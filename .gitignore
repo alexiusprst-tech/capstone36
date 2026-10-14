@@ -1,0 +1,64 @@
+# Root .gitignore for Capstone Project
+
+# Environment files (CRITICAL: Do NOT commit secrets/env files)
+.env
+.env.*
+!.env.example
+*.env
+*.env.*
+!*.env.example
+
+# Dependencies
+node_modules/
+**/node_modules/
+vendor/
+**/vendor/
+
+# Build artifacts
+dist/
+**/dist/
+public/build/
+**/public/build/
+public/hot/
+**/public/hot/
+
+# Storage & Runtime generated files
+storage/logs/*.log
+**/storage/logs/*.log
+storage/framework/cache/data/*
+**/storage/framework/cache/data/*
+storage/framework/sessions/*
+**/storage/framework/sessions/*
+storage/framework/views/*
+**/storage/framework/views/*
+storage/app/generated_docs/*
+**/storage/app/generated_docs/*
+!**/storage/**/.gitignore
+
+# Local SQLite databases
+*.sqlite
+*.sqlite-journal
+*.sqlite3
+backend/database/*.sqlite*
+!backend/database/.gitignore
+
+# Testing and Coverage
+.phpunit.result.cache
+.phpunit.cache/
+coverage/
+
+# IDE & OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.agents/
+**/.agents/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Temporary exports/dumps
+data_barang_*.xlsx
