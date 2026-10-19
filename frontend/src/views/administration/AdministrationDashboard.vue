@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Dashboard Administrasi & Legal Dokumen</h1>
+          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Dashboard Administrasi</h1>
           <p class="text-sm text-slate-500 mt-1">
             Pusat penerbitan PO, Surat Jalan, BAST, Faktur, dan monitoring kelengkapan berkas proyek.
           </p>
@@ -22,17 +22,17 @@
 
     <!-- KPIS FOR ADMINISTRASI: DOKUMEN MENUNGGU & STATUS KELENGKAPAN -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-      <KpiCard title="Order Disetujui" :value="approvedOrders.length" subtitle="Siap dibuatkan berkas" icon-variant="emerald" />
-      <KpiCard title="PO Belum Dibuat" :value="missingPoCount" subtitle="Purchase Order pending" icon-variant="amber" />
-      <KpiCard title="SJ Belum Dibuat" :value="missingSjCount" subtitle="Surat Jalan pending" icon-variant="amber" />
-      <KpiCard title="BAST Belum Dibuat" :value="missingBastCount" subtitle="Berita Acara pending" icon-variant="amber" />
+      <KpiCard title="Order Disetujui" :value="approvedOrders.length" subtitle="Siap dibuatkan berkas" :icon-component="FileCheck2" icon-variant="blue" />
+      <KpiCard title="PO Belum Dibuat" :value="missingPoCount" subtitle="Purchase Order pending" :icon-component="FileText" icon-variant="blue" />
+      <KpiCard title="SJ Belum Dibuat" :value="missingSjCount" subtitle="Surat Jalan pending" :icon-component="Truck" icon-variant="blue" />
+      <KpiCard title="BAST Belum Dibuat" :value="missingBastCount" subtitle="Berita Acara pending" :icon-component="ClipboardList" icon-variant="blue" />
     </div>
 
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-      <KpiCard title="Faktur Belum Dibuat" :value="missingFakturCount" subtitle="Faktur Pajak pending" icon-variant="amber" />
-      <KpiCard title="Berkas Belum Lengkap" :value="incompleteCount" subtitle="Ada dokumen tertunda" icon-variant="rose" />
-      <KpiCard title="Sedang Diproses" :value="inProcessCount" subtitle="Verifikasi administrasi" icon-variant="blue" />
-      <KpiCard title="Dokumen Selesai" :value="completeCount" subtitle="Semua berkas lengkap" icon-variant="emerald" />
+      <KpiCard title="Faktur Belum Dibuat" :value="missingFakturCount" subtitle="Faktur Pajak pending" :icon-component="Receipt" icon-variant="blue" />
+      <KpiCard title="Berkas Belum Lengkap" :value="incompleteCount" subtitle="Ada dokumen tertunda" :icon-component="Clock" icon-variant="blue" />
+      <KpiCard title="Sedang Diproses" :value="inProcessCount" subtitle="Verifikasi administrasi" :icon-component="Layers" icon-variant="blue" />
+      <KpiCard title="Dokumen Selesai" :value="completeCount" subtitle="Semua berkas lengkap" :icon-component="FolderCheck" icon-variant="blue" />
     </div>
 
     <!-- MAIN TWO-COLUMN LAYOUT -->
@@ -265,7 +265,17 @@ import DocumentChecklist from '../../components/common/DocumentChecklist.vue';
 import Modal from '../../components/common/Modal.vue';
 import { store, storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
-import { Archive, ChevronRight, FolderCheck } from 'lucide-vue-next';
+import {
+  ChevronRight,
+  FolderCheck,
+  FileCheck2,
+  FileText,
+  Truck,
+  ClipboardList,
+  Receipt,
+  Clock,
+  Layers,
+} from 'lucide-vue-next';
 
 const toast = useToast();
 

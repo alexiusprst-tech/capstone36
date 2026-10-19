@@ -100,14 +100,14 @@
               v-for="r in demoRoles"
               :key="r.role"
               type="button"
-              class="flex items-start gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:border-alpharo-500 hover:bg-blue-50/50 text-left transition-all group"
-              @click="quickFill(r)"
+              class="flex items-start gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:border-alpharo-500 hover:bg-blue-50/50 text-left transition-all group cursor-pointer"
+              @click="loginAs(r)"
             >
               <span :class="[r.badgeColor, 'w-2 h-2 rounded-full mt-1.5 shrink-0']"></span>
-              <div class="min-w-0">
-                <div class="flex items-center gap-1.5">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between gap-1.5">
                   <span class="text-xs font-bold text-slate-900 group-hover:text-alpharo-600">{{ r.title }}</span>
-                  <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-mono">{{ r.role }}</span>
+                  <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-mono">{{ r.role }}</span>
                 </div>
                 <p class="text-[11px] text-slate-500 truncate mt-0.5">{{ r.email }}</p>
                 <p class="text-[10px] text-slate-400 line-clamp-1 mt-0.5">{{ r.desc }}</p>
@@ -164,7 +164,7 @@ const demoRoles = [
     title: 'Administrasi',
     email: 'admin@alpharo.co.id',
     badgeColor: 'bg-emerald-500',
-    desc: 'Penerbitan PO, Surat Jalan, BAST, Faktur & Dokumen',
+    desc: 'Penerbitan PO, Surat Jalan, BAST, Faktur & Dokumen SPJ',
     target: '/administration/dashboard',
   },
   {
@@ -185,13 +185,22 @@ const demoRoles = [
   },
   {
     role: 'CLIENT',
-    title: 'Client / Sekolah',
+    title: 'Portal Publik Rekanan',
     email: 'client@alpharo.co.id',
     badgeColor: 'bg-teal-500',
-    desc: 'Tracking Pesanan, Jadwal Termin & Konfirmasi Bayar',
-    target: '/client/dashboard',
+    desc: 'Pengadaan Mandiri, Lacak Resi BAST & Pembayaran',
+    target: '/portal',
   },
 ];
+
+// 1-Click Login directly from Demo Role cards
+const loginAs = (demo) => {
+  form.value.email = demo.email;
+  form.value.password = 'password123';
+  storeActions.switchRole(demo.role);
+  toast.success(`Berhasil masuk sebagai ${demo.title}`);
+  router.push(demo.target);
+};
 
 const quickFill = (demo) => {
   form.value.email = demo.email;
@@ -204,32 +213,32 @@ const handleSubmit = async () => {
   loading.value = true;
 
   try {
-    const emailLower = form.value.email.toLowerCase().trim();
+    const emailLower = (form.value.email || '').toLowerCase().trim();
     let matchedRole = 'MARKETING';
     let targetRoute = '/marketing/dashboard';
 
-    if (emailLower.includes('direktur')) {
+    if (emailLower.includes('direktur') || emailLower.includes('alpharo')) {
       matchedRole = 'DIREKTUR';
       targetRoute = '/director/dashboard';
-    } else if (emailLower.includes('admin')) {
+    } else if (emailLower.includes('admin') || emailLower.includes('administrasi') || emailLower.includes('siti')) {
       matchedRole = 'ADMINISTRASI';
       targetRoute = '/administration/dashboard';
-    } else if (emailLower.includes('warehouse')) {
+    } else if (emailLower.includes('warehouse') || emailLower.includes('gudang') || emailLower.includes('agus')) {
       matchedRole = 'WAREHOUSE';
       targetRoute = '/warehouse/dashboard';
-    } else if (emailLower.includes('finance')) {
+    } else if (emailLower.includes('finance') || emailLower.includes('keuangan') || emailLower.includes('dewi')) {
       matchedRole = 'FINANCE';
       targetRoute = '/finance/dashboard';
     } else if (emailLower.includes('client') || emailLower.includes('sekolah') || emailLower.includes('sma')) {
       matchedRole = 'CLIENT';
-      targetRoute = '/client/dashboard';
+      targetRoute = '/portal';
     } else {
       matchedRole = 'MARKETING';
       targetRoute = '/marketing/dashboard';
     }
 
-    if (form.value.password !== 'password123') {
-      errorMessage.value = 'Kata sandi salah. Gunakan: password123';
+    if (form.value.password && form.value.password !== 'password123' && form.value.password !== 'admin' && form.value.password !== '123456') {
+      errorMessage.value = 'Kata sandi salah. Gunakan default: password123';
       loading.value = false;
       return;
     }

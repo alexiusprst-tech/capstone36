@@ -45,7 +45,7 @@
               <td class="py-3.5 px-4 font-bold text-slate-800">{{ po.clientName }}</td>
               <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ po.date }}</td>
               <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">
-                Rp {{ po.amount.toLocaleString('id-ID') }}
+                Rp {{ Number(po.amount || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-center">
                 <StatusBadge :status="po.status" />
@@ -96,7 +96,7 @@
           <select v-model="newPo.orderId" required class="w-full px-3 py-2 border rounded-lg bg-white">
             <option value="" disabled>-- Pilih Order --</option>
             <option v-for="o in approvedOrders" :key="o.id" :value="o.id">
-              {{ o.orderNumber }} - {{ o.clientName }} (Rp {{ o.grandTotal.toLocaleString('id-ID') }})
+              {{ o.orderNumber }} - {{ o.clientName }} (Rp {{ Number(o.grandTotal || 0).toLocaleString('id-ID') }})
             </option>
           </select>
         </div>
@@ -154,7 +154,7 @@
           </div>
           <div class="flex justify-between font-bold text-sm pt-2 border-t border-slate-200">
             <span>Nilai Kontrak PO:</span>
-            <span class="font-mono text-alpharo-600">Rp {{ selectedPo.amount.toLocaleString('id-ID') }}</span>
+            <span class="font-mono text-alpharo-600">Rp {{ Number(selectedPo?.amount || 0).toLocaleString('id-ID') }}</span>
           </div>
         </div>
       </div>

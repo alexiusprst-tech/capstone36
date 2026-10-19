@@ -50,13 +50,13 @@
               <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ inv.invoiceDate }}</td>
               <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ inv.dueDate }}</td>
               <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
-                Rp {{ inv.totalAmount.toLocaleString('id-ID') }}
+                Rp {{ Number(inv.totalAmount || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-right font-mono text-emerald-600 font-semibold whitespace-nowrap">
-                Rp {{ inv.paidAmount.toLocaleString('id-ID') }}
+                Rp {{ Number(inv.paidAmount || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-right font-mono text-rose-600 font-bold whitespace-nowrap">
-                Rp {{ inv.remainingAmount.toLocaleString('id-ID') }}
+                Rp {{ Number(inv.remainingAmount || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-center"><StatusBadge :status="inv.status" /></td>
               <td class="py-3.5 px-4 text-right whitespace-nowrap">
@@ -85,7 +85,7 @@
           <label class="block font-bold text-slate-700 uppercase mb-1">Pilih Order Disetujui</label>
           <select v-model="form.orderNumber" required class="w-full px-3 py-2 border rounded-lg bg-white" @change="onOrderChange">
             <option v-for="o in readyOrders" :key="o.orderNumber" :value="o.orderNumber">
-              {{ o.orderNumber }} - {{ o.clientName }} (Rp {{ o.grandTotal.toLocaleString('id-ID') }})
+              {{ o.orderNumber }} - {{ o.clientName }} (Rp {{ Number(o.grandTotal || 0).toLocaleString('id-ID') }})
             </option>
           </select>
         </div>
@@ -143,15 +143,15 @@
           </div>
           <div class="flex justify-between">
             <span class="text-slate-600">Total Tagihan:</span>
-            <span class="font-bold font-mono text-slate-900">Rp {{ selectedInv.totalAmount.toLocaleString('id-ID') }}</span>
+            <span class="font-bold font-mono text-slate-900">Rp {{ Number(selectedInv?.totalAmount || 0).toLocaleString('id-ID') }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-slate-600">Telah Dibayar:</span>
-            <span class="font-bold font-mono text-emerald-600">Rp {{ selectedInv.paidAmount.toLocaleString('id-ID') }}</span>
+            <span class="font-bold font-mono text-emerald-600">Rp {{ Number(selectedInv?.paidAmount || 0).toLocaleString('id-ID') }}</span>
           </div>
           <div class="flex justify-between font-bold text-sm pt-2 border-t border-slate-200">
             <span>Sisa Piutang:</span>
-            <span class="font-mono text-rose-600">Rp {{ selectedInv.remainingAmount.toLocaleString('id-ID') }}</span>
+            <span class="font-mono text-rose-600">Rp {{ Number(selectedInv?.remainingAmount || 0).toLocaleString('id-ID') }}</span>
           </div>
         </div>
 
@@ -164,7 +164,7 @@
                 <span class="block text-[11px] text-slate-500">Jatuh Tempo: {{ t.dueDate }}</span>
               </div>
               <div class="text-right">
-                <span class="font-mono font-bold text-slate-900 block">Rp {{ t.amount.toLocaleString('id-ID') }}</span>
+                <span class="font-mono font-bold text-slate-900 block">Rp {{ Number(t?.amount || 0).toLocaleString('id-ID') }}</span>
                 <StatusBadge :status="t.status" />
               </div>
             </div>
@@ -265,7 +265,7 @@ const triggerAction = (type, num) => {
 const remindMarketing = (inv) => {
   storeActions.sendPaymentReminderToMarketing(
     inv.invoiceNumber,
-    `Tagihan invoice ${inv.invoiceNumber} (${inv.clientName}) belum lunas (Sisa: Rp ${inv.remainingAmount.toLocaleString('id-ID')}). Mohon bantu koordinasi dengan PIC client.`
+    `Tagihan invoice ${inv.invoiceNumber} (${inv.clientName}) belum lunas (Sisa: Rp ${Number(inv.remainingAmount || 0).toLocaleString('id-ID')}). Mohon bantu koordinasi dengan PIC client.`
   );
   toast.success(`Pengingat penagihan ${inv.invoiceNumber} berhasil dikirim ke Marketing.`);
 };

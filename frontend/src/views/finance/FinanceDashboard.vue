@@ -22,17 +22,17 @@
 
     <!-- KPIS FOR FINANCE: STATUS OPERASIONAL & METRIK KEUANGAN -->
     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-      <KpiCard title="Total Invoice" :value="store.invoices.length" subtitle="Semua berkas tagihan" icon-variant="slate" />
-      <KpiCard title="Belum Dibayar" :value="unpaidCount" subtitle="Menunggu pencairan" icon-variant="amber" />
-      <KpiCard title="Jatuh Tempo" :value="overdueCount" subtitle="Perlu follow-up segera" icon-variant="rose" />
-      <KpiCard title="Invoice Lunas" :value="paidCount" subtitle="Pembayaran selesai" icon-variant="emerald" />
+      <KpiCard title="Total Invoice" :value="store.invoices.length" subtitle="Semua berkas tagihan" :icon-component="FileText" icon-variant="blue" />
+      <KpiCard title="Belum Dibayar" :value="unpaidCount" subtitle="Menunggu pencairan" :icon-component="Clock" icon-variant="blue" />
+      <KpiCard title="Jatuh Tempo" :value="overdueCount" subtitle="Perlu follow-up segera" :icon-component="AlertCircle" icon-variant="blue" />
+      <KpiCard title="Invoice Lunas" :value="paidCount" subtitle="Pembayaran selesai" :icon-component="CheckCircle2" icon-variant="blue" />
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <KpiCard title="Dibayar Sebagian" :value="partialCount" subtitle="Termin sedang berjalan" icon-variant="blue" />
-      <KpiCard title="Total Nilai Invoice" :value="totalInvoiceValue" :is-currency="true" subtitle="Akumulasi tagihan" icon-variant="blue" />
-      <KpiCard title="Total Penerimaan" :value="totalPaymentValue" :is-currency="true" subtitle="Realisasi dana masuk" icon-variant="emerald" />
-      <KpiCard title="Total Piutang" :value="totalReceivableValue" :is-currency="true" subtitle="Sisa tagihan belum cair" icon-variant="rose" />
+      <KpiCard title="Dibayar Sebagian" :value="partialCount" subtitle="Termin sedang berjalan" :icon-component="CreditCard" icon-variant="blue" />
+      <KpiCard title="Total Nilai Invoice" :value="totalInvoiceValue" :is-currency="true" subtitle="Akumulasi tagihan" :icon-component="Receipt" icon-variant="blue" />
+      <KpiCard title="Total Penerimaan" :value="totalPaymentValue" :is-currency="true" subtitle="Realisasi dana masuk" :icon-component="Wallet" icon-variant="blue" />
+      <KpiCard title="Total Piutang" :value="totalReceivableValue" :is-currency="true" subtitle="Sisa tagihan belum cair" :icon-component="DollarSign" icon-variant="blue" />
     </div>
 
     <!-- MAIN TWO-COLUMN DASHBOARD SECTIONS -->
@@ -68,10 +68,10 @@
                   <td class="py-3 px-3 font-mono font-bold text-slate-900">{{ inv.invoiceNumber }}</td>
                   <td class="py-3 px-3 font-medium text-slate-800">{{ inv.clientName }}</td>
                   <td class="py-3 px-3 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
-                    Rp {{ inv.totalAmount.toLocaleString('id-ID') }}
+                    Rp {{ Number(inv.totalAmount || 0).toLocaleString('id-ID') }}
                   </td>
                   <td class="py-3 px-3 text-right font-mono text-rose-600 font-semibold whitespace-nowrap">
-                    Rp {{ inv.remainingAmount.toLocaleString('id-ID') }}
+                    Rp {{ Number(inv.remainingAmount || 0).toLocaleString('id-ID') }}
                   </td>
                   <td class="py-3 px-3 text-center"><StatusBadge :status="inv.status" /></td>
                   <td class="py-3 px-3 text-right whitespace-nowrap">
@@ -121,7 +121,7 @@
                     <span class="block text-[10px] text-slate-400">{{ pay.terminSequence }}</span>
                   </td>
                   <td class="py-3 px-3 text-right font-mono font-bold text-emerald-600 whitespace-nowrap">
-                    Rp {{ pay.amount.toLocaleString('id-ID') }}
+                    Rp {{ Number(pay.amount || 0).toLocaleString('id-ID') }}
                   </td>
                   <td class="py-3 px-3 text-slate-600">{{ pay.paymentMethod }}</td>
                   <td class="py-3 px-3 text-center"><StatusBadge status="Lunas" /></td>
@@ -159,7 +159,7 @@
               </div>
               <div class="text-right">
                 <span class="font-mono font-bold text-slate-900 block">
-                  Rp {{ inv.remainingAmount.toLocaleString('id-ID') }}
+                  Rp {{ Number(inv.remainingAmount || 0).toLocaleString('id-ID') }}
                 </span>
                 <StatusBadge :status="inv.status" />
               </div>
@@ -179,7 +179,7 @@
 
           <div class="space-y-3 text-xs">
             <div
-              v-for="inv in store.invoices.filter(i => i.remainingAmount > 0)"
+              v-for="inv in store.invoices.filter(i => (i.remainingAmount || 0) > 0)"
               :key="inv.id"
               class="p-2.5 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between"
             >
@@ -189,9 +189,9 @@
               </div>
               <div class="text-right">
                 <span class="font-mono font-bold text-rose-600 block">
-                  Rp {{ inv.remainingAmount.toLocaleString('id-ID') }}
+                  Rp {{ Number(inv.remainingAmount || 0).toLocaleString('id-ID') }}
                 </span>
-                <span class="text-[10px] text-slate-400">Dari Rp {{ inv.totalAmount.toLocaleString('id-ID') }}</span>
+                <span class="text-[10px] text-slate-400">Dari Rp {{ Number(inv.totalAmount || 0).toLocaleString('id-ID') }}</span>
               </div>
             </div>
           </div>
@@ -207,7 +207,17 @@ import AppLayout from '../../components/layout/AppLayout.vue';
 import KpiCard from '../../components/common/KpiCard.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import { store } from '../../stores/mockData';
-import { ChevronRight, AlertCircle, CreditCard } from 'lucide-vue-next';
+import {
+  ChevronRight,
+  AlertCircle,
+  CreditCard,
+  FileText,
+  Clock,
+  CheckCircle2,
+  Receipt,
+  Wallet,
+  DollarSign,
+} from 'lucide-vue-next';
 
 const unpaidCount = computed(() => store.invoices.filter((i) => i.status === 'Belum Dibayar').length);
 const overdueCount = computed(() => store.invoices.filter((i) => i.status === 'Jatuh Tempo').length);

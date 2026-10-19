@@ -10,6 +10,13 @@
         </div>
         <div class="flex items-center gap-2">
           <router-link
+            to="/client/order-request"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0B4DA2] to-[#062F69] hover:from-[#09428F] hover:to-[#042452] text-white font-bold rounded-lg text-xs shadow-xs transition-all"
+          >
+            <Plus class="w-4 h-4 text-amber-300 stroke-[2.5]" />
+            <span>Ajukan Pesanan Baru</span>
+          </router-link>
+          <router-link
             to="/client/orders"
             class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold rounded-lg text-xs shadow-xs transition-colors"
           >
@@ -18,7 +25,7 @@
           </router-link>
           <router-link
             to="/client/payments"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-alpharo-500 hover:bg-alpharo-600 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors"
           >
             <CreditCard class="w-4 h-4" />
             <span>Status Pembayaran</span>
@@ -26,6 +33,39 @@
         </div>
       </div>
     </template>
+
+    <!-- HERO CTA ORDER REQUEST BANNER -->
+    <div class="bg-gradient-to-r from-[#0B4DA2] via-[#09428F] to-[#062F69] rounded-2xl p-6 mb-6 text-white shadow-md relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div class="relative z-10 max-w-2xl space-y-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold bg-amber-400/20 text-amber-300 border border-amber-300/30">
+          <Sparkles class="w-3.5 h-3.5" />
+          Layanan Pengadaan Terbuka
+        </span>
+        <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+          Butuh Pengadaan Barang atau Sarana Baru?
+        </h2>
+        <p class="text-xs sm:text-sm text-blue-100 leading-relaxed">
+          Ajukan permohonan pesanan secara mandiri sesuai kebutuhan sekolah atau instansi Anda. Pilih dari katalog resmi 2.196 SKU atau input spesifikasi khusus, pantau verifikasi stok, dan lacak pengiriman hingga serah terima fisik (BAST).
+        </p>
+      </div>
+
+      <div class="relative z-10 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+        <router-link
+          to="/client/order-request"
+          class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#F5A623] hover:bg-amber-500 text-slate-950 font-extrabold rounded-xl text-xs sm:text-sm shadow-md transition-all cursor-pointer"
+        >
+          <Plus class="w-4 h-4 stroke-[3]" />
+          <span>Ajukan Pesanan Baru</span>
+        </router-link>
+        <router-link
+          to="/portal"
+          class="inline-flex items-center justify-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl text-xs backdrop-blur-xs transition-colors cursor-pointer"
+        >
+          <Globe class="w-4 h-4" />
+          <span>Buka Portal Publik</span>
+        </router-link>
+      </div>
+    </div>
 
     <!-- CLIENT IDENTITY BANNER -->
     <div class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -47,10 +87,10 @@
 
     <!-- KPI CARDS -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <KpiCard title="Total Pesanan" :value="clientOrders.length" subtitle="Order atas nama instansi" icon-variant="slate" />
-      <KpiCard title="Pesanan Selesai" :value="completedOrders" subtitle="Barang telah diterima" icon-variant="emerald" />
-      <KpiCard title="Menunggu Pembayaran" :value="outstandingCount" subtitle="Termin belum lunas" icon-variant="amber" />
-      <KpiCard title="Total Tagihan" :value="totalOutstanding" :is-currency="true" subtitle="Sisa yang harus dibayar" icon-variant="rose" />
+      <KpiCard title="Total Pesanan" :value="clientOrders.length" subtitle="Order atas nama instansi" :icon-component="ShoppingBag" icon-variant="blue" />
+      <KpiCard title="Pesanan Selesai" :value="completedOrders" subtitle="Barang telah diterima" :icon-component="CheckCircle2" icon-variant="blue" />
+      <KpiCard title="Menunggu Pembayaran" :value="outstandingCount" subtitle="Termin belum lunas" :icon-component="Clock" icon-variant="blue" />
+      <KpiCard title="Total Tagihan" :value="totalOutstanding" :is-currency="true" subtitle="Sisa yang harus dibayar" :icon-component="CreditCard" icon-variant="blue" />
     </div>
 
     <!-- DETAILED SECTION -->
@@ -88,7 +128,7 @@
                     <div class="text-[11px] text-slate-400">{{ order.date }}</div>
                   </td>
                   <td class="py-3 px-3 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
-                    Rp {{ order.grandTotal.toLocaleString('id-ID') }}
+                    Rp {{ Number(order.grandTotal || 0).toLocaleString('id-ID') }}
                   </td>
                   <td class="py-3 px-3 text-center">
                     <StatusBadge :status="order.isHold ? 'Ditahan' : order.status" />
@@ -133,10 +173,10 @@
                   <td class="py-3 px-3 font-mono font-bold text-slate-900">{{ inv.invoiceNumber }}</td>
                   <td class="py-3 px-3 text-slate-700">{{ inv.paymentScheme || inv.paymentType || 'Penuh' }}</td>
                   <td class="py-3 px-3 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
-                    Rp {{ inv.totalAmount.toLocaleString('id-ID') }}
+                    Rp {{ Number(inv.totalAmount || 0).toLocaleString('id-ID') }}
                   </td>
                   <td class="py-3 px-3 text-right font-mono text-rose-600 font-semibold whitespace-nowrap">
-                    Rp {{ inv.remainingAmount.toLocaleString('id-ID') }}
+                    Rp {{ Number(inv.remainingAmount || 0).toLocaleString('id-ID') }}
                   </td>
                   <td class="py-3 px-3 text-center"><StatusBadge :status="inv.status" /></td>
                 </tr>
@@ -185,7 +225,18 @@ import KpiCard from '../../components/common/KpiCard.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import Timeline from '../../components/common/Timeline.vue';
 import { store } from '../../stores/mockData';
-import { CreditCard, PackageSearch, ChevronRight, School } from 'lucide-vue-next';
+import {
+  CreditCard,
+  PackageSearch,
+  ChevronRight,
+  School,
+  Plus,
+  Sparkles,
+  Globe,
+  ShoppingBag,
+  CheckCircle2,
+  Clock,
+} from 'lucide-vue-next';
 
 const clientId = computed(() => store.currentUser.clientId || 1);
 

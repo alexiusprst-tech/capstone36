@@ -50,7 +50,7 @@
               </td>
               <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ order.date }}</td>
               <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
-                Rp {{ order.grandTotal.toLocaleString('id-ID') }}
+                Rp {{ (order.grandTotal || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-slate-600">{{ order.submittedBy }}</td>
               <td class="py-3.5 px-4 text-center">
@@ -148,8 +148,8 @@
                     <span class="font-mono text-[10px] text-slate-400">{{ it.sku }}</span>
                   </td>
                   <td class="p-2.5 text-center whitespace-nowrap">{{ it.qty }} {{ it.unit }}</td>
-                  <td class="p-2.5 text-right whitespace-nowrap">Rp {{ it.price.toLocaleString('id-ID') }}</td>
-                  <td class="p-2.5 text-right font-bold whitespace-nowrap">Rp {{ it.total.toLocaleString('id-ID') }}</td>
+                  <td class="p-2.5 text-right whitespace-nowrap">Rp {{ Number(it.price || 0).toLocaleString('id-ID') }}</td>
+                  <td class="p-2.5 text-right font-bold whitespace-nowrap">Rp {{ Number(it.total || ((it.qty || 0) * (it.price || 0))).toLocaleString('id-ID') }}</td>
                 </tr>
               </tbody>
             </table>
@@ -167,15 +167,15 @@
             <div class="space-y-2 bg-white p-3.5 rounded-lg border border-slate-200">
               <div class="flex justify-between text-slate-600">
                 <span>Subtotal Items:</span>
-                <span class="font-mono">Rp {{ selectedOrder.subtotal.toLocaleString('id-ID') }}</span>
+                <span class="font-mono">Rp {{ Number(selectedOrder.subtotal || 0).toLocaleString('id-ID') }}</span>
               </div>
               <div class="flex justify-between text-slate-600">
                 <span>PPN 11%:</span>
-                <span class="font-mono">Rp {{ selectedOrder.tax.toLocaleString('id-ID') }}</span>
+                <span class="font-mono">Rp {{ Number(selectedOrder.tax || 0).toLocaleString('id-ID') }}</span>
               </div>
               <div class="pt-2 border-t border-slate-200 flex justify-between font-bold text-sm text-slate-900">
                 <span>Grand Total:</span>
-                <span class="font-mono text-alpharo-600">Rp {{ selectedOrder.grandTotal.toLocaleString('id-ID') }}</span>
+                <span class="font-mono text-alpharo-600">Rp {{ Number(selectedOrder.grandTotal || 0).toLocaleString('id-ID') }}</span>
               </div>
             </div>
           </div>

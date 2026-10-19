@@ -13,12 +13,12 @@
 
     <!-- KPIS FOR WAREHOUSE MONITORING (SPECIFIED IN PROMPT) -->
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-      <KpiCard title="Order Harus Dipenuhi" :value="store.warehouseFulfillments.length" icon-variant="slate" />
-      <KpiCard title="Barang Tersedia" :value="availableCount" icon-variant="emerald" />
-      <KpiCard title="Tidak Tersedia / OOS" :value="oosCount" icon-variant="rose" />
+      <KpiCard title="Order Harus Dipenuhi" :value="store.warehouseFulfillments.length" icon-variant="blue" />
+      <KpiCard title="Barang Tersedia" :value="availableCount" icon-variant="blue" />
+      <KpiCard title="Tidak Tersedia / OOS" :value="oosCount" icon-variant="blue" />
       <KpiCard title="Pemenuhan Diproses" :value="fulfillProcessCount" icon-variant="blue" />
-      <KpiCard title="Siap Dikirim" :value="readyShipCount" icon-variant="indigo" />
-      <KpiCard title="Sedang / Sudah Dikirim" :value="shippingCount" icon-variant="emerald" />
+      <KpiCard title="Siap Dikirim" :value="readyShipCount" icon-variant="blue" />
+      <KpiCard title="Sedang / Sudah Dikirim" :value="shippingCount" icon-variant="blue" />
     </div>
 
     <!-- MAIN TWO TABLES: 1. FULFILLMENT QUEUE & 2. CRITICAL INVENTORY -->
@@ -91,7 +91,7 @@
                 <td class="py-3.5 px-4 text-slate-600">{{ p.category }}</td>
                 <td class="py-3.5 px-4 text-center font-bold text-slate-900">{{ p.stock }} {{ p.unit }}</td>
                 <td class="py-3.5 px-4 text-center text-slate-500 font-mono">{{ p.minStock }} {{ p.unit }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-semibold">Rp {{ p.price.toLocaleString('id-ID') }}</td>
+                <td class="py-3.5 px-4 text-right font-mono font-semibold">Rp {{ Number(p.price || p.sell_price || 0).toLocaleString('id-ID') }}</td>
                 <td class="py-3.5 px-4 text-center">
                   <StatusBadge :status="p.status" />
                 </td>

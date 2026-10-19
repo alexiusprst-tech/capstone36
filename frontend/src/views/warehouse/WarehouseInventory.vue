@@ -21,9 +21,9 @@
 
     <!-- KPIS FOR INVENTORY MOVEMENTS -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-      <KpiCard title="Total SKU Aktif" :value="store.products.length" icon-variant="slate" />
-      <KpiCard title="Mutasi Masuk" :value="incomingCount" icon-variant="emerald" />
-      <KpiCard title="Mutasi Keluar" :value="outgoingCount" icon-variant="rose" />
+      <KpiCard title="Total SKU Aktif" :value="store.products.length" icon-variant="blue" />
+      <KpiCard title="Mutasi Masuk" :value="incomingCount" icon-variant="blue" />
+      <KpiCard title="Mutasi Keluar" :value="outgoingCount" icon-variant="blue" />
       <KpiCard title="Penyesuaian Opname" :value="adjustCount" icon-variant="blue" />
     </div>
 

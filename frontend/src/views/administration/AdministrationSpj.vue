@@ -2800,7 +2800,7 @@
               <p class="font-bold text-slate-800">Terbilang : <em>{{ formatTerbilang(fakturForm.nilai_setelah_pph || getEffectiveDocTotals('faktur').netto) }}</em></p>
               <div class="mt-2 text-[11px] text-slate-600">
                 <p>Pembayaran dapat ditransfer melalui rekening:</p>
-                <p class="font-semibold text-slate-800">Bank DKI JAKARTA | No. Rek: 52323628813 | A.n: CV ALPHARO ARTHA JAYA</p>
+                <p class="font-semibold text-slate-800">Bank BCA JAKARTA | No. Rek: 52323628813 | A.n: CV ALPHARO ARTHA JAYA</p>
               </div>
             </div>
           </div>

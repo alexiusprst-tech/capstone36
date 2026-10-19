@@ -14,12 +14,12 @@
     <!-- KPIS FOR DOCUMENT MONITORING (SPECIFIED IN PROMPT) -->
     <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
       <KpiCard title="PO Terbit" :value="poCount" icon-variant="blue" />
-      <KpiCard title="Surat Jalan" :value="sjCount" icon-variant="indigo" />
-      <KpiCard title="BAST Terbit" :value="bastCount" icon-variant="emerald" />
+      <KpiCard title="Surat Jalan" :value="sjCount" icon-variant="blue" />
+      <KpiCard title="BAST Terbit" :value="bastCount" icon-variant="blue" />
       <KpiCard title="Faktur Terbit" :value="fakturCount" icon-variant="blue" />
-      <KpiCard title="Dokumen Lengkap" :value="completeOrderCount" icon-variant="emerald" />
-      <KpiCard title="Belum Lengkap" :value="incompleteOrderCount" icon-variant="amber" />
-      <KpiCard title="Tuntas Selesai" :value="completeOrderCount" icon-variant="emerald" />
+      <KpiCard title="Dokumen Lengkap" :value="completeOrderCount" icon-variant="blue" />
+      <KpiCard title="Belum Lengkap" :value="incompleteOrderCount" icon-variant="blue" />
+      <KpiCard title="Tuntas Selesai" :value="completeOrderCount" icon-variant="blue" />
     </div>
 
     <!-- DOCUMENT COMPLETENESS CHECKLIST TABLE -->

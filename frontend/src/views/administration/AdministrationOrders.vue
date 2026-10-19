@@ -38,7 +38,7 @@
               </td>
               <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ order.approvalDate || order.date }}</td>
               <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
-                Rp {{ order.grandTotal.toLocaleString('id-ID') }}
+                Rp {{ Number(order.grandTotal || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-center">
                 <DocumentChecklist :documents="order.documents" />
@@ -87,8 +87,8 @@
                     <span class="block text-[10px] text-slate-400 font-mono">{{ it.sku }}</span>
                   </td>
                   <td class="p-2.5 text-center">{{ it.qty }} {{ it.unit }}</td>
-                  <td class="p-2.5 text-right">Rp {{ it.price.toLocaleString('id-ID') }}</td>
-                  <td class="p-2.5 text-right font-bold">Rp {{ it.total.toLocaleString('id-ID') }}</td>
+                  <td class="p-2.5 text-right">Rp {{ Number(it.price || 0).toLocaleString('id-ID') }}</td>
+                  <td class="p-2.5 text-right font-bold">Rp {{ Number(it.total || ((it.qty || 0) * (it.price || 0))).toLocaleString('id-ID') }}</td>
                 </tr>
               </tbody>
             </table>

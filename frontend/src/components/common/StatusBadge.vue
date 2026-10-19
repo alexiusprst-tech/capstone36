@@ -48,6 +48,11 @@ const colorScheme = computed(() => {
     return 'info';
   }
 
+  // Purple / Client Submission
+  if (['diajukan client', 'pengajuan client', 'diajukan'].includes(s) || s.includes('diajukan')) {
+    return 'purple';
+  }
+
   // Red / Danger
   if (
     ['ditolak', 'tidak tersedia', 'jatuh tempo', 'overdue', 'batal', 'nonaktif', 'ditahan', 'on hold', 'hold'].includes(s) ||
@@ -70,6 +75,8 @@ const badgeClasses = computed(() => {
       return 'bg-amber-50 text-amber-800 border border-amber-200';
     case 'info':
       return 'bg-blue-50 text-blue-700 border border-blue-200';
+    case 'purple':
+      return 'bg-purple-50 text-purple-700 border border-purple-200 font-semibold';
     case 'danger':
       return 'bg-rose-50 text-rose-700 border border-rose-200';
     default:
@@ -85,6 +92,8 @@ const dotClasses = computed(() => {
       return 'bg-amber-500';
     case 'info':
       return 'bg-blue-500';
+    case 'purple':
+      return 'bg-purple-500';
     case 'danger':
       return 'bg-rose-500';
     default:

@@ -48,9 +48,9 @@
             <tr v-for="inv in filteredList" :key="inv.id" class="hover:bg-slate-50/70 transition-colors">
               <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ inv.invoiceNumber }}</td>
               <td class="py-3.5 px-4 font-bold text-slate-800">{{ inv.clientName }}</td>
-              <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">Rp {{ inv.totalAmount.toLocaleString('id-ID') }}</td>
-              <td class="py-3.5 px-4 text-right font-mono text-emerald-600 font-semibold">Rp {{ inv.paidAmount.toLocaleString('id-ID') }}</td>
-              <td class="py-3.5 px-4 text-right font-mono text-rose-600 font-bold">Rp {{ inv.remainingAmount.toLocaleString('id-ID') }}</td>
+              <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">Rp {{ Number(inv.totalAmount || 0).toLocaleString('id-ID') }}</td>
+              <td class="py-3.5 px-4 text-right font-mono text-emerald-600 font-semibold">Rp {{ Number(inv.paidAmount || 0).toLocaleString('id-ID') }}</td>
+              <td class="py-3.5 px-4 text-right font-mono text-rose-600 font-bold">Rp {{ Number(inv.remainingAmount || 0).toLocaleString('id-ID') }}</td>
               <td class="py-3.5 px-4 text-slate-500">{{ inv.dueDate }}</td>
               <td class="py-3.5 px-4 text-center"><StatusBadge :status="inv.status" /></td>
             </tr>

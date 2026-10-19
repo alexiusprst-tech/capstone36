@@ -51,7 +51,7 @@
                 <span class="text-[11px] text-slate-400 block">{{ pay.terminSequence }}</span>
               </td>
               <td class="py-3.5 px-4 text-right font-mono font-bold text-emerald-600 whitespace-nowrap">
-                Rp {{ pay.amount.toLocaleString('id-ID') }}
+                Rp {{ Number(pay.amount || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ pay.paymentDate }}</td>
               <td class="py-3.5 px-4 text-slate-700">{{ pay.paymentMethod }}</td>
@@ -78,7 +78,7 @@
           <label class="block font-bold text-slate-700 uppercase mb-1">Pilih Invoice Tagihan</label>
           <select v-model="form.invoiceNumber" required class="w-full px-3 py-2 border rounded-lg bg-white" @change="onInvoiceSelect">
             <option v-for="inv in unpaidInvoices" :key="inv.invoiceNumber" :value="inv.invoiceNumber">
-              {{ inv.invoiceNumber }} - {{ inv.clientName }} (Sisa: Rp {{ inv.remainingAmount.toLocaleString('id-ID') }})
+              {{ inv.invoiceNumber }} - {{ inv.clientName }} (Sisa: Rp {{ Number(inv.remainingAmount || 0).toLocaleString('id-ID') }})
             </option>
           </select>
         </div>
@@ -116,12 +116,10 @@
         <div>
           <label class="block font-bold text-slate-700 uppercase mb-1">Metode Pembayaran</label>
           <select v-model="form.paymentMethod" class="w-full px-3 py-2 border rounded-lg bg-white">
-            <option>Transfer Bank BCA</option>
-            <option>Transfer Bank Mandiri</option>
-            <option>Transfer BNI</option>
-            <option>SP2D Bank Jatim</option>
-            <option>Bilyet Giro (BG)</option>
-            <option>Tunai Kasir</option>
+            <option value="Transfer Bank BCA (52323628813)">Transfer Bank BCA (No. Rek 52323628813)</option>
+            <option value="SP2D BOS / Kas Daerah (Bank DKI)">SP2D BOS / Kas Daerah (Bank DKI)</option>
+            <option value="Bilyet Giro (BG)">Bilyet Giro (BG)</option>
+            <option value="Tunai Kasir">Tunai Kasir</option>
           </select>
         </div>
 
@@ -152,11 +150,11 @@
           </div>
           <div class="flex justify-between">
             <span class="text-slate-500">Total Nilai Tagihan:</span>
-            <span class="font-mono font-bold text-slate-900">Rp {{ selectedPayment.totalInvoice.toLocaleString('id-ID') }}</span>
+            <span class="font-mono font-bold text-slate-900">Rp {{ Number(selectedPayment?.totalInvoice || 0).toLocaleString('id-ID') }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-slate-500">Nominal Pembayaran Ini:</span>
-            <span class="font-mono font-bold text-emerald-600">Rp {{ selectedPayment.amount.toLocaleString('id-ID') }}</span>
+            <span class="font-mono font-bold text-emerald-600">Rp {{ Number(selectedPayment?.amount || 0).toLocaleString('id-ID') }}</span>
           </div>
           <div class="flex justify-between pt-2 border-t border-slate-200">
             <span class="text-slate-500">Metode Bayar:</span>
@@ -189,7 +187,7 @@
             >
               <div>
                 <span class="font-bold text-slate-900 block">Termin {{ term.termNumber }}</span>
-                <span class="font-mono text-slate-600 text-xs">Rp {{ term.amount.toLocaleString('id-ID') }}</span>
+                <span class="font-mono text-slate-600 text-xs">Rp {{ Number(term?.amount || 0).toLocaleString('id-ID') }}</span>
               </div>
               <StatusBadge :status="term.status" />
             </div>
@@ -198,11 +196,11 @@
           <div class="pt-3 border-t border-slate-200 space-y-1.5 text-xs">
             <div class="flex justify-between text-slate-700">
               <span>Total Paid:</span>
-              <span class="font-mono font-bold text-emerald-600">Rp {{ relatedInvoice.paidAmount.toLocaleString('id-ID') }}</span>
+              <span class="font-mono font-bold text-emerald-600">Rp {{ Number(relatedInvoice?.paidAmount || 0).toLocaleString('id-ID') }}</span>
             </div>
             <div class="flex justify-between text-slate-700">
               <span>Remaining:</span>
-              <span class="font-mono font-bold text-rose-600">Rp {{ relatedInvoice.remainingAmount.toLocaleString('id-ID') }}</span>
+              <span class="font-mono font-bold text-rose-600">Rp {{ Number(relatedInvoice?.remainingAmount || 0).toLocaleString('id-ID') }}</span>
             </div>
             <div class="flex justify-between font-bold text-slate-900 pt-1">
               <span>Status Invoice:</span>
@@ -241,7 +239,7 @@ const form = ref({
   terminNumber: 1,
   amount: 25000000,
   paymentDate: new Date().toISOString().split('T')[0],
-  paymentMethod: 'Transfer Bank BCA',
+  paymentMethod: 'Transfer Bank BCA (52323628813)',
 });
 
 const relatedInvoice = computed(() => {
@@ -257,7 +255,7 @@ const openInputPaymentModal = () => {
     terminNumber: 1,
     amount: inv ? Math.round(inv.remainingAmount / 2) : 10000000,
     paymentDate: new Date().toISOString().split('T')[0],
-    paymentMethod: 'Transfer Bank BCA',
+    paymentMethod: 'Transfer Bank BCA (52323628813)',
   };
   inputModalOpen.value = true;
 };
@@ -272,7 +270,7 @@ const onInvoiceSelect = () => {
 const savePayment = () => {
   const p = storeActions.recordPayment(form.value);
   if (p) {
-    toast.success(`Pembayaran ${p.paymentNumber} senilai Rp ${p.amount.toLocaleString('id-ID')} berhasil dicatat.`);
+    toast.success(`Pembayaran ${p.paymentNumber} senilai Rp ${Number(p.amount || 0).toLocaleString('id-ID')} berhasil dicatat.`);
     inputModalOpen.value = false;
   }
 };

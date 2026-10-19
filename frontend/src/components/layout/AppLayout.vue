@@ -150,6 +150,16 @@
 
           <!-- Right: Actions, Notifications, Role Switcher & User Profile -->
           <div class="flex items-center gap-3">
+            <!-- Portal Publik Quick Link -->
+            <router-link
+              to="/portal"
+              class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#0B4DA2] rounded-lg text-xs font-semibold border border-blue-200 transition-colors"
+              title="Buka Portal Publik Rekanan"
+            >
+              <Globe class="w-3.5 h-3.5 text-amber-500" />
+              <span>Portal Publik ↗</span>
+            </router-link>
+
             <!-- Quick Role Switcher (For Capstone Evaluation & Review) -->
             <div class="relative">
               <button
@@ -316,13 +326,11 @@ import {
   ShoppingCart,
   ShoppingBag,
   FileText,
-  FileCheck2,
   Package,
   Boxes,
   Truck,
   CreditCard,
   Receipt,
-  FileSpreadsheet,
   CheckCircle2,
   Clock,
   ShieldCheck,
@@ -333,14 +341,12 @@ import {
   ChevronDown,
   Menu,
   X,
-  Search,
-  Eye,
   Activity,
   Layers,
-  Archive,
   BarChart3,
   ClipboardList,
   FolderCheck,
+  Globe,
 } from 'lucide-vue-next';
 
 const router = useRouter();
@@ -388,7 +394,6 @@ const navGroups = computed(() => {
         items: [
           { label: 'Client', path: '/marketing/clients', icon: Users },
           { label: 'Order', path: '/marketing/orders', icon: ShoppingCart },
-          { label: 'Monitoring Order', path: '/marketing/orders/monitoring', icon: Clock },
         ],
       },
       {
@@ -513,23 +518,9 @@ const navGroups = computed(() => {
   if (role === 'CLIENT') {
     return [
       {
-        title: 'Utama',
+        title: 'Portal Terbuka',
         items: [
-          { label: 'Dashboard', path: '/client/dashboard', icon: LayoutDashboard },
-        ],
-      },
-      {
-        title: 'Layanan Rekanan',
-        items: [
-          { label: 'Pembayaran', path: '/client/payments', icon: CreditCard },
-          { label: 'Tracking Pesanan', path: '/client/orders', icon: Truck },
-        ],
-      },
-      {
-        title: 'Akun',
-        items: [
-          { label: 'Notifikasi', path: '/client/notifications', icon: Bell, badge: unreadCount.value || null },
-          { label: 'Profile', path: '/client/profile', icon: ShieldCheck },
+          { label: 'Portal Publik Rekanan', path: '/portal', icon: Layers },
         ],
       },
     ];
@@ -550,7 +541,7 @@ const onSelectRole = (newRoleKey) => {
     ADMINISTRASI: '/administration/dashboard',
     WAREHOUSE: '/warehouse/dashboard',
     FINANCE: '/finance/dashboard',
-    CLIENT: '/client/dashboard',
+    CLIENT: '/portal',
   };
   router.push(targetMap[newRoleKey] || '/marketing/dashboard');
 };

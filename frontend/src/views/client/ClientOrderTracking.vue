@@ -10,11 +10,18 @@
         </div>
         <div class="flex items-center gap-2">
           <router-link
+            to="/client/order-request"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0B4DA2] to-[#062F69] hover:from-[#09428F] hover:to-[#042452] text-white font-bold rounded-lg text-xs shadow-xs transition-all"
+          >
+            <Plus class="w-4 h-4 text-amber-300 stroke-[2.5]" />
+            <span>Ajukan Pesanan Baru</span>
+          </router-link>
+          <router-link
             to="/client/payments"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-alpharo-500 hover:bg-alpharo-600 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors"
           >
             <CreditCard class="w-4 h-4" />
-            <span>Lihat Info Pembayaran</span>
+            <span>Status Pembayaran</span>
           </router-link>
         </div>
       </div>
@@ -136,6 +143,29 @@
               </div>
             </div>
 
+            <!-- DIAJUKAN CLIENT ALERT -->
+            <div
+              v-if="selectedOrder.status === 'Diajukan Client'"
+              class="mt-4 p-4 rounded-xl bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-purple-200 text-xs text-purple-900 flex items-start gap-3 shadow-2xs"
+            >
+              <Inbox class="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
+              <div>
+                <div class="flex items-center gap-2">
+                  <p class="font-bold text-sm text-slate-900">Pengajuan Kebutuhan Telah Diterima Sistem Alpharo</p>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700 border border-purple-200">
+                    Menunggu Verifikasi Marketing
+                  </span>
+                </div>
+                <p class="mt-1 leading-relaxed text-slate-700">
+                  Pesanan kebutuhan Anda telah masuk ke meja Tim Marketing CV Alpharo Artha Jaya. Staf marketing sedang memvalidasi spesifikasi teknis dan ketersediaan stok fisik di gudang sebelum diteruskan untuk approval final Direktur.
+                </p>
+                <p class="text-[11px] text-purple-700 font-semibold mt-1.5 flex items-center gap-1.5">
+                  <Clock class="w-3.5 h-3.5" />
+                  <span>Estimasi waktu respons penawaran: 1 &ndash; 3 jam kerja. Anda akan menerima notifikasi begitu status diperbarui.</span>
+                </p>
+              </div>
+            </div>
+
             <!-- TRACKING STEPPER PIPELINE -->
             <div class="mt-6">
               <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4">
@@ -210,11 +240,28 @@
                 </div>
               </div>
 
-              <div class="mt-4 p-3 rounded-lg bg-blue-50/60 border border-blue-100 text-[11px] text-blue-900 leading-relaxed">
-                <p class="font-semibold">Konfirmasi Penerimaan Barang:</p>
-                <p class="mt-0.5 text-blue-800">
-                  Mohon pastikan personil sekolah / PIC instansi siap memeriksa kondisi fisik barang dan menandatangani berkas Berita Acara Serah Terima (BAST).
+              <div class="mt-4 p-3.5 rounded-xl bg-blue-50/80 border border-blue-200 text-[11px] text-blue-900 leading-relaxed space-y-2">
+                <div class="flex items-center justify-between">
+                  <p class="font-bold flex items-center gap-1.5">
+                    <CheckCircle2 class="w-4 h-4 text-emerald-600" />
+                    <span>Konfirmasi Penerimaan Barang (BAST):</span>
+                  </p>
+                  <span v-if="selectedOrder.fulfillmentStatus === 'Selesai'" class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold text-[10px]">
+                    Sudah Diterima
+                  </span>
+                </div>
+                <p class="text-blue-800 text-[11px]">
+                  Mohon periksa fisik barang saat tiba di lokasi. Klik tombol di bawah ini untuk mengonfirmasi penerimaan secara resmi.
                 </p>
+                <button
+                  v-if="selectedOrder.fulfillmentStatus !== 'Selesai'"
+                  type="button"
+                  class="w-full mt-1 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-lg text-xs shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                  @click="openConfirmModal"
+                >
+                  <CheckCircle2 class="w-4 h-4 stroke-[2.5]" />
+                  <span>Konfirmasi Barang Telah Diterima</span>
+                </button>
               </div>
             </div>
 
@@ -363,14 +410,97 @@
         </div>
       </div>
     </div>
+
+    <!-- CONFIRM RECEIPT BAST MODAL (FR-CL-05) -->
+    <Modal
+      v-model="confirmModalOpen"
+      title="Konfirmasi Penerimaan Barang (BAST)"
+      subtitle="Pastikan seluruh fisik barang telah diperiksa dan diterima dengan baik di lokasi sekolah/instansi Anda."
+      size="md"
+    >
+      <form class="space-y-4 text-xs" @submit.prevent="submitReceiptConfirmation">
+        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 space-y-1">
+          <p class="font-bold flex items-center gap-1.5">
+            <CheckCircle2 class="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Konfirmasi untuk Pesanan: {{ selectedOrder?.orderNumber }}</span>
+          </p>
+          <p class="text-[11px] text-emerald-800">{{ selectedOrder?.projectName }}</p>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">
+            Nama Petugas Penerima / PIC di Lokasi <span class="text-rose-500">*</span>
+          </label>
+          <input
+            v-model="receiptForm.recipientName"
+            type="text"
+            required
+            placeholder="Contoh: Bpk. Supriyadi (Kepala Sarpras / Guru)"
+            class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300"
+          />
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">
+            Nomor Telepon / WhatsApp Penerima <span class="text-rose-500">*</span>
+          </label>
+          <input
+            v-model="receiptForm.phone"
+            type="text"
+            required
+            placeholder="0812-xxxx-xxxx"
+            class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300"
+          />
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">
+            Catatan Kondisi Fisik Barang <span class="text-rose-500">*</span>
+          </label>
+          <textarea
+            v-model="receiptForm.notes"
+            rows="2"
+            required
+            placeholder="Contoh: Barang telah diperiksa fisik lengkap, jumlah sesuai Surat Jalan, kondisi mulus tanpa cacat."
+            class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300"
+          ></textarea>
+        </div>
+
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-600 flex items-start gap-2">
+          <Info class="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+          <span>
+            Dengan mengonfirmasi, status pesanan akan diperbarui menjadi <strong>SELESAI</strong> di bagian Logistik Gudang dan Administrasi CV Alpharo Artha Jaya untuk pengarsipan BAST fisik.
+          </span>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button
+            type="button"
+            class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold cursor-pointer"
+            @click="confirmModalOpen = false"
+          >
+            Batal
+          </button>
+          <button
+            type="submit"
+            class="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-lg shadow-xs cursor-pointer flex items-center gap-1.5"
+          >
+            <CheckCircle2 class="w-4 h-4" />
+            <span>Simpan Konfirmasi Penerimaan</span>
+          </button>
+        </div>
+      </form>
+    </Modal>
   </AppLayout>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
-import { store } from '../../stores/mockData';
+import Modal from '../../components/common/Modal.vue';
+import { store, storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
 import {
   CreditCard,
@@ -383,8 +513,12 @@ import {
   FileText,
   Download,
   AlertTriangle,
+  Plus,
+  Info,
+  Inbox,
 } from 'lucide-vue-next';
 
+const route = useRoute();
 const toast = useToast();
 
 const searchQuery = ref('');
@@ -398,16 +532,31 @@ const clientOrders = computed(() => {
 
 const selectedOrder = ref(clientOrders.value[0] || null);
 
+onMounted(() => {
+  const code = route.query.order || route.query.code;
+  if (code) {
+    const found = (clientOrders.value || []).find((o) => o.orderNumber === code || String(o.id) === code);
+    if (found) {
+      selectedOrder.value = found;
+      if (found.status === 'Diajukan Client') {
+        activeTab.value = 'pengajuan';
+      }
+    }
+  }
+});
+
 const filterTabs = [
   { key: 'all', label: 'Semua Pesanan' },
-  { key: 'active', label: 'Sedang Diproses' },
+  { key: 'pengajuan', label: 'Pengajuan Baru' },
+  { key: 'active', label: 'Sedang Berjalan' },
   { key: 'completed', label: 'Selesai' },
   { key: 'hold', label: 'Ditahan' },
 ];
 
 const getTabCount = (tabKey) => {
   if (tabKey === 'all') return clientOrders.value.length;
-  if (tabKey === 'active') return clientOrders.value.filter((o) => o.status !== 'Selesai' && !o.isHold).length;
+  if (tabKey === 'pengajuan') return clientOrders.value.filter((o) => o.status === 'Diajukan Client').length;
+  if (tabKey === 'active') return clientOrders.value.filter((o) => o.status !== 'Selesai' && o.status !== 'Diajukan Client' && !o.isHold).length;
   if (tabKey === 'completed') return clientOrders.value.filter((o) => o.status === 'Selesai').length;
   if (tabKey === 'hold') return clientOrders.value.filter((o) => o.isHold).length;
   return 0;
@@ -416,8 +565,10 @@ const getTabCount = (tabKey) => {
 const filteredOrders = computed(() => {
   let list = clientOrders.value;
 
-  if (activeTab.value === 'active') {
-    list = list.filter((o) => o.status !== 'Selesai' && !o.isHold);
+  if (activeTab.value === 'pengajuan') {
+    list = list.filter((o) => o.status === 'Diajukan Client');
+  } else if (activeTab.value === 'active') {
+    list = list.filter((o) => o.status !== 'Selesai' && o.status !== 'Diajukan Client' && !o.isHold);
   } else if (activeTab.value === 'completed') {
     list = list.filter((o) => o.status === 'Selesai');
   } else if (activeTab.value === 'hold') {
@@ -443,26 +594,20 @@ const pipelineStages = computed(() => {
 
   const status = o.status;
   const isHold = o.isHold;
+  const isDiajukan = status === 'Diajukan Client';
 
-  // Stages:
-  // 1. Order Dibuat
-  // 2. Verifikasi Direktur
-  // 3. Dokumen SPJ
-  // 4. Gudang & Packing
-  // 5. Pengiriman
-  // 6. BAST & Selesai
   return [
     {
-      title: 'Order Dibuat',
-      desc: o.date,
-      isDone: true,
-      isCurrent: false,
+      title: isDiajukan ? 'Pengajuan Kebutuhan' : 'Order Dibuat',
+      desc: isDiajukan ? 'Menunggu review Marketing' : o.date,
+      isDone: !isDiajukan,
+      isCurrent: isDiajukan,
     },
     {
       title: 'Verifikasi Direktur',
-      desc: status === 'Draft' || status === 'Menunggu Verifikasi' ? 'Review wewenang' : 'Telah disetujui',
-      isDone: status !== 'Draft' && status !== 'Menunggu Verifikasi',
-      isCurrent: status === 'Menunggu Verifikasi',
+      desc: isDiajukan ? 'Menunggu review Marketing' : (status === 'Draft' || status === 'Menunggu Verifikasi' ? 'Review wewenang' : 'Telah disetujui'),
+      isDone: !isDiajukan && status !== 'Draft' && status !== 'Menunggu Verifikasi',
+      isCurrent: !isDiajukan && status === 'Menunggu Verifikasi',
     },
     {
       title: 'Dokumen SPJ',
@@ -505,8 +650,8 @@ const shipmentInfo = computed(() => {
     };
   }
 
-  const deliveryNote = store.deliveryNotes.find((dn) => dn.orderNumber === o.orderNumber);
-  const shipment = store.shipments.find((s) => s.orderNumber === o.orderNumber);
+  const deliveryNote = (store.deliveryNotes || []).find((dn) => dn.orderNumber === o.orderNumber);
+  const shipment = (store.shipments || []).find((s) => s.orderNumber === o.orderNumber);
 
   return {
     deliveryNoteNumber: deliveryNote?.deliveryNoteNumber || `SJ-2026-${String(o.id).padStart(3, '0')}`,
@@ -520,5 +665,29 @@ const shipmentInfo = computed(() => {
 
 const downloadDocumentSimulation = (docType) => {
   toast.success(`Mengunduh dokumen digital ${docType} untuk ${selectedOrder.value.orderNumber}`);
+};
+
+const confirmModalOpen = ref(false);
+const receiptForm = reactive({
+  recipientName: '',
+  phone: '',
+  notes: 'Barang telah diperiksa fisik lengkap dan sesuai spesifikasi Surat Jalan.',
+});
+
+const openConfirmModal = () => {
+  if (!selectedOrder.value) return;
+  receiptForm.recipientName = selectedOrder.value.contactPerson || '';
+  receiptForm.phone = selectedOrder.value.phone || '';
+  confirmModalOpen.value = true;
+};
+
+const submitReceiptConfirmation = () => {
+  if (!selectedOrder.value) return;
+  storeActions.confirmClientReceipt(selectedOrder.value.orderNumber, {
+    recipientName: receiptForm.recipientName,
+    notes: receiptForm.notes,
+  });
+  confirmModalOpen.value = false;
+  toast.success('Penerimaan barang telah berhasil dikonfirmasi! BAST diterbitkan.');
 };
 </script>

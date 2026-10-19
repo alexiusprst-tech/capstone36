@@ -22,17 +22,17 @@
 
     <!-- KPIS FOR WAREHOUSE: STATUS PERSEDIAAN & LOGISTIK PEMENUHAN -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-      <KpiCard title="Total Ragam Barang" :value="store.products.length" subtitle="Katalog material" icon-variant="slate" />
-      <KpiCard title="Total Stok Fisik" :value="totalStockUnits" unit="Unit" subtitle="Akumulasi stok" icon-variant="blue" />
-      <KpiCard title="Barang Tersedia" :value="availableCount" subtitle="Stok aman di gudang" icon-variant="emerald" />
-      <KpiCard title="Stok Menipis / Habis" :value="oosCount" subtitle="Perlu restock segera" icon-variant="rose" />
+      <KpiCard title="Total Ragam Barang" :value="store.products.length" subtitle="Katalog material" :icon-component="Boxes" icon-variant="blue" />
+      <KpiCard title="Total Stok Fisik" :value="totalStockUnits" unit="Unit" subtitle="Akumulasi stok" :icon-component="Package" icon-variant="blue" />
+      <KpiCard title="Barang Tersedia" :value="availableCount" subtitle="Stok aman di gudang" :icon-component="CheckCircle2" icon-variant="blue" />
+      <KpiCard title="Stok Menipis / Habis" :value="oosCount" subtitle="Perlu restock segera" :icon-component="AlertTriangle" icon-variant="blue" />
     </div>
 
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-      <KpiCard title="Harus Dipenuhi" :value="store.warehouseFulfillments.length" subtitle="Antrean order masuk" icon-variant="amber" />
-      <KpiCard title="Proses Pemenuhan" :value="fulfillProcessCount" subtitle="Pengemasan & sortir" icon-variant="blue" />
-      <KpiCard title="Siap Dikirim" :value="readyShipCount" subtitle="Menunggu armada logistik" icon-variant="indigo" />
-      <KpiCard title="Sedang Dikirim" :value="shippingCount" subtitle="Dalam perjalanan kurir" icon-variant="emerald" />
+      <KpiCard title="Harus Dipenuhi" :value="store.warehouseFulfillments.length" subtitle="Antrean order masuk" :icon-component="Clock" icon-variant="blue" />
+      <KpiCard title="Proses Pemenuhan" :value="fulfillProcessCount" subtitle="Pengemasan & sortir" :icon-component="PackageSearch" icon-variant="blue" />
+      <KpiCard title="Siap Dikirim" :value="readyShipCount" subtitle="Menunggu armada logistik" :icon-component="PackageCheck" icon-variant="blue" />
+      <KpiCard title="Sedang Dikirim" :value="shippingCount" subtitle="Dalam perjalanan kurir" :icon-component="Truck" icon-variant="blue" />
     </div>
 
     <!-- MAIN TWO-COLUMN DASHBOARD SECTIONS -->
@@ -215,7 +215,17 @@ import KpiCard from '../../components/common/KpiCard.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import { store, storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
-import { CheckCircle2, ChevronRight, AlertTriangle } from 'lucide-vue-next';
+import {
+  CheckCircle2,
+  ChevronRight,
+  AlertTriangle,
+  Boxes,
+  Package,
+  Clock,
+  PackageSearch,
+  PackageCheck,
+  Truck,
+} from 'lucide-vue-next';
 
 const toast = useToast();
 
