@@ -10,6 +10,7 @@ use App\Models\WarehouseRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class PurchaseController extends Controller
 {
@@ -274,11 +275,152 @@ class PurchaseController extends Controller
                 }
             }
 
+            $this->applyReceiptToSupplierFollowUps(
+                $validated['items'],
+                $validated['default_supplier'] ?? null,
+                $purchase->id,
+                $purchase->purchase_code
+            );
+
             return response()->json([
                 'success' => true,
                 'message' => 'Transaksi pembelian '.$purchase->purchase_code.' berhasil disimpan.',
                 'data' => $purchase,
             ], 201);
         });
+    }
+
+    /**
+     * Record a follow-up with the supplier for a purchase item shortage.
+     */
+    public function storeSupplierFollowUp(Request $request, int $purchaseId): JsonResponse
+    {
+        $purchase = PurchaseTransaction::find($purchaseId);
+        if (! $purchase) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaksi pembelian tidak ditemukan. Muat ulang daftar dan pilih transaksi yang tersimpan.',
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'follow_up_type' => 'required|in:PEMESANAN_ULANG,PENERIMAAN_ULANG',
+            'item_index' => 'required|integer|min:0',
+            'quantity' => 'required|numeric|min:0.01',
+            'follow_up_date' => 'required|date',
+            'expected_date' => 'nullable|date|after_or_equal:follow_up_date',
+            'notes' => 'required|string|max:2000',
+        ]);
+
+        $items = $purchase->items ?? [];
+        if (! array_key_exists($validated['item_index'], $items)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Barang yang dipilih tidak ditemukan pada transaksi pembelian.',
+            ], 422);
+        }
+
+        $item = $items[$validated['item_index']];
+        $followUps = $purchase->supplier_follow_ups ?? [];
+        $followUps[] = [
+            'id' => (string) Str::uuid(),
+            'follow_up_type' => $validated['follow_up_type'],
+            'status' => $validated['follow_up_type'],
+            'supplier' => $purchase->default_supplier ?: ($item['supplier'] ?? 'Supplier belum ditentukan'),
+            'item_name' => $item['barang'] ?? $item['name'] ?? 'Barang',
+            'sku' => $item['sku'] ?? null,
+            'quantity' => (float) $validated['quantity'],
+            'received_quantity' => 0,
+            'follow_up_date' => $validated['follow_up_date'],
+            'expected_date' => $validated['expected_date'] ?? null,
+            'notes' => $validated['notes'],
+            'recorded_by' => $request->user()?->name ?? 'Finance',
+            'recorded_at' => now()->toISOString(),
+            'completed_at' => null,
+        ];
+
+        $purchase->supplier_follow_ups = $followUps;
+        $purchase->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tindak lanjut kepada supplier berhasil dicatat.',
+            'data' => $purchase->fresh(),
+        ], 201);
+    }
+
+    /**
+     * Match newly recorded receipts to open supplier follow-ups by SKU and supplier.
+     *
+     * @param  array<int, array<string, mixed>>  $receivedItems
+     */
+    private function applyReceiptToSupplierFollowUps(
+        array $receivedItems,
+        ?string $defaultSupplier,
+        int $receiptId,
+        string $receiptPurchaseCode
+    ): void {
+        $transactions = PurchaseTransaction::query()
+            ->where('id', '!=', $receiptId)
+            ->whereNotNull('supplier_follow_ups')
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
+
+        foreach ($receivedItems as $receivedItem) {
+            $sku = trim((string) ($receivedItem['sku'] ?? ''));
+            $receivedSupplier = strtolower(trim((string) ($receivedItem['supplier'] ?? $defaultSupplier ?? '')));
+            $remainingReceiptQty = (float) ($receivedItem['qty'] ?? 0);
+            if ($sku === '' || $receivedSupplier === '' || $remainingReceiptQty <= 0) {
+                continue;
+            }
+
+            foreach ($transactions as $transaction) {
+                $followUps = $transaction->supplier_follow_ups ?? [];
+                $changed = false;
+
+                foreach ($followUps as &$followUp) {
+                    $followUpSku = trim((string) ($followUp['sku'] ?? ''));
+                    $followUpSupplier = strtolower(trim((string) ($followUp['supplier'] ?? '')));
+                    $status = $followUp['status'] ?? $followUp['follow_up_type'] ?? null;
+                    if (
+                        $remainingReceiptQty <= 0 ||
+                        $status === 'SELESAI' ||
+                        $sku !== $followUpSku ||
+                        $receivedSupplier !== $followUpSupplier
+                    ) {
+                        continue;
+                    }
+
+                    $requestedQty = (float) ($followUp['quantity'] ?? 0);
+                    $receivedQty = (float) ($followUp['received_quantity'] ?? 0);
+                    $outstandingQty = max(0, $requestedQty - $receivedQty);
+                    $appliedQty = min($remainingReceiptQty, $outstandingQty);
+                    if ($appliedQty <= 0) {
+                        continue;
+                    }
+
+                    $receivedQty += $appliedQty;
+                    $remainingReceiptQty -= $appliedQty;
+                    $followUp['received_quantity'] = $receivedQty;
+                    if ($receivedQty >= $requestedQty) {
+                        $followUp['status'] = 'SELESAI';
+                        $followUp['completed_at'] = now()->toISOString();
+                    }
+                    $followUp['last_receipt_purchase_code'] = $receiptPurchaseCode;
+                    $changed = true;
+                }
+                unset($followUp);
+
+                if ($changed) {
+                    $transaction->supplier_follow_ups = $followUps;
+                    $transaction->save();
+                }
+
+                if ($remainingReceiptQty <= 0) {
+                    break;
+                }
+            }
+        }
     }
 }

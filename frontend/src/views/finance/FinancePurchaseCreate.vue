@@ -956,37 +956,45 @@ const savePurchase = async () => {
     items: validItems,
   };
 
-  // Update in-memory reactive store
-  if (!store.purchases) store.purchases = [];
-  store.purchases.unshift(payload);
-
-  // Update linked warehouse request status to DIPROSES_PEMBELIAN
-  if (form.value.warehouse_request_code || form.value.warehouse_request_id) {
-    const match = (store.warehouseRequests || []).find(
-      (r) =>
-        r.id === form.value.warehouse_request_id ||
-        r.requestCode === form.value.warehouse_request_code ||
-        r.request_code === form.value.warehouse_request_code
-    );
-    if (match) {
-      match.status = 'DIPROSES_PEMBELIAN';
-      match.purchaseCode = form.value.purchase_code;
-      match.purchase_code = form.value.purchase_code;
-    }
-  }
-
-  // Persist to backend API
   try {
-    await fetch('/api/purchases', {
+    const response = await fetch('/api/purchases', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-  } catch (e) {
-    console.error('Failed to sync purchase to API:', e);
-  }
+    const result = await response.json();
+    if (!response.ok) {
+      const validationMessage = result.errors
+        ? Object.values(result.errors).flat().join(' ')
+        : result.message;
+      throw new Error(validationMessage || 'Transaksi pembelian gagal disimpan.');
+    }
+    if (!result.data?.id) {
+      throw new Error('Transaksi berhasil dikirim, tetapi server tidak mengembalikan ID transaksi.');
+    }
 
-  toast.success(`Transaksi Pembelian ${form.value.purchase_code} berhasil disimpan!`);
-  router.push('/finance/purchases');
+    if (!store.purchases) store.purchases = [];
+    store.purchases.unshift(result.data);
+
+    if (form.value.warehouse_request_code || form.value.warehouse_request_id) {
+      const match = (store.warehouseRequests || []).find(
+        (r) =>
+          r.id === form.value.warehouse_request_id ||
+          r.requestCode === form.value.warehouse_request_code ||
+          r.request_code === form.value.warehouse_request_code
+      );
+      if (match) {
+        match.status = 'DIPROSES_PEMBELIAN';
+        match.purchaseCode = form.value.purchase_code;
+        match.purchase_code = form.value.purchase_code;
+      }
+    }
+
+    toast.success(`Transaksi Pembelian ${form.value.purchase_code} berhasil disimpan.`);
+    router.push('/finance/purchases');
+  } catch (error) {
+    console.error('Failed to save purchase:', error);
+    toast.error(error.message || 'Tidak dapat menyimpan transaksi pembelian. Periksa koneksi dan coba lagi.');
+  }
 };
 </script>

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Product;
+use App\Models\PurchaseTransaction;
 use App\Models\WarehouseRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -133,5 +134,123 @@ class PurchaseApiTest extends TestCase
         $prodFresh = $prod->fresh();
         $this->assertEquals(100, $prodFresh->stock);
         $this->assertEquals(100000, (float) $prodFresh->last_buy_price);
+    }
+
+    public function test_can_record_supplier_follow_up_for_a_purchase_item_without_changing_stock(): void
+    {
+        $product = Product::create([
+            'sku' => 'MAT-001',
+            'name' => 'Semen Portland',
+            'category' => 'Material Konstruksi',
+            'unit' => 'Sak',
+            'stock' => 5,
+            'sell_price' => 70000,
+            'hpp' => 60000,
+            'last_buy_price' => 60000,
+            'status' => 'Tersedia',
+        ]);
+        $purchase = PurchaseTransaction::create([
+            'purchase_code' => 'PB-FOLLOWUP-001',
+            'transaction_date' => '2026-10-31',
+            'project_name' => 'Pengadaan bahan bangunan',
+            'default_supplier' => 'PT Supplier Utama',
+            'items' => [
+                [
+                    'barang' => 'Semen Portland',
+                    'sku' => 'MAT-001',
+                    'supplier' => 'PT Supplier Utama',
+                    'qty' => 20,
+                    'harga_beli' => 60000,
+                    'subtotal' => 1200000,
+                ],
+            ],
+        ]);
+
+        $response = $this->postJson("/api/purchases/{$purchase->id}/supplier-follow-ups", [
+            'follow_up_type' => 'PENERIMAAN_ULANG',
+            'item_index' => 0,
+            'quantity' => 5,
+            'follow_up_date' => '2026-10-31',
+            'expected_date' => '2026-11-02',
+            'notes' => 'Supplier mengonfirmasi pengiriman ulang 5 sak.',
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.supplier_follow_ups.0.follow_up_type', 'PENERIMAAN_ULANG')
+            ->assertJsonPath('data.supplier_follow_ups.0.status', 'PENERIMAAN_ULANG')
+            ->assertJsonPath('data.supplier_follow_ups.0.item_name', 'Semen Portland')
+            ->assertJsonPath('data.supplier_follow_ups.0.quantity', 5);
+
+        $this->assertEquals(5, $product->fresh()->stock);
+        $this->assertCount(1, $purchase->fresh()->supplier_follow_ups);
+
+        $recordReceipt = function (string $code, int $quantity): void {
+            $subtotal = $quantity * 60000;
+            $this->postJson('/api/purchases', [
+                'purchase_code' => $code,
+                'transaction_date' => '2026-10-31',
+                'project_name' => 'Pengadaan bahan bangunan',
+                'default_supplier' => 'PT Supplier Utama',
+                'subtotal' => $subtotal,
+                'discount' => 0,
+                'total_price' => $subtotal,
+                'payment_method' => 'Tunai',
+                'items' => [[
+                    'barang' => 'Semen Portland',
+                    'sku' => 'MAT-001',
+                    'supplier' => 'PT Supplier Utama',
+                    'qty' => $quantity,
+                    'harga_beli' => 60000,
+                    'subtotal' => $subtotal,
+                ]],
+            ])->assertCreated();
+        };
+
+        $recordReceipt('PB-FOLLOWUP-RECEIPT-001', 3);
+        $this->assertEquals('PENERIMAAN_ULANG', $purchase->fresh()->supplier_follow_ups[0]['status']);
+        $this->assertEquals(3, $purchase->fresh()->supplier_follow_ups[0]['received_quantity']);
+
+        $recordReceipt('PB-FOLLOWUP-RECEIPT-002', 2);
+        $completedFollowUp = $purchase->fresh()->supplier_follow_ups[0];
+        $this->assertEquals('SELESAI', $completedFollowUp['status']);
+        $this->assertEquals(5, $completedFollowUp['received_quantity']);
+        $this->assertEquals('PB-FOLLOWUP-RECEIPT-002', $completedFollowUp['last_receipt_purchase_code']);
+        $this->assertNotNull($completedFollowUp['completed_at']);
+        $this->assertEquals(10, $product->fresh()->stock);
+    }
+
+    public function test_supplier_follow_up_rejects_an_item_not_in_the_purchase(): void
+    {
+        $purchase = PurchaseTransaction::create([
+            'purchase_code' => 'PB-FOLLOWUP-002',
+            'transaction_date' => '2026-10-31',
+            'project_name' => 'Pengadaan bahan bangunan',
+            'items' => [
+                ['barang' => 'Semen Portland', 'qty' => 20],
+            ],
+        ]);
+
+        $this->postJson("/api/purchases/{$purchase->id}/supplier-follow-ups", [
+            'follow_up_type' => 'PEMESANAN_ULANG',
+            'item_index' => 1,
+            'quantity' => 5,
+            'follow_up_date' => '2026-10-31',
+            'notes' => 'Permintaan pemesanan ulang.',
+        ])->assertUnprocessable()
+            ->assertJsonPath('success', false);
+    }
+
+    public function test_supplier_follow_up_returns_a_clear_error_for_an_unknown_purchase(): void
+    {
+        $this->postJson('/api/purchases/999999/supplier-follow-ups', [
+            'follow_up_type' => 'PEMESANAN_ULANG',
+            'item_index' => 0,
+            'quantity' => 5,
+            'follow_up_date' => '2026-10-31',
+            'notes' => 'Permintaan pemesanan ulang.',
+        ])->assertNotFound()
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('message', 'Transaksi pembelian tidak ditemukan. Muat ulang daftar dan pilih transaksi yang tersimpan.');
     }
 }

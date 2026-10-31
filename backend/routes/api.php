@@ -43,6 +43,8 @@ Route::post('/warehouse/requests', [PurchaseController::class, 'storeWarehouseRe
 // Purchases (Transaksi Pembelian)
 Route::get('/purchases', [PurchaseController::class, 'getPurchases'])->name('api.purchases.index');
 Route::post('/purchases', [PurchaseController::class, 'storePurchase'])->name('api.purchases.store');
+Route::post('/purchases/{purchaseId}/supplier-follow-ups', [PurchaseController::class, 'storeSupplierFollowUp'])
+    ->name('api.purchases.supplier-follow-ups.store');
 
 // Regions (DKI Jakarta Kecamatan & Kelurahan Data)
 Route::get('/regions', [RegionController::class, 'index'])->name('api.regions.index');

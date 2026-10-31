@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { store, storeActions } from '../stores/mockData';
+import { getRouteAccessDecision } from './access';
 
 // Auth Views
 import LoginView from '../views/auth/LoginView.vue';
@@ -441,30 +442,15 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token');
+  const decision = getRouteAccessDecision({
+    meta: to.meta,
+    fullPath: to.fullPath,
+    token,
+    currentRole: store.currentUser?.role,
+  });
 
-  // If requiresAuth and no token, redirect to login
-  if (to.meta.requiresAuth && !token) {
-    return next({ name: 'login', query: { redirect: to.fullPath } });
-  }
-
-  // If guestOnly and user is logged in, redirect to their role dashboard
-  if (to.meta.guestOnly && token) {
-    const role = store.currentUser?.role || 'MARKETING';
-    const roleMap = {
-      MARKETING: '/marketing/dashboard',
-      DIREKTUR: '/director/dashboard',
-      ADMINISTRASI: '/administration/dashboard',
-      WAREHOUSE: '/warehouse/dashboard',
-      FINANCE: '/finance/dashboard',
-      CLIENT: '/client/dashboard',
-    };
-    return next(roleMap[role] || '/marketing/dashboard');
-  }
-
-  // Auto sync store role if route specifies a role
-  if (to.meta.role && store.currentUser.role !== to.meta.role) {
-    storeActions.switchRole(to.meta.role);
-  }
+  if (decision.type === 'redirect') return next(decision.destination);
+  if (decision.type === 'switch-role') storeActions.switchRole(decision.role);
 
   next();
 });

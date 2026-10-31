@@ -333,7 +333,19 @@ const selectForVerification = (order) => {
 };
 
 const executeApprove = (order) => {
-  storeActions.approveOrder(order.id, directorNotes.value || 'Disetujui penuh oleh Direktur.');
+  if (!storeActions.approveOrder(order.id, directorNotes.value || 'Disetujui penuh oleh Direktur.')) {
+    const readiness = storeActions.getOrderStockReadiness(order.items);
+    const shortageDetails = readiness.shortages
+      .map((item) => `${item.name}: tersedia ${item.available}, dibutuhkan ${item.required} ${item.unit}`)
+      .join('; ');
+    toast.error(
+      shortageDetails
+        ? `Approval ditunda karena stok tidak mencukupi. ${shortageDetails}`
+        : 'Approval gagal. Periksa kembali status order dan ketersediaan stok.'
+    );
+    return;
+  }
+
   toast.success(`Order ${order.orderNumber} telah disetujui! Administrasi & Warehouse telah dinotifikasi.`);
   selectedOrder.value = pendingOrders.value[0] || null;
   directorNotes.value = '';

@@ -146,7 +146,10 @@ const confirmFulfillment = (ful) => {
     return;
   }
 
-  storeActions.confirmFulfillment(ful.id);
+  if (!storeActions.confirmFulfillment(ful.id)) {
+    toast.error('Pemenuhan gagal dikonfirmasi. Periksa kembali status order dan ketersediaan stok.');
+    return;
+  }
   toast.success(`Pemenuhan order ${ful.orderNumber} berhasil dikonfirmasi. Status diubah menjadi Siap Kirim.`);
 };
 </script>

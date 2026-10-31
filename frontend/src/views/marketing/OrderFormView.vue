@@ -13,16 +13,20 @@
             </router-link>
           </div>
           <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
-            {{ isEdit ? 'Edit Order & Proyek' : 'Tambah Order & Proyek Baru' }}
+            {{ isEdit ? 'Perbaiki Draft Order & Proyek' : 'Tambah Order & Proyek Baru' }}
           </h1>
           <p class="text-sm text-slate-500 mt-0.5">
-            {{ isEdit ? `Perbarui informasi proyek ${form.projectId} - ${form.projectName}` : 'Lengkapi data project, pengadaan, jadwal, penanggung jawab, dan nomor dokumen resmi' }}
+            {{ isEdit ? `Perbarui rincian dan harga final proyek ${form.projectId} - ${form.projectName} sebelum diajukan.` : 'Lengkapi data project, pengadaan, jadwal, penanggung jawab, dan nomor dokumen resmi' }}
           </p>
         </div>
       </div>
     </template>
 
     <form class="space-y-6 max-w-7xl mx-auto pb-12" @submit.prevent="handleSubmit">
+      <div v-if="isEdit" class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800">
+        Harga final draft dihitung dari rincian barang ditambah PPN 11%. Perubahan akan disimpan sebelum order diajukan ke Direktur.
+      </div>
+
       <!-- 4-CARD 2x2 GRID (SESUAI DOKUMEN TANGKAPAN LAYAR) -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         
@@ -255,11 +259,12 @@
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nilai Project</label>
               <input
-                v-model.number="form.nilaiProject"
+                :value="isEdit ? calculatedOrderTotal : form.nilaiProject"
                 type="number"
                 min="0"
+                :readonly="isEdit"
                 class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800 text-right font-mono font-bold"
-                @input="onNilaiProjectChange"
+                @input="onNilaiProjectInput"
               />
             </div>
 
@@ -267,7 +272,7 @@
               <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nilai Invoice</label>
                 <input
-                  :value="form.nilaiInvoice"
+                  :value="isEdit ? calculatedOrderTotal : form.nilaiInvoice"
                   type="number"
                   disabled
                   readonly
@@ -453,9 +458,20 @@
           <div class="flex items-center gap-2.5">
             <Boxes class="w-4 h-4 text-slate-700" />
             <div>
-              <h2 class="font-bold text-slate-800 text-sm">Rincian Barang / Material Pengadaan (Opsional)</h2>
+              <h2 class="font-bold text-slate-800 text-sm">
+                {{ isEdit ? 'Rincian Barang / Material Pengadaan' : 'Rincian Barang / Material Pengadaan (Opsional)' }}
+              </h2>
               <p class="text-[11px] text-slate-500">
-                {{ form.items.length }} item barang terdaftar &bull; Total Kalkulasi: Rp {{ calculatedItemsTotal.toLocaleString('id-ID') }}
+                {{ form.items.length }} item barang terdaftar &bull; Subtotal: Rp {{ calculatedItemsTotal.toLocaleString('id-ID') }} &bull; Total dengan PPN: Rp {{ calculatedOrderTotal.toLocaleString('id-ID') }}
+              </p>
+              <p
+                :class="[
+                  'mt-1 text-[11px] font-semibold',
+                  stockReadiness.status === 'ready' ? 'text-emerald-700' : stockReadiness.status === 'shortage' ? 'text-amber-700' : 'text-slate-500',
+                ]"
+              >
+                {{ stockReadiness.title }}
+                <span v-if="stockReadiness.shortages.length"> — {{ stockReadiness.shortages.map((item) => `${item.name}: kurang ${item.required - item.available} ${item.unit}`).join(', ') }}</span>
               </p>
             </div>
           </div>
@@ -477,6 +493,28 @@
             </button>
           </div>
 
+          <div
+            role="status"
+            aria-live="polite"
+            :class="[
+              'rounded-lg border px-3.5 py-3 text-xs',
+              stockReadiness.status === 'ready'
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                : stockReadiness.status === 'shortage'
+                  ? 'border-amber-200 bg-amber-50 text-amber-800'
+                  : 'border-slate-200 bg-slate-50 text-slate-600',
+            ]"
+          >
+            <p class="font-bold">{{ stockReadiness.title }}</p>
+            <p class="mt-1">{{ stockReadiness.message }}</p>
+            <p v-if="stockReadiness.shortages.length" class="mt-1">
+              Stok kurang: {{ stockReadiness.shortages.map((item) => `${item.name} (kurang ${item.required - item.available} ${item.unit})`).join(', ') }}.
+            </p>
+            <p v-if="stockReadiness.status === 'shortage'" class="mt-1 font-semibold">
+              Draft tetap bisa disimpan, tetapi belum bisa diajukan untuk approval.
+            </p>
+          </div>
+
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs border-collapse">
               <thead>
@@ -493,6 +531,7 @@
                   <td class="py-2.5 px-3">
                     <select
                       v-model="it.productId"
+                      :required="isEdit"
                       class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 bg-white"
                       @change="onProductSelect(it)"
                     >
@@ -501,12 +540,31 @@
                         [{{ p.sku }}] {{ p.name }} (Stok: {{ p.stock }} {{ p.unit }})
                       </option>
                     </select>
+                    <div v-if="stockByItem[idx]" class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span class="text-[11px] text-slate-500">
+                        Stok {{ stockByItem[idx].available }} {{ stockByItem[idx].unit }}
+                        &bull; Kebutuhan {{ stockByItem[idx].required }} {{ stockByItem[idx].unit }}
+                      </span>
+                      <span
+                        :class="[
+                          'rounded px-1.5 py-0.5 text-[10px] font-bold',
+                          stockByItem[idx].sufficient
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : stockByItem[idx].available > 0
+                              ? 'bg-amber-100 text-amber-700'
+                              : 'bg-rose-100 text-rose-700',
+                        ]"
+                      >
+                        {{ stockByItem[idx].sufficient ? 'Stok Cukup' : stockByItem[idx].available > 0 ? 'Stok Kurang' : 'Stok Habis' }}
+                      </span>
+                    </div>
                   </td>
                   <td class="py-2.5 px-3">
                     <input
                       v-model.number="it.qty"
                       type="number"
                       min="1"
+                      :required="isEdit"
                       class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 text-center font-bold"
                     />
                   </td>
@@ -515,6 +573,7 @@
                       v-model.number="it.price"
                       type="number"
                       min="0"
+                      :required="isEdit"
                       class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 text-right font-mono"
                     />
                   </td>
@@ -540,7 +599,22 @@
             </table>
           </div>
 
-          <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+          <div class="rounded-lg bg-slate-50 border border-slate-200 p-3 space-y-2 text-xs">
+            <div class="flex justify-between text-slate-600">
+              <span>Subtotal Barang</span>
+              <span class="font-mono">Rp {{ calculatedItemsTotal.toLocaleString('id-ID') }}</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>PPN 11%</span>
+              <span class="font-mono">Rp {{ calculatedItemsTax.toLocaleString('id-ID') }}</span>
+            </div>
+            <div class="flex justify-between border-t border-slate-200 pt-2 font-bold text-slate-900">
+              <span>Harga Final</span>
+              <span class="font-mono">Rp {{ calculatedOrderTotal.toLocaleString('id-ID') }}</span>
+            </div>
+          </div>
+
+          <div v-if="!isEdit" class="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs">
             <span class="text-slate-600">Gunakan total kalkulasi barang sebagai Nilai Project:</span>
             <button
               v-if="calculatedItemsTotal > 0"
@@ -781,10 +855,67 @@ const availablePenanggungJawab = ref([
 ]);
 
 const calculatedItemsTotal = computed(() => {
-  return form.value.items.reduce((sum, it) => sum + (it.qty || 0) * (it.price || 0), 0);
+  return form.value.items.reduce((sum, it) => sum + (Number(it.qty) || 0) * (Number(it.price) || 0), 0);
 });
 
-const onNilaiProjectChange = () => {
+const calculatedItemsTax = computed(() => Math.round(calculatedItemsTotal.value * 0.11));
+const calculatedOrderTotal = computed(() => calculatedItemsTotal.value + calculatedItemsTax.value);
+
+const stockByItem = computed(() => {
+  const requiredByProduct = new Map();
+  for (const item of form.value.items) {
+    const productId = Number(item.productId);
+    if (item.productId && Number.isFinite(productId)) {
+      requiredByProduct.set(
+        productId,
+        (requiredByProduct.get(productId) || 0) + (Number(item.qty) || 0)
+      );
+    }
+  }
+
+  return form.value.items.map((item) => {
+    const product = store.products.find((candidate) => candidate.id === Number(item.productId));
+    if (!product) return null;
+
+    const required = requiredByProduct.get(product.id) || 0;
+    return {
+      available: Number(product.stock) || 0,
+      required,
+      unit: product.unit,
+      sufficient: required > 0 && required <= (Number(product.stock) || 0),
+    };
+  });
+});
+
+const stockReadiness = computed(() => {
+  const readiness = storeActions.getOrderStockReadiness(form.value.items);
+  if (readiness.shortages.length) {
+    return {
+      status: 'shortage',
+      title: 'Stok belum mencukupi',
+      message: 'Tinjau jumlah barang atau koordinasikan pemenuhan dengan Gudang sebelum mengajukan approval.',
+      shortages: readiness.shortages,
+    };
+  }
+  if (!readiness.ready) {
+    return {
+      status: 'incomplete',
+      title: 'Rincian stok belum lengkap',
+      message: 'Pilih barang dan masukkan jumlah untuk melihat kesiapan stok pengajuan.',
+      shortages: readiness.shortages,
+    };
+  }
+  return {
+    status: 'ready',
+    title: 'Stok mencukupi — siap diajukan untuk approval',
+    message: 'Stok saat ini mencukupi seluruh kebutuhan barang pada order.',
+    shortages: readiness.shortages,
+  };
+});
+
+const onNilaiProjectInput = (event) => {
+  if (isEdit.value) return;
+  form.value.nilaiProject = Number(event.target.value) || 0;
   // If user adjusts Nilai Project, auto sync invoice calculations
   form.value.nilaiInvoice = form.value.nilaiProject;
 };
@@ -892,48 +1023,53 @@ const saveQuickPj = () => {
 onMounted(() => {
   if (isEdit.value) {
     const existing = store.orders.find((o) => o.id === Number(route.params.id));
-    if (existing) {
-      form.value = {
-        ...form.value,
-        id: existing.id,
-        projectId: existing.projectId || `PR${String(existing.id).padStart(5, '0')}`,
-        projectName: existing.projectName || '',
-        description: existing.description || '',
-        customerId: existing.clientId || '',
-        marketingName: existing.submittedBy || store.currentUser.name,
-        company: existing.company || 'CV Alpharo Artha Jaya',
-        namaKegiatan: existing.namaKegiatan || existing.projectName || '',
-        rincianKegiatan: existing.rincianKegiatan || '',
-        kodeRekening: existing.kodeRekening || '5.1.02.01.01.0024',
-        tahunAnggaran: existing.tahunAnggaran || '2026',
-        sumberDana: existing.sumberDana || 'BOP',
-        kategori: existing.kategori || 'Barang/Jasa',
-        paguAnggaran: existing.paguAnggaran || existing.grandTotal || 0,
-        tglMulai: existing.date || todayDate,
-        estimasiSelesai: existing.estimasiSelesai || todayDate,
-        nilaiProject: existing.grandTotal || 0,
-        nilaiInvoice: existing.nilaiInvoice || existing.grandTotal || 0,
-        invoiceDibayar: existing.invoiceDibayar || 0,
-        penanggungJawabSelection: existing.penanggungJawabNama || '',
-        penanggungJawabNama: existing.penanggungJawabNama || 'Bpk. supri, M.Pd.',
-        penanggungJawabJabatan: existing.penanggungJawabJabatan || 'Kepala Sekolah / KPA',
-        penanggungJawabNip: existing.penanggungJawabNip || '19720815 199803 1 004',
-        kotaTandaTangan: existing.kotaTandaTangan || 'Jakarta Timur',
-        docNumbers: existing.docNumbers || {
-          penawaran: `00${existing.id}/SPH/AAJ/X/2026`,
-          suratJalan: `00${existing.id}/SJ/AAJ/X/2026`,
-          faktur: `00${existing.id}/FP/AAJ/X/2026`,
-          kuitansi: `00${existing.id}/KW/AAJ/X/2026`,
-        },
-        items: existing.items && existing.items.length ? JSON.parse(JSON.stringify(existing.items)) : form.value.items,
-      };
-      updateDocNumbers();
+    if (!existing || existing.status !== 'Draft') {
+      toast.error(existing ? 'Hanya draft order yang dapat diperbaiki.' : 'Order tidak ditemukan.');
+      router.replace('/marketing/orders');
+      return;
     }
+
+    form.value = {
+      ...form.value,
+      id: existing.id,
+      projectId: existing.projectId || `PR${String(existing.id).padStart(5, '0')}`,
+      projectName: existing.projectName || '',
+      description: existing.description || '',
+      customerId: existing.clientId || '',
+      marketingName: existing.submittedBy || store.currentUser.name,
+      company: existing.company || 'CV Alpharo Artha Jaya',
+      namaKegiatan: existing.namaKegiatan || existing.projectName || '',
+      rincianKegiatan: existing.rincianKegiatan || '',
+      kodeRekening: existing.kodeRekening || '5.1.02.01.01.0024',
+      tahunAnggaran: existing.tahunAnggaran || '2026',
+      sumberDana: existing.sumberDana || 'BOP',
+      kategori: existing.kategori || 'Barang/Jasa',
+      paguAnggaran: existing.paguAnggaran || existing.grandTotal || 0,
+      tglMulai: existing.date || todayDate,
+      estimasiSelesai: existing.estimasiSelesai || todayDate,
+      nilaiProject: existing.grandTotal || 0,
+      nilaiInvoice: existing.nilaiInvoice || existing.grandTotal || 0,
+      invoiceDibayar: existing.invoiceDibayar || 0,
+      penanggungJawabSelection: existing.penanggungJawabNama || '',
+      penanggungJawabNama: existing.penanggungJawabNama || 'Bpk. supri, M.Pd.',
+      penanggungJawabJabatan: existing.penanggungJawabJabatan || 'Kepala Sekolah / KPA',
+      penanggungJawabNip: existing.penanggungJawabNip || '19720815 199803 1 004',
+      kotaTandaTangan: existing.kotaTandaTangan || 'Jakarta Timur',
+      docNumbers: existing.docNumbers || {
+        penawaran: `00${existing.id}/SPH/AAJ/X/2026`,
+        suratJalan: `00${existing.id}/SJ/AAJ/X/2026`,
+        faktur: `00${existing.id}/FP/AAJ/X/2026`,
+        kuitansi: `00${existing.id}/KW/AAJ/X/2026`,
+      },
+      items: existing.items && existing.items.length ? JSON.parse(JSON.stringify(existing.items)) : form.value.items,
+    };
+    showItemsSection.value = true;
   } else {
     form.value.projectId = displayProjectId.value;
     // Set default company to CV Alpharo Artha Jaya to generate previews nicely
     form.value.company = 'CV Alpharo Artha Jaya';
     updateDocNumbers();
+    showItemsSection.value = true;
   }
 });
 
@@ -944,6 +1080,20 @@ const handleSubmit = () => {
   }
   if (!form.value.projectName) {
     toast.error('Nama Project wajib diisi.');
+    return;
+  }
+
+  if (isEdit.value && (
+    form.value.items.length === 0 ||
+    form.value.items.some((item) =>
+      !item.productId ||
+      !Number.isFinite(Number(item.qty)) ||
+      Number(item.qty) < 1 ||
+      !Number.isFinite(Number(item.price)) ||
+      Number(item.price) < 0
+    )
+  )) {
+    toast.error('Pastikan setiap rincian barang memiliki produk, jumlah, dan harga yang valid.');
     return;
   }
 
@@ -979,29 +1129,30 @@ const handleSubmit = () => {
     paguAnggaran: form.value.paguAnggaran,
     tglMulai: form.value.tglMulai,
     estimasiSelesai: form.value.estimasiSelesai,
-    nilaiProject: form.value.nilaiProject,
-    nilaiInvoice: form.value.nilaiInvoice,
+    nilaiProject: isEdit.value ? calculatedOrderTotal.value : form.value.nilaiProject,
+    nilaiInvoice: isEdit.value ? calculatedOrderTotal.value : form.value.nilaiInvoice,
     invoiceDibayar: form.value.invoiceDibayar,
     penanggungJawabNama: form.value.penanggungJawabNama,
     penanggungJawabJabatan: form.value.penanggungJawabJabatan,
     penanggungJawabNip: form.value.penanggungJawabNip,
     kotaTandaTangan: form.value.kotaTandaTangan,
     docNumbers: form.value.docNumbers,
-    submitDirectly: false, // Disimpan sebagai project / order
+    ...(!isEdit.value ? { submitDirectly: false } : {}),
     items: finalItems,
   };
 
   if (isEdit.value && form.value.id) {
-    const idx = store.orders.findIndex((o) => o.id === form.value.id);
-    if (idx !== -1) {
-      store.orders[idx] = {
-        ...store.orders[idx],
-        ...payload,
-        clientName: client.name,
-        grandTotal: form.value.nilaiProject || payload.nilaiProject,
-      };
-      toast.success(`Data Project ${displayProjectId.value} berhasil diperbarui!`);
+    const updated = storeActions.updateDraftOrder(form.value.id, {
+      ...payload,
+      clientId: Number(form.value.customerId),
+      clientName: client.name,
+      date: form.value.tglMulai,
+    });
+    if (!updated) {
+      toast.error('Draft order tidak dapat diperbarui. Muat ulang daftar order dan coba lagi.');
+      return;
     }
+    toast.success(`Draft order ${updated.orderNumber} berhasil diperbarui. Harga final: Rp ${updated.grandTotal.toLocaleString('id-ID')}.`);
   } else {
     const newOrder = storeActions.createOrder(payload);
     // Enrich with additional project fields

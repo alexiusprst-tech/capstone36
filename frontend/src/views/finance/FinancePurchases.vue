@@ -358,6 +358,106 @@
           </table>
         </div>
 
+        <section class="space-y-3 border-t border-slate-200 pt-4">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <h4 class="font-bold uppercase text-slate-700 text-[11px]">Tindak Lanjut Supplier</h4>
+              <p class="mt-1 text-[11px] text-slate-500">
+                Catat pemesanan ulang atau penerimaan ulang untuk memenuhi kekurangan barang.
+              </p>
+            </div>
+            <span class="shrink-0 rounded-full bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-600">
+              {{ selectedPurchase.supplier_follow_ups?.length || 0 }} catatan
+            </span>
+          </div>
+
+          <div v-if="selectedPurchase.supplier_follow_ups?.length" class="space-y-2">
+            <article
+              v-for="followUp in selectedPurchase.supplier_follow_ups"
+              :key="followUp.id"
+              class="rounded-lg border border-slate-200 bg-slate-50 p-3"
+            >
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="font-bold text-slate-800">
+                  {{ followUp.follow_up_type === 'PEMESANAN_ULANG' ? 'Pemesanan ulang' : 'Penerimaan ulang' }}
+                  &middot; {{ followUp.item_name }} ({{ followUp.quantity }} unit)
+                </span>
+                <span
+                  :class="[
+                    'rounded-full px-2 py-0.5 text-[10px] font-bold',
+                    followUp.status === 'SELESAI'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-amber-100 text-amber-800',
+                  ]"
+                >
+                  {{ followUp.status === 'SELESAI'
+                    ? 'Selesai'
+                    : followUp.status === 'PEMESANAN_ULANG'
+                      ? 'Pemesanan Ulang'
+                      : 'Penerimaan Ulang' }}
+                </span>
+              </div>
+              <p class="mt-1 text-slate-600">
+                Supplier: {{ followUp.supplier }}
+                <span v-if="followUp.expected_date"> &middot; Target: {{ followUp.expected_date }}</span>
+              </p>
+              <p class="mt-1 text-slate-600">
+                Diterima: {{ followUp.received_quantity || 0 }} / {{ followUp.quantity }} unit
+                <span v-if="followUp.last_receipt_purchase_code"> &middot; Penerimaan {{ followUp.last_receipt_purchase_code }}</span>
+              </p>
+              <p class="mt-1 whitespace-pre-wrap text-slate-700">{{ followUp.notes }}</p>
+              <p class="mt-1 text-[10px] text-slate-400">Dicatat {{ followUp.recorded_by }} pada {{ formatDateTime(followUp.recorded_at) }}</p>
+            </article>
+          </div>
+          <p v-else class="rounded-lg border border-dashed border-slate-300 px-3 py-4 text-center text-[11px] text-slate-500">
+            Belum ada tindak lanjut supplier untuk transaksi ini.
+          </p>
+
+          <div v-if="!purchaseApiAvailable" class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
+            Tindak lanjut belum dapat disimpan karena transaksi ini belum terhubung ke database. Muat ulang halaman atau simpan transaksi pembelian terlebih dahulu.
+          </div>
+          <form v-else class="grid grid-cols-1 gap-3 rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 sm:grid-cols-2" @submit.prevent="saveSupplierFollowUp">
+            <div>
+              <label class="mb-1 block text-[11px] font-semibold text-slate-700">Jenis tindak lanjut</label>
+              <select v-model="followUpForm.follow_up_type" required class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs">
+                <option value="PEMESANAN_ULANG">Pemesanan ulang</option>
+                <option value="PENERIMAAN_ULANG">Penerimaan ulang</option>
+              </select>
+            </div>
+            <div>
+              <label class="mb-1 block text-[11px] font-semibold text-slate-700">Barang</label>
+              <select v-model="followUpForm.item_index" required class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs">
+                <option value="" disabled>Pilih barang</option>
+                <option v-for="(item, idx) in selectedPurchase.items" :key="idx" :value="String(idx)">
+                  {{ item.barang || item.name }} (tersedia di transaksi: {{ item.qty }})
+                </option>
+              </select>
+            </div>
+            <div>
+              <label class="mb-1 block text-[11px] font-semibold text-slate-700">Jumlah kekurangan</label>
+              <input v-model.number="followUpForm.quantity" type="number" min="0.01" step="any" required class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs" />
+            </div>
+            <div>
+              <label class="mb-1 block text-[11px] font-semibold text-slate-700">Tanggal dihubungi</label>
+              <input v-model="followUpForm.follow_up_date" type="date" required class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs" />
+            </div>
+            <div>
+              <label class="mb-1 block text-[11px] font-semibold text-slate-700">Target pemenuhan (opsional)</label>
+              <input v-model="followUpForm.expected_date" type="date" :min="followUpForm.follow_up_date" class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs" />
+            </div>
+            <div class="sm:col-span-2">
+              <label class="mb-1 block text-[11px] font-semibold text-slate-700">Catatan komunikasi dengan supplier</label>
+              <textarea v-model="followUpForm.notes" required maxlength="2000" rows="2" placeholder="Contoh: Supplier mengonfirmasi pengiriman kekurangan 10 unit pada tanggal ..." class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs"></textarea>
+            </div>
+            <div class="flex items-center justify-between gap-3 sm:col-span-2">
+              <p class="text-[10px] text-slate-500">Pencatatan tindak lanjut tidak mengubah stok. Stok diperbarui saat penerimaan barang dicatat.</p>
+              <button type="submit" :disabled="savingFollowUp" class="shrink-0 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">
+                {{ savingFollowUp ? 'Menyimpan...' : 'Simpan Tindak Lanjut' }}
+              </button>
+            </div>
+          </form>
+        </section>
+
         <div class="flex justify-end pt-2 border-t border-slate-200">
           <button
             type="button"
@@ -378,6 +478,7 @@ import { useRouter } from 'vue-router';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import Modal from '../../components/common/Modal.vue';
 import { store } from '../../stores/mockData';
+import { useToast } from '../../services/toast';
 import {
   ShoppingBag,
   Plus,
@@ -398,6 +499,27 @@ const paymentMethodFilter = ref('');
 
 const detailModalOpen = ref(false);
 const selectedPurchase = ref(null);
+const toast = useToast();
+const savingFollowUp = ref(false);
+const purchaseApiAvailable = ref(false);
+const followUpForm = ref(createFollowUpForm());
+
+function createFollowUpForm() {
+  return {
+    follow_up_type: 'PEMESANAN_ULANG',
+    item_index: '',
+    quantity: 1,
+    follow_up_date: new Date().toISOString().split('T')[0],
+    expected_date: '',
+    notes: '',
+  };
+}
+
+const formatDateTime = (value) => {
+  if (!value) return '-';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString('id-ID');
+};
 
 const availableProjects = ref([
   { id: 'PR00001', name: 'pengadaan komputer sekolah (SMA NEGRI 2 BOGOR)' },
@@ -406,57 +528,39 @@ const availableProjects = ref([
   { id: 'PR00004', name: 'Renovasi Gedung Laboratorium Komputer' },
 ]);
 
-// Initialize default store purchases if empty
-if (!store.purchases) {
-  store.purchases = [
-    {
-      id: 1,
-      purchase_code: 'PB20261014114148',
-      transaction_date: '2026-10-14',
-      invoice_number: 'FAK-SNX-99812',
-      project_id: 'PR00001',
-      project_name: 'pengadaan komputer sekolah (SMA NEGRI 2 BOGOR)',
-      default_supplier: 'PT Synnex Metrodata Indonesia',
-      subtotal: 10000000,
-      discount: 0,
-      total_price: 10000000,
-      payment_method: 'Tunai',
-      items: [
-        {
-          barang: 'A00001770 - Pemeliharaan Komputer Note Book/ Laptop',
-          sku: 'A00001770',
-          supplier: 'PT Synnex Metrodata Indonesia',
-          qty: 100,
-          harga_beli: 100000,
-          diskon_percent: 0,
-          diskon_nominal: 0,
-          subtotal: 10000000,
-        },
-      ],
-    },
-  ];
-}
+if (!store.purchases) store.purchases = [];
 
 onMounted(async () => {
   try {
     const res = await fetch('/api/purchases');
-    if (res.ok) {
-      const data = await res.json();
-      if (data.data?.length) {
-        store.purchases = data.data;
-      }
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || 'Gagal memuat transaksi pembelian.');
     }
-  } catch (e) {}
+    if (!Array.isArray(data.data)) {
+      throw new Error('Respons transaksi pembelian dari server tidak valid.');
+    }
+    store.purchases = data.data;
+    purchaseApiAvailable.value = true;
+  } catch (error) {
+    console.error('Failed to load purchases from API:', error);
+    toast.error(error.message || 'Tidak dapat memuat transaksi pembelian dari server.');
+  }
 
   try {
     const reqRes = await fetch('/api/warehouse/requests');
     if (reqRes.ok) {
       const reqData = await reqRes.json();
-      if (reqData.data?.length) {
+      if (Array.isArray(reqData.data)) {
         store.warehouseRequests = reqData.data;
       }
+    } else {
+      throw new Error('Gagal memuat pengajuan kebutuhan gudang.');
     }
-  } catch (e) {}
+  } catch (error) {
+    console.error('Failed to load warehouse requests from API:', error);
+    toast.error(error.message || 'Tidak dapat memuat pengajuan kebutuhan gudang.');
+  }
 });
 
 // Pending requests from warehouse
@@ -512,6 +616,45 @@ const processPurchaseFromRequest = (req) => {
 
 const openDetail = (p) => {
   selectedPurchase.value = p;
+  followUpForm.value = createFollowUpForm();
   detailModalOpen.value = true;
+};
+
+const saveSupplierFollowUp = async () => {
+  if (!purchaseApiAvailable.value || !selectedPurchase.value?.id) {
+    toast.error('Transaksi ini belum tersimpan di database. Muat ulang halaman atau simpan transaksi pembelian terlebih dahulu.');
+    return;
+  }
+
+  savingFollowUp.value = true;
+  try {
+    const response = await fetch(`/api/purchases/${encodeURIComponent(selectedPurchase.value.id)}/supplier-follow-ups`, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...followUpForm.value,
+        item_index: Number(followUpForm.value.item_index),
+      }),
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      const validationMessage = result.errors
+        ? Object.values(result.errors).flat().join(' ')
+        : result.message;
+      throw new Error(validationMessage || 'Tindak lanjut supplier gagal disimpan.');
+    }
+
+    Object.assign(selectedPurchase.value, result.data);
+    const purchaseIndex = store.purchases.findIndex((purchase) => purchase.id === result.data.id);
+    if (purchaseIndex !== -1) Object.assign(store.purchases[purchaseIndex], result.data);
+
+    toast.success(result.message || 'Tindak lanjut supplier berhasil dicatat.');
+    followUpForm.value = createFollowUpForm();
+  } catch (error) {
+    console.error('Failed to save supplier follow-up:', error);
+    toast.error(error.message || 'Tidak dapat menyimpan tindak lanjut supplier. Periksa koneksi dan coba lagi.');
+  } finally {
+    savingFollowUp.value = false;
+  }
 };
 </script>

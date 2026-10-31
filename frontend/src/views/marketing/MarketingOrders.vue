@@ -75,7 +75,15 @@
               <td class="py-3.5 px-4">
                 <span class="font-bold text-slate-900 block">{{ order.clientName }}</span>
                 <span class="text-[11px] text-slate-400 block truncate max-w-xs">{{ order.projectName }}</span>
-              </td>
+                  <span
+                    v-if="order.status === 'Draft' && !getStockReadiness(order).ready"
+                    class="mt-1 text-[10px] font-semibold text-amber-700 block"
+                  >
+                    {{ getStockReadiness(order).shortages.length
+                      ? getStockReadiness(order).shortages.map((item) => `${item.name}: kurang ${item.required - item.available} ${item.unit}`).join(', ')
+                      : 'Lengkapi rincian barang dan jumlah.' }}
+                  </span>
+                </td>
               <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">
                 {{ order.date }}
               </td>
@@ -84,6 +92,15 @@
               </td>
               <td class="py-3.5 px-4 text-center">
                 <StatusBadge :status="order.status" />
+                <p
+                  v-if="order.status === 'Draft'"
+                  :class="[
+                    'mt-1 text-[10px] font-semibold',
+                    getStockReadiness(order).ready ? 'text-emerald-700' : 'text-amber-700',
+                  ]"
+                >
+                  {{ getStockReadiness(order).ready ? 'Stok cukup' : 'Stok belum cukup' }}
+                </p>
               </td>
               <td class="py-3.5 px-4 text-center">
                 <span class="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
@@ -113,8 +130,14 @@
                   <button
                     v-if="order.status === 'Draft'"
                     type="button"
-                    class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-[11px] font-bold flex items-center gap-1"
-                    title="Ajukan Verifikasi"
+                    :class="[
+                      'px-2 py-1 rounded text-[11px] font-bold flex items-center gap-1',
+                      getStockReadiness(order).ready
+                        ? 'bg-amber-500 hover:bg-amber-600 text-white'
+                        : 'bg-slate-200 text-slate-500 cursor-not-allowed',
+                    ]"
+                    :disabled="!getStockReadiness(order).ready"
+                    :title="getStockReadiness(order).ready ? 'Ajukan Verifikasi' : 'Stok belum mencukupi; perbaiki rincian order sebelum diajukan'"
                     @click="submitVerification(order)"
                   >
                     <Send class="w-3 h-3" /> Ajukan
@@ -227,6 +250,29 @@
             </button>
           </div>
 
+          <div
+            role="status"
+            aria-live="polite"
+            :class="[
+              'mb-3 rounded-lg border px-3 py-2.5 text-xs',
+              newOrderStockReadiness.ready
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                : newOrderStockReadiness.shortages.length
+                  ? 'border-amber-200 bg-amber-50 text-amber-800'
+                  : 'border-slate-200 bg-slate-50 text-slate-600',
+            ]"
+          >
+            <p class="font-bold">
+              {{ newOrderStockReadiness.ready ? 'Stok mencukupi — siap diajukan untuk approval' : newOrderStockReadiness.shortages.length ? 'Stok belum mencukupi' : 'Pilih barang dan masukkan jumlah untuk cek stok' }}
+            </p>
+            <p v-if="newOrderStockReadiness.shortages.length" class="mt-1">
+              {{ newOrderStockReadiness.shortages.map((item) => `${item.name}: stok ${item.available}, perlu ${item.required} (kurang ${item.required - item.available}) ${item.unit}`).join('; ') }}
+            </p>
+            <p v-if="newOrder.submitDirectly && !newOrderStockReadiness.ready" class="mt-1 font-semibold">
+              Pengajuan langsung akan ditolak sampai stok mencukupi.
+            </p>
+          </div>
+
           <div class="space-y-2">
             <div
               v-for="(item, idx) in newOrder.items"
@@ -245,6 +291,18 @@
                     [{{ p.sku }}] {{ p.name }} (Stok: {{ p.stock }} {{ p.unit }})
                   </option>
                 </select>
+                <p v-if="newOrderStockByItem[idx]" class="mt-1 text-[11px] text-slate-600">
+                  Stok {{ newOrderStockByItem[idx].available }} {{ newOrderStockByItem[idx].unit }}
+                  &bull; Kebutuhan {{ newOrderStockByItem[idx].required }} {{ newOrderStockByItem[idx].unit }}
+                  <span
+                    :class="[
+                      'ml-1 font-bold',
+                      newOrderStockByItem[idx].sufficient ? 'text-emerald-700' : 'text-rose-700',
+                    ]"
+                  >
+                    {{ newOrderStockByItem[idx].sufficient ? 'Stok Cukup' : 'Stok Kurang' }}
+                  </span>
+                </p>
               </div>
 
               <div class="col-span-4 sm:col-span-2">
@@ -513,6 +571,33 @@ const computedSubtotal = computed(() => {
 const computedTax = computed(() => Math.round(computedSubtotal.value * 0.11));
 const computedGrandTotal = computed(() => computedSubtotal.value + computedTax.value);
 
+const getStockReadiness = (order) => storeActions.getOrderStockReadiness(order.items);
+const newOrderStockReadiness = computed(() => storeActions.getOrderStockReadiness(newOrder.value.items));
+const newOrderStockByItem = computed(() => {
+  const requiredByProduct = new Map();
+  for (const item of newOrder.value.items) {
+    const productId = Number(item.productId);
+    if (item.productId && Number.isFinite(productId)) {
+      requiredByProduct.set(
+        productId,
+        (requiredByProduct.get(productId) || 0) + (Number(item.qty) || 0)
+      );
+    }
+  }
+
+  return newOrder.value.items.map((item) => {
+    const product = store.products.find((candidate) => candidate.id === Number(item.productId));
+    if (!product) return null;
+    const required = requiredByProduct.get(product.id) || 0;
+    return {
+      available: Number(product.stock) || 0,
+      required,
+      unit: product.unit,
+      sufficient: required > 0 && required <= (Number(product.stock) || 0),
+    };
+  });
+});
+
 const getDocCount = (docs) => {
   if (!docs) return 0;
   let count = 0;
@@ -566,6 +651,10 @@ const onProductSelect = (item) => {
 
 const submitCreateOrder = () => {
   const created = storeActions.createOrder(newOrder.value);
+  if (!created) {
+    toast.error('Stok belum mencukupi. Perbarui jumlah barang sebelum mengajukan order untuk verifikasi.');
+    return;
+  }
   createModalOpen.value = false;
   toast.success(
     newOrder.value.submitDirectly
@@ -575,8 +664,24 @@ const submitCreateOrder = () => {
 };
 
 const submitVerification = (order) => {
-  storeActions.submitOrderForVerification(order.id);
-  toast.success(`Order ${order.orderNumber} berhasil diajukan untuk verifikasi Direktur.`);
+  const readiness = getStockReadiness(order);
+  if (!readiness.ready) {
+    const shortageMessage = readiness.shortages
+      .map((item) => `${item.name} kurang ${item.required - item.available} ${item.unit}`)
+      .join(', ');
+    toast.error(
+      shortageMessage
+        ? `Order belum bisa diajukan. Stok kurang: ${shortageMessage}.`
+        : 'Order belum bisa diajukan. Lengkapi rincian barang dan jumlahnya.'
+    );
+    return;
+  }
+
+  if (storeActions.submitOrderForVerification(order.id)) {
+    toast.success(`Order ${order.orderNumber} berhasil diajukan untuk verifikasi Direktur.`);
+  } else {
+    toast.error('Order tidak dapat diajukan. Periksa kembali status order dan ketersediaan stok.');
+  }
 };
 
 const confirmDelete = (order) => {

@@ -51,6 +51,7 @@ class PurchaseTransaction extends Model
         'payment_method',
         'status',
         'items',
+        'supplier_follow_ups',
         'created_by',
         'notes',
     ];
@@ -60,6 +61,7 @@ class PurchaseTransaction extends Model
      */
     protected $casts = [
         'items' => 'array',
+        'supplier_follow_ups' => 'array',
         'subtotal' => 'decimal:2',
         'discount' => 'decimal:2',
         'total_price' => 'decimal:2',
