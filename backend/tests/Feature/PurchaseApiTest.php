@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Product;
+use App\Models\PurchaseTransaction;
 use App\Models\WarehouseRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -161,5 +162,255 @@ class PurchaseApiTest extends TestCase
             ->assertJsonPath('data.status', 'DITERIMA_GUDANG');
 
         $this->assertEquals(100, $prod->fresh()->stock);
+    }
+
+    public function test_finance_can_record_supplier_follow_up_for_a_purchase(): void
+    {
+        $purchase = PurchaseTransaction::create([
+            'purchase_code' => 'PB20261103090000',
+            'transaction_date' => '2026-11-03',
+            'project_name' => 'Pengadaan komputer sekolah',
+            'default_supplier' => 'PT Synnex Metrodata Indonesia',
+            'subtotal' => 1000000,
+            'discount' => 0,
+            'total_price' => 1000000,
+            'payment_method' => 'Tunai',
+            'status' => 'DIPESAN',
+            'items' => [],
+        ]);
+
+        $response = $this->postJson("/api/purchases/{$purchase->purchase_code}/supplier-follow-ups", [
+            'action' => 'PENERIMAAN_ULANG',
+            'notes' => 'Supplier diminta mengirim ulang 2 unit yang kurang.',
+            'expected_date' => '2026-11-05',
+            'recorded_by' => 'Dewi Lestari (Finance)',
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.purchase.supplier_status', 'Menunggu Penerimaan Ulang')
+            ->assertJsonPath('data.purchase.supplier_follow_ups.0.action', 'PENERIMAAN_ULANG')
+            ->assertJsonPath('data.purchase.supplier_follow_ups.0.expected_date', '2026-11-05');
+
+        $this->assertSame(
+            'Supplier diminta mengirim ulang 2 unit yang kurang.',
+            $purchase->fresh()->supplier_follow_ups[0]['notes']
+        );
+    }
+
+    public function test_warehouse_discrepancy_is_available_to_finance_purchase_list(): void
+    {
+        $purchase = PurchaseTransaction::create([
+            'purchase_code' => 'PB20261103090100',
+            'transaction_date' => '2026-11-03',
+            'project_name' => 'Pengadaan komputer sekolah',
+            'default_supplier' => 'PT Synnex Metrodata Indonesia',
+            'subtotal' => 1000000,
+            'discount' => 0,
+            'total_price' => 1000000,
+            'payment_method' => 'Tunai',
+            'status' => 'DIPESAN',
+            'items' => [],
+        ]);
+
+        $this->postJson("/api/purchases/{$purchase->purchase_code}/supplier-discrepancies", [
+            'reason' => 'Jumlah yang diterima kurang 2 unit.',
+        ])->assertCreated()
+            ->assertJsonPath('data.supplier_status', 'Ketidaksesuaian Fisik (Menunggu Retur)')
+            ->assertJsonPath('data.discrepancy_reason', 'Jumlah yang diterima kurang 2 unit.');
+
+        $this->getJson('/api/purchases')
+            ->assertOk()
+            ->assertJsonPath('data.0.supplier_status', 'Ketidaksesuaian Fisik (Menunggu Retur)')
+            ->assertJsonPath('data.0.discrepancy_reason', 'Jumlah yang diterima kurang 2 unit.');
+    }
+
+    public function test_warehouse_order_discrepancy_is_saved_for_finance_with_notes_and_items(): void
+    {
+        $this->postJson('/api/warehouse/discrepancies', [
+            'order_number' => 'ORD-2026-001',
+            'client_name' => 'SMA 9',
+            'reason' => 'Barang yang diterima kurang 2 unit.',
+            'items' => [
+                ['sku' => 'MAT-002', 'name' => 'Besi Beton Ulir D16', 'qty' => 2, 'unit' => 'Batang'],
+            ],
+            'reported_by' => 'Agus Santoso',
+        ])->assertCreated()
+            ->assertJsonPath('data.status', 'OPEN');
+
+        $this->getJson('/api/warehouse/discrepancies')
+            ->assertOk()
+            ->assertJsonPath('data.0.order_number', 'ORD-2026-001')
+            ->assertJsonPath('data.0.reason', 'Barang yang diterima kurang 2 unit.')
+            ->assertJsonPath('data.0.items.0.sku', 'MAT-002')
+            ->assertJsonPath('data.0.reported_by', 'Agus Santoso');
+    }
+
+    public function test_supplier_replacement_dispatch_is_persisted_for_warehouse(): void
+    {
+        $purchase = PurchaseTransaction::create([
+            'purchase_code' => 'PB20261103090200',
+            'transaction_date' => '2026-11-03',
+            'project_name' => 'Renovasi ruang kelas',
+            'default_supplier' => 'PT Synnex Metrodata Indonesia',
+            'subtotal' => 1000000,
+            'discount' => 0,
+            'total_price' => 1000000,
+            'payment_method' => 'Transfer Bank',
+            'status' => 'DIPESAN',
+            'items' => [['barang' => 'Laptop', 'qty' => 1, 'harga_beli' => 1000000, 'subtotal' => 1000000]],
+            'supplier_status' => 'Menunggu Penerimaan Ulang',
+        ]);
+
+        $this->postJson("/api/purchases/{$purchase->purchase_code}/supplier-replacement-dispatch", [
+            'action' => 'Pengiriman Kekurangan Item / Qty Tambahan',
+            'replacement_surat_jalan' => 'SJ-RETUR-123456',
+            'notes' => 'Dua unit susulan dikirim hari ini.',
+            'resolved_date' => '2026-11-03',
+        ])->assertCreated()
+            ->assertJsonPath('data.supplier_status', 'Barang Pengganti Dikirim')
+            ->assertJsonPath('data.discrepancy_resolution.replacement_surat_jalan', 'SJ-RETUR-123456')
+            ->assertJsonPath('data.discrepancy_resolution.notes', 'Dua unit susulan dikirim hari ini.');
+
+        $this->getJson('/api/purchases')
+            ->assertOk()
+            ->assertJsonPath('data.0.supplier_status', 'Barang Pengganti Dikirim')
+            ->assertJsonPath('data.0.discrepancy_resolution.notes', 'Dua unit susulan dikirim hari ini.');
+    }
+
+    public function test_supplier_dispatch_turns_reorder_follow_up_into_warehouse_replacement_shipment(): void
+    {
+        $purchase = PurchaseTransaction::create([
+            'purchase_code' => 'PB20261103090300',
+            'transaction_date' => '2026-11-03',
+            'project_name' => 'Renovasi ruang kelas',
+            'default_supplier' => 'PT Synnex Metrodata Indonesia',
+            'subtotal' => 1000000,
+            'discount' => 0,
+            'total_price' => 1000000,
+            'payment_method' => 'Transfer Bank',
+            'status' => 'DITERIMA_GUDANG',
+            'items' => [['barang' => 'Laptop', 'qty' => 1, 'harga_beli' => 1000000, 'subtotal' => 1000000]],
+            'supplier_status' => 'Menunggu Pemesanan Ulang',
+            'supplier_follow_ups' => [['action' => 'PEMESANAN_ULANG']],
+        ]);
+
+        $this->postJson("/api/purchases/{$purchase->purchase_code}/supplier-dispatch", [
+            'surat_jalan' => 'SJ-ULANG-123456',
+            'courier' => 'Kurir Supplier',
+            'tracking_number' => 'TRK-123456',
+            'dispatch_date' => '2026-11-03',
+            'est_arrival' => '2026-11-04',
+            'notes' => 'Barang susulan sudah dikirim.',
+        ])->assertCreated()
+            ->assertJsonPath('data.supplier_status', 'Barang Pengganti Dikirim')
+            ->assertJsonPath('data.delivery_info.surat_jalan', 'SJ-ULANG-123456')
+            ->assertJsonPath('data.discrepancy_resolution.notes', 'Barang susulan sudah dikirim.');
+
+        $this->getJson('/api/purchases')
+            ->assertOk()
+            ->assertJsonPath('data.0.supplier_status', 'Barang Pengganti Dikirim')
+            ->assertJsonPath('data.0.delivery_info.tracking_number', 'TRK-123456');
+    }
+
+    public function test_warehouse_receives_replacement_goods_once_and_updates_supplier_status(): void
+    {
+        $product = Product::create([
+            'sku' => 'LAP-001',
+            'name' => 'Laptop',
+            'category' => 'Elektronik',
+            'unit' => 'Unit',
+            'stock' => 3,
+            'sell_price' => 15000000,
+            'hpp' => 10000000,
+            'last_buy_price' => 10000000,
+            'status' => 'Tersedia',
+        ]);
+        $purchase = PurchaseTransaction::create([
+            'purchase_code' => 'PB20261103090400',
+            'transaction_date' => '2026-11-03',
+            'project_name' => 'Renovasi ruang kelas',
+            'default_supplier' => 'PT Synnex Metrodata Indonesia',
+            'subtotal' => 1000000,
+            'discount' => 0,
+            'total_price' => 1000000,
+            'payment_method' => 'Transfer Bank',
+            'status' => 'DITERIMA_GUDANG',
+            'items' => [['sku' => 'LAP-001', 'barang' => 'Laptop', 'qty' => 10, 'harga_beli' => 1000000, 'subtotal' => 10000000]],
+            'supplier_status' => 'Barang Pengganti Dikirim',
+            'discrepancy_resolution' => ['replacement_surat_jalan' => 'SJ-RETUR-654321'],
+        ]);
+
+        $payload = [
+            'notes' => 'Dua unit susulan diterima dan diperiksa.',
+            'items_received' => [
+                ['sku' => 'LAP-001', 'name' => 'Laptop', 'qty' => 2, 'unit' => 'Unit'],
+            ],
+        ];
+
+        $this->postJson("/api/purchases/{$purchase->purchase_code}/supplier-replacement-receive", $payload)
+            ->assertOk()
+            ->assertJsonPath('data.purchase.supplier_status', 'Barang Pengganti Diterima Gudang')
+            ->assertJsonPath('data.purchase.discrepancy_resolution.warehouse_received_notes', 'Dua unit susulan diterima dan diperiksa.')
+            ->assertJsonPath('data.items_received.0.current_stock', 5);
+
+        $this->assertSame(5.0, (float) $product->fresh()->stock);
+
+        $this->postJson("/api/purchases/{$purchase->purchase_code}/supplier-replacement-receive", $payload)
+            ->assertStatus(409);
+        $this->assertSame(5.0, (float) $product->fresh()->stock);
+
+        $this->getJson('/api/purchases')
+            ->assertOk()
+            ->assertJsonPath('data.0.supplier_status', 'Barang Pengganti Diterima Gudang');
+    }
+
+    public function test_warehouse_can_receive_replacement_items_and_supplier_status_updates_once(): void
+    {
+        $product = Product::create([
+            'sku' => 'LAP-001',
+            'name' => 'Laptop',
+            'category' => 'Elektronik',
+            'unit' => 'Unit',
+            'stock' => 3,
+            'sell_price' => 15000000,
+            'hpp' => 10000000,
+            'last_buy_price' => 10000000,
+            'status' => 'Tersedia',
+        ]);
+        $purchase = PurchaseTransaction::create([
+            'purchase_code' => 'PB20261103090400',
+            'transaction_date' => '2026-11-03',
+            'project_name' => 'Renovasi ruang kelas',
+            'default_supplier' => 'PT Synnex Metrodata Indonesia',
+            'subtotal' => 1000000,
+            'discount' => 0,
+            'total_price' => 1000000,
+            'payment_method' => 'Transfer Bank',
+            'status' => 'DITERIMA_GUDANG',
+            'items' => [['sku' => 'LAP-001', 'barang' => 'Laptop', 'qty' => 10, 'harga_beli' => 1000000, 'subtotal' => 10000000]],
+            'supplier_status' => 'Barang Pengganti Dikirim',
+            'discrepancy_resolution' => ['replacement_surat_jalan' => 'SJ-RETUR-654321'],
+        ]);
+
+        $payload = [
+            'notes' => 'Dua unit susulan diterima dan diperiksa.',
+            'items_received' => [
+                ['sku' => 'LAP-001', 'name' => 'Laptop', 'qty' => 2, 'unit' => 'Unit'],
+            ],
+        ];
+
+        $this->postJson("/api/purchases/{$purchase->purchase_code}/supplier-replacement-receive", $payload)
+            ->assertOk()
+            ->assertJsonPath('data.purchase.supplier_status', 'Barang Pengganti Diterima Gudang')
+            ->assertJsonPath('data.purchase.discrepancy_resolution.warehouse_received_notes', 'Dua unit susulan diterima dan diperiksa.')
+            ->assertJsonPath('data.items_received.0.current_stock', 5);
+
+        $this->assertSame(5.0, (float) $product->fresh()->stock);
+
+        $this->postJson("/api/purchases/{$purchase->purchase_code}/supplier-replacement-receive", $payload)
+            ->assertStatus(409);
+
+        $this->assertSame(5.0, (float) $product->fresh()->stock);
     }
 }

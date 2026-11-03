@@ -21,6 +21,104 @@
       </div>
     </div>
 
+    <section class="bg-purple-50 border border-purple-200 rounded-xl overflow-hidden mb-6">
+      <div class="p-4 border-b border-purple-200 flex items-center justify-between gap-3">
+        <div>
+          <h2 class="font-bold text-purple-950 text-sm">Pengiriman Susulan dari Supplier</h2>
+          <p class="text-[11px] text-purple-800">Periksa barang pengganti/susulan ini saat tiba di gudang.</p>
+        </div>
+        <span class="px-2.5 py-1 bg-purple-100 text-purple-900 rounded-full text-xs font-bold">
+          {{ incomingReplacementShipments.length }} Kiriman
+        </span>
+      </div>
+      <div v-if="incomingReplacementShipments.length" class="divide-y divide-purple-100">
+        <article
+          v-for="purchase in incomingReplacementShipments"
+          :key="`replacement-${purchase.purchase_code}`"
+          class="p-4"
+        >
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <p class="font-bold text-slate-900 text-xs">
+              PO {{ purchase.purchase_code }}
+              <span class="font-normal text-slate-600">· {{ purchase.default_supplier }} · {{ purchase.project_name }}</span>
+            </p>
+            <span class="font-mono text-[11px] text-purple-900 bg-white border border-purple-200 rounded px-2 py-1">
+              SJ: {{ purchase.discrepancy_resolution?.replacement_surat_jalan || '-' }}
+            </span>
+          </div>
+          <div class="mt-1 text-[10px] text-slate-600">
+            {{ purchase.discrepancy_resolution?.courier || purchase.delivery_info?.courier || 'Kurir Supplier' }}
+            <span v-if="purchase.discrepancy_resolution?.tracking_number || purchase.delivery_info?.tracking_number">
+              · Resi {{ purchase.discrepancy_resolution?.tracking_number || purchase.delivery_info?.tracking_number }}
+            </span>
+            · Tiba: {{ purchase.discrepancy_resolution?.est_arrival || purchase.delivery_info?.est_arrival || '-' }}
+          </div>
+          <p class="mt-2 text-xs text-purple-950 whitespace-pre-wrap">
+            <strong>Catatan Supplier:</strong>
+            {{ purchase.discrepancy_resolution?.notes || 'Supplier mengirim barang pengganti/susulan.' }}
+          </p>
+          <div v-if="purchase.items?.length" class="mt-2 flex flex-wrap gap-1">
+            <span
+              v-for="(item, index) in purchase.items"
+              :key="`${item.sku || item.barang || item.name}-${index}`"
+              class="bg-white text-slate-700 border border-purple-100 px-2 py-1 rounded text-[10px]"
+            >
+              {{ item.barang || item.name }} · {{ item.qty }} {{ item.unit || '' }}
+            </span>
+          </div>
+          <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
+            <p class="text-[10px] text-purple-800">
+              {{ purchase.discrepancy_resolution?.warehouse_received_at ? 'Sudah diterima dan diperiksa Warehouse.' : 'Kiriman susulan menunggu pemeriksaan fisik Warehouse.' }}
+            </p>
+            <button
+              v-if="!purchase.discrepancy_resolution?.warehouse_received_at"
+              type="button"
+              class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold cursor-pointer"
+              @click="openConfirmReceiptModal(purchase)"
+            >
+              ✓ Periksa & Terima Barang Susulan
+            </button>
+            <span
+              v-else
+              class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-bold"
+            >
+              ✓ Diterima Gudang
+            </span>
+          </div>
+        </article>
+      </div>
+      <p v-else class="p-4 text-xs text-purple-800">
+        Belum ada pengiriman susulan yang tercatat dari Supplier.
+      </p>
+    </section>
+
+    <section
+      v-if="completedReplacementShipments.length"
+      class="bg-emerald-50 border border-emerald-200 rounded-xl overflow-hidden mb-6"
+    >
+      <div class="p-4 border-b border-emerald-200">
+        <h2 class="font-bold text-emerald-950 text-sm">Riwayat Penerimaan Barang Pengganti</h2>
+      </div>
+      <article
+        v-for="purchase in completedReplacementShipments"
+        :key="`replacement-received-${purchase.purchase_code}`"
+        class="p-4 border-b border-emerald-100 last:border-0"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <p class="font-bold text-slate-900 text-xs">
+            PO {{ purchase.purchase_code }}
+            <span class="font-normal text-slate-600">· {{ purchase.default_supplier }}</span>
+          </p>
+          <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-bold">
+            ✓ Diterima Gudang
+          </span>
+        </div>
+        <p class="mt-1 text-[11px] text-emerald-900">
+          {{ purchase.discrepancy_resolution?.warehouse_received_notes || 'Barang susulan sudah diperiksa dan diterima.' }}
+        </p>
+      </article>
+    </section>
+
     <!-- SEKSI 1: PENERIMAAN FISIK BARANG SUPPLIER (PROBIS TO-BE TAHAP 4 & 5) -->
     <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden mb-6">
       <div class="h-1 bg-amber-500 w-full"></div>
@@ -32,12 +130,12 @@
           </h3>
         </div>
         <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
-          {{ incomingSupplierShipments.length }} Kiriman Vendor Menuju Gudang
+          {{ uninspectedSupplierShipmentCount }} Kiriman Belum Diperiksa
         </span>
       </div>
 
       <div v-if="incomingSupplierShipments.length === 0" class="p-6 text-center text-slate-500 text-xs">
-        <p>Tidak ada pengiriman supplier yang sedang dalam perjalanan menuju gudang saat ini.</p>
+        <p>Tidak ada kiriman pembelian yang menunggu pemeriksaan fisik.</p>
         <p v-if="preparingPurchasesCount > 0" class="text-[11px] text-amber-700/80 font-medium mt-1">
           ({{ preparingPurchasesCount }} pesanan PO sedang dipersiapkan oleh vendor di Portal Supplier)
         </p>
@@ -51,7 +149,9 @@
         >
           <div>
             <div class="flex items-center gap-2 mb-1">
-              <span class="font-mono font-bold text-slate-900 text-xs">{{ p.delivery_info?.surat_jalan || 'SJ-SUP' }}</span>
+              <span class="font-mono font-bold text-slate-900 text-xs">
+                {{ p.discrepancy_resolution?.replacement_surat_jalan || p.delivery_info?.surat_jalan || 'SJ-SUP' }}
+              </span>
               <span class="px-2 py-0.2 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800">
                 PO: {{ p.purchase_code }}
               </span>
@@ -59,6 +159,13 @@
             </div>
             <p class="text-xs text-slate-600">
               Proyek: <strong>{{ p.project_name }}</strong> &bull; Ekspedisi: {{ p.delivery_info?.courier }} ({{ p.delivery_info?.tracking_number }})
+            </p>
+            <p
+              v-if="p.supplier_status === 'Barang Pengganti Dikirim'"
+              class="mt-1 text-[11px] text-purple-800 bg-purple-50 border border-purple-200 rounded-md p-2"
+            >
+              <strong>Pengiriman susulan:</strong>
+              {{ p.discrepancy_resolution?.notes || 'Supplier mengirim barang pengganti/susulan.' }}
             </p>
             <div class="mt-1 flex flex-wrap gap-1">
               <span
@@ -76,10 +183,10 @@
             <button
               type="button"
               class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
-              title="Laporkan jika barang supplier rusak/tidak sesuai (Tahap 5b)"
+              title="Laporkan kekurangan atau ketidaksesuaian barang ke Finance"
               @click="openShipmentDiscrepancyModal(p)"
             >
-              ⚠ Cacat / Retur
+              ⚠ Laporkan Kekurangan / Cacat
             </button>
             <button
               type="button"
@@ -316,7 +423,8 @@
           <div>
             <span class="font-bold text-sm block">Verifikasi Fisik Kedatangan Barang Supplier</span>
             <span class="text-[11px] text-emerald-800">
-              Proyek: {{ selectedShipmentForReceipt.project_name }} • Surat Jalan: {{ selectedShipmentForReceipt.delivery_info?.surat_jalan || 'SJ-VENDOR' }}
+              Proyek: {{ selectedShipmentForReceipt.project_name }} • Surat Jalan:
+              {{ selectedShipmentForReceipt.discrepancy_resolution?.replacement_surat_jalan || selectedShipmentForReceipt.delivery_info?.surat_jalan || 'SJ-VENDOR' }}
             </span>
           </div>
           <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 font-bold rounded-full text-[10px] border border-emerald-300">
@@ -346,13 +454,23 @@
                     <span class="font-mono text-[10px] text-slate-400">{{ it.sku || '-' }}</span>
                   </td>
                   <td class="p-2.5 text-center font-bold text-emerald-700 font-mono">
-                    +{{ it.qty }} {{ it.unit || 'Unit' }}
+                    <input
+                      v-if="isReplacementReceipt"
+                      v-model.number="replacementReceiptQuantities[idx]"
+                      type="number"
+                      min="0"
+                      step="any"
+                      class="w-20 px-1.5 py-1 text-center border border-slate-300 rounded"
+                      aria-label="Jumlah barang susulan diterima"
+                    />
+                    <span v-else>+{{ it.qty }}</span>
+                    {{ it.unit || 'Unit' }}
                   </td>
                   <td class="p-2.5 text-center font-mono text-slate-500">
                     {{ getStockProjection(it).currentStock }} {{ getStockProjection(it).unit }}
                   </td>
                   <td class="p-2.5 text-center font-mono font-bold text-emerald-800 bg-emerald-50/60">
-                    {{ getStockProjection(it).newStock }} {{ getStockProjection(it).unit }}
+                    {{ getStockProjection(it, isReplacementReceipt ? replacementReceiptQuantities[idx] : undefined).newStock }} {{ getStockProjection(it).unit }}
                   </td>
                 </tr>
               </tbody>
@@ -395,13 +513,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import Modal from '../../components/common/Modal.vue';
 import { store, storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
-import { Info, AlertTriangle, Truck } from 'lucide-vue-next';
+import { Info, AlertTriangle, Truck, CheckCircle2 } from 'lucide-vue-next';
 
 const toast = useToast();
 
@@ -416,14 +534,88 @@ const shipmentDiscrepancyReason = ref('');
 const receiptModalOpen = ref(false);
 const selectedShipmentForReceipt = ref(null);
 const receiptNotes = ref('Barang fisik telah diperiksa lengkap, sesuai spesifikasi PO, dan segel baik.');
+const replacementReceiptQuantities = ref({});
+const isReplacementReceipt = computed(
+  () => selectedShipmentForReceipt.value?.supplier_status === 'Barang Pengganti Dikirim'
+);
+
+const loadPurchases = async () => {
+  try {
+    const response = await fetch('/api/purchases', {
+      headers: { Accept: 'application/json' },
+    });
+    if (!response.ok) {
+      throw new Error('Daftar transaksi pembelian gagal dimuat dari server.');
+    }
+
+    const result = await response.json();
+    if (!result.success || !Array.isArray(result.data)) {
+      throw new Error('Server mengembalikan data transaksi pembelian yang tidak valid.');
+    }
+
+    store.purchases = result.data;
+    result.data
+      .filter((purchase) => purchase.supplier_status === 'Barang Pengganti Dikirim')
+      .forEach((purchase) => {
+        const resolution = purchase.discrepancy_resolution || {};
+        const title = 'Barang Pengganti / Susulan Supplier Dikirim';
+        const message = `Supplier ${purchase.default_supplier} mengirim barang pengganti/susulan untuk PO ${purchase.purchase_code} (SJ: ${resolution.replacement_surat_jalan || '-'}). Catatan: ${resolution.notes || 'Tidak ada catatan dari Supplier'}. Harap periksa barang saat tiba.`;
+        const alreadyNotified = store.notifications.some(
+          (notification) => notification.role === 'WAREHOUSE' &&
+            notification.title === title &&
+            notification.message === message
+        );
+        if (!alreadyNotified) {
+          storeActions.addNotification('WAREHOUSE', title, message, 'shipment', '/warehouse/fulfillment');
+        }
+      });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Terjadi kesalahan yang tidak diketahui.';
+    toast.error(message);
+  }
+};
+
+let purchaseRefreshInterval;
+
+onMounted(async () => {
+  await loadPurchases();
+  purchaseRefreshInterval = setInterval(loadPurchases, 30000);
+});
+
+onUnmounted(() => {
+  if (purchaseRefreshInterval) clearInterval(purchaseRefreshInterval);
+});
 
 const incomingSupplierShipments = computed(() => {
   return (store.purchases || []).filter(
-    (p) => p.status !== 'DITERIMA_GUDANG' &&
+    (p) => p.supplier_status !== 'Barang Pengganti Dikirim' &&
+           p.status !== 'DITERIMA_GUDANG' &&
            p.supplier_status !== 'Diterima Gudang (Lengkap & Sesuai)' &&
-           p.supplier_status !== 'Diterima Gudang'
+           p.supplier_status !== 'Diterima Gudang' &&
+           ![
+             'Ketidaksesuaian Fisik (Menunggu Retur)',
+             'Ditolak Supplier',
+             'Menunggu Pemesanan Ulang',
+             'Menunggu Penerimaan Ulang',
+           ].includes(p.supplier_status)
   );
 });
+
+const incomingReplacementShipments = computed(() => {
+  return (store.purchases || []).filter(
+    (purchase) => purchase.supplier_status === 'Barang Pengganti Dikirim'
+  );
+});
+
+const completedReplacementShipments = computed(() => {
+  return (store.purchases || []).filter(
+    (purchase) => purchase.supplier_status === 'Barang Pengganti Diterima Gudang'
+  );
+});
+
+const uninspectedSupplierShipmentCount = computed(
+  () => incomingSupplierShipments.value.length + incomingReplacementShipments.value.length
+);
 
 const receivedSupplierShipments = computed(() => {
   return (store.purchases || []).filter(
@@ -439,11 +631,11 @@ const preparingPurchasesCount = computed(() => {
   ).length;
 });
 
-const getStockProjection = (item) => {
+const getStockProjection = (item, quantity = item.qty) => {
   const rawName = item.name || item.barang || '';
   const cleanName = rawName.replace(/^[A-Z0-9_\-]+\s*-\s*/, '').trim();
   const sku = (item.sku && item.sku !== '-') ? item.sku : (rawName.includes(' - ') ? rawName.split(' - ')[0].trim() : '');
-  const qty = Number(item.qty) || 0;
+  const qty = Number(quantity) || 0;
 
   const prod = (store.products || []).find((pr) => {
     if (sku && pr.sku && pr.sku.toLowerCase() === sku.toLowerCase()) return true;
@@ -466,12 +658,57 @@ const getStockProjection = (item) => {
 const openConfirmReceiptModal = (p) => {
   selectedShipmentForReceipt.value = p;
   receiptNotes.value = 'Barang fisik telah diperiksa lengkap, sesuai spesifikasi PO, dan segel baik.';
+  replacementReceiptQuantities.value = Object.fromEntries(
+    (p.items || []).map((item, index) => [index, 0])
+  );
   receiptModalOpen.value = true;
 };
 
-const executeConfirmReceipt = () => {
+const executeConfirmReceipt = async () => {
   if (!selectedShipmentForReceipt.value) return;
   const p = selectedShipmentForReceipt.value;
+
+  if (isReplacementReceipt.value) {
+    const itemsReceived = (p.items || [])
+      .map((item, index) => ({
+        sku: item.sku,
+        name: item.barang || item.name,
+        qty: Number(replacementReceiptQuantities.value[index]) || 0,
+        unit: item.unit || 'Unit',
+      }))
+      .filter((item) => item.qty > 0);
+
+    if (itemsReceived.length === 0) {
+      toast.error('Masukkan jumlah barang susulan yang benar-benar diterima.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/purchases/${encodeURIComponent(p.purchase_code)}/supplier-replacement-receive`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ notes: receiptNotes.value, items_received: itemsReceived }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Penerimaan barang susulan gagal disimpan.');
+      }
+
+      storeActions.confirmSupplierReplacementReceipt(
+        p.purchase_code,
+        result.data.items_received,
+        receiptNotes.value,
+        result.data.purchase
+      );
+      toast.success(`Barang susulan PO ${p.purchase_code} berhasil diperiksa dan diterima.`);
+      receiptModalOpen.value = false;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Terjadi kesalahan yang tidak diketahui.';
+      toast.error(`Penerimaan barang susulan gagal: ${message}`);
+    }
+    return;
+  }
+
   storeActions.confirmSupplierReceipt(p.purchase_code, { notes: receiptNotes.value });
   toast.success(`Barang PO ${p.purchase_code} dari Supplier ${p.default_supplier} BERHASIL DI-ACC! Data stok fisik otomatis bertambah secara real-time.`);
   receiptModalOpen.value = false;
@@ -487,15 +724,32 @@ const openShipmentDiscrepancyModal = (p) => {
   shipmentDiscrepancyModalOpen.value = true;
 };
 
-const submitShipmentDiscrepancy = () => {
+const submitShipmentDiscrepancy = async () => {
   if (!shipmentDiscrepancyReason.value.trim()) {
     toast.error('Harap masukkan alasan ketidaksesuaian/kerusakan barang.');
     return;
   }
-  storeActions.reportSupplierShipmentDiscrepancy(
-    selectedShipmentForDiscrepancy.value.purchase_code,
-    shipmentDiscrepancyReason.value.trim()
-  );
+
+  const purchase = selectedShipmentForDiscrepancy.value;
+  if (!purchase) return;
+
+  try {
+    const response = await fetch(`/api/purchases/${encodeURIComponent(purchase.purchase_code)}/supplier-discrepancies`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ reason: shipmentDiscrepancyReason.value.trim() }),
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Laporan tidak dapat disimpan ke server.');
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Terjadi kesalahan yang tidak diketahui.';
+    toast.error(`Laporan ketidaksesuaian gagal disimpan: ${message}`);
+    return;
+  }
+
+  storeActions.reportSupplierShipmentDiscrepancy(purchase.purchase_code, shipmentDiscrepancyReason.value.trim());
   toast.warning(`Ketidaksesuaian barang PO ${selectedShipmentForDiscrepancy.value.purchase_code} berhasil dilaporkan ke Finance & Supplier.`);
   shipmentDiscrepancyModalOpen.value = false;
 };
@@ -522,14 +776,51 @@ const openDiscrepancyModal = (ful) => {
   discrepancyModalOpen.value = true;
 };
 
-const submitDiscrepancyReport = () => {
+const submitDiscrepancyReport = async () => {
   if (!discrepancyReason.value.trim()) {
     toast.error('Harap isi rincian ketidaksesuaian barang.');
     return;
   }
 
-  storeActions.reportSupplierDiscrepancy(selectedDiscrepancyItem.value.id, discrepancyReason.value.trim());
-  toast.warning(`Ketidaksesuaian order ${selectedDiscrepancyItem.value.orderNumber} berhasil dilaporkan ke Finance.`);
+  const fulfillment = selectedDiscrepancyItem.value;
+  if (!fulfillment) {
+    toast.error('Data antrean pemenuhan tidak ditemukan. Tutup dialog dan coba kembali.');
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/warehouse/discrepancies', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        order_number: fulfillment.orderNumber,
+        client_name: fulfillment.clientName,
+        reason: discrepancyReason.value.trim(),
+        items: fulfillment.items.map((item) => ({
+          sku: item.sku,
+          name: item.name,
+          qty: item.reqQty ?? item.fulfilledQty ?? item.qty,
+          unit: item.unit,
+        })),
+        reported_by: store.currentUser?.name || 'Warehouse',
+      }),
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Laporan tidak dapat disimpan ke server.');
+    }
+
+    const reported = storeActions.reportSupplierDiscrepancy(fulfillment.id, discrepancyReason.value);
+    if (!reported) {
+      throw new Error('Laporan tersimpan di server, tetapi antrean Warehouse tidak dapat diperbarui.');
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Terjadi kesalahan yang tidak diketahui.';
+    toast.error(`Laporan gagal dikirim ke Finance: ${message}`);
+    return;
+  }
+
+  toast.success(`Laporan ketidaksesuaian order ${fulfillment.orderNumber} berhasil dikirim ke Finance.`);
   discrepancyModalOpen.value = false;
 };
 </script>

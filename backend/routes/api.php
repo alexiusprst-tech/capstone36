@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AccountController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DocumentTemplateController;
 use App\Http\Controllers\Api\OrderDocumentController;
 use App\Http\Controllers\Api\ProductController;
@@ -43,10 +43,17 @@ Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy'])->name('
 // Warehouse Requests (Material Request)
 Route::get('/warehouse/requests', [PurchaseController::class, 'getWarehouseRequests'])->name('api.warehouse.requests.index');
 Route::post('/warehouse/requests', [PurchaseController::class, 'storeWarehouseRequest'])->name('api.warehouse.requests.store');
+Route::get('/warehouse/discrepancies', [PurchaseController::class, 'getWarehouseDiscrepancies'])->name('api.warehouse.discrepancies.index');
+Route::post('/warehouse/discrepancies', [PurchaseController::class, 'storeWarehouseDiscrepancy'])->name('api.warehouse.discrepancies.store');
 
 // Purchases (Transaksi Pembelian)
 Route::get('/purchases', [PurchaseController::class, 'getPurchases'])->name('api.purchases.index');
 Route::post('/purchases', [PurchaseController::class, 'storePurchase'])->name('api.purchases.store');
+Route::post('/purchases/{id}/supplier-discrepancies', [PurchaseController::class, 'storeSupplierDiscrepancy'])->name('api.purchases.supplier-discrepancies.store');
+Route::post('/purchases/{id}/supplier-replacement-dispatch', [PurchaseController::class, 'storeSupplierReplacementDispatch'])->name('api.purchases.supplier-replacement-dispatch.store');
+Route::post('/purchases/{id}/supplier-dispatch', [PurchaseController::class, 'storeSupplierDispatch'])->name('api.purchases.supplier-dispatch.store');
+Route::post('/purchases/{id}/supplier-replacement-receive', [PurchaseController::class, 'receiveSupplierReplacement'])->name('api.purchases.supplier-replacement-receive.store');
+Route::post('/purchases/{id}/supplier-follow-ups', [PurchaseController::class, 'storeSupplierFollowUp'])->name('api.purchases.supplier-follow-ups.store');
 Route::post('/purchases/{id}/receive', [PurchaseController::class, 'receivePurchaseShipment'])->name('api.purchases.receive');
 
 // Regions (DKI Jakarta Kecamatan & Kelurahan Data)

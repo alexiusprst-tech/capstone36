@@ -24,6 +24,12 @@ use Illuminate\Support\Carbon;
  * @property string $payment_method
  * @property string $status
  * @property array|null $items
+ * @property string|null $supplier_status
+ * @property string|null $discrepancy_reason
+ * @property string|null $discrepancy_reported_at
+ * @property array|null $supplier_follow_ups
+ * @property array|null $discrepancy_resolution
+ * @property array|null $delivery_info
  * @property string|null $created_by
  * @property string|null $notes
  * @property Carbon|null $created_at
@@ -51,6 +57,12 @@ class PurchaseTransaction extends Model
         'payment_method',
         'status',
         'items',
+        'supplier_status',
+        'discrepancy_reason',
+        'discrepancy_reported_at',
+        'supplier_follow_ups',
+        'discrepancy_resolution',
+        'delivery_info',
         'created_by',
         'notes',
     ];
@@ -60,6 +72,9 @@ class PurchaseTransaction extends Model
      */
     protected $casts = [
         'items' => 'array',
+        'supplier_follow_ups' => 'array',
+        'discrepancy_resolution' => 'array',
+        'delivery_info' => 'array',
         'subtotal' => 'decimal:2',
         'discount' => 'decimal:2',
         'total_price' => 'decimal:2',

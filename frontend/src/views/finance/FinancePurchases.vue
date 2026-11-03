@@ -28,6 +28,49 @@
       </div>
     </template>
 
+    <section class="bg-rose-50 border border-rose-200 rounded-xl p-4 sm:p-5 mb-6">
+      <div class="flex items-center justify-between gap-3 mb-3">
+        <div>
+          <h2 class="font-bold text-rose-950 text-sm">Laporan Kekurangan Barang dari Warehouse</h2>
+          <p class="text-[11px] text-rose-800">Catatan pemeriksaan yang perlu ditindaklanjuti Finance.</p>
+        </div>
+        <span class="px-2.5 py-1 bg-rose-100 text-rose-900 rounded-full text-xs font-bold">
+          {{ warehouseDiscrepancyReports.length }} Laporan
+        </span>
+      </div>
+
+      <div v-if="warehouseDiscrepancyReports.length === 0" class="text-xs text-rose-800/80 py-2">
+        Belum ada laporan kekurangan atau ketidaksesuaian dari Warehouse.
+      </div>
+      <div v-else class="space-y-2">
+        <article
+          v-for="report in warehouseDiscrepancyReports"
+          :key="report.id"
+          class="bg-white border border-rose-200 rounded-lg p-3 text-xs"
+        >
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <p class="font-bold text-slate-900">
+              {{ report.order_number }} <span class="font-normal text-slate-500">· {{ report.client_name }}</span>
+            </p>
+            <span class="text-[10px] text-slate-500">
+              {{ report.created_at ? new Date(report.created_at).toLocaleString('id-ID') : '-' }}
+            </span>
+          </div>
+          <p class="mt-1.5 text-slate-700">{{ report.reason }}</p>
+          <div v-if="report.items?.length" class="mt-2 flex flex-wrap gap-1">
+            <span
+              v-for="(item, index) in report.items"
+              :key="`${item.sku || item.name}-${index}`"
+              class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[10px]"
+            >
+              {{ item.name }} · {{ item.qty ?? item.reqQty ?? item.fulfilledQty ?? '-' }} {{ item.unit || '' }}
+            </span>
+          </div>
+          <p class="mt-1.5 text-[10px] text-slate-500">Dilaporkan oleh {{ report.reported_by || 'Warehouse' }}</p>
+        </article>
+      </div>
+    </section>
+
     <!-- SECTION 1: PENGAJUAN BARANG DARI GUDANG (MATERIAL REQUESTS MENUNGGU PEMILIHAN SUPPLIER) -->
     <div class="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50/60 border border-amber-200/90 rounded-xl p-4 sm:p-5 mb-6 shadow-2xs">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 pb-3 border-b border-amber-200/70">
@@ -274,7 +317,7 @@
               </td>
 
               <!-- Metode Bayar -->
-              <td class="py-3 px-4 text-center whitespace-nowrap">
+              <td class="py-3 px-4 text-center">
                 <span class="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-700 rounded font-semibold text-[11px]">
                   {{ p.payment_method }}
                 </span>
@@ -308,6 +351,13 @@
                   ✓ Diterima Gudang
                 </span>
                 <span
+                  v-else-if="p.supplier_status === 'Ketidaksesuaian Fisik (Menunggu Retur)'"
+                  class="px-2.5 py-0.5 bg-rose-50 text-rose-800 border border-rose-200 rounded-full font-bold text-[10px] block"
+                  :title="p.discrepancy_reason || 'Gudang melaporkan kekurangan atau ketidaksesuaian barang.'"
+                >
+                  ⚠ Perlu Tindak Lanjut
+                </span>
+                <span
                   v-else
                   class="px-2.5 py-0.5 bg-slate-100 text-slate-800 border border-slate-200 rounded-full font-bold text-[10px] block"
                 >
@@ -316,6 +366,12 @@
                 <span class="text-[9px] text-emerald-700 font-semibold block mt-0.5">
                   ● Lunas
                 </span>
+                <p
+                  v-if="p.discrepancy_reason"
+                  class="max-w-56 mx-auto mt-2 text-left text-[10px] leading-relaxed text-rose-800 bg-rose-50 border border-rose-200 rounded-md p-2 whitespace-normal"
+                >
+                  <strong>Catatan Warehouse:</strong> {{ p.discrepancy_reason }}
+                </p>
               </td>
 
               <!-- Aksi -->
@@ -328,7 +384,16 @@
                   Detail
                 </button>
                 <button
-                  v-if="p.status !== 'DITERIMA_GUDANG' && p.supplier_status !== 'Diterima Gudang (Lengkap & Sesuai)' && p.supplier_status !== 'Diterima Gudang'"
+                  v-if="canFollowUpSupplier(p)"
+                  type="button"
+                  class="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs font-bold transition-colors cursor-pointer inline-flex items-center gap-1 shadow-2xs"
+                  @click="openFollowUpModal(p)"
+                >
+                  <RefreshCw class="w-3 h-3" />
+                  <span>Tindak Lanjut</span>
+                </button>
+                <button
+                  v-if="!canFollowUpSupplier(p) && !['Menunggu Pemesanan Ulang', 'Menunggu Penerimaan Ulang'].includes(p.supplier_status) && p.status !== 'DITERIMA_GUDANG' && p.supplier_status !== 'Diterima Gudang (Lengkap & Sesuai)' && p.supplier_status !== 'Diterima Gudang'"
                   type="button"
                   class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold transition-colors cursor-pointer inline-flex items-center gap-1 shadow-2xs"
                   title="Konfirmasi fisik barang telah tiba di gudang dan update stok barang secara real-time"
@@ -544,6 +609,75 @@
       </template>
     </Modal>
 
+    <!-- MODAL: FINANCE SUPPLIER FOLLOW-UP -->
+    <Modal
+      v-model="followUpModalOpen"
+      :title="`Tindak Lanjut Supplier: ${selectedFollowUpPurchase?.purchase_code || ''}`"
+      subtitle="Catat permintaan pemenuhan kekurangan barang kepada Supplier."
+    >
+      <form v-if="selectedFollowUpPurchase" class="space-y-4 text-xs" @submit.prevent="submitSupplierFollowUp">
+        <div class="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-900 space-y-1">
+          <p class="font-bold">{{ selectedFollowUpPurchase.default_supplier }} · {{ selectedFollowUpPurchase.project_name }}</p>
+          <p class="text-[11px] text-rose-800">
+            {{ selectedFollowUpPurchase.discrepancy_reason || selectedFollowUpPurchase.rejection_reason || 'Terdapat kekurangan atau ketidaksesuaian pada barang yang diterima.' }}
+          </p>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Cara Pemenuhan Kekurangan <span class="text-rose-500">*</span></label>
+          <select
+            v-model="followUpForm.action"
+            required
+            class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white focus:ring-2 focus:ring-amber-500"
+          >
+            <option value="PEMESANAN_ULANG">Pemesanan ulang</option>
+            <option value="PENERIMAAN_ULANG">Penerimaan ulang / pengiriman susulan</option>
+          </select>
+          <p class="mt-1 text-[11px] text-slate-500">
+            Penerimaan barang susulan tetap harus diperiksa dan dikonfirmasi oleh Warehouse.
+          </p>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Catatan kepada Supplier <span class="text-rose-500">*</span></label>
+          <textarea
+            v-model="followUpForm.notes"
+            rows="3"
+            required
+            maxlength="1000"
+            placeholder="Jelaskan barang/kuantitas yang kurang dan tindak lanjut yang diminta..."
+            class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-amber-500"
+          ></textarea>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Target Pemenuhan (opsional)</label>
+          <input
+            v-model="followUpForm.expected_date"
+            type="date"
+            class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs"
+          />
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+          <button
+            type="button"
+            class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold"
+            @click="followUpModalOpen = false"
+          >
+            Batal
+          </button>
+          <button
+            type="submit"
+            :disabled="savingSupplierFollowUp"
+            class="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold shadow-xs cursor-pointer"
+          >
+            {{ savingSupplierFollowUp ? 'Menyimpan...' : 'Simpan Tindak Lanjut' }}
+          </button>
+        </div>
+      </form>
+    </Modal>
+
     <!-- MODAL 2: DETAIL TRANSAKSI PEMBELIAN -->
     <Modal
       v-model="detailModalOpen"
@@ -628,6 +762,33 @@
           </div>
         </div>
 
+        <div
+          v-if="selectedPurchase.discrepancy_reason"
+          class="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs"
+        >
+          <div class="font-bold text-rose-950 uppercase text-[10px]">Catatan Ketidaksesuaian dari Warehouse</div>
+          <p class="mt-1.5 whitespace-pre-wrap text-rose-900">{{ selectedPurchase.discrepancy_reason }}</p>
+          <p v-if="selectedPurchase.discrepancy_reported_at" class="mt-1.5 text-[10px] text-rose-700">
+            Dilaporkan pada {{ selectedPurchase.discrepancy_reported_at }}
+          </p>
+        </div>
+
+        <div v-if="selectedPurchase.supplier_follow_ups?.length" class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs space-y-2">
+          <div class="font-bold text-amber-950 uppercase text-[10px]">Riwayat Tindak Lanjut Supplier</div>
+          <div
+            v-for="(followUp, index) in selectedPurchase.supplier_follow_ups"
+            :key="`${followUp.recorded_at || index}-${index}`"
+            class="border-t border-amber-200 pt-2 first:border-0 first:pt-0"
+          >
+            <div class="flex flex-wrap justify-between gap-1 font-semibold text-slate-800">
+              <span>{{ followUp.action === 'PEMESANAN_ULANG' ? 'Pemesanan ulang' : 'Penerimaan ulang / pengiriman susulan' }}</span>
+              <span class="text-slate-500">{{ followUp.expected_date || followUp.recorded_at?.slice(0, 10) || '-' }}</span>
+            </div>
+            <p class="mt-1 text-slate-700">{{ followUp.notes }}</p>
+            <p class="mt-1 text-[10px] text-slate-500">Dicatat oleh {{ followUp.recorded_by || 'Finance' }}</p>
+          </div>
+        </div>
+
         <div class="flex justify-end pt-2 border-t border-slate-200">
           <button
             type="button"
@@ -661,6 +822,7 @@ import {
   Package,
   Building,
   CheckCircle2,
+  RefreshCw,
 } from 'lucide-vue-next';
 
 const router = useRouter();
@@ -672,6 +834,15 @@ const paymentMethodFilter = ref('');
 
 const detailModalOpen = ref(false);
 const selectedPurchase = ref(null);
+const warehouseDiscrepancyReports = ref([]);
+const followUpModalOpen = ref(false);
+const selectedFollowUpPurchase = ref(null);
+const followUpForm = ref({
+  action: 'PEMESANAN_ULANG',
+  notes: '',
+  expected_date: '',
+});
+const savingSupplierFollowUp = ref(false);
 
 const supplierModalOpen = ref(false);
 const selectedRequest = ref(null);
@@ -755,6 +926,21 @@ onMounted(async () => {
       }
     }
   } catch (e) {}
+
+  try {
+    const response = await fetch('/api/warehouse/discrepancies', {
+      headers: { Accept: 'application/json' },
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success || !Array.isArray(result.data)) {
+      throw new Error(result.message || 'Laporan Warehouse gagal dimuat.');
+    }
+
+    warehouseDiscrepancyReports.value = result.data;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Terjadi kesalahan yang tidak diketahui.';
+    toast.error(message);
+  }
 });
 
 // Merged suppliers list (store.suppliers + API)
@@ -1006,5 +1192,65 @@ const quickConfirmReceipt = (p) => {
   toast.success(
     `Barang PO ${p.purchase_code} berhasil di-ACC! Data stok fisik di gudang otomatis bertambah secara real-time.`
   );
+};
+
+const canFollowUpSupplier = (purchase) => {
+  return purchase.supplier_status === 'Ketidaksesuaian Fisik (Menunggu Retur)' ||
+    purchase.supplier_status === 'Ditolak Supplier';
+};
+
+const openFollowUpModal = (purchase) => {
+  selectedFollowUpPurchase.value = purchase;
+  followUpForm.value = {
+    action: 'PEMESANAN_ULANG',
+    notes: '',
+    expected_date: '',
+  };
+  followUpModalOpen.value = true;
+};
+
+const submitSupplierFollowUp = async () => {
+  if (savingSupplierFollowUp.value) return;
+
+  const purchase = selectedFollowUpPurchase.value;
+  if (!purchase || !followUpForm.value.notes.trim()) {
+    toast.error('Catatan kepada Supplier wajib diisi.');
+    return;
+  }
+
+  const payload = {
+    ...followUpForm.value,
+    notes: followUpForm.value.notes.trim(),
+    recorded_by: store.currentUser?.name || 'Finance',
+  };
+
+  if (!storeActions.recordSupplierFollowUp(purchase.purchase_code || purchase.id, payload)) {
+    toast.error('Transaksi pembelian tidak ditemukan.');
+    return;
+  }
+
+  savingSupplierFollowUp.value = true;
+  try {
+    try {
+      const response = await fetch(`/api/purchases/${encodeURIComponent(purchase.purchase_code)}/supplier-follow-ups`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Tindak lanjut tidak dapat disinkronkan ke server.');
+      }
+      purchase.supplier_follow_ups = result.data.purchase.supplier_follow_ups;
+      purchase.supplier_status = result.data.purchase.supplier_status;
+      toast.success('Tindak lanjut kepada Supplier berhasil dicatat.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Terjadi kesalahan yang tidak diketahui.';
+      toast.warning(`Tindak lanjut tersimpan di perangkat ini, tetapi gagal disinkronkan ke server: ${message}`);
+    }
+    followUpModalOpen.value = false;
+  } finally {
+    savingSupplierFollowUp.value = false;
+  }
 };
 </script>

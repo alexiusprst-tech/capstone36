@@ -66,6 +66,7 @@ Berikut adalah daftar lengkap 46 kebutuhan fungsional resmi sistem yang diselara
 | **FR-FIN-09** | Finance | Sistem memperbarui status pembayaran menjadi lunas setelah pelunasan terverifikasi. | Status Update Otomatis $\rightarrow$ `LUNAS` |
 | **FR-FIN-10** | Finance | Sistem mengirimkan konfirmasi pelunasan kepada client melalui email. | Automated Email Notification Engine |
 | **FR-FIN-11** | Finance | Sistem menyediakan fitur untuk melihat riwayat transaksi dan status pembayaran setiap pesanan. | `/finance/purchases` & `/finance/monitoring` |
+| **FR-FIN-12** | Finance | Sistem menyediakan fitur untuk mencatat tindak lanjut kekurangan barang kepada Supplier melalui pemesanan ulang atau penerimaan ulang. | `/finance/purchases` (Riwayat Tindak Lanjut Supplier) |
 
 ### C. Functional Requirement — Warehouse
 | ID FR | User | Functional Requirement | Modul / Halaman Sistem |

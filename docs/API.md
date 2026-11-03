@@ -145,7 +145,29 @@ Dokumentasi ini merinci seluruh endpoint RESTful API yang aktif pada `backend/ro
 }
 ```
 
-### 4.3 Transaksi Pembelian Finance (`/api/purchases`)
+### 4.3 Laporan Ketidaksesuaian Barang Warehouse
+* **Endpoint**: `POST /api/warehouse/discrepancies`
+  * Menyimpan laporan pemeriksaan fisik Warehouse agar catatan dapat diakses lintas role dan sesi.
+  * **Body Request**:
+```json
+{
+  "order_number": "ORD-2026-001",
+  "client_name": "SMA 9",
+  "reason": "Barang yang diterima kurang 2 unit.",
+  "items": [
+    {
+      "sku": "MAT-002",
+      "name": "Besi Beton Ulir D16",
+      "qty": 2,
+      "unit": "Batang"
+    }
+  ],
+  "reported_by": "Staf Warehouse"
+}
+```
+* **Endpoint**: `GET /api/warehouse/discrepancies` — Daftar laporan untuk ditampilkan di halaman Finance; respons mencakup catatan, item, pelapor, status, dan waktu pelaporan.
+
+### 4.4 Transaksi Pembelian Finance (`/api/purchases`)
 * **Endpoint**: `GET /api/purchases`
   * Mengembalikan daftar transaksi pembelian supplier.
 * **Endpoint**: `POST /api/purchases`
@@ -179,6 +201,24 @@ Dokumentasi ini merinci seluruh endpoint RESTful API yang aktif pada `backend/ro
   * **Efek Sistem**:
     1. Membuat transaksi `TRX-YYYYMMDD-XXXX` berstatus `LUNAS`.
     2. Mengubah status `WarehouseRequest` terkait menjadi `DIPROSES_PEMBELIAN`.
+
+### 4.5 Tindak Lanjut Kekurangan Barang Supplier
+* **Laporan Warehouse**: `POST /api/purchases/{id}/supplier-discrepancies` dengan body `{"reason":"Jumlah yang diterima kurang 2 unit."}`. Laporan menyimpan status masalah dan alasan pada transaksi pembelian agar terlihat oleh Finance.
+* **Endpoint**: `POST /api/purchases/{id}/supplier-follow-ups` (`{id}` dapat berupa ID transaksi atau kode pembelian)
+* **Body Request**:
+```json
+{
+  "action": "PENERIMAAN_ULANG",
+  "notes": "Supplier diminta mengirim ulang 2 unit yang kurang.",
+  "expected_date": "2026-11-05",
+  "recorded_by": "Finance"
+}
+```
+* `action` menerima `PEMESANAN_ULANG` atau `PENERIMAAN_ULANG`; `notes` wajib diisi dan `expected_date` bersifat opsional.
+* **Efek Sistem**: Menambahkan catatan ke riwayat `supplier_follow_ups` pada transaksi dan memperbarui `supplier_status`. Pencatatan tindak lanjut tidak mengubah stok; Warehouse tetap melakukan pemeriksaan dan konfirmasi penerimaan fisik.
+* **Pengiriman susulan Supplier**: `POST /api/purchases/{id}/supplier-replacement-dispatch` menyimpan status `Barang Pengganti Dikirim`, nomor surat jalan, aksi, dan catatan Supplier pada `discrepancy_resolution`. Warehouse menerima notifikasi berdasarkan data transaksi server.
+* Pengiriman melalui formulir surat jalan Supplier memakai `POST /api/purchases/{id}/supplier-dispatch`. Jika status PO sedang `Menunggu Pemesanan Ulang` atau `Menunggu Penerimaan Ulang`, endpoint otomatis menyimpannya sebagai `Barang Pengganti Dikirim` agar dapat dihitung dan ditampilkan Warehouse.
+* Warehouse mencatat penerimaan fisik barang susulan melalui `POST /api/purchases/{id}/supplier-replacement-receive` dengan `notes` dan `items_received` berisi SKU, nama, jumlah yang benar-benar diterima, serta satuan. Endpoint memperbarui stok hanya untuk jumlah susulan dan mengubah status Supplier menjadi `Barang Pengganti Diterima Gudang`; pengiriman yang sama tidak dapat diterima dua kali.
 
 ---
 

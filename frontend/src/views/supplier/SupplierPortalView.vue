@@ -342,11 +342,25 @@
                       <span>Selesai Diterima Gudang</span>
                     </span>
                     <span
+                      v-else-if="p.supplier_status === 'Diterima Gudang (Lengkap & Sesuai)'"
+                      class="px-2.5 py-1 bg-emerald-100 text-emerald-900 border border-emerald-200 rounded-full font-bold text-[10px] inline-flex items-center gap-1"
+                    >
+                      <CheckCircle class="w-3 h-3 text-emerald-600" />
+                      <span>Selesai Diterima Gudang</span>
+                    </span>
+                    <span
                       v-else-if="p.supplier_status === 'Barang Pengganti Dikirim'"
                       class="px-2.5 py-1 bg-purple-100 text-purple-900 border border-purple-200 rounded-full font-bold text-[10px] inline-flex items-center gap-1"
                     >
                       <RefreshCw class="w-3 h-3 text-purple-600" />
                       <span>Barang Pengganti Dikirim</span>
+                    </span>
+                    <span
+                      v-else-if="p.supplier_status === 'Barang Pengganti Diterima Gudang'"
+                      class="px-2.5 py-1 bg-emerald-100 text-emerald-900 border border-emerald-200 rounded-full font-bold text-[10px] inline-flex items-center gap-1"
+                    >
+                      <CheckCircle class="w-3 h-3 text-emerald-600" />
+                      <span>Barang Pengganti Diterima Gudang</span>
                     </span>
                     <span
                       v-else
@@ -526,7 +540,7 @@
                 </div>
                 <p class="text-xs text-slate-600 mt-1">
                   <strong>Catatan Masalah: </strong>
-                  {{ p.discrepancy_info?.notes || 'Terdapat kerusakan fisik kemasan dan segel terkelupas pada saat dibongkar di gudang CV Alpharo.' }}
+                  {{ p.discrepancy_reason || p.discrepancy_info?.notes || 'Terdapat kerusakan fisik kemasan dan segel terkelupas pada saat dibongkar di gudang CV Alpharo.' }}
                 </p>
                 <div class="text-[11px] text-slate-400 mt-1 font-mono">
                   No. SJ Awal: {{ p.delivery_info?.surat_jalan || '-' }} &bull; Dilaporkan: {{ p.discrepancy_info?.date || p.transaction_date }}
@@ -541,7 +555,7 @@
                   @click="openResolutionModal(p)"
                 >
                   <RefreshCw class="w-3.5 h-3.5" />
-                  <span>Kirim Barang Pengganti</span>
+                  <span>Kirim Barang Pengganti / Susulan</span>
                 </button>
               </div>
             </div>
@@ -996,7 +1010,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import AlpharoLogo from '../../components/common/AlpharoLogo.vue';
 import Modal from '../../components/common/Modal.vue';
@@ -1051,6 +1065,34 @@ const resolutionForm = ref({
   replacement_surat_jalan: '',
   action: 'Penggantian Unit Baru 100% Sesuai Spesifikasi',
   notes: '',
+});
+
+const loadSupplierPurchases = async () => {
+  try {
+    const response = await fetch('/api/purchases', {
+      headers: { Accept: 'application/json' },
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success || !Array.isArray(result.data)) {
+      throw new Error(result.message || 'Daftar pesanan Supplier gagal dimuat dari server.');
+    }
+
+    store.purchases = result.data;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Terjadi kesalahan yang tidak diketahui.';
+    toast.error(message);
+  }
+};
+
+let supplierPurchaseRefreshInterval;
+
+onMounted(async () => {
+  await loadSupplierPurchases();
+  supplierPurchaseRefreshInterval = setInterval(loadSupplierPurchases, 30000);
+});
+
+onUnmounted(() => {
+  if (supplierPurchaseRefreshInterval) clearInterval(supplierPurchaseRefreshInterval);
 });
 
 // Detect current active supplier
@@ -1147,8 +1189,16 @@ const dispatchedPurchases = computed(() => {
 });
 
 const discrepancyPurchases = computed(() => {
+  const activeDiscrepancyStatuses = [
+    'Ketidaksesuaian',
+    'Ketidaksesuaian Fisik (Menunggu Retur)',
+    'Menunggu Pemesanan Ulang',
+    'Menunggu Penerimaan Ulang',
+  ];
+
   return supplierPurchases.value.filter(
-    (p) => p.supplier_status === 'Ketidaksesuaian' || p.discrepancy_info
+    (p) => activeDiscrepancyStatuses.includes(p.supplier_status) ||
+      (p.discrepancy_info && p.supplier_status !== 'Barang Pengganti Dikirim')
   );
 });
 
@@ -1209,9 +1259,43 @@ const openDispatchModal = (p) => {
   dispatchModalOpen.value = true;
 };
 
-const submitDispatch = () => {
+const submitDispatch = async () => {
   if (!activePO.value) return;
-  storeActions.dispatchSupplierDelivery(activePO.value.purchase_code, dispatchForm.value);
+  try {
+    const response = await fetch(`/api/purchases/${encodeURIComponent(activePO.value.purchase_code)}/supplier-dispatch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(dispatchForm.value),
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Pengiriman gagal disimpan ke server.');
+    }
+
+    const purchaseIndex = store.purchases.findIndex(
+      (purchase) => purchase.purchase_code === activePO.value.purchase_code
+    );
+    if (purchaseIndex >= 0) {
+      store.purchases[purchaseIndex] = result.data;
+    } else {
+      store.purchases.unshift(result.data);
+    }
+
+    if (result.data.supplier_status === 'Barang Pengganti Dikirim') {
+      storeActions.resolveSupplierDiscrepancy(activePO.value.purchase_code, {
+        ...resolutionForm.value,
+        replacement_surat_jalan: dispatchForm.value.surat_jalan,
+        notes: dispatchForm.value.notes,
+      });
+    } else {
+      storeActions.dispatchSupplierDelivery(activePO.value.purchase_code, dispatchForm.value);
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Terjadi kesalahan yang tidak diketahui.';
+    toast.error(`Pengiriman Supplier gagal dicatat: ${message}`);
+    return;
+  }
+
   toast.success(`Barang PO ${activePO.value.purchase_code} telah diberangkatkan ke CV Alpharo! Surat Jalan: ${dispatchForm.value.surat_jalan}`);
   dispatchModalOpen.value = false;
 };
@@ -1226,9 +1310,37 @@ const openResolutionModal = (p) => {
   resolutionModalOpen.value = true;
 };
 
-const submitResolution = () => {
+const submitResolution = async () => {
   if (!activePO.value) return;
-  storeActions.resolveSupplierDiscrepancy(activePO.value.purchase_code, resolutionForm.value);
+  try {
+    const response = await fetch(`/api/purchases/${encodeURIComponent(activePO.value.purchase_code)}/supplier-replacement-dispatch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        ...resolutionForm.value,
+        resolved_date: new Date().toISOString().split('T')[0],
+      }),
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Pengiriman susulan gagal disimpan ke server.');
+    }
+
+    const purchaseIndex = store.purchases.findIndex(
+      (purchase) => purchase.purchase_code === activePO.value.purchase_code
+    );
+    if (purchaseIndex >= 0) {
+      store.purchases[purchaseIndex] = result.data;
+    } else {
+      store.purchases.unshift(result.data);
+    }
+    storeActions.resolveSupplierDiscrepancy(activePO.value.purchase_code, resolutionForm.value);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Terjadi kesalahan yang tidak diketahui.';
+    toast.error(`Pengiriman barang pengganti gagal dicatat: ${message}`);
+    return;
+  }
+
   toast.success(`Barang pengganti telah dikirim untuk PO ${activePO.value.purchase_code}!`);
   resolutionModalOpen.value = false;
 };
@@ -1237,4 +1349,3 @@ const printPO = () => {
   window.print();
 };
 </script>
-

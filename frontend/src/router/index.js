@@ -543,19 +543,7 @@ router.beforeEach((to) => {
   // If guestOnly and user is logged in, redirect to their role dashboard
   if (to.meta.guestOnly && token) {
     const role = store.currentUser?.role || 'MARKETING';
-<<<<<<< HEAD
     return roleHome[role] || roleHome.MARKETING;
-=======
-    const roleMap = {
-      MARKETING: '/marketing/dashboard',
-      DIREKTUR: '/director/dashboard',
-      ADMINISTRASI: '/administration/dashboard',
-      WAREHOUSE: '/warehouse/dashboard',
-      FINANCE: '/finance/dashboard',
-      CLIENT: '/portal',
-    };
-    return next(roleMap[role] || '/marketing/dashboard');
->>>>>>> origin/Pras
   }
 
   if (to.meta.role && store.currentUser.role !== to.meta.role) {

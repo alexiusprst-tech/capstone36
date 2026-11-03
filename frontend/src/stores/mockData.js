@@ -1707,36 +1707,45 @@ export const storeActions = {
     Object.assign(store, defaults);
   },
 
-<<<<<<< HEAD
   setAuthenticatedUser(user) {
     const roleObj = store.roles.find((r) => r.key === user.role);
-=======
+    if (!roleObj) return;
+
+    store.currentUser = {
+      ...store.currentUser,
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: roleObj.key,
+      division: roleObj.division,
+      supplierId: null,
+      supplierCode: null,
+      supplierName: null,
+    };
+    localStorage.setItem('user', JSON.stringify(user));
+  },
+
   switchRole(roleKey, customSupplier = null) {
     const roleObj = store.roles.find((r) => r.key === roleKey);
->>>>>>> origin/Pras
-    if (roleObj) {
-      const activeSupplier = customSupplier || (store.suppliers ? store.suppliers[0] : null);
-      store.currentUser = {
-<<<<<<< HEAD
-        id: user.id,
-        name: user.name,
-        email: user.email,
-=======
-        id: roleObj.key === 'MARKETING' ? 1 : roleObj.key === 'DIREKTUR' ? 2 : roleObj.key === 'ADMINISTRASI' ? 3 : roleObj.key === 'WAREHOUSE' ? 4 : roleObj.key === 'FINANCE' ? 5 : roleObj.key === 'CLIENT' ? 6 : 7,
-        name: roleObj.key === 'SUPPLIER' && activeSupplier ? `${activeSupplier.contactPerson} (${activeSupplier.name})` : roleObj.name,
-        email: roleObj.key === 'SUPPLIER' && activeSupplier ? activeSupplier.email : roleObj.email,
->>>>>>> origin/Pras
-        role: roleObj.key,
-        division: roleObj.division,
-        avatar: store.currentUser.avatar,
-        phone: '',
-        clientId: roleObj.key === 'CLIENT' ? 1 : null,
-        supplierId: roleObj.key === 'SUPPLIER' && activeSupplier ? activeSupplier.id : null,
-        supplierCode: roleObj.key === 'SUPPLIER' && activeSupplier ? activeSupplier.code : null,
-        supplierName: roleObj.key === 'SUPPLIER' && activeSupplier ? activeSupplier.name : null,
-      };
-      localStorage.setItem('user', JSON.stringify(user));
-    }
+    if (!roleObj) return;
+
+    const activeSupplier = customSupplier || (store.suppliers ? store.suppliers[0] : null);
+    const user = {
+      id: roleObj.key === 'MARKETING' ? 1 : roleObj.key === 'DIREKTUR' ? 2 : roleObj.key === 'ADMINISTRASI' ? 3 : roleObj.key === 'WAREHOUSE' ? 4 : roleObj.key === 'FINANCE' ? 5 : roleObj.key === 'CLIENT' ? 6 : 7,
+      name: roleObj.key === 'SUPPLIER' && activeSupplier ? `${activeSupplier.contactPerson} (${activeSupplier.name})` : roleObj.name,
+      email: roleObj.key === 'SUPPLIER' && activeSupplier ? activeSupplier.email : roleObj.email,
+      role: roleObj.key,
+      division: roleObj.division,
+      avatar: store.currentUser.avatar,
+      phone: '',
+      clientId: roleObj.key === 'CLIENT' ? 1 : null,
+      supplierId: roleObj.key === 'SUPPLIER' && activeSupplier ? activeSupplier.id : null,
+      supplierCode: roleObj.key === 'SUPPLIER' && activeSupplier ? activeSupplier.code : null,
+      supplierName: roleObj.key === 'SUPPLIER' && activeSupplier ? activeSupplier.name : null,
+    };
+
+    store.currentUser = user;
+    localStorage.setItem('user', JSON.stringify(user));
   },
 
   addActivityLog(action, target, details) {
@@ -2178,6 +2187,35 @@ export const storeActions = {
       this.addActivityLog('Konfirmasi Pemenuhan Barang', item.orderNumber, 'Semua item siap dikirim di Loading Dock.');
       this.addNotification('ADMINISTRASI', 'Barang Siap Dikirim', `Order ${item.orderNumber} telah siap dikirim oleh Gudang.`, 'warehouse', '/administration/delivery-notes');
     }
+  },
+
+  reportSupplierDiscrepancy(fulfillmentId, reason) {
+    const fulfillment = store.warehouseFulfillments.find((item) => item.id === fulfillmentId);
+    if (!fulfillment || !reason?.trim()) return false;
+
+    fulfillment.status = 'Ketidaksesuaian';
+    fulfillment.discrepancyReason = reason.trim();
+    fulfillment.discrepancyReportedAt = new Date().toISOString().split('T')[0];
+
+    const order = store.orders.find((item) => item.orderNumber === fulfillment.orderNumber);
+    if (order) {
+      order.fulfillmentStatus = 'Ketidaksesuaian';
+    }
+
+    this.addNotification(
+      'FINANCE',
+      'Laporan Ketidaksesuaian Barang dari Warehouse',
+      `Warehouse melaporkan ketidaksesuaian untuk order ${fulfillment.orderNumber} (${fulfillment.clientName}): "${fulfillment.discrepancyReason}". Mohon tindak lanjuti kebutuhan barang dengan Supplier.`,
+      'alert',
+      '/finance/purchases'
+    );
+    this.addActivityLog(
+      'Lapor Ketidaksesuaian Barang ke Finance',
+      fulfillment.orderNumber,
+      fulfillment.discrepancyReason
+    );
+
+    return true;
   },
 
   createShipment(shipmentData) {
@@ -2740,6 +2778,71 @@ export const storeActions = {
     return true;
   },
 
+  confirmSupplierReplacementReceipt(purchaseCode, itemsReceived, notes, updatedPurchase) {
+    const purchase = (store.purchases || []).find(
+      (item) => item.purchase_code === purchaseCode || item.id === purchaseCode
+    );
+    if (!purchase) return false;
+
+    Object.assign(purchase, updatedPurchase);
+    purchase.received_notes = notes;
+
+    if (!Array.isArray(store.stockMovements)) store.stockMovements = [];
+
+    itemsReceived.forEach((item) => {
+      const quantity = Number(item.qty_received ?? item.qty);
+      const product = (store.products || []).find(
+        (existing) => (item.sku && existing.sku === item.sku) ||
+          existing.name === item.name
+      );
+      if (product) {
+        product.stock = item.current_stock ?? Number(product.stock || 0) + quantity;
+        product.status = product.stock > 10 ? 'Tersedia' : 'Menipis';
+      } else {
+        const newId = store.products.length
+          ? Math.max(...store.products.map((existing) => existing.id || 0)) + 1
+          : 1;
+        store.products.unshift({
+          id: newId,
+          sku: item.sku || `PRD-${String(newId).padStart(4, '0')}`,
+          name: item.name,
+          category: 'Material Pengadaan',
+          unit: item.unit || 'Unit',
+          stock: item.current_stock ?? quantity,
+          minStock: 10,
+          price: 0,
+          costPrice: 0,
+          status: Number(item.current_stock ?? quantity) > 10 ? 'Tersedia' : 'Menipis',
+          location: 'Gudang Utama A-01',
+        });
+      }
+
+      store.stockMovements.unshift({
+        id: Date.now() + Math.random(),
+        date: new Date().toISOString().split('T')[0],
+        sku: item.sku || '-',
+        productName: item.name,
+        name: item.name,
+        type: 'Masuk',
+        qty: quantity,
+        unit: item.unit || 'Unit',
+        reference: `PO-${purchaseCode}-SUSULAN`,
+        notes: `Penerimaan barang pengganti dari Supplier ${purchase.default_supplier}`,
+        pic: store.currentUser?.name || 'Warehouse',
+      });
+    });
+
+    this.addNotification(
+      ['FINANCE', 'SUPPLIER'],
+      'Barang Pengganti Diterima Warehouse',
+      `Warehouse telah memeriksa dan menerima barang pengganti untuk PO ${purchaseCode}. Catatan: ${notes}`,
+      'warehouse',
+      '/finance/purchases'
+    );
+    this.addActivityLog('Penerimaan Barang Pengganti Supplier', purchaseCode, notes);
+    return true;
+  },
+
   confirmSupplierReceipt(purchaseCode, receiptData = {}) {
     const p = (store.purchases || []).find((x) => x.purchase_code === purchaseCode || x.id === purchaseCode);
     if (!p) return false;
@@ -2880,6 +2983,44 @@ export const storeActions = {
     return true;
   },
 
+  recordSupplierFollowUp(purchaseCode, followUpData = {}) {
+    const p = (store.purchases || []).find((x) => x.purchase_code === purchaseCode || x.id === purchaseCode);
+    if (!p) return false;
+
+    const action = followUpData.action;
+    if (!['PEMESANAN_ULANG', 'PENERIMAAN_ULANG'].includes(action)) return false;
+
+    const followUp = {
+      action,
+      notes: followUpData.notes,
+      expected_date: followUpData.expected_date || null,
+      recorded_by: followUpData.recorded_by || store.currentUser?.name || 'Finance',
+      recorded_at: new Date().toISOString(),
+    };
+
+    if (!Array.isArray(p.supplier_follow_ups)) p.supplier_follow_ups = [];
+    p.supplier_follow_ups.push(followUp);
+    p.supplier_status = action === 'PEMESANAN_ULANG'
+      ? 'Menunggu Pemesanan Ulang'
+      : 'Menunggu Penerimaan Ulang';
+
+    const actionLabel = action === 'PEMESANAN_ULANG' ? 'pemesanan ulang' : 'penerimaan ulang';
+    this.addNotification(
+      ['SUPPLIER', 'WAREHOUSE'],
+      'Tindak Lanjut Kekurangan Barang Supplier',
+      `Finance mencatat tindak lanjut ${actionLabel} untuk PO ${p.purchase_code} dari ${p.default_supplier}. Catatan: ${followUp.notes}`,
+      'purchase',
+      action === 'PENERIMAAN_ULANG' ? '/warehouse/fulfillment' : '/supplier/portal'
+    );
+    this.addActivityLog(
+      'Mencatat Tindak Lanjut Supplier',
+      p.purchase_code,
+      `${actionLabel}: ${followUp.notes}`
+    );
+
+    return true;
+  },
+
   rejectPurchaseOrderBySupplier(purchaseCode, reason = '') {
     const p = (store.purchases || []).find((x) => x.purchase_code === purchaseCode || x.id === purchaseCode);
     if (!p) return false;
@@ -2898,4 +3039,3 @@ export const storeActions = {
     return true;
   },
 };
-

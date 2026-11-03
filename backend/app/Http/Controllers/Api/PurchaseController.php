@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\PurchaseTransaction;
 use App\Models\Supplier;
+use App\Models\WarehouseDiscrepancyReport;
 use App\Models\WarehouseRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,40 @@ use Illuminate\Support\Facades\DB;
 
 class PurchaseController extends Controller
 {
+    public function getWarehouseDiscrepancies(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data' => WarehouseDiscrepancyReport::query()->latest('id')->get(),
+        ]);
+    }
+
+    public function storeWarehouseDiscrepancy(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'order_number' => 'required|string|max:100',
+            'client_name' => 'required|string|max:255',
+            'reason' => 'required|string|max:2000',
+            'items' => 'nullable|array',
+            'items.*.sku' => 'nullable|string|max:100',
+            'items.*.name' => 'required_with:items|string|max:255',
+            'items.*.qty' => 'nullable|numeric|min:0',
+            'items.*.unit' => 'nullable|string|max:50',
+            'reported_by' => 'nullable|string|max:100',
+        ]);
+
+        $report = WarehouseDiscrepancyReport::create([
+            ...$validated,
+            'status' => 'OPEN',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Laporan ketidaksesuaian berhasil dikirim ke Finance.',
+            'data' => $report,
+        ], 201);
+    }
+
     /**
      * List all suppliers
      */
@@ -275,6 +310,294 @@ class PurchaseController extends Controller
     }
 
     /**
+     * Record a Warehouse report about a supplier shipment discrepancy.
+     */
+    public function storeSupplierDiscrepancy(Request $request, $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'reason' => 'required|string|max:2000',
+        ]);
+
+        $purchase = PurchaseTransaction::where('id', $id)
+            ->orWhere('purchase_code', $id)
+            ->first();
+
+        if (! $purchase) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaksi pembelian tidak ditemukan.',
+            ], 404);
+        }
+
+        $purchase->update([
+            'supplier_status' => 'Ketidaksesuaian Fisik (Menunggu Retur)',
+            'discrepancy_reason' => $validated['reason'],
+            'discrepancy_reported_at' => now()->toDateString(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Laporan ketidaksesuaian Supplier berhasil dicatat.',
+            'data' => $purchase->fresh(),
+        ], 201);
+    }
+
+    public function storeSupplierReplacementDispatch(Request $request, $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'action' => 'required|string|max:255',
+            'replacement_surat_jalan' => 'required|string|max:100',
+            'notes' => 'required|string|max:2000',
+            'resolved_date' => 'nullable|date',
+        ]);
+
+        $purchase = PurchaseTransaction::where('id', $id)
+            ->orWhere('purchase_code', $id)
+            ->first();
+
+        if (! $purchase) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaksi pembelian tidak ditemukan.',
+            ], 404);
+        }
+
+        $resolution = [
+            'action' => $validated['action'],
+            'replacement_surat_jalan' => $validated['replacement_surat_jalan'],
+            'notes' => $validated['notes'],
+            'resolved_date' => $validated['resolved_date'] ?? now()->toDateString(),
+        ];
+
+        $purchase->update([
+            'supplier_status' => 'Barang Pengganti Dikirim',
+            'discrepancy_resolution' => $resolution,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengiriman barang pengganti berhasil dicatat.',
+            'data' => $purchase->fresh(),
+        ], 201);
+    }
+
+    public function storeSupplierDispatch(Request $request, $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'surat_jalan' => 'required|string|max:100',
+            'courier' => 'required|string|max:255',
+            'tracking_number' => 'required|string|max:100',
+            'dispatch_date' => 'required|date',
+            'est_arrival' => 'nullable|date',
+            'notes' => 'nullable|string|max:2000',
+        ]);
+
+        $purchase = PurchaseTransaction::where('id', $id)
+            ->orWhere('purchase_code', $id)
+            ->first();
+
+        if (! $purchase) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaksi pembelian tidak ditemukan.',
+            ], 404);
+        }
+
+        $deliveryInfo = $validated;
+        $followUps = $purchase->supplier_follow_ups ?? [];
+        $latestFollowUp = $followUps === [] ? null : $followUps[array_key_last($followUps)];
+        $isReplacement = in_array($purchase->supplier_status, [
+            'Menunggu Pemesanan Ulang',
+            'Menunggu Penerimaan Ulang',
+        ], true);
+        $updates = ['delivery_info' => $deliveryInfo];
+
+        if ($isReplacement) {
+            $updates['supplier_status'] = 'Barang Pengganti Dikirim';
+            $updates['discrepancy_resolution'] = [
+                'action' => $latestFollowUp['action'] ?? 'PENGIRIMAN_SUSULAN',
+                'replacement_surat_jalan' => $validated['surat_jalan'],
+                'notes' => $validated['notes'] ?? '',
+                'resolved_date' => $validated['dispatch_date'],
+                'courier' => $validated['courier'],
+                'tracking_number' => $validated['tracking_number'],
+                'est_arrival' => $validated['est_arrival'] ?? null,
+            ];
+        } else {
+            $updates['supplier_status'] = 'Dikirim ke Gudang CV';
+        }
+
+        $purchase->update($updates);
+
+        return response()->json([
+            'success' => true,
+            'message' => $isReplacement
+                ? 'Pengiriman susulan berhasil dicatat untuk pemeriksaan Warehouse.'
+                : 'Pengiriman Supplier berhasil dicatat.',
+            'data' => $purchase->fresh(),
+        ], 201);
+    }
+
+    /**
+     * Record Warehouse's physical receipt of replacement goods without receiving the original PO twice.
+     */
+    public function receiveSupplierReplacement(Request $request, $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'notes' => 'nullable|string|max:2000',
+            'items_received' => 'required|array|min:1',
+            'items_received.*.sku' => 'nullable|string|max:100',
+            'items_received.*.name' => 'required|string|max:255',
+            'items_received.*.qty' => 'required|numeric|min:0.01',
+            'items_received.*.unit' => 'nullable|string|max:50',
+        ]);
+
+        return DB::transaction(function () use ($validated, $id) {
+            $purchase = PurchaseTransaction::where('id', $id)
+                ->orWhere('purchase_code', $id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $purchase) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Transaksi pembelian tidak ditemukan.',
+                ], 404);
+            }
+
+            $resolution = $purchase->discrepancy_resolution ?? [];
+            if (
+                $purchase->supplier_status !== 'Barang Pengganti Dikirim' ||
+                ! empty($resolution['warehouse_received_at'])
+            ) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pengiriman susulan sudah diterima atau tidak menunggu pemeriksaan.',
+                ], 409);
+            }
+
+            $receivedItems = [];
+            foreach ($validated['items_received'] as $item) {
+                $sku = $item['sku'] ?? null;
+                $rawName = $item['name'];
+                $cleanName = preg_replace('/^[A-Z0-9_\-]+\s*-\s*/', '', $rawName);
+                $quantity = (float) $item['qty'];
+                $product = null;
+
+                if (! empty($sku)) {
+                    $product = Product::where('sku', $sku)->lockForUpdate()->first();
+                }
+                if (! $product) {
+                    $product = Product::where('name', $cleanName)
+                        ->orWhere('name', $rawName)
+                        ->orWhere('name', 'like', "%{$cleanName}%")
+                        ->lockForUpdate()
+                        ->first();
+                }
+
+                if ($product) {
+                    $newStock = (float) $product->stock + $quantity;
+                    $product->update([
+                        'stock' => $newStock,
+                        'status' => $newStock > 10 ? 'Tersedia' : 'Menipis',
+                    ]);
+                } else {
+                    $newStock = $quantity;
+                    $product = Product::create([
+                        'sku' => $sku ?: 'PRD-'.str_pad((string) (Product::count() + 1), 4, '0', STR_PAD_LEFT),
+                        'name' => $cleanName ?: $rawName,
+                        'category' => 'Material Pengadaan',
+                        'unit' => $item['unit'] ?? 'Unit',
+                        'stock' => $newStock,
+                        'min_stock' => 10,
+                        'last_buy_price' => 0,
+                        'hpp' => 0,
+                        'sell_price' => 0,
+                        'status' => $newStock > 10 ? 'Tersedia' : 'Menipis',
+                    ]);
+                }
+
+                $receivedItems[] = [
+                    'sku' => $product->sku,
+                    'name' => $product->name,
+                    'qty_received' => $quantity,
+                    'current_stock' => $newStock,
+                ];
+            }
+
+            $resolution['warehouse_received_at'] = now()->toIso8601String();
+            $resolution['warehouse_received_notes'] = $validated['notes'] ?? null;
+            $resolution['items_received'] = $validated['items_received'];
+            $purchase->update([
+                'supplier_status' => 'Barang Pengganti Diterima Gudang',
+                'discrepancy_resolution' => $resolution,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Barang pengganti/susulan berhasil diperiksa dan diterima Warehouse.',
+                'data' => [
+                    'purchase' => $purchase->fresh(),
+                    'items_received' => $receivedItems,
+                ],
+            ]);
+        });
+    }
+
+    /**
+     * Record Finance's follow-up to a supplier for a reported shipment discrepancy.
+     */
+    public function storeSupplierFollowUp(Request $request, $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'action' => 'required|in:PEMESANAN_ULANG,PENERIMAAN_ULANG',
+            'notes' => 'required|string|max:1000',
+            'expected_date' => 'nullable|date',
+            'recorded_by' => 'nullable|string|max:100',
+        ]);
+
+        return DB::transaction(function () use ($validated, $id) {
+            $purchase = PurchaseTransaction::where('id', $id)
+                ->orWhere('purchase_code', $id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $purchase) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Transaksi pembelian tidak ditemukan.',
+                ], 404);
+            }
+
+            $followUps = $purchase->supplier_follow_ups ?? [];
+            $followUp = [
+                'action' => $validated['action'],
+                'notes' => $validated['notes'],
+                'expected_date' => $validated['expected_date'] ?? null,
+                'recorded_by' => $validated['recorded_by'] ?? null,
+                'recorded_at' => now()->toIso8601String(),
+            ];
+            $followUps[] = $followUp;
+
+            $purchase->update([
+                'supplier_status' => $validated['action'] === 'PEMESANAN_ULANG'
+                    ? 'Menunggu Pemesanan Ulang'
+                    : 'Menunggu Penerimaan Ulang',
+                'supplier_follow_ups' => $followUps,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tindak lanjut kepada Supplier berhasil dicatat.',
+                'data' => [
+                    'purchase' => $purchase->fresh(),
+                    'follow_up' => $followUp,
+                ],
+            ], 201);
+        });
+    }
+
+    /**
      * Confirm physical receipt of purchase goods in Warehouse (PROBIS TO-BE Tahap 5).
      * Increases actual physical stock upon verified delivery.
      */
@@ -292,10 +615,16 @@ class PurchaseController extends Controller
         }
 
         if ($purchase->status === 'DITERIMA_GUDANG') {
+            if ($purchase->supplier_status !== 'Diterima Gudang (Lengkap & Sesuai)') {
+                $purchase->update([
+                    'supplier_status' => 'Diterima Gudang (Lengkap & Sesuai)',
+                ]);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Barang untuk transaksi '.$purchase->purchase_code.' sudah pernah diterima sebelumnya.',
-                'data' => $purchase,
+                'data' => $purchase->fresh(),
             ]);
         }
 
@@ -304,7 +633,8 @@ class PurchaseController extends Controller
 
             $purchase->update([
                 'status' => 'DITERIMA_GUDANG',
-                'notes' => $purchase->notes ? $purchase->notes . "\n" . $notes : $notes,
+                'supplier_status' => 'Diterima Gudang (Lengkap & Sesuai)',
+                'notes' => $purchase->notes ? $purchase->notes."\n".$notes : $notes,
             ]);
 
             // Update linked warehouse request if any

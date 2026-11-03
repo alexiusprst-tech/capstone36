@@ -128,7 +128,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AlpharoLogo from '../../components/common/AlpharoLogo.vue';
-import { store, storeActions } from '../../stores/mockData';
+import { storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
 import api from '../../services/api';
 
@@ -232,7 +232,6 @@ const handleSubmit = async () => {
   loading.value = true;
 
   try {
-<<<<<<< HEAD
     const response = await api.post('/auth/login', {
       email: form.value.email.trim().toLowerCase(),
       password: form.value.password,
@@ -256,63 +255,6 @@ const handleSubmit = async () => {
   } catch (error) {
     const validationMessage = Object.values(error.response?.data?.errors || {}).flat()[0];
     errorMessage.value = validationMessage || error.response?.data?.message || 'Tidak dapat terhubung ke layanan autentikasi.';
-=======
-    const emailLower = (form.value.email || '').toLowerCase().trim();
-    let matchedRole = 'MARKETING';
-    let targetRoute = '/marketing/dashboard';
-
-    let matchedSupplier = null;
-    if (
-      emailLower.includes('supplier') ||
-      emailLower.includes('synnex') ||
-      emailLower.includes('sumbermakmur') ||
-      emailLower.includes('indokomputer') ||
-      emailLower.includes('mandiriperkasa') ||
-      emailLower.includes('ciptakarya') ||
-      emailLower.includes('globalsarana') ||
-      emailLower.includes('graha') ||
-      emailLower.includes('mitrasejahtera') ||
-      (store.suppliers && store.suppliers.some((s) => s.email?.toLowerCase() === emailLower))
-    ) {
-      matchedRole = 'SUPPLIER';
-      targetRoute = '/supplier/portal';
-      matchedSupplier = (store.suppliers || []).find((s) => s.email?.toLowerCase() === emailLower) || (store.suppliers?.[0]);
-    } else if (emailLower.includes('direktur') || emailLower.includes('alpharo')) {
-      matchedRole = 'DIREKTUR';
-      targetRoute = '/director/dashboard';
-    } else if (emailLower.includes('admin') || emailLower.includes('administrasi') || emailLower.includes('siti')) {
-      matchedRole = 'ADMINISTRASI';
-      targetRoute = '/administration/dashboard';
-    } else if (emailLower.includes('warehouse') || emailLower.includes('gudang') || emailLower.includes('agus')) {
-      matchedRole = 'WAREHOUSE';
-      targetRoute = '/warehouse/dashboard';
-    } else if (emailLower.includes('finance') || emailLower.includes('keuangan') || emailLower.includes('dewi')) {
-      matchedRole = 'FINANCE';
-      targetRoute = '/finance/dashboard';
-    } else if (emailLower.includes('client') || emailLower.includes('sekolah') || emailLower.includes('sma')) {
-      matchedRole = 'CLIENT';
-      targetRoute = '/portal';
-    } else {
-      matchedRole = 'MARKETING';
-      targetRoute = '/marketing/dashboard';
-    }
-
-    const validPasswords = ['password', 'password123', 'admin', '123456'];
-    if (form.value.password && !validPasswords.includes(form.value.password)) {
-      errorMessage.value = matchedRole === 'SUPPLIER'
-        ? 'Kata sandi salah. Gunakan default: password'
-        : 'Kata sandi salah. Gunakan default: password123';
-      loading.value = false;
-      return;
-    }
-
-    // Switch role in reactive store & sync localStorage
-    storeActions.switchRole(matchedRole, matchedSupplier);
-    toast.success(`Berhasil masuk sebagai ${matchedSupplier ? matchedSupplier.name : matchedRole}`);
-    router.push(targetRoute);
-  } catch (err) {
-    errorMessage.value = 'Terjadi kesalahan autentikasi.';
->>>>>>> origin/Pras
   } finally {
     loading.value = false;
   }

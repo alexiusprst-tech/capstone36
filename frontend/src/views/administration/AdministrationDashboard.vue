@@ -272,9 +272,6 @@ import DocumentChecklist from '../../components/common/DocumentChecklist.vue';
 import Modal from '../../components/common/Modal.vue';
 import { store, storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
-<<<<<<< HEAD
-import { Archive, ChevronRight, FolderCheck, Users } from 'lucide-vue-next';
-=======
 import {
   ChevronRight,
   FolderCheck,
@@ -286,7 +283,6 @@ import {
   Clock,
   Layers,
 } from 'lucide-vue-next';
->>>>>>> origin/Pras
 
 const toast = useToast();
 

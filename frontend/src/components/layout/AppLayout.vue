@@ -150,8 +150,6 @@
 
           <!-- Right: Actions, Notifications & User Profile -->
           <div class="flex items-center gap-3">
-<<<<<<< HEAD
-=======
             <!-- Portal Publik Quick Link -->
             <router-link
               to="/portal"
@@ -204,7 +202,6 @@
               </div>
             </div>
 
->>>>>>> origin/Pras
             <!-- Notifications Center Dropdown -->
             <div class="relative">
               <button
@@ -318,9 +315,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onUnmounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { store } from '../../stores/mockData';
+import { store, storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
 import api from '../../services/api';
 import ToastContainer from '../common/ToastContainer.vue';
@@ -347,6 +344,7 @@ import {
   ChevronRight,
   Menu,
   X,
+  ChevronDown,
   Activity,
   Layers,
   BarChart3,
@@ -362,6 +360,7 @@ const toast = useToast();
 const sidebarCollapsed = ref(false);
 const mobileSidebarOpen = ref(false);
 const notificationOpen = ref(false);
+const roleDropdownOpen = ref(false);
 
 const roleLabel = computed(() => {
   const currentRole = store.currentUser.role;
@@ -554,8 +553,6 @@ const navGroups = computed(() => {
   return [];
 });
 
-<<<<<<< HEAD
-=======
 const onSelectRole = (newRoleKey) => {
   storeActions.switchRole(newRoleKey);
   roleDropdownOpen.value = false;
@@ -574,7 +571,6 @@ const onSelectRole = (newRoleKey) => {
   router.push(targetMap[newRoleKey] || '/marketing/dashboard');
 };
 
->>>>>>> origin/Pras
 const getNotificationRoute = () => {
   const r = store.currentUser.role.toLowerCase();
   return `/${r}/notifications`;
@@ -605,4 +601,87 @@ const handleLogout = async () => {
     router.push('/login');
   }
 };
+
+let warehouseNotificationInterval;
+
+const syncWarehouseReplacementNotifications = async () => {
+  try {
+    const response = await fetch('/api/purchases', {
+      headers: { Accept: 'application/json' },
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success || !Array.isArray(result.data)) {
+      throw new Error(result.message || 'Status pengiriman Supplier gagal dimuat.');
+    }
+
+    store.purchases = result.data;
+    result.data
+      .filter((purchase) => purchase.supplier_status === 'Barang Pengganti Dikirim')
+      .forEach((purchase) => {
+        const resolution = purchase.discrepancy_resolution || {};
+        const title = 'Barang Pengganti / Susulan Supplier Dikirim';
+        const message = `Supplier ${purchase.default_supplier} mengirim barang pengganti/susulan untuk PO ${purchase.purchase_code} (SJ: ${resolution.replacement_surat_jalan || '-'}). Catatan: ${resolution.notes || 'Tidak ada catatan dari Supplier'}. Harap periksa barang saat tiba.`;
+        const alreadyNotified = store.notifications.some(
+          (notification) => notification.role === 'WAREHOUSE' &&
+            notification.title === title &&
+            notification.message === message
+        );
+        if (!alreadyNotified) {
+          storeActions.addNotification('WAREHOUSE', title, message, 'shipment', '/warehouse/fulfillment');
+        }
+      });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Terjadi kesalahan yang tidak diketahui.';
+    toast.warning(`Notifikasi pengiriman susulan gagal dimuat: ${message}`);
+  }
+};
+
+watch(
+  () => store.currentUser.role,
+  async (role) => {
+    if (warehouseNotificationInterval) {
+      clearInterval(warehouseNotificationInterval);
+      warehouseNotificationInterval = undefined;
+    }
+
+    if (role === 'WAREHOUSE') {
+      await syncWarehouseReplacementNotifications();
+      warehouseNotificationInterval = setInterval(syncWarehouseReplacementNotifications, 30000);
+      return;
+    }
+
+    if (role !== 'FINANCE') return;
+
+    try {
+      const response = await fetch('/api/warehouse/discrepancies', {
+        headers: { Accept: 'application/json' },
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success || !Array.isArray(result.data)) {
+        throw new Error(result.message || 'Laporan Warehouse gagal dimuat.');
+      }
+
+      result.data.forEach((report) => {
+        const title = 'Laporan Ketidaksesuaian Barang dari Warehouse';
+        const message = `Warehouse melaporkan ketidaksesuaian untuk order ${report.order_number} (${report.client_name}): "${report.reason}". Mohon tindak lanjuti kebutuhan barang dengan Supplier.`;
+        const alreadyNotified = store.notifications.some(
+          (notification) => notification.role === 'FINANCE' &&
+            notification.title === title &&
+            notification.message === message
+        );
+        if (!alreadyNotified) {
+          storeActions.addNotification('FINANCE', title, message, 'alert', '/finance/purchases');
+        }
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Terjadi kesalahan yang tidak diketahui.';
+      toast.warning(`Notifikasi laporan Warehouse gagal dimuat: ${message}`);
+    }
+  },
+  { immediate: true }
+);
+
+onUnmounted(() => {
+  if (warehouseNotificationInterval) clearInterval(warehouseNotificationInterval);
+});
 </script>
