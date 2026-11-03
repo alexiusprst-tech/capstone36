@@ -13,12 +13,12 @@
 
     <!-- KPIS -->
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-      <KpiCard title="Total Order" :value="store.orders.length" icon-variant="slate" />
-      <KpiCard title="Menunggu Approval" :value="countStatus('Menunggu Verifikasi')" icon-variant="amber" />
-      <KpiCard title="Disetujui" :value="countStatus('Disetujui')" icon-variant="emerald" />
-      <KpiCard title="Menunggu Bayar" :value="countStatus('Menunggu Pembayaran')" icon-variant="amber" />
+      <KpiCard title="Total Order" :value="store.orders.length" icon-variant="blue" />
+      <KpiCard title="Menunggu Approval" :value="countStatus('Menunggu Verifikasi')" icon-variant="blue" />
+      <KpiCard title="Disetujui" :value="countStatus('Disetujui')" icon-variant="blue" />
+      <KpiCard title="Menunggu Bayar" :value="countStatus('Menunggu Pembayaran')" icon-variant="blue" />
       <KpiCard title="Sedang Diproses" :value="countStatus('Diproses')" icon-variant="blue" />
-      <KpiCard title="Tuntas Selesai" :value="countStatus('Selesai')" icon-variant="emerald" />
+      <KpiCard title="Tuntas Selesai" :value="countStatus('Selesai')" icon-variant="blue" />
     </div>
 
     <!-- FILTER & SEARCH -->
@@ -81,7 +81,7 @@
               </td>
               <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ order.date }}</td>
               <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
-                Rp {{ order.grandTotal.toLocaleString('id-ID') }}
+                Rp {{ Number(order.grandTotal || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-center">
                 <StatusBadge :status="order.status" />
@@ -158,7 +158,7 @@
           <div class="text-right">
             <span class="text-slate-500 block">Grand Total</span>
             <span class="text-base font-bold font-mono text-slate-900 mt-0.5 block">
-              Rp {{ selectedOrder.grandTotal.toLocaleString('id-ID') }}
+              Rp {{ Number(selectedOrder?.grandTotal || 0).toLocaleString('id-ID') }}
             </span>
           </div>
         </div>
@@ -176,15 +176,15 @@
             </div>
             <div>
               <span class="text-slate-500 text-[10px] block">Total Tagihan</span>
-              <span class="font-mono font-bold">Rp {{ associatedInvoice.totalAmount.toLocaleString('id-ID') }}</span>
+              <span class="font-mono font-bold">Rp {{ Number(associatedInvoice.totalAmount || 0).toLocaleString('id-ID') }}</span>
             </div>
             <div>
               <span class="text-slate-500 text-[10px] block">Telah Masuk</span>
-              <span class="font-mono font-bold text-emerald-600">Rp {{ associatedInvoice.paidAmount.toLocaleString('id-ID') }}</span>
+              <span class="font-mono font-bold text-emerald-600">Rp {{ Number(associatedInvoice.paidAmount || 0).toLocaleString('id-ID') }}</span>
             </div>
             <div>
               <span class="text-slate-500 text-[10px] block">Sisa Piutang</span>
-              <span class="font-mono font-bold text-rose-600">Rp {{ associatedInvoice.remainingAmount.toLocaleString('id-ID') }}</span>
+              <span class="font-mono font-bold text-rose-600">Rp {{ Number(associatedInvoice.remainingAmount || 0).toLocaleString('id-ID') }}</span>
             </div>
           </div>
         </div>

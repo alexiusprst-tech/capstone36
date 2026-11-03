@@ -228,7 +228,7 @@ class PurchaseController extends Controller
                 'discount' => $validated['discount'] ?? 0,
                 'total_price' => $validated['total_price'],
                 'payment_method' => $validated['payment_method'],
-                'status' => 'LUNAS',
+                'status' => 'DIPESAN',
                 'items' => $validated['items'],
                 'created_by' => $validated['created_by'] ?? 'Dewi Lestari (Finance)',
                 'notes' => $validated['notes'] ?? null,
@@ -249,25 +249,17 @@ class PurchaseController extends Controller
                     ]);
             }
 
-            // Update product stock and last buy price in database
+            // PROBIS TO-BE Tahap 4: Update harga beli/acuan HPP, stok fisik BELUM bertambah sampai diterima Gudang (Tahap 5)
             foreach ($validated['items'] as $item) {
                 $sku = $item['sku'] ?? null;
                 $hargaBeli = (float) $item['harga_beli'];
-                $qty = (float) $item['qty'];
 
-                if (! empty($sku)) {
+                if (! empty($sku) && $hargaBeli > 0) {
                     $prod = Product::where('sku', $sku)->first();
                     if ($prod) {
-                        $newStock = $prod->stock + $qty;
-                        $updateData = [
-                            'stock' => $newStock,
-                            'status' => $newStock > 10 ? 'Tersedia' : ($newStock > 0 ? 'Menipis' : 'Habis'),
-                        ];
-                        if ($hargaBeli > 0) {
-                            $updateData['last_buy_price'] = $hargaBeli;
-                            if ($prod->hpp <= 0) {
-                                $updateData['hpp'] = $hargaBeli;
-                            }
+                        $updateData = ['last_buy_price' => $hargaBeli];
+                        if ($prod->hpp <= 0) {
+                            $updateData['hpp'] = $hargaBeli;
                         }
                         $prod->update($updateData);
                     }
@@ -279,6 +271,115 @@ class PurchaseController extends Controller
                 'message' => 'Transaksi pembelian '.$purchase->purchase_code.' berhasil disimpan.',
                 'data' => $purchase,
             ], 201);
+        });
+    }
+
+    /**
+     * Confirm physical receipt of purchase goods in Warehouse (PROBIS TO-BE Tahap 5).
+     * Increases actual physical stock upon verified delivery.
+     */
+    public function receivePurchaseShipment(Request $request, $id): JsonResponse
+    {
+        $purchase = PurchaseTransaction::where('id', $id)
+            ->orWhere('purchase_code', $id)
+            ->first();
+
+        if (! $purchase) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaksi pembelian tidak ditemukan.',
+            ], 404);
+        }
+
+        if ($purchase->status === 'DITERIMA_GUDANG') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Barang untuk transaksi '.$purchase->purchase_code.' sudah pernah diterima sebelumnya.',
+                'data' => $purchase,
+            ]);
+        }
+
+        return DB::transaction(function () use ($purchase, $request) {
+            $notes = $request->input('notes', 'Barang diterima lengkap dan sesuai spesifikasi fisik.');
+
+            $purchase->update([
+                'status' => 'DITERIMA_GUDANG',
+                'notes' => $purchase->notes ? $purchase->notes . "\n" . $notes : $notes,
+            ]);
+
+            // Update linked warehouse request if any
+            if (! empty($purchase->warehouse_request_id)) {
+                WarehouseRequest::where('id', $purchase->warehouse_request_id)
+                    ->update(['status' => 'SELESAI']);
+            } elseif (! empty($purchase->warehouse_request_code)) {
+                WarehouseRequest::where('request_code', $purchase->warehouse_request_code)
+                    ->update(['status' => 'SELESAI']);
+            }
+
+            // Increment actual physical stock now that goods are physically received
+            $receivedItems = [];
+            foreach ($purchase->items ?? [] as $item) {
+                $sku = $item['sku'] ?? null;
+                $rawName = $item['barang'] ?? $item['name'] ?? null;
+                $cleanName = $rawName ? preg_replace('/^[A-Z0-9_\-]+\s*-\s*/', '', $rawName) : null;
+                $qty = (float) ($item['qty'] ?? 0);
+
+                if ($qty > 0) {
+                    $prod = null;
+                    if (! empty($sku) && $sku !== '-') {
+                        $prod = Product::where('sku', $sku)->first();
+                    }
+                    if (! $prod && ! empty($cleanName)) {
+                        $prod = Product::where('name', $cleanName)
+                            ->orWhere('name', $rawName)
+                            ->orWhere('name', 'like', "%{$cleanName}%")
+                            ->first();
+                    }
+
+                    if ($prod) {
+                        $newStock = $prod->stock + $qty;
+                        $prod->update([
+                            'stock' => $newStock,
+                            'status' => $newStock > 10 ? 'Tersedia' : ($newStock > 0 ? 'Menipis' : 'Habis'),
+                        ]);
+                        $receivedItems[] = [
+                            'sku' => $prod->sku,
+                            'name' => $prod->name,
+                            'qty_received' => $qty,
+                            'current_stock' => $newStock,
+                        ];
+                    } else {
+                        $generatedSku = (! empty($sku) && $sku !== '-') ? $sku : 'PRD-'.str_pad((string) (Product::count() + 1), 4, '0', STR_PAD_LEFT);
+                        $newProd = Product::create([
+                            'sku' => $generatedSku,
+                            'name' => $cleanName ?: ($rawName ?? 'Barang Supplier'),
+                            'category' => 'Material Pengadaan',
+                            'unit' => $item['unit'] ?? 'Unit',
+                            'stock' => (int) $qty,
+                            'min_stock' => 10,
+                            'last_buy_price' => (float) ($item['harga_beli'] ?? 0),
+                            'hpp' => (float) ($item['harga_beli'] ?? 0),
+                            'sell_price' => round((float) ($item['harga_beli'] ?? 0) * 1.25),
+                            'status' => $qty > 10 ? 'Tersedia' : 'Menipis',
+                        ]);
+                        $receivedItems[] = [
+                            'sku' => $newProd->sku,
+                            'name' => $newProd->name,
+                            'qty_received' => $qty,
+                            'current_stock' => (int) $qty,
+                        ];
+                    }
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Barang pembelian '.$purchase->purchase_code.' berhasil diverifikasi fisik dan masuk ke stok gudang.',
+                'data' => [
+                    'purchase' => $purchase,
+                    'items_received' => $receivedItems,
+                ],
+            ]);
         });
     }
 }

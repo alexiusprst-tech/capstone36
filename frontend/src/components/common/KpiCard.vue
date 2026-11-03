@@ -69,6 +69,7 @@
 </template>
 
 <script setup>
+import { Activity } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -103,36 +104,12 @@ const valueFontSizeClass = computed(() => {
 });
 
 const iconBgClass = computed(() => {
-  switch (props.iconVariant) {
-    case 'emerald':
-      return 'bg-emerald-50 border-emerald-100';
-    case 'amber':
-      return 'bg-amber-50 border-amber-100';
-    case 'rose':
-      return 'bg-rose-50 border-rose-100';
-    case 'indigo':
-      return 'bg-indigo-50 border-indigo-100';
-    case 'slate':
-      return 'bg-slate-50 border-slate-200';
-    default:
-      return 'bg-blue-50 border-blue-100';
-  }
+  // Uniform corporate blue style across all dashboard roles
+  return 'bg-blue-50 border-blue-100';
 });
 
 const iconColorClass = computed(() => {
-  switch (props.iconVariant) {
-    case 'emerald':
-      return 'text-emerald-600';
-    case 'amber':
-      return 'text-amber-600';
-    case 'rose':
-      return 'text-rose-600';
-    case 'indigo':
-      return 'text-indigo-600';
-    case 'slate':
-      return 'text-slate-600';
-    default:
-      return 'text-alpharo-500';
-  }
+  // Uniform corporate blue icon across all dashboard roles
+  return 'text-[#0B4DA2]';
 });
 </script>

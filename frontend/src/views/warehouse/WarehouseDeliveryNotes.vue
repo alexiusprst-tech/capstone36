@@ -102,7 +102,7 @@ import { ref, computed } from 'vue';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import Modal from '../../components/common/Modal.vue';
-import { store, storeActions } from '../../stores/mockData';
+import { store } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
 
 const toast = useToast();

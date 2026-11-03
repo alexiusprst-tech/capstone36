@@ -15,6 +15,12 @@ use Illuminate\Support\Carbon;
  * @property string|null $phone
  * @property string|null $email
  * @property string|null $address
+ * @property string|null $contact_person
+ * @property string|null $npwp
+ * @property string|null $bank_name
+ * @property string|null $bank_account_number
+ * @property string|null $bank_account_name
+ * @property string|null $notes
  * @property bool $is_active
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -32,6 +38,12 @@ class Supplier extends Model
         'phone',
         'email',
         'address',
+        'contact_person',
+        'npwp',
+        'bank_name',
+        'bank_account_number',
+        'bank_account_name',
+        'notes',
         'is_active',
     ];
 

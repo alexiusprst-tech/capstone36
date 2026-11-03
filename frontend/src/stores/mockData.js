@@ -6,6 +6,11 @@ const STORAGE_KEY = 'alpharo_integrated_system_v1';
 // Initial realistic enterprise seed data for CV Alpharo Artha Jaya (Supplier & Contractor)
 const defaultData = {
   wilayahDki: WILAYAH_DKI,
+  companyBankAccount: {
+    bankName: 'Bank BCA',
+    accountNumber: '52323628813',
+    accountHolder: 'CV ALPHARO ARTHA JAYA',
+  },
   currentUser: {
     id: 1,
     name: 'Budi Hartono, S.T.',
@@ -22,6 +27,7 @@ const defaultData = {
     { key: 'WAREHOUSE', label: 'Warehouse', email: 'warehouse@alpharo.co.id', name: 'Agus Santoso', division: 'Logistik, Gudang & Pengiriman' },
     { key: 'FINANCE', label: 'Finance', email: 'finance@alpharo.co.id', name: 'Dewi Lestari, S.E.', division: 'Keuangan & Akuntansi' },
     { key: 'CLIENT', label: 'Client / Sekolah', email: 'client@alpharo.co.id', name: 'Kepala SMA Negeri 9 Jakarta', division: 'Rekanan Client / Instansi Pendidikan' },
+    { key: 'SUPPLIER', label: 'Supplier / Vendor', email: 'sales@synnexmetrodata.com', name: 'Hendra Gunawan (PT Synnex)', division: 'Mitra Pengadaan & Vendor' },
   ],
   clients: [
     {
@@ -457,6 +463,267 @@ const defaultData = {
       createdAt: '2025-08-15',
     },
   ],
+  suppliers: [
+    {
+      id: 1,
+      code: 'SUP00001',
+      name: 'PT Synnex Metrodata Indonesia',
+      address: 'Gedung APL Tower Lt. 42, Jl. Letjen S. Parman Kav. 28, Tanjung Duren Selatan, Jakarta Barat',
+      contactPerson: 'Hendra Gunawan (Sales Enterprise)',
+      phone: '021-29345800',
+      email: 'sales@synnexmetrodata.com',
+      npwp: '01.345.678.9-031.000',
+      bankName: 'BCA',
+      bankAccountNumber: '5001239841',
+      bankAccountName: 'PT Synnex Metrodata Indonesia',
+      status: 'Aktif',
+      notes: 'Supplier utama hardware komputer, server, dan laptop bergaransi resmi.',
+      createdAt: '2025-01-10',
+    },
+    {
+      id: 2,
+      code: 'SUP00002',
+      name: 'CV Sumber Makmur Komputer',
+      address: 'Jl. Pajajaran No. 45, Baranangsiang, Kota Bogor, Jawa Barat',
+      contactPerson: 'Budi Setiawan',
+      phone: '0251-8321900',
+      email: 'marketing@sumbermakmur.co.id',
+      npwp: '02.456.789.0-042.000',
+      bankName: 'Bank Mandiri',
+      bankAccountNumber: '1330018892019',
+      bankAccountName: 'CV Sumber Makmur Komputer',
+      status: 'Aktif',
+      notes: 'Vendor peripheral IT, printer, proyektor, dan aksesoris multimedia.',
+      createdAt: '2025-01-15',
+    },
+    {
+      id: 3,
+      code: 'SUP00003',
+      name: 'PT Indo Komputer Perkasa',
+      address: 'Komplek Harco Mangga Dua Blok E No. 12, Sawah Besar, Jakarta Pusat',
+      contactPerson: 'Siti Nurhaliza',
+      phone: '021-62301122',
+      email: 'info@indokomputer.com',
+      npwp: '01.889.012.3-018.000',
+      bankName: 'BNI',
+      bankAccountNumber: '0829103982',
+      bankAccountName: 'PT Indo Komputer Perkasa',
+      status: 'Aktif',
+      notes: 'Distributor jaringan komputer, kabel UTP, switch mikrotik, dan router cisco.',
+      createdAt: '2025-02-01',
+    },
+    {
+      id: 4,
+      code: 'SUP00004',
+      name: 'CV Mandiri Perkasa Prima',
+      address: 'Kawasan Industri Sentul, Jl. Babakan Madang No. 8, Bogor, Jawa Barat',
+      contactPerson: 'Ahmad Fauzi',
+      phone: '0251-8456789',
+      email: 'order@mandiriperkasa.id',
+      npwp: '03.112.233.4-055.000',
+      bankName: 'BCA',
+      bankAccountNumber: '5230918231',
+      bankAccountName: 'CV Mandiri Perkasa Prima',
+      status: 'Aktif',
+      notes: 'Penyedia material konstruksi, baja ringan, semen, dan pipa pvc.',
+      createdAt: '2025-02-12',
+    },
+    {
+      id: 5,
+      code: 'SUP00005',
+      name: 'PT Cipta Karya Niaga',
+      address: 'Jl. Raya Daan Mogot Km. 11, Cengkareng, Jakarta Barat',
+      contactPerson: 'Dewi Sartika',
+      phone: '021-58902233',
+      email: 'sales@ciptakaryaniaga.com',
+      npwp: '01.992.384.1-085.000',
+      bankName: 'BRI',
+      bankAccountNumber: '038901000293301',
+      bankAccountName: 'PT Cipta Karya Niaga',
+      status: 'Aktif',
+      notes: 'Grosir perlengkapan elektrikal kabel NYM, panel MCB, dan lampu LED gedung.',
+      createdAt: '2025-03-05',
+    },
+    {
+      id: 6,
+      code: 'SUP00006',
+      name: 'PT Global Sarana Solusindo',
+      address: 'Jl. TB Simatupang No. 18, Cilandak, Jakarta Selatan',
+      contactPerson: 'Rian Hidayat',
+      phone: '021-75912345',
+      email: 'procurement@globalsarana.co.id',
+      npwp: '02.102.938.4-012.000',
+      bankName: 'Bank Mandiri',
+      bankAccountNumber: '1270098234112',
+      bankAccountName: 'PT Global Sarana Solusindo',
+      status: 'Aktif',
+      notes: 'Penyedia software lisensi, Microsoft Windows, Office Pro, dan Antivirus.',
+      createdAt: '2025-03-20',
+    },
+    {
+      id: 7,
+      code: 'CV Graha Pratama Furniture',
+      address: 'Jl. Dr. Saharjo No. 112, Tebet, Jakarta Selatan',
+      contactPerson: 'Eko Prasetyo',
+      phone: '021-83709876',
+      email: 'sales@grahafuniture.com',
+      npwp: '03.445.667.8-061.000',
+      bankName: 'BCA',
+      bankAccountNumber: '6820192834',
+      bankAccountName: 'CV Graha Pratama Furniture',
+      status: 'Aktif',
+      notes: 'Meja dan kursi laboratorium komputer sekolah, partisi ruang kantor.',
+      createdAt: '2025-04-10',
+    },
+    {
+      id: 8,
+      code: 'SUP00008',
+      name: 'PT Mitra Sejahtera Teknik',
+      address: 'Kawasan Industri Pulogadung Blok III A, Cakung, Jakarta Timur',
+      contactPerson: 'Ir. Bambang Tri',
+      phone: '021-4601199',
+      email: 'contact@mitrasejahtera.co.id',
+      npwp: '01.556.778.9-009.000',
+      bankName: 'BSI',
+      bankAccountNumber: '7112093847',
+      bankAccountName: 'PT Mitra Sejahtera Teknik',
+      status: 'Aktif',
+      notes: 'Alat mekanikal dan elektrikal heavy-duty, genset, dan stabilizer daya.',
+      createdAt: '2025-05-02',
+    },
+  ],
+  purchases: [
+    {
+      id: 1,
+      purchase_code: 'PB20261014114148',
+      transaction_date: '2026-10-14',
+      invoice_number: 'FAK-SNX-99812',
+      project_id: 'PR00001',
+      project_name: 'pengadaan komputer sekolah (SMA NEGRI 2 BOGOR)',
+      default_supplier: 'PT Synnex Metrodata Indonesia',
+      supplier_code: 'SUP00001',
+      supplier_email: 'sales@synnexmetrodata.com',
+      subtotal: 10000000,
+      discount: 0,
+      total_price: 10000000,
+      payment_method: 'Tunai',
+      supplier_status: 'Diterima Gudang',
+      delivery_info: {
+        surat_jalan: 'SJ/SNX/X/2026/088',
+        courier: 'Armada Internal PT Synnex',
+        tracking_number: 'TRK-SNX-8821',
+        dispatch_date: '2026-10-15',
+        est_arrival: '2026-10-16',
+        notes: 'Barang telah diantar langsung dan diverifikasi lengkap oleh staf gudang CV Alpharo.',
+      },
+      items: [
+        {
+          barang: 'A00001770 - Pemeliharaan Komputer Note Book/ Laptop',
+          sku: 'A00001770',
+          supplier: 'PT Synnex Metrodata Indonesia',
+          qty: 100,
+          harga_beli: 100000,
+          diskon_percent: 0,
+          diskon_nominal: 0,
+          subtotal: 10000000,
+        },
+      ],
+    },
+    {
+      id: 2,
+      purchase_code: 'PB20261028091522',
+      transaction_date: '2026-10-28',
+      invoice_number: 'FAK-SNX-100234',
+      project_id: 'PR00002',
+      project_name: 'Pembangunan Fasilitas Workshop & Lab Vokasi',
+      default_supplier: 'PT Synnex Metrodata Indonesia',
+      supplier_code: 'SUP00001',
+      supplier_email: 'sales@synnexmetrodata.com',
+      subtotal: 25000000,
+      discount: 500000,
+      total_price: 24500000,
+      payment_method: 'Transfer Bank BCA',
+      supplier_status: 'Dikirim ke Gudang CV',
+      delivery_info: {
+        surat_jalan: 'SJ/SNX/X/2026/102',
+        courier: 'JNE Trucking',
+        tracking_number: 'JNET-298371928',
+        dispatch_date: '2026-10-29',
+        est_arrival: '2026-10-31',
+        notes: 'Dikirim dalam 5 pallet kayu pelindung garansi resmi.',
+      },
+      items: [
+        {
+          barang: 'PRD-SRV-01 - Server Tower Intel Xeon E-2324G',
+          sku: 'PRD-SRV-01',
+          supplier: 'PT Synnex Metrodata Indonesia',
+          qty: 2,
+          harga_beli: 12250000,
+          diskon_percent: 0,
+          diskon_nominal: 0,
+          subtotal: 24500000,
+        },
+      ],
+    },
+    {
+      id: 3,
+      purchase_code: 'PB20261030132015',
+      transaction_date: '2026-10-30',
+      invoice_number: 'FAK-SNX-101550',
+      project_id: 'PR00001',
+      project_name: 'pengadaan komputer sekolah (SMA NEGRI 2 BOGOR)',
+      default_supplier: 'PT Synnex Metrodata Indonesia',
+      supplier_code: 'SUP00001',
+      supplier_email: 'sales@synnexmetrodata.com',
+      subtotal: 18000000,
+      discount: 0,
+      total_price: 18000000,
+      payment_method: 'Transfer Bank BCA',
+      supplier_status: 'Menunggu Konfirmasi',
+      delivery_info: null,
+      items: [
+        {
+          barang: 'PRD-LPT-02 - Laptop Asus ExpertBook B1 Core i5 16GB',
+          sku: 'PRD-LPT-02',
+          supplier: 'PT Synnex Metrodata Indonesia',
+          qty: 2,
+          harga_beli: 9000000,
+          diskon_percent: 0,
+          diskon_nominal: 0,
+          subtotal: 18000000,
+        },
+      ],
+    },
+    {
+      id: 4,
+      purchase_code: 'PB20261030141018',
+      transaction_date: '2026-10-30',
+      invoice_number: 'FAK-SBM-55421',
+      project_id: 'PR00004',
+      project_name: 'Renovasi Gedung Laboratorium Komputer',
+      default_supplier: 'CV Sumber Makmur Komputer',
+      supplier_code: 'SUP00002',
+      supplier_email: 'marketing@sumbermakmur.co.id',
+      subtotal: 8500000,
+      discount: 0,
+      total_price: 8500000,
+      payment_method: 'Transfer Bank Mandiri',
+      supplier_status: 'Menunggu Konfirmasi',
+      delivery_info: null,
+      items: [
+        {
+          barang: 'PRD-SW-24 - Switch Gigabyte 24 Port Managed',
+          sku: 'PRD-SW-24',
+          supplier: 'CV Sumber Makmur Komputer',
+          qty: 5,
+          harga_beli: 1700000,
+          diskon_percent: 0,
+          diskon_nominal: 0,
+          subtotal: 8500000,
+        },
+      ],
+    },
+  ],
   products: [
     {
       id: 1,
@@ -800,6 +1067,120 @@ const defaultData = {
       },
       fulfillmentStatus: 'Tidak Tersedia',
     },
+    {
+      id: 7,
+      orderNumber: 'ORD-2026-007',
+      clientId: 1,
+      clientName: 'SMA 9',
+      projectName: 'Pengadaan Meja Kursi Kelas & Perbaikan Atap Laboratorium',
+      date: '2026-10-15',
+      submittedBy: 'Bpk. Supri (Client Portal)',
+      contactPerson: 'Bpk. Supri',
+      phone: '081316673264',
+      email: 'adm@sma9jkt.sch.id',
+      address: 'Jl. SMU 9, Halim Perdanakusuma, Kebon Pala, Makasar, Jakarta Timur',
+      status: 'Diajukan Client',
+      isHold: false,
+      holdReason: null,
+      holdBy: null,
+      holdDate: null,
+      urgency: 'Penting',
+      targetDeliveryDate: '2026-10-28',
+      followUpLogs: [],
+      approvedBy: null,
+      approvalDate: null,
+      approvalNotes: null,
+      items: [
+        { productId: 1, sku: 'MAT-001', name: 'Semen Portland Tipe 1 (50kg)', qty: 60, unit: 'Sak', price: 68000, specs: 'SNI Standar perbaikan cor dak atap lab', total: 4080000 },
+        { productId: 2, sku: 'MAT-002', name: 'Besi Beton Ulir D16 (12m)', qty: 30, unit: 'Batang', price: 145000, specs: 'Rangka penguat struktur atap', total: 4350000 },
+        { productId: null, sku: 'CST-8812', name: 'Set Meja Kursi Siswa Kayu Solid Standar Kemendikbud', qty: 36, unit: 'Set', price: 420000, specs: 'Rangka besi hollow, top table kayu jati belanda pernis natural', total: 15120000 },
+      ],
+      subtotal: 23550000,
+      tax: 2590500,
+      grandTotal: 26140500,
+      notes: 'Mohon penawaran harga resmi (SPH) & konfirmasi kesiapan pengiriman sebelum 28 Oktober 2026 untuk pelaporan BOS.',
+      supportingDocument: 'Surat_Permohonan_Kebutuhan_SMAN9.pdf',
+      timeline: [
+        {
+          stage: 'Pengajuan Client',
+          user: 'Bpk. Supri (SMA Negeri 9 Jakarta)',
+          timestamp: '2026-10-15 09:30',
+          status: 'completed',
+          notes: 'Pengajuan kebutuhan mandiri dikirimkan via Portal Rekanan SMA Negeri 9 Jakarta.',
+        },
+        {
+          stage: 'Verifikasi & Review Marketing',
+          user: 'Tim Marketing',
+          timestamp: '-',
+          status: 'in_progress',
+          notes: 'Menunggu review ketersediaan barang dan penerbitan penawaran resmi oleh Marketing CV Alpharo Artha Jaya.',
+        },
+      ],
+      documents: {
+        po: { exists: false, number: '-', status: 'Belum Dibuat', date: '-', file: null },
+        suratJalan: { exists: false, number: '-', status: 'Belum Dibuat', date: '-', file: null },
+        bast: { exists: false, number: '-', status: 'Belum Dibuat', date: '-', file: null },
+        faktur: { exists: false, number: '-', status: 'Belum Dibuat', date: '-', file: null },
+      },
+      fulfillmentStatus: 'Menunggu Persiapan',
+    },
+    {
+      id: 8,
+      orderNumber: 'ORD-2026-008',
+      clientId: 14,
+      clientName: 'SMPN 106 JAKARTA',
+      projectName: 'Pengadaan Sarana Laboratorium Komputer CBT & Perangkat Jaringan',
+      date: '2026-10-16',
+      submittedBy: 'Pa Ujang (Client Portal)',
+      contactPerson: 'Pa Ujang',
+      phone: '0812584184814',
+      email: 'mail@smpn106jkt.sch.id',
+      address: 'Jl. SMPN 106, Ciracas, Jakarta Timur',
+      status: 'Diajukan Client',
+      isHold: false,
+      holdReason: null,
+      holdBy: null,
+      holdDate: null,
+      urgency: 'Sangat Mendesak',
+      targetDeliveryDate: '2026-10-24',
+      followUpLogs: [],
+      approvedBy: null,
+      approvalDate: null,
+      approvalNotes: null,
+      items: [
+        { productId: 6, sku: 'MAT-006', name: 'Pipa PVC Conduit AW 3/4" (4m)', qty: 50, unit: 'Batang', price: 42000, specs: 'Instalasi rapi jalur kabel LAN antar workstation', total: 2100000 },
+        { productId: 7, sku: 'MAT-007', name: 'Granit Tile 60x60 Polished Glazed', qty: 30, unit: 'Dus', price: 215000, specs: 'Perbaikan lantai area server lab', total: 6450000 },
+        { productId: null, sku: 'NET-SW24G', name: 'Managed Gigabit Switch 24-Port & Access Point Ruang Lab', qty: 4, unit: 'Unit', price: 1650000, specs: 'Port Gigabit 10/100/1000Mbps, rackmount 1U', total: 6600000 },
+      ],
+      subtotal: 15150000,
+      tax: 1666500,
+      grandTotal: 16816500,
+      notes: 'Kebutuhan mendesak untuk persiapan gladi bersih Asesmen Nasional Berbasis Komputer (ANBK). Mohon survei dan penawaran spesifikasi resmi.',
+      supportingDocument: 'Form_Kebutuhan_Sarpras_SMPN106.pdf',
+      timeline: [
+        {
+          stage: 'Pengajuan Client',
+          user: 'Pa Ujang (SMP Negeri 106 Jakarta)',
+          timestamp: '2026-10-16 08:15',
+          status: 'completed',
+          notes: 'Pengajuan sarana IT dan perbaikan lab via Portal Publik Rekanan.',
+        },
+        {
+          stage: 'Verifikasi & Review Marketing',
+          user: 'Tim Marketing',
+          timestamp: '-',
+          status: 'in_progress',
+          notes: 'Menunggu review ketersediaan barang dan penerbitan spesifikasi resmi oleh Marketing.',
+        },
+      ],
+      documents: {
+        po: { exists: false, number: '-', status: 'Belum Dibuat', date: '-', file: null },
+        suratJalan: { exists: false, number: '-', status: 'Belum Dibuat', date: '-', file: null },
+        bast: { exists: false, number: '-', status: 'Belum Dibuat', date: '-', file: null },
+        faktur: { exists: false, number: '-', status: 'Belum Dibuat', date: '-', file: null },
+      },
+      fulfillmentStatus: 'Menunggu Persiapan',
+    },
   ],
   warehouseFulfillments: [
     {
@@ -825,6 +1206,26 @@ const defaultData = {
       status: 'Diproses',
       checkedBy: 'Agus Santoso',
       notes: 'Sedang dikelompokkan di bay logistik 2.',
+    },
+  ],
+  deliveryNotes: [
+    {
+      id: 1,
+      deliveryNoteNumber: 'SJ-2026-001',
+      orderNumber: 'ORD-2026-001',
+      date: '2026-10-03',
+      driver: 'Joko Purwanto',
+      vehicle: 'Truk Tronton N-8841-AA',
+      status: 'Sedang Dikirim',
+    },
+    {
+      id: 2,
+      deliveryNoteNumber: 'SJ-2026-002',
+      orderNumber: 'ORD-2026-002',
+      date: '2026-10-04',
+      driver: 'Bambang Kusumo',
+      vehicle: 'Truk Isuzu Elf Box (B 9182 KXA)',
+      status: 'Menunggu Persiapan',
     },
   ],
   shipments: [
@@ -872,12 +1273,57 @@ const defaultData = {
       date: '2026-10-02',
       requestedBy: 'Agus Santoso (Warehouse)',
       purpose: 'Restock Pengadaan Bahan Habis & Proyeksi Order Q4',
-      status: 'Diproses', // Draft, Menunggu Verifikasi, Disetujui, Diproses, Selesai
+      status: 'MENUNGGU_FINANCE', // Draft, Menunggu Verifikasi, Disetujui, Diproses, Selesai
       items: [
         { sku: 'MAT-005', name: 'Cat Epoxy Floor Heavy Duty (20L)', qty: 25, unit: 'Pail', estPrice: 1750000, total: 43750000 },
         { sku: 'MAT-003', name: 'Besi Beton Polos D10 (12m)', qty: 100, unit: 'Batang', estPrice: 75000, total: 7500000 },
       ],
       totalEstCost: 51250000,
+    },
+    {
+      id: 2,
+      requestCode: 'REQ-2026-002',
+      date: '2026-10-28',
+      requestedBy: 'Agus Santoso (Warehouse)',
+      projectName: 'pengadaan komputer sekolah (SMA NEGRI 2 BOGOR)',
+      project_name: 'pengadaan komputer sekolah (SMA NEGRI 2 BOGOR)',
+      purpose: 'Pengadaan Tambahan Laptop & PC Server Lab Komputer SMA Negeri 2 Bogor',
+      status: 'MENUNGGU_FINANCE',
+      items: [
+        { sku: 'PRD-LPT-02', name: 'Laptop Asus ExpertBook B1 Core i5 16GB', qty: 2, unit: 'Unit', estPrice: 9000000, total: 18000000 },
+        { sku: 'PRD-SRV-01', name: 'Server Tower Intel Xeon E-2324G', qty: 1, unit: 'Unit', estPrice: 12500000, total: 12500000 },
+      ],
+      totalEstCost: 30500000,
+    },
+    {
+      id: 3,
+      requestCode: 'REQ-2026-003',
+      date: '2026-10-29',
+      requestedBy: 'Agus Santoso (Warehouse)',
+      projectName: 'Renovasi Gedung Laboratorium Komputer',
+      project_name: 'Renovasi Gedung Laboratorium Komputer',
+      purpose: 'Kebutuhan Switch Managed & Kabel Jaringan Lab Komputer SMAN 30',
+      status: 'MENUNGGU_FINANCE',
+      items: [
+        { sku: 'PRD-SW-24', name: 'Switch Gigabyte 24 Port Managed', qty: 5, unit: 'Unit', estPrice: 1700000, total: 8500000 },
+        { sku: 'IT-001', name: 'Kabel UTP Cat6 Belden (305m)', qty: 4, unit: 'Roll', estPrice: 1850000, total: 7400000 },
+      ],
+      totalEstCost: 15900000,
+    },
+    {
+      id: 4,
+      requestCode: 'REQ-2026-004',
+      date: '2026-10-30',
+      requestedBy: 'Agus Santoso (Warehouse)',
+      projectName: 'Pekerjaan Pasangan & Struktur Jembatan Kanal',
+      project_name: 'Pekerjaan Pasangan & Struktur Jembatan Kanal',
+      purpose: 'Pengadaan Material Semen & Pipa PVC Konstruksi Kanal Cipinang',
+      status: 'MENUNGGU_FINANCE',
+      items: [
+        { sku: 'MAT-001', name: 'Semen Portland Tipe 1 (50kg)', qty: 150, unit: 'Sak', estPrice: 68000, total: 10200000 },
+        { sku: 'MAT-006', name: 'Pipa PVC Conduit AW 3/4"', qty: 80, unit: 'Batang', estPrice: 45000, total: 3600000 },
+      ],
+      totalEstCost: 13800000,
     },
   ],
   invoices: [
@@ -975,7 +1421,7 @@ const defaultData = {
       proofFile: 'BUKTI_TRANSFER_WIKA_T1.pdf',
       status: 'Lunas', // Lunas, Menunggu Verifikasi
       recordedBy: 'Dewi Lestari, S.E. (Finance)',
-      notes: 'Diverifikasi masuk ke Rekening CV Alpharo Bank BCA No. 142-990-1288.',
+      notes: 'Diverifikasi masuk ke Rekening Resmi Perusahaan Bank BCA No. 52323628813 a.n. CV ALPHARO ARTHA JAYA.',
     },
     {
       id: 2,
@@ -997,6 +1443,16 @@ const defaultData = {
     },
   ],
   notifications: [
+    {
+      id: 99,
+      role: 'MARKETING',
+      title: 'Pengajuan Pesanan Baru dari Rekanan Client',
+      message: 'SMA 9 (Bpk. Supri) mengajukan pesanan kebutuhan sarana (ORD-2026-007): "Pengadaan Meja Kursi Kelas & Perbaikan Atap Laboratorium". Total est. Rp 26.140.500.',
+      time: 'Baru saja',
+      isRead: false,
+      category: 'order',
+      link: '/marketing/orders',
+    },
     {
       id: 1,
       role: 'DIREKTUR',
@@ -1055,7 +1511,7 @@ const defaultData = {
       time: '2 jam lalu',
       isRead: false,
       category: 'finance',
-      link: '/client/payments',
+      link: '/portal?tab=payment',
     },
     {
       id: 7,
@@ -1065,7 +1521,7 @@ const defaultData = {
       time: '6 jam lalu',
       isRead: false,
       category: 'order',
-      link: '/client/orders',
+      link: '/portal?tab=tracking',
     },
     {
       id: 8,
@@ -1075,7 +1531,7 @@ const defaultData = {
       time: '3 hari lalu',
       isRead: true,
       category: 'finance',
-      link: '/client/payments',
+      link: '/portal?tab=payment',
     },
   ],
   activityLogs: [
@@ -1129,23 +1585,95 @@ function loadInitialState() {
         const clientNotifs = defaultData.notifications.filter((n) => n.role === 'CLIENT');
         merged.notifications = [...nonClientNotifs, ...clientNotifs];
       }
-      if (!Array.isArray(merged.roles) || !merged.roles.some((r) => r.key === 'CLIENT')) {
+      if (!Array.isArray(merged.roles) || !merged.roles.some((r) => r.key === 'SUPPLIER')) {
         merged.roles = JSON.parse(JSON.stringify(defaultData.roles));
+      }
+
+      if (!Array.isArray(merged.suppliers) || merged.suppliers.length === 0) {
+        merged.suppliers = JSON.parse(JSON.stringify(defaultData.suppliers));
+      }
+      if (!Array.isArray(merged.purchases) || merged.purchases.length === 0) {
+        merged.purchases = JSON.parse(JSON.stringify(defaultData.purchases));
+      }
+      if (!Array.isArray(merged.warehouseRequests) || merged.warehouseRequests.length <= 1) {
+        merged.warehouseRequests = JSON.parse(JSON.stringify(defaultData.warehouseRequests));
+      }
+
+      // Pastikan seluruh master produk dasar (MAT-001 s/d MAT-012, termasuk MAT-005 Cat Epoxy Floor) selalu ada di store.products
+      if (Array.isArray(merged.products)) {
+        defaultData.products.forEach((dp) => {
+          const existing = merged.products.find(
+            (p) => (p.sku && dp.sku && p.sku.toLowerCase() === dp.sku.toLowerCase()) ||
+                   (p.name && dp.name && p.name.toLowerCase() === dp.name.toLowerCase())
+          );
+          if (!existing) {
+            merged.products.unshift(JSON.parse(JSON.stringify(dp)));
+          }
+        });
+      } else {
+        merged.products = JSON.parse(JSON.stringify(defaultData.products));
+      }
+
+      // Pastikan REQ-2026-001 jika belum diterbitkan PO memiliki status MENUNGGU_FINANCE agar Finance bisa memilih supplier
+      const reqFloor = (merged.warehouseRequests || []).find((r) => r.requestCode === 'REQ-2026-001' || r.id === 1);
+      if (reqFloor && !reqFloor.purchaseCode && !reqFloor.purchase_code && reqFloor.status !== 'SELESAI') {
+        reqFloor.status = 'MENUNGGU_FINANCE';
       }
       if (merged.currentUser && merged.currentUser.role === 'CLIENT' && !merged.currentUser.clientId) {
         merged.currentUser.clientId = 1;
       }
       if (Array.isArray(merged.orders)) {
-        merged.orders = merged.orders.map((o) => ({
-          ...o,
-          isHold: o.isHold ?? false,
-          holdReason: o.holdReason ?? null,
-          holdBy: o.holdBy ?? null,
-          holdDate: o.holdDate ?? null,
-          followUpLogs: Array.isArray(o.followUpLogs) ? o.followUpLogs : [],
-        }));
+        // DEDUPLIKASI ORDER: Cegah order ganda dengan orderNumber yang sama
+        const seenOrderNumbers = new Set();
+        merged.orders = merged.orders
+          .filter((o) => {
+            if (!o || !o.orderNumber) return false;
+            const key = o.orderNumber.toUpperCase().trim();
+            if (seenOrderNumbers.has(key)) return false;
+            seenOrderNumbers.add(key);
+            return true;
+          })
+          .map((o) => ({
+            ...o,
+            isHold: o.isHold ?? false,
+            holdReason: o.holdReason ?? null,
+            holdBy: o.holdBy ?? null,
+            holdDate: o.holdDate ?? null,
+            followUpLogs: Array.isArray(o.followUpLogs) ? o.followUpLogs : [],
+          }));
+      }
+      if (!Array.isArray(merged.deliveryNotes)) {
+        merged.deliveryNotes = JSON.parse(JSON.stringify(defaultData.deliveryNotes || []));
+      }
+      if (!Array.isArray(merged.shipments)) {
+        merged.shipments = JSON.parse(JSON.stringify(defaultData.shipments || []));
+      }
+      // HANYA tambahkan sample order jika belum ada sama sekali di orders (bukan cek status agar tidak duplikat saat status berubah)
+      if (!merged.orders.some((o) => o.orderNumber === 'ORD-2026-007')) {
+        const sampleOrder = defaultData.orders.find((o) => o.orderNumber === 'ORD-2026-007');
+        if (sampleOrder) {
+          merged.orders.unshift(JSON.parse(JSON.stringify(sampleOrder)));
+        }
+      }
+      if (Array.isArray(merged.notifications)) {
+        // DEDUPLIKASI NOTIFIKASI
+        const seenNotifs = new Set();
+        merged.notifications = merged.notifications.filter((n) => {
+          if (!n) return false;
+          const key = `${n.role}_${n.title}_${n.message}`;
+          if (seenNotifs.has(key)) return false;
+          seenNotifs.add(key);
+          return true;
+        });
+      }
+      if (!merged.notifications.some((n) => n.role === 'MARKETING' && n.title.includes('Pengajuan'))) {
+        const sampleNotif = defaultData.notifications.find((n) => n.id === 99);
+        if (sampleNotif) {
+          merged.notifications.unshift(JSON.parse(JSON.stringify(sampleNotif)));
+        }
       }
       merged.wilayahDki = WILAYAH_DKI;
+      merged.companyBankAccount = defaultData.companyBankAccount;
       return merged;
     } catch (e) {
       console.warn('Failed to parse saved state, resetting to defaults', e);
@@ -1179,18 +1707,33 @@ export const storeActions = {
     Object.assign(store, defaults);
   },
 
+<<<<<<< HEAD
   setAuthenticatedUser(user) {
     const roleObj = store.roles.find((r) => r.key === user.role);
+=======
+  switchRole(roleKey, customSupplier = null) {
+    const roleObj = store.roles.find((r) => r.key === roleKey);
+>>>>>>> origin/Pras
     if (roleObj) {
+      const activeSupplier = customSupplier || (store.suppliers ? store.suppliers[0] : null);
       store.currentUser = {
+<<<<<<< HEAD
         id: user.id,
         name: user.name,
         email: user.email,
+=======
+        id: roleObj.key === 'MARKETING' ? 1 : roleObj.key === 'DIREKTUR' ? 2 : roleObj.key === 'ADMINISTRASI' ? 3 : roleObj.key === 'WAREHOUSE' ? 4 : roleObj.key === 'FINANCE' ? 5 : roleObj.key === 'CLIENT' ? 6 : 7,
+        name: roleObj.key === 'SUPPLIER' && activeSupplier ? `${activeSupplier.contactPerson} (${activeSupplier.name})` : roleObj.name,
+        email: roleObj.key === 'SUPPLIER' && activeSupplier ? activeSupplier.email : roleObj.email,
+>>>>>>> origin/Pras
         role: roleObj.key,
         division: roleObj.division,
         avatar: store.currentUser.avatar,
         phone: '',
         clientId: roleObj.key === 'CLIENT' ? 1 : null,
+        supplierId: roleObj.key === 'SUPPLIER' && activeSupplier ? activeSupplier.id : null,
+        supplierCode: roleObj.key === 'SUPPLIER' && activeSupplier ? activeSupplier.code : null,
+        supplierName: roleObj.key === 'SUPPLIER' && activeSupplier ? activeSupplier.name : null,
       };
       localStorage.setItem('user', JSON.stringify(user));
     }
@@ -1211,6 +1754,11 @@ export const storeActions = {
   },
 
   addNotification(role, title, message, category, link) {
+    const isDuplicate = store.notifications.some(
+      (n) => n.role === role && n.title === title && n.message === message && !n.isRead
+    );
+    if (isDuplicate) return;
+
     store.notifications.unshift({
       id: Date.now(),
       role,
@@ -1588,11 +2136,11 @@ export const storeActions = {
       this.addNotification(
         'MARKETING',
         'Pengingat Penagihan Client',
-        `Invoice ${inv.invoiceNumber} (${inv.clientName}) belum lunas (Sisa: Rp ${inv.remainingAmount.toLocaleString('id-ID')}). Catatan Finance: ${note || 'Mohon dibantu konfirmasi tanggal pembayaran dengan PIC client.'}`,
+        `Invoice ${inv.invoiceNumber} (${inv.clientName}) belum lunas (Sisa: Rp ${Number(inv.remainingAmount || 0).toLocaleString('id-ID')}). Catatan Finance: ${note || 'Mohon dibantu konfirmasi tanggal pembayaran dengan PIC client.'}`,
         'finance',
         '/marketing/monitoring'
       );
-      this.addActivityLog('Kirim Pengingat Tagihan ke Marketing', inv.invoiceNumber, `Client: ${inv.clientName}, Sisa: Rp ${inv.remainingAmount.toLocaleString('id-ID')}`);
+      this.addActivityLog('Kirim Pengingat Tagihan ke Marketing', inv.invoiceNumber, `Client: ${inv.clientName}, Sisa: Rp ${Number(inv.remainingAmount || 0).toLocaleString('id-ID')}`);
     }
   },
 
@@ -1759,7 +2307,7 @@ export const storeActions = {
         user: store.currentUser.name,
         timestamp: new Date().toLocaleString('id-ID'),
         status: 'completed',
-        notes: `Invoice ${invoiceNumber} senilai Rp ${newInvoice.totalAmount.toLocaleString('id-ID')} diterbitkan. Status pesanan: Menunggu Pembayaran.`,
+        notes: `Invoice ${invoiceNumber} senilai Rp ${Number(newInvoice.totalAmount || 0).toLocaleString('id-ID')} diterbitkan. Status pesanan: Menunggu Pembayaran.`,
       });
       this.addNotification(
         'MARKETING',
@@ -1770,7 +2318,7 @@ export const storeActions = {
       );
     }
 
-    this.addActivityLog('Menerbitkan Invoice', invoiceNumber, `Nilai Rp ${newInvoice.totalAmount.toLocaleString('id-ID')} untuk ${newInvoice.clientName}`);
+    this.addActivityLog('Menerbitkan Invoice', invoiceNumber, `Nilai Rp ${Number(newInvoice.totalAmount || 0).toLocaleString('id-ID')} untuk ${newInvoice.clientName}`);
     return newInvoice;
   },
 
@@ -1830,7 +2378,7 @@ export const storeActions = {
         user: store.currentUser.name,
         timestamp: new Date().toLocaleString('id-ID'),
         status: 'completed',
-        notes: `Penerimaan kas Rp ${payAmount.toLocaleString('id-ID')}. Sisa tagihan invoice: Rp ${invoice.remainingAmount.toLocaleString('id-ID')}`,
+        notes: `Penerimaan kas Rp ${Number(payAmount || 0).toLocaleString('id-ID')}. Sisa tagihan invoice: Rp ${Number(invoice.remainingAmount || 0).toLocaleString('id-ID')}`,
       });
 
       if (invoice.remainingAmount <= 0) {
@@ -1853,4 +2401,501 @@ export const storeActions = {
     this.addActivityLog('Mencatat Pembayaran', paymentNumber, `Penerimaan Rp ${payAmount.toLocaleString('id-ID')} (${newPayment.terminSequence})`);
     return newPayment;
   },
+
+  // Client Order Request (Public Portal & Client Role)
+  submitClientOrderRequest(data) {
+    const nextId = store.orders.length ? Math.max(...store.orders.map((o) => o.id)) + 1 : 1;
+    const orderNumber = `ORD-2026-${String(nextId).padStart(3, '0')}`;
+    const subtotal = (data.items || []).reduce((sum, item) => sum + (Number(item.qty || 0) * Number(item.price || 0)), 0);
+    const tax = Math.round(subtotal * 0.11);
+    const grandTotal = subtotal + tax;
+
+    const newOrder = {
+      id: nextId,
+      orderNumber,
+      clientId: Number(data.clientId) || 1,
+      clientName: data.clientName || 'Instansi / Sekolah Rekanan',
+      contactPerson: data.contactPerson || '-',
+      phone: data.phone || '-',
+      email: data.email || '-',
+      address: data.address || '',
+      projectName: data.projectName || 'Pengadaan Kebutuhan Sarana Prasarana',
+      date: new Date().toISOString().split('T')[0],
+      submittedBy: data.contactPerson ? `${data.contactPerson} (Client Portal)` : 'Client Portal',
+      status: 'Diajukan Client',
+      isHold: false,
+      holdReason: null,
+      holdBy: null,
+      holdDate: null,
+      urgency: data.urgency || 'Normal',
+      targetDeliveryDate: data.targetDeliveryDate || '',
+      followUpLogs: [],
+      approvedBy: null,
+      approvalDate: null,
+      approvalNotes: null,
+      items: (data.items || []).map((it) => ({
+        productId: it.productId || null,
+        sku: it.sku || 'SKU-CUSTOM',
+        name: it.name,
+        qty: Number(it.qty),
+        unit: it.unit || 'Unit',
+        price: Number(it.price || 0),
+        specs: it.specs || '',
+        total: Number(it.qty) * Number(it.price || 0),
+      })),
+      subtotal,
+      tax,
+      grandTotal,
+      notes: data.notes || '',
+      supportingDocument: data.supportingDocument || null,
+      timeline: [
+        {
+          stage: 'Pengajuan Client',
+          user: data.contactPerson || 'Client / Sekolah',
+          timestamp: new Date().toLocaleString('id-ID'),
+          status: 'completed',
+          notes: `Pengajuan kebutuhan barang mandiri via Portal Publik (${(data.items || []).length} item). Total Est: Rp ${grandTotal.toLocaleString('id-ID')}`,
+        },
+        {
+          stage: 'Verifikasi & Review Marketing',
+          user: 'Tim Marketing',
+          timestamp: '-',
+          status: 'in_progress',
+          notes: 'Menunggu review ketersediaan stok & penerbitan penawaran resmi.',
+        },
+      ],
+      documents: {
+        po: { exists: false, number: '-', status: 'Belum Dibuat', date: '-', file: null },
+        suratJalan: { exists: false, number: '-', status: 'Belum Dibuat', date: '-', file: null },
+        bast: { exists: false, number: '-', status: 'Belum Dibuat', date: '-', file: null },
+        faktur: { exists: false, number: '-', status: 'Belum Dibuat', date: '-', file: null },
+      },
+      fulfillmentStatus: 'Menunggu Persiapan',
+    };
+
+    store.orders.unshift(newOrder);
+
+    this.addNotification(
+      'MARKETING',
+      'Pengajuan Pesanan Baru dari Client',
+      `Client ${newOrder.clientName} mengajukan pesanan baru (${newOrder.orderNumber}): "${newOrder.projectName}". Total est. Rp ${grandTotal.toLocaleString('id-ID')}.`,
+      'order',
+      '/marketing/orders'
+    );
+
+    this.addActivityLog('Pengajuan Pesanan Baru Client', orderNumber, `Client: ${newOrder.clientName}, Nilai: Rp ${grandTotal.toLocaleString('id-ID')}`);
+    return newOrder;
+  },
+
+  // Marketing Accepts & Reviews Client Order Submission
+  acceptClientOrder(orderId, reviewData = {}) {
+    const order = store.orders.find((o) => o.id === Number(orderId) || o.orderNumber === orderId);
+    if (!order) return null;
+
+    // Optional item adjustments if reviewed by Marketing
+    if (reviewData.items && reviewData.items.length > 0) {
+      order.items = reviewData.items.map((it) => ({
+        productId: it.productId || null,
+        sku: it.sku || 'SKU-CUSTOM',
+        name: it.name,
+        qty: Number(it.qty),
+        unit: it.unit || 'Unit',
+        price: Number(it.price || 0),
+        specs: it.specs || '',
+        total: Number(it.qty) * Number(it.price || 0),
+      }));
+      order.subtotal = order.items.reduce((sum, it) => sum + it.total, 0);
+      order.tax = Math.round(order.subtotal * 0.11);
+      order.grandTotal = order.subtotal + order.tax;
+    }
+
+    const marketingUser = store.currentUser?.name || 'Budi Hartono, S.T. (Marketing)';
+    const notes = reviewData.notes || 'Pengajuan kebutuhan telah ditinjau dan divalidasi spesifikasinya oleh Tim Marketing CV Alpharo Artha Jaya.';
+    const actionType = reviewData.actionType || 'verify'; // 'verify' (Menunggu Verifikasi Direktur) or 'draft' (Disimpan sebagai Draft SPH)
+    const nowFormatted = new Date().toLocaleString('id-ID');
+
+    // Update existing review timeline or push new
+    const reviewTimelineItem = order.timeline.find((t) => t.stage.includes('Review Marketing') || t.stage.includes('Verifikasi & Review'));
+    if (reviewTimelineItem) {
+      reviewTimelineItem.status = 'completed';
+      reviewTimelineItem.user = marketingUser;
+      reviewTimelineItem.timestamp = nowFormatted;
+      reviewTimelineItem.notes = `Diterima & diverifikasi oleh ${marketingUser}. Catatan: ${notes}`;
+    } else {
+      order.timeline.push({
+        stage: 'Verifikasi & Review Marketing',
+        user: marketingUser,
+        timestamp: nowFormatted,
+        status: 'completed',
+        notes: `Pengajuan diterima & diverifikasi oleh ${marketingUser}. Catatan: ${notes}`,
+      });
+    }
+
+    if (actionType === 'draft') {
+      order.status = 'Draft';
+      order.timeline.push({
+        stage: 'Penyusunan Draft SPH',
+        user: marketingUser,
+        timestamp: nowFormatted,
+        status: 'in_progress',
+        notes: 'Disimpan sebagai draft penawaran resmi untuk penyesuaian margin & kelengkapan administrasi.',
+      });
+
+      this.addNotification(
+        'CLIENT',
+        'Pesanan Anda Sedang Disiapkan Penawarannya',
+        `Pengajuan ${order.orderNumber} ("${order.projectName}") telah diterima oleh Tim Marketing (${marketingUser}). Surat Penawaran Harga (SPH) sedang disiapkan.`,
+        'order',
+        '/portal?tab=tracking'
+      );
+    } else {
+      // Direct forward to Director for approval
+      order.status = 'Menunggu Verifikasi';
+      order.timeline.push({
+        stage: 'Menunggu Verifikasi Direktur',
+        user: 'System',
+        timestamp: nowFormatted,
+        status: 'in_progress',
+        notes: 'Diteruskan ke meja Direktur untuk telaah margin dan persetujuan pengadaan.',
+      });
+
+      this.addNotification(
+        'DIREKTUR',
+        'Verifikasi Pengajuan Order Rekanan',
+        `Marketing (${marketingUser}) telah memverifikasi pesanan ${order.orderNumber} dari ${order.clientName} senilai Rp ${Number(order.grandTotal || 0).toLocaleString('id-ID')}. Menunggu persetujuan Anda.`,
+        'order',
+        '/director/verification'
+      );
+
+      this.addNotification(
+        'CLIENT',
+        'Pesanan Diterima & Diajukan Approval',
+        `Kabar baik! Pengajuan pesanan Anda #${order.orderNumber} telah diterima dan divalidasi oleh Marketing Alpharo (${marketingUser}). Saat ini sedang dalam tahap approval Direktur.`,
+        'order',
+        '/portal?tab=tracking'
+      );
+    }
+
+    this.addActivityLog(
+      'Penerimaan Pesanan Client',
+      order.orderNumber,
+      `Diverifikasi oleh ${marketingUser}. Nilai final: Rp ${Number(order.grandTotal || 0).toLocaleString('id-ID')}. Status: ${order.status}`
+    );
+
+    return order;
+  },
+
+  // Marketing Clarifies or Rejects Client Order
+  rejectClientOrder(orderId, reason = '') {
+    const order = store.orders.find((o) => o.id === Number(orderId) || o.orderNumber === orderId);
+    if (!order) return false;
+
+    const marketingUser = store.currentUser?.name || 'Budi Hartono, S.T. (Marketing)';
+    order.status = 'Ditolak';
+    order.timeline.push({
+      stage: 'Pengajuan Ditolak Marketing',
+      user: marketingUser,
+      timestamp: new Date().toLocaleString('id-ID'),
+      status: 'completed',
+      notes: `Alasan penolakan / klarifikasi: ${reason || 'Spesifikasi teknis di luar lingkup layanan atau stok tidak dapat dipenuhi.'}`,
+    });
+
+    this.addNotification(
+      'CLIENT',
+      'Pengajuan Pesanan Belum Dapat Diproses',
+      `Mohon maaf, pengajuan #${order.orderNumber} belum dapat disetujui oleh Marketing Alpharo. Alasan: ${reason}`,
+      'order',
+      '/portal?tab=tracking'
+    );
+
+    this.addActivityLog('Penolakan Pengajuan Client', order.orderNumber, `Alasan: ${reason}`);
+    return true;
+  },
+
+  // Client Confirm Receipt of Goods (FR-CL-05)
+  confirmClientReceipt(orderNumber, receiptData = {}) {
+    const order = store.orders.find((o) => o.orderNumber === orderNumber);
+    if (!order) return false;
+
+    order.fulfillmentStatus = 'Selesai';
+    const recipientName = receiptData.recipientName || 'Petugas Penerima Sekolah / PIC';
+    const note = receiptData.notes || 'Barang telah diperiksa fisik lengkap dan sesuai spesifikasi.';
+
+    order.timeline.push({
+      stage: 'Barang Diterima & BAST',
+      user: recipientName,
+      timestamp: new Date().toLocaleString('id-ID'),
+      status: 'completed',
+      notes: `Penerimaan barang telah dikonfirmasi oleh client (${recipientName}). Catatan: ${note}`,
+    });
+
+    const inv = store.invoices.find((i) => i.orderNumber === orderNumber);
+    if (inv && inv.status === 'Lunas') {
+      order.status = 'Selesai';
+    }
+
+    const shipment = store.shipments.find((s) => s.orderNumber === orderNumber);
+    if (shipment) {
+      shipment.status = 'Selesai';
+    }
+
+    this.addNotification(
+      'WAREHOUSE',
+      'Client Konfirmasi Penerimaan Barang',
+      `Order ${order.orderNumber} (${order.clientName}) telah dikonfirmasi diterima di lokasi oleh ${recipientName}.`,
+      'warehouse',
+      '/warehouse/shipments'
+    );
+
+    this.addNotification(
+      'ADMINISTRASI',
+      'BAST Siap Diarsipkan',
+      `Penerimaan barang order ${order.orderNumber} telah tuntas. Segera verifikasi arsip BAST bertanda tangan.`,
+      'document',
+      '/administration/spj'
+    );
+
+    this.addActivityLog('Konfirmasi Penerimaan Barang', orderNumber, `Diterima oleh ${recipientName}. BAST tuntas.`);
+  },
+
+  // ==========================================
+  // SUPPLIER ACTIONS (PROBIS TO-BE TAHAP 4 & 5)
+  // ==========================================
+  addSupplier(newSup) {
+    if (!store.suppliers) store.suppliers = [];
+    store.suppliers.push(newSup);
+  },
+
+  confirmPurchaseOrderBySupplier(purchaseCode, supplierNotes = '') {
+    const p = (store.purchases || []).find((x) => x.purchase_code === purchaseCode || x.id === purchaseCode);
+    if (!p) return false;
+    p.supplier_status = 'Dikonfirmasi Supplier';
+    p.supplier_confirmation_date = new Date().toISOString().split('T')[0];
+    p.supplier_notes = supplierNotes || 'Pesanan telah diterima dan diverifikasi oleh Supplier. Barang sedang dipersiapkan untuk pengiriman.';
+
+    // PROBIS TO-BE Tahap 4: Notifikasi ke Finance & Warehouse bahwa pesanan dikonfirmasi
+    this.addNotification(
+      ['FINANCE', 'WAREHOUSE'],
+      'Pesanan Dikonfirmasi Supplier',
+      `Supplier ${p.default_supplier} telah mengonfirmasi kesiapan barang untuk PO ${p.purchase_code}. Barang sedang disiapkan.`,
+      'purchase',
+      '/finance/purchases'
+    );
+    this.addActivityLog('Konfirmasi Pesanan PO', p.purchase_code, `Dikonfirmasi oleh Supplier ${p.default_supplier}.`);
+    return true;
+  },
+
+  dispatchSupplierDelivery(purchaseCode, deliveryData = {}) {
+    const p = (store.purchases || []).find((x) => x.purchase_code === purchaseCode || x.id === purchaseCode);
+    if (!p) return false;
+    p.supplier_status = 'Dikirim ke Gudang CV';
+    p.delivery_info = {
+      surat_jalan: deliveryData.surat_jalan || `SJ/SUP/${Date.now().toString().slice(-6)}`,
+      courier: deliveryData.courier || 'Armada Internal Supplier',
+      tracking_number: deliveryData.tracking_number || `RESI-${Math.floor(100000 + Math.random() * 900000)}`,
+      dispatch_date: deliveryData.dispatch_date || new Date().toISOString().split('T')[0],
+      est_arrival: deliveryData.est_arrival || new Date(Date.now() + 86400000).toISOString().split('T')[0],
+      notes: deliveryData.notes || '',
+    };
+
+    // PROBIS TO-BE Tahap 4 & 5: Supplier mengirim barang -> Notifikasi ke Warehouse & Finance
+    this.addNotification(
+      'WAREHOUSE',
+      'Barang Supplier Sedang Dikirim ke Gudang',
+      `Supplier ${p.default_supplier} telah mengirimkan barang untuk PO ${p.purchase_code} dengan No. Surat Jalan ${p.delivery_info.surat_jalan} (${p.delivery_info.courier} - ${p.delivery_info.tracking_number}). Mohon siapkan penerimaan fisik di gudang.`,
+      'delivery',
+      '/warehouse/fulfillment'
+    );
+    this.addNotification(
+      'FINANCE',
+      'Pengiriman Barang Supplier Berangkat',
+      `Pesanan ${p.purchase_code} telah dikirim oleh Supplier ${p.default_supplier} (Surat Jalan: ${p.delivery_info.surat_jalan}).`,
+      'purchase',
+      '/finance/purchases'
+    );
+    this.addActivityLog('Kirim Barang Supplier', p.purchase_code, `No. SJ: ${p.delivery_info.surat_jalan}, Kurir: ${p.delivery_info.courier}`);
+    return true;
+  },
+
+  resolveSupplierDiscrepancy(purchaseCode, resolutionData = {}) {
+    const p = (store.purchases || []).find((x) => x.purchase_code === purchaseCode || x.id === purchaseCode);
+    if (!p) return false;
+    p.supplier_status = 'Barang Pengganti Dikirim';
+    p.discrepancy_resolution = {
+      action: resolutionData.action || 'Penggantian Barang Baru',
+      replacement_surat_jalan: resolutionData.replacement_surat_jalan || `SJ-RETUR-${Date.now().toString().slice(-6)}`,
+      notes: resolutionData.notes || 'Barang pengganti telah dikirimkan kembali ke gudang CV Alpharo.',
+      resolved_date: new Date().toISOString().split('T')[0],
+    };
+
+    // PROBIS TO-BE Tahap 5b: Panah kembali ke pemesanan barang ke supplier, kemudian diterima dan diperiksa kembali oleh gudang
+    this.addNotification(
+      ['WAREHOUSE', 'FINANCE'],
+      'Barang Pengganti / Retur Supplier Dikirim',
+      `Supplier ${p.default_supplier} telah mengirimkan barang pengganti untuk PO ${p.purchase_code} (SJ: ${p.discrepancy_resolution.replacement_surat_jalan}). Harap periksa kembali saat barang tiba.`,
+      'delivery',
+      '/warehouse/fulfillment'
+    );
+    this.addActivityLog('Resolusi Ketidaksesuaian Supplier', p.purchase_code, `Barang pengganti dikirim (SJ: ${p.discrepancy_resolution.replacement_surat_jalan})`);
+    return true;
+  },
+
+  confirmSupplierReceipt(purchaseCode, receiptData = {}) {
+    const p = (store.purchases || []).find((x) => x.purchase_code === purchaseCode || x.id === purchaseCode);
+    if (!p) return false;
+
+    p.supplier_status = 'Diterima Gudang (Lengkap & Sesuai)';
+    p.status = 'DITERIMA_GUDANG';
+    p.received_at = new Date().toISOString().split('T')[0];
+    p.received_notes = receiptData.notes || 'Barang diterima lengkap dan sesuai spesifikasi fisik di gudang.';
+
+    // PROBIS TO-BE Tahap 5: Update stok fisik produk aktif di gudang secara REAL-TIME
+    if (Array.isArray(p.items)) {
+      if (!Array.isArray(store.products)) {
+        store.products = [];
+      }
+      p.items.forEach((item) => {
+        const rawName = item.name || item.barang || '';
+        const cleanName = rawName.replace(/^[A-Z0-9_\-]+\s*-\s*/, '').trim();
+        const sku = (item.sku && item.sku !== '-') ? item.sku : (rawName.includes(' - ') ? rawName.split(' - ')[0].trim() : '');
+        const qty = Number(item.qty) || 0;
+
+        if (qty > 0) {
+          let prod = store.products.find((pr) => {
+            if (sku && pr.sku && pr.sku.toLowerCase() === sku.toLowerCase()) return true;
+            if (cleanName && pr.name && pr.name.toLowerCase() === cleanName.toLowerCase()) return true;
+            if (rawName && pr.name && pr.name.toLowerCase() === rawName.toLowerCase()) return true;
+            if (pr.name && cleanName && pr.name.toLowerCase().includes(cleanName.toLowerCase())) return true;
+            return false;
+          });
+
+          if (prod) {
+            prod.stock = (Number(prod.stock) || 0) + qty;
+            prod.status = prod.stock > 10 ? 'Tersedia' : (prod.stock > 0 ? 'Menipis' : 'Habis');
+          } else {
+            // New item received from supplier - add to master inventory in real time!
+            const newId = store.products.length ? Math.max(...store.products.map((x) => x.id || 0)) + 1 : 1;
+            prod = {
+              id: newId,
+              sku: sku || `PRD-${String(newId).padStart(4, '0')}`,
+              name: cleanName || rawName || 'Barang Baru Supplier',
+              category: 'Material Pengadaan',
+              unit: item.unit || 'Unit',
+              stock: qty,
+              minStock: 10,
+              price: Math.round((Number(item.harga_beli || item.est_price || 0) * 1.25)) || 100000,
+              costPrice: Number(item.harga_beli || item.est_price || 0),
+              status: qty > 10 ? 'Tersedia' : 'Menipis',
+              location: 'Gudang Utama A-01',
+            };
+            store.products.unshift(prod);
+          }
+
+          // Catat di Riwayat Mutasi Kartu Stok Gudang
+          if (!Array.isArray(store.stockMovements)) {
+            store.stockMovements = [];
+          }
+          store.stockMovements.unshift({
+            id: Date.now() + Math.random(),
+            date: new Date().toISOString().split('T')[0],
+            sku: prod.sku,
+            productName: prod.name,
+            name: prod.name,
+            type: 'Masuk',
+            qty: qty,
+            unit: prod.unit || item.unit || 'Unit',
+            reference: `PO-${p.purchase_code}`,
+            notes: `Penerimaan fisik barang supplier ${p.default_supplier}`,
+            pic: store.currentUser?.name || 'Agus Santoso (Warehouse)',
+          });
+        }
+      });
+    }
+
+    // Update status Pengajuan Gudang jika ada
+    if (p.warehouse_request_id || p.warehouse_request_code) {
+      const matchReq = (store.warehouseRequests || []).find(
+        (r) =>
+          r.id === p.warehouse_request_id ||
+          r.requestCode === p.warehouse_request_code ||
+          r.request_code === p.warehouse_request_code
+      );
+      if (matchReq) {
+        matchReq.status = 'SELESAI';
+      }
+    }
+
+    // Update antrean pemenuhan gudang jika ada order proyek terkait
+    if (store.warehouseFulfillments && p.project_name) {
+      store.warehouseFulfillments.forEach((ful) => {
+        if (ful.projectName === p.project_name || ful.clientName?.includes(p.project_name)) {
+          ful.items.forEach((fi) => {
+            const matchItem = p.items?.find((pi) => (pi.sku && pi.sku === fi.sku) || (pi.barang && pi.barang.includes(fi.name)));
+            if (matchItem) {
+              fi.availQty = Math.max(fi.availQty, fi.reqQty);
+            }
+          });
+        }
+      });
+    }
+
+    // Sync to backend API
+    try {
+      fetch(`/api/purchases/${p.id || p.purchase_code}/receive`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes: p.received_notes }),
+      }).catch(() => {});
+    } catch (e) {}
+
+    // Notifikasi ke Finance & Marketing
+    this.addNotification(
+      ['FINANCE', 'MARKETING'],
+      'Barang Supplier Tiba & Diterima di Gudang',
+      `Barang dari Supplier ${p.default_supplier} (PO: ${p.purchase_code}) telah diverifikasi fisik dan masuk ke stok gudang. Pesanan siap dialokasikan untuk pemenuhan proyek "${p.project_name}".`,
+      'warehouse',
+      '/warehouse/fulfillment'
+    );
+    this.addActivityLog('Penerimaan Fisik Barang Supplier', p.purchase_code, `Diterima lengkap dan masuk ke stok gudang.`);
+    return true;
+  },
+
+  reportSupplierShipmentDiscrepancy(purchaseCode, reason = '') {
+    const p = (store.purchases || []).find((x) => x.purchase_code === purchaseCode || x.id === purchaseCode);
+    if (!p) return false;
+
+    p.supplier_status = 'Ketidaksesuaian Fisik (Menunggu Retur)';
+    p.discrepancy_reason = reason || 'Spesifikasi barang tidak sesuai atau terdapat kerusakan fisik kemasan saat tiba di gudang.';
+    p.discrepancy_reported_at = new Date().toISOString().split('T')[0];
+
+    // PROBIS TO-BE Tahap 5b: Lapor ke Finance agar ditindaklanjuti ke Supplier
+    this.addNotification(
+      ['FINANCE', 'SUPPLIER'],
+      'Laporan Ketidaksesuaian Barang Supplier (Retur)',
+      `Gudang melaporkan ketidaksesuaian barang untuk PO ${p.purchase_code} dari Supplier ${p.default_supplier}: "${p.discrepancy_reason}". Mohon segera ditindaklanjuti.`,
+      'alert',
+      '/finance/purchases'
+    );
+    this.addActivityLog('Lapor Ketidaksesuaian Supplier', p.purchase_code, `Ketidaksesuaian: ${p.discrepancy_reason}`);
+    return true;
+  },
+
+  rejectPurchaseOrderBySupplier(purchaseCode, reason = '') {
+    const p = (store.purchases || []).find((x) => x.purchase_code === purchaseCode || x.id === purchaseCode);
+    if (!p) return false;
+    p.supplier_status = 'Ditolak Supplier';
+    p.rejection_reason = reason || 'Stok tidak mencukupi atau kendala logistik supplier.';
+    
+    this.addNotification(
+      'FINANCE',
+      'Pesanan Ditolak oleh Supplier',
+      `Supplier ${p.default_supplier} menolak pesanan PO ${p.purchase_code}. Alasan: ${p.rejection_reason}`,
+      'alert',
+      '/finance/purchases'
+    );
+    this.addActivityLog('Penolakan PO oleh Supplier', p.purchase_code, `Alasan: ${p.rejection_reason}`);
+    return true;
+    return true;
+  },
 };
+

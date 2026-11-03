@@ -53,7 +53,7 @@
               <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
                 Kata Sandi
               </label>
-              <span class="text-[11px] text-slate-400">Default: password123</span>
+              <span class="text-[11px] text-slate-400">Staff: password123 | Supplier: password</span>
             </div>
             <div class="relative">
               <input
@@ -89,7 +89,7 @@
             <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">
               Akses Cepat Penguji / Demo Role
             </span>
-            <span class="text-[10px] text-slate-400 font-mono">Password: password123</span>
+            <span class="text-[10px] text-slate-400 font-mono">Staff: password123 &bull; Supplier: password</span>
           </div>
           <p class="text-xs text-slate-500 mb-3 leading-relaxed">
             Klik tombol role di bawah untuk mengisi kredensial dan langsung masuk ke hak akses terkait:
@@ -100,14 +100,14 @@
               v-for="r in demoRoles"
               :key="r.role"
               type="button"
-              class="flex items-start gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:border-alpharo-500 hover:bg-blue-50/50 text-left transition-all group"
-              @click="quickFill(r)"
+              class="flex items-start gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:border-alpharo-500 hover:bg-blue-50/50 text-left transition-all group cursor-pointer"
+              @click="loginAs(r)"
             >
               <span :class="[r.badgeColor, 'w-2 h-2 rounded-full mt-1.5 shrink-0']"></span>
-              <div class="min-w-0">
-                <div class="flex items-center gap-1.5">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between gap-1.5">
                   <span class="text-xs font-bold text-slate-900 group-hover:text-alpharo-600">{{ r.title }}</span>
-                  <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-mono">{{ r.role }}</span>
+                  <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-mono">{{ r.role }}</span>
                 </div>
                 <p class="text-[11px] text-slate-500 truncate mt-0.5">{{ r.email }}</p>
                 <p class="text-[10px] text-slate-400 line-clamp-1 mt-0.5">{{ r.desc }}</p>
@@ -128,7 +128,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AlpharoLogo from '../../components/common/AlpharoLogo.vue';
-import { storeActions } from '../../stores/mockData';
+import { store, storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
 import api from '../../services/api';
 
@@ -174,7 +174,7 @@ const demoRoles = [
     title: 'Administrasi',
     email: 'admin@alpharo.co.id',
     badgeColor: 'bg-emerald-500',
-    desc: 'Penerbitan PO, Surat Jalan, BAST, Faktur & Dokumen',
+    desc: 'Penerbitan PO, Surat Jalan, BAST, Faktur & Dokumen SPJ',
     target: '/administration/dashboard',
   },
   {
@@ -195,17 +195,35 @@ const demoRoles = [
   },
   {
     role: 'CLIENT',
-    title: 'Client / Sekolah',
+    title: 'Portal Publik Rekanan',
     email: 'client@alpharo.co.id',
     badgeColor: 'bg-teal-500',
-    desc: 'Tracking Pesanan, Jadwal Termin & Konfirmasi Bayar',
-    target: '/client/dashboard',
+    desc: 'Pengadaan Mandiri, Lacak Resi BAST & Pembayaran',
+    target: '/portal',
+  },
+  {
+    role: 'SUPPLIER',
+    title: 'Supplier / Vendor',
+    email: 'sales@synnexmetrodata.com',
+    password: 'password',
+    badgeColor: 'bg-amber-600',
+    desc: 'Terima Pesanan Masuk (PO), Konfirmasi & Kirim ke Gudang CV',
+    target: '/supplier/portal',
   },
 ];
 
+// 1-Click Login directly from Demo Role cards
+const loginAs = (demo) => {
+  form.value.email = demo.email;
+  form.value.password = demo.password || 'password123';
+  storeActions.switchRole(demo.role);
+  toast.success(`Berhasil masuk sebagai ${demo.title}`);
+  router.push(demo.target);
+};
+
 const quickFill = (demo) => {
   form.value.email = demo.email;
-  form.value.password = 'password123';
+  form.value.password = demo.password || 'password123';
   toast.info(`Kredensial ${demo.title} diisi. Silakan klik Masuk.`);
 };
 
@@ -214,6 +232,7 @@ const handleSubmit = async () => {
   loading.value = true;
 
   try {
+<<<<<<< HEAD
     const response = await api.post('/auth/login', {
       email: form.value.email.trim().toLowerCase(),
       password: form.value.password,
@@ -237,6 +256,63 @@ const handleSubmit = async () => {
   } catch (error) {
     const validationMessage = Object.values(error.response?.data?.errors || {}).flat()[0];
     errorMessage.value = validationMessage || error.response?.data?.message || 'Tidak dapat terhubung ke layanan autentikasi.';
+=======
+    const emailLower = (form.value.email || '').toLowerCase().trim();
+    let matchedRole = 'MARKETING';
+    let targetRoute = '/marketing/dashboard';
+
+    let matchedSupplier = null;
+    if (
+      emailLower.includes('supplier') ||
+      emailLower.includes('synnex') ||
+      emailLower.includes('sumbermakmur') ||
+      emailLower.includes('indokomputer') ||
+      emailLower.includes('mandiriperkasa') ||
+      emailLower.includes('ciptakarya') ||
+      emailLower.includes('globalsarana') ||
+      emailLower.includes('graha') ||
+      emailLower.includes('mitrasejahtera') ||
+      (store.suppliers && store.suppliers.some((s) => s.email?.toLowerCase() === emailLower))
+    ) {
+      matchedRole = 'SUPPLIER';
+      targetRoute = '/supplier/portal';
+      matchedSupplier = (store.suppliers || []).find((s) => s.email?.toLowerCase() === emailLower) || (store.suppliers?.[0]);
+    } else if (emailLower.includes('direktur') || emailLower.includes('alpharo')) {
+      matchedRole = 'DIREKTUR';
+      targetRoute = '/director/dashboard';
+    } else if (emailLower.includes('admin') || emailLower.includes('administrasi') || emailLower.includes('siti')) {
+      matchedRole = 'ADMINISTRASI';
+      targetRoute = '/administration/dashboard';
+    } else if (emailLower.includes('warehouse') || emailLower.includes('gudang') || emailLower.includes('agus')) {
+      matchedRole = 'WAREHOUSE';
+      targetRoute = '/warehouse/dashboard';
+    } else if (emailLower.includes('finance') || emailLower.includes('keuangan') || emailLower.includes('dewi')) {
+      matchedRole = 'FINANCE';
+      targetRoute = '/finance/dashboard';
+    } else if (emailLower.includes('client') || emailLower.includes('sekolah') || emailLower.includes('sma')) {
+      matchedRole = 'CLIENT';
+      targetRoute = '/portal';
+    } else {
+      matchedRole = 'MARKETING';
+      targetRoute = '/marketing/dashboard';
+    }
+
+    const validPasswords = ['password', 'password123', 'admin', '123456'];
+    if (form.value.password && !validPasswords.includes(form.value.password)) {
+      errorMessage.value = matchedRole === 'SUPPLIER'
+        ? 'Kata sandi salah. Gunakan default: password'
+        : 'Kata sandi salah. Gunakan default: password123';
+      loading.value = false;
+      return;
+    }
+
+    // Switch role in reactive store & sync localStorage
+    storeActions.switchRole(matchedRole, matchedSupplier);
+    toast.success(`Berhasil masuk sebagai ${matchedSupplier ? matchedSupplier.name : matchedRole}`);
+    router.push(targetRoute);
+  } catch (err) {
+    errorMessage.value = 'Terjadi kesalahan autentikasi.';
+>>>>>>> origin/Pras
   } finally {
     loading.value = false;
   }

@@ -663,7 +663,7 @@
 import { ref, computed, onMounted } from 'vue';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import Modal from '../../components/common/Modal.vue';
-import { store } from '../../stores/mockData';
+import { store, storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
 import {
   ClipboardList,
@@ -925,6 +925,25 @@ const saveRequest = async () => {
   };
 
   store.warehouseRequests.unshift(newReq);
+
+  // PROBIS TO-BE Tahap 3 & 4: Warehouse ajukan kebutuhan ke Finance
+  storeActions.addNotification(
+    'FINANCE',
+    'Pengajuan Kebutuhan Barang (Pengadaan)',
+    `Gudang mengajukan pengadaan barang ${requestCode} untuk proyek "${form.value.project_name}" senilai Rp ${Number(total).toLocaleString('id-ID')}. Segera lakukan pemesanan ke Supplier.`,
+    'procurement',
+    `/finance/purchases/create?request_id=${newReq.id}`
+  );
+
+  storeActions.addNotification(
+    'MARKETING',
+    'Pengadaan Barang Dalam Proses',
+    `Kebutuhan pengadaan barang belum tersedia untuk proyek "${form.value.project_name}" (${requestCode}) telah diajukan ke Finance oleh Gudang.`,
+    'warehouse',
+    '/marketing/orders'
+  );
+
+  storeActions.addActivityLog('Pengajuan Kebutuhan Barang', requestCode, `Diajukan ke Finance untuk proyek ${form.value.project_name} senilai Rp ${Number(total).toLocaleString('id-ID')}`);
 
   // Sync to backend API if available
   try {

@@ -40,6 +40,17 @@
             <Sparkles class="w-4 h-4" :class="{ 'animate-spin': isBulkGenerating }" />
             <span>{{ isBulkGenerating ? 'Memproses Dokumen...' : `Generate Terpilih (${selectedDocKeys.length})` }}</span>
           </button>
+
+          <!-- PROBIS TO-BE Tahap 11 & 12: Serahkan SPJ ke Gudang untuk Pengiriman -->
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 font-semibold rounded-lg text-xs shadow-2xs transition-all bg-[#0e7490] hover:bg-[#155e75] active:bg-[#164e63] text-white cursor-pointer"
+            title="Selesaikan SPJ dan kirim notifikasi ke Gudang untuk persiapan pengiriman armada"
+            @click="notifyWarehouseSpjReady"
+          >
+            <Truck class="w-4 h-4" />
+            <span>Kirim SPJ ke Gudang</span>
+          </button>
         </div>
       </div>
     </template>
@@ -2800,7 +2811,7 @@
               <p class="font-bold text-slate-800">Terbilang : <em>{{ formatTerbilang(fakturForm.nilai_setelah_pph || getEffectiveDocTotals('faktur').netto) }}</em></p>
               <div class="mt-2 text-[11px] text-slate-600">
                 <p>Pembayaran dapat ditransfer melalui rekening:</p>
-                <p class="font-semibold text-slate-800">Bank DKI JAKARTA | No. Rek: 52323628813 | A.n: CV ALPHARO ARTHA JAYA</p>
+                <p class="font-semibold text-slate-800">Bank BCA JAKARTA | No. Rek: 52323628813 | A.n: CV ALPHARO ARTHA JAYA</p>
               </div>
             </div>
           </div>
@@ -2954,6 +2965,7 @@ import AppLayout from '../../components/layout/AppLayout.vue';
 import Modal from '../../components/common/Modal.vue';
 import { useToast } from '../../services/toast';
 import spjService from '../../services/spjService';
+import { store, storeActions } from '../../stores/mockData';
 
 // Lucide Icons
 import {
@@ -3914,6 +3926,23 @@ async function handleBulkGenerate() {
     if (res.success) {
       toast.success(res.message);
       await loadProjectData(selectedProjectId.value);
+
+      // PROBIS TO-BE Tahap 11: Dokumen SPJ di-generate
+      const pName = activeProject.value?.title || activeProject.value?.name || selectedProjectId.value;
+      storeActions.addNotification(
+        'WAREHOUSE',
+        'Dokumen SPJ Siap Diunduh / Dikirim',
+        `Administrasi telah men-generate ${selectedDocKeys.value.length} dokumen SPJ untuk proyek "${pName}". Persiapkan barang & armada pengiriman.`,
+        'document',
+        '/warehouse/shipments'
+      );
+      storeActions.addNotification(
+        'MARKETING',
+        'Penyusunan SPJ Berjalan',
+        `Dokumen SPJ proyek "${pName}" (${selectedDocKeys.value.length} dokumen) telah di-generate oleh Administrasi.`,
+        'document',
+        '/marketing/orders'
+      );
     }
   } catch (err) {
     console.error(err);
@@ -3921,6 +3950,26 @@ async function handleBulkGenerate() {
   } finally {
     isBulkGenerating.value = false;
   }
+}
+
+function notifyWarehouseSpjReady() {
+  const pName = activeProject.value?.title || activeProject.value?.name || selectedProjectId.value;
+  storeActions.addNotification(
+    'WAREHOUSE',
+    'Berkas SPJ Lengkap - Siapkan Pengiriman Armada',
+    `Administrasi telah merampungkan penyusunan berkas SPJ proyek "${pName}". Mohon Gudang segera menyiapkan armada dan nomor resi untuk dikirim bersama dokumen SPJ ke customer.`,
+    'warehouse',
+    '/warehouse/shipments'
+  );
+  storeActions.addNotification(
+    'MARKETING',
+    'Laporan SPJ Rampung Disusun',
+    `Berkas Surat Pertanggungjawaban (SPJ) proyek "${pName}" telah lengkap dan diserahkan ke bagian Gudang untuk pengiriman.`,
+    'document',
+    '/marketing/orders'
+  );
+  storeActions.addActivityLog('Penyusunan SPJ Selesai', selectedProjectId.value, `Berkas SPJ ${pName} diserahkan ke Gudang`);
+  toast.success('Pemberitahuan telah dikirimkan ke Gudang untuk persiapan pengiriman barang & SPJ.');
 }
 
 function downloadActiveDocFile(docKey) {

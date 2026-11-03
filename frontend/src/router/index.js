@@ -10,7 +10,6 @@ import MarketingClients from '../views/marketing/MarketingClients.vue';
 import ClientFormView from '../views/marketing/ClientFormView.vue';
 import MarketingOrders from '../views/marketing/MarketingOrders.vue';
 import OrderFormView from '../views/marketing/OrderFormView.vue';
-import MarketingOrderMonitoring from '../views/marketing/MarketingOrderMonitoring.vue';
 
 // Direktur Views
 import DirectorDashboard from '../views/director/DirectorDashboard.vue';
@@ -45,6 +44,7 @@ import WarehouseDeliveryNotes from '../views/warehouse/WarehouseDeliveryNotes.vu
 
 // Finance Views
 import FinanceDashboard from '../views/finance/FinanceDashboard.vue';
+import FinanceSuppliers from '../views/finance/FinanceSuppliers.vue';
 import FinanceInvoices from '../views/finance/FinanceInvoices.vue';
 import FinancePayments from '../views/finance/FinancePayments.vue';
 import FinanceReceivables from '../views/finance/FinanceReceivables.vue';
@@ -55,8 +55,11 @@ import FinancePurchaseCreate from '../views/finance/FinancePurchaseCreate.vue';
 
 // Client Views
 import ClientDashboard from '../views/client/ClientDashboard.vue';
+import ClientOrderRequest from '../views/client/ClientOrderRequest.vue';
 import ClientPayments from '../views/client/ClientPayments.vue';
 import ClientOrderTracking from '../views/client/ClientOrderTracking.vue';
+import PublicPortalView from '../views/client/PublicPortalView.vue';
+import SupplierPortalView from '../views/supplier/SupplierPortalView.vue';
 
 // Common Views
 import NotificationsView from '../views/common/NotificationsView.vue';
@@ -76,7 +79,8 @@ const routes = [
         ADMINISTRASI: '/administration/dashboard',
         WAREHOUSE: '/warehouse/dashboard',
         FINANCE: '/finance/dashboard',
-        CLIENT: '/client/dashboard',
+        CLIENT: '/portal',
+        SUPPLIER: '/supplier/portal',
       };
       return roleMap[role] || '/marketing/dashboard';
     },
@@ -85,7 +89,7 @@ const routes = [
     path: '/login',
     name: 'login',
     component: LoginView,
-    meta: { title: 'Masuk ke Sistem', guestOnly: true },
+    meta: { title: 'Masuk ke Sistem' },
   },
   {
     path: '/register',
@@ -117,6 +121,7 @@ const routes = [
     component: ClientFormView,
     meta: { title: 'Edit Data Client', role: 'MARKETING', requiresAuth: true },
   },
+
   {
     path: '/marketing/orders',
     name: 'marketing-orders',
@@ -137,9 +142,7 @@ const routes = [
   },
   {
     path: '/marketing/orders/monitoring',
-    name: 'marketing-order-monitoring',
-    component: MarketingOrderMonitoring,
-    meta: { title: 'Monitoring Order', role: 'MARKETING', requiresAuth: true },
+    redirect: '/marketing/orders',
   },
   {
     path: '/marketing/notifications',
@@ -340,6 +343,12 @@ const routes = [
     meta: { title: 'Dashboard Finance', role: 'FINANCE', requiresAuth: true },
   },
   {
+    path: '/finance/suppliers',
+    name: 'finance-suppliers',
+    component: FinanceSuppliers,
+    meta: { title: 'Data Supplier', role: 'FINANCE', requiresAuth: true },
+  },
+  {
     path: '/finance/purchases',
     name: 'finance-purchases',
     component: FinancePurchases,
@@ -392,40 +401,100 @@ const routes = [
     meta: { title: 'Profil Finance', role: 'FINANCE', requiresAuth: true },
   },
 
-  // 6. CLIENT / SEKOLAH ROUTES
+  // 6. CLIENT / PORTAL REKANAN (SEMUA AKSES CLIENT DIARAHKAN KE PORTAL PUBLIK TERPADU)
+  {
+    path: '/client',
+    redirect: '/portal',
+  },
   {
     path: '/client/dashboard',
-    name: 'client-dashboard',
-    component: ClientDashboard,
-    meta: { title: 'Dashboard Rekanan Client', role: 'CLIENT', requiresAuth: true },
+    redirect: '/portal',
+  },
+  {
+    path: '/client/order-request',
+    redirect: { path: '/portal', query: { tab: 'request' } },
+  },
+  {
+    path: '/client/request',
+    redirect: { path: '/portal', query: { tab: 'request' } },
   },
   {
     path: '/client/payments',
-    name: 'client-payments',
-    component: ClientPayments,
-    meta: { title: 'Pembayaran (Penuh & Termin)', role: 'CLIENT', requiresAuth: true },
+    redirect: { path: '/portal', query: { tab: 'payment' } },
   },
   {
     path: '/client/orders',
-    name: 'client-orders',
-    component: ClientOrderTracking,
-    meta: { title: 'Tracking Pesanan', role: 'CLIENT', requiresAuth: true },
+    redirect: { path: '/portal', query: { tab: 'tracking' } },
   },
   {
     path: '/client/tracking',
-    redirect: '/client/orders',
+    redirect: { path: '/portal', query: { tab: 'tracking' } },
   },
   {
     path: '/client/notifications',
-    name: 'client-notifications',
-    component: NotificationsView,
-    meta: { title: 'Notifikasi Rekanan Client', role: 'CLIENT', requiresAuth: true },
+    redirect: '/portal',
   },
   {
     path: '/client/profile',
-    name: 'client-profile',
-    component: ProfileView,
-    meta: { title: 'Profil Rekanan Client', role: 'CLIENT', requiresAuth: true },
+    redirect: '/portal',
+  },
+
+  // 7. PUBLIC PORTAL (PORTAL PUBLIK REKANAN - 1 PORTAL TERPADU: PENGAJUAN, RESI/BAST, PEMBAYARAN)
+  {
+    path: '/portal',
+    name: 'public-portal',
+    component: PublicPortalView,
+    meta: { title: 'Portal Publik Rekanan — Layanan Mandiri Pengadaan, Logistik & Pembayaran' },
+  },
+  {
+    path: '/portal/tracking',
+    redirect: { path: '/portal', query: { tab: 'tracking' } },
+  },
+  {
+    path: '/portal/pengajuan',
+    redirect: { path: '/portal', query: { tab: 'request' } },
+  },
+  {
+    path: '/portal/pembayaran',
+    redirect: { path: '/portal', query: { tab: 'payment' } },
+  },
+  {
+    path: '/tracking',
+    redirect: { path: '/portal', query: { tab: 'tracking' } },
+  },
+
+  // 8. SUPPLIER / PORTAL VENDOR (PORTAL REKANAN PENGADAAN & DISTRIBUTOR)
+  {
+    path: '/supplier',
+    redirect: '/supplier/portal',
+  },
+  {
+    path: '/supplier/dashboard',
+    redirect: '/supplier/portal',
+  },
+  {
+    path: '/supplier/orders',
+    redirect: { path: '/supplier/portal', query: { tab: 'orders' } },
+  },
+  {
+    path: '/supplier/shipments',
+    redirect: { path: '/supplier/portal', query: { tab: 'shipments' } },
+  },
+  {
+    path: '/supplier/notifications',
+    name: 'supplier-notifications',
+    component: NotificationsView,
+    meta: { title: 'Notifikasi Supplier', role: 'SUPPLIER', requiresAuth: true },
+  },
+  {
+    path: '/supplier/profile',
+    redirect: { path: '/supplier/portal', query: { tab: 'profile' } },
+  },
+  {
+    path: '/supplier/portal',
+    name: 'supplier-portal',
+    component: SupplierPortalView,
+    meta: { title: 'Portal Vendor & Supplier Rekanan — CV Alpharo Artha Jaya', role: 'SUPPLIER' },
   },
 
   // Catch-all route
@@ -474,7 +543,19 @@ router.beforeEach((to) => {
   // If guestOnly and user is logged in, redirect to their role dashboard
   if (to.meta.guestOnly && token) {
     const role = store.currentUser?.role || 'MARKETING';
+<<<<<<< HEAD
     return roleHome[role] || roleHome.MARKETING;
+=======
+    const roleMap = {
+      MARKETING: '/marketing/dashboard',
+      DIREKTUR: '/director/dashboard',
+      ADMINISTRASI: '/administration/dashboard',
+      WAREHOUSE: '/warehouse/dashboard',
+      FINANCE: '/finance/dashboard',
+      CLIENT: '/portal',
+    };
+    return next(roleMap[role] || '/marketing/dashboard');
+>>>>>>> origin/Pras
   }
 
   if (to.meta.role && store.currentUser.role !== to.meta.role) {

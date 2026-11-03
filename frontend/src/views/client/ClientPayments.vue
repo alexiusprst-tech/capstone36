@@ -26,24 +26,22 @@
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white uppercase tracking-wider mb-2">
-            Rekening Resmi Perusahaan
+            Rekening Resmi Perusahaan (Tunggal & Tetap)
           </span>
           <h3 class="text-base font-bold text-white">Pembayaran Ditujukan Kepada: CV Alpharo Artha Jaya</h3>
           <p class="text-xs text-blue-100 mt-0.5">
-            Gunakan nomor rekening resmi berikut untuk seluruh transaksi pembayaran pesanan dan termin instansi Anda.
+            Gunakan nomor rekening resmi Bank DKI berikut untuk seluruh transaksi pembayaran pesanan dan termin instansi Anda.
           </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-          <div class="bg-white/10 backdrop-blur-xs rounded-xl p-3 border border-white/10">
-            <p class="text-[10px] text-blue-200 font-bold uppercase tracking-wider">Bank BCA</p>
-            <p class="font-mono text-sm font-bold text-white tracking-wider">829-019-2811</p>
-            <p class="text-[10px] text-blue-200">a.n. CV Alpharo Artha Jaya</p>
-          </div>
-          <div class="bg-white/10 backdrop-blur-xs rounded-xl p-3 border border-white/10">
-            <p class="text-[10px] text-blue-200 font-bold uppercase tracking-wider">Bank Mandiri</p>
-            <p class="font-mono text-sm font-bold text-white tracking-wider">133-00-98218-09</p>
-            <p class="text-[10px] text-blue-200">a.n. CV Alpharo Artha Jaya</p>
+          <div class="bg-white/10 backdrop-blur-xs rounded-xl p-4 border border-white/20 min-w-[260px] shadow-sm">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <p class="text-[10px] text-amber-300 font-bold uppercase tracking-wider">Bank BCA Jakarta</p>
+              <span class="text-[9px] font-bold bg-emerald-500/80 text-white px-2 py-0.5 rounded-full">Resmi Tetap</span>
+            </div>
+            <p class="font-mono text-lg font-extrabold text-white tracking-widest my-1 select-all">52323628813</p>
+            <p class="text-[11px] text-blue-100 font-semibold">a.n. CV ALPHARO ARTHA JAYA</p>
           </div>
         </div>
       </div>
@@ -51,9 +49,9 @@
 
     <!-- KPI SUMMARY -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <KpiCard title="Total Tagihan" :value="totalInvoiceValue" :is-currency="true" subtitle="Seluruh nilai invoice" icon-variant="slate" />
-      <KpiCard title="Sudah Dibayar" :value="totalPaid" :is-currency="true" subtitle="Realisasi dana diterima" icon-variant="emerald" />
-      <KpiCard title="Sisa Tagihan" :value="totalOutstanding" :is-currency="true" subtitle="Menunggu pelunasan" icon-variant="rose" />
+      <KpiCard title="Total Tagihan" :value="totalInvoiceValue" :is-currency="true" subtitle="Seluruh nilai invoice" icon-variant="blue" />
+      <KpiCard title="Sudah Dibayar" :value="totalPaid" :is-currency="true" subtitle="Realisasi dana diterima" icon-variant="blue" />
+      <KpiCard title="Sisa Tagihan" :value="totalOutstanding" :is-currency="true" subtitle="Menunggu pelunasan" icon-variant="blue" />
       <KpiCard title="Invoice Lunas" :value="paidCount" subtitle="Tagihan tuntas 100%" icon-variant="blue" />
     </div>
 
@@ -466,7 +464,7 @@ const submitPaymentConfirmation = () => {
   storeActions.addNotification(
     'FINANCE',
     'Konfirmasi Pembayaran Rekanan',
-    `${store.currentUser.name} telah mengirimkan konfirmasi pembayaran Rp ${paymentForm.value.amount.toLocaleString('id-ID')} untuk ${inv.invoiceNumber}.`,
+    `${store.currentUser.name} telah mengirimkan konfirmasi pembayaran Rp ${Number(paymentForm.value.amount || 0).toLocaleString('id-ID')} untuk ${inv.invoiceNumber}.`,
     'payment',
     '/finance/payments'
   );

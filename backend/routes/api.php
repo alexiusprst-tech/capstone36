@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\PurchaseController;
 use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\SpjController;
+use App\Http\Controllers\Api\SupplierController;
 use Illuminate\Support\Facades\Route;
 
 // Public Auth Routes
@@ -32,9 +33,12 @@ Route::post('/products', [ProductController::class, 'store'])->name('api.product
 Route::put('/products/{id}', [ProductController::class, 'update'])->name('api.products.update');
 Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('api.products.destroy');
 
-// Suppliers
-Route::get('/suppliers', [PurchaseController::class, 'getSuppliers'])->name('api.suppliers.index');
-Route::post('/suppliers', [PurchaseController::class, 'storeSupplier'])->name('api.suppliers.store');
+// Suppliers (Full Master CRUD)
+Route::get('/suppliers', [SupplierController::class, 'index'])->name('api.suppliers.index');
+Route::post('/suppliers', [SupplierController::class, 'store'])->name('api.suppliers.store');
+Route::get('/suppliers/{id}', [SupplierController::class, 'show'])->name('api.suppliers.show');
+Route::put('/suppliers/{id}', [SupplierController::class, 'update'])->name('api.suppliers.update');
+Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy'])->name('api.suppliers.destroy');
 
 // Warehouse Requests (Material Request)
 Route::get('/warehouse/requests', [PurchaseController::class, 'getWarehouseRequests'])->name('api.warehouse.requests.index');
@@ -43,6 +47,7 @@ Route::post('/warehouse/requests', [PurchaseController::class, 'storeWarehouseRe
 // Purchases (Transaksi Pembelian)
 Route::get('/purchases', [PurchaseController::class, 'getPurchases'])->name('api.purchases.index');
 Route::post('/purchases', [PurchaseController::class, 'storePurchase'])->name('api.purchases.store');
+Route::post('/purchases/{id}/receive', [PurchaseController::class, 'receivePurchaseShipment'])->name('api.purchases.receive');
 
 // Regions (DKI Jakarta Kecamatan & Kelurahan Data)
 Route::get('/regions', [RegionController::class, 'index'])->name('api.regions.index');

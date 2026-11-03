@@ -13,10 +13,10 @@
 
     <!-- KPIS FOR RECEIVABLES -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-      <KpiCard title="Total Piutang Usaha" :value="totalReceivable" :is-currency="true" icon-variant="rose" />
+      <KpiCard title="Total Piutang Usaha" :value="totalReceivable" :is-currency="true" icon-variant="blue" />
       <KpiCard title="Piutang Berjalan (Lancar)" :value="currentReceivable" :is-currency="true" icon-variant="blue" />
-      <KpiCard title="Mendekati Tempo" :value="dueReceivable" :is-currency="true" icon-variant="amber" />
-      <KpiCard title="Lewat Jatuh Tempo (Overdue)" :value="overdueReceivable" :is-currency="true" icon-variant="rose" />
+      <KpiCard title="Mendekati Tempo" :value="dueReceivable" :is-currency="true" icon-variant="blue" />
+      <KpiCard title="Lewat Jatuh Tempo (Overdue)" :value="overdueReceivable" :is-currency="true" icon-variant="blue" />
     </div>
 
     <!-- RECEIVABLES TABLE -->
@@ -45,13 +45,13 @@
               <td class="py-3.5 px-4 font-bold text-slate-800">{{ inv.clientName }}</td>
               <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ inv.invoiceNumber }}</td>
               <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
-                Rp {{ inv.totalAmount.toLocaleString('id-ID') }}
+                Rp {{ Number(inv.totalAmount || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-right font-mono text-emerald-600 font-semibold whitespace-nowrap">
-                Rp {{ inv.paidAmount.toLocaleString('id-ID') }}
+                Rp {{ Number(inv.paidAmount || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-right font-mono text-rose-600 font-bold whitespace-nowrap">
-                Rp {{ inv.remainingAmount.toLocaleString('id-ID') }}
+                Rp {{ Number(inv.remainingAmount || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ inv.dueDate }}</td>
               <td class="py-3.5 px-4 text-center"><StatusBadge :status="inv.status" /></td>
@@ -135,14 +135,14 @@ const remindNote = ref('');
 
 const receivableList = computed(() => store.invoices.filter((i) => i.remainingAmount > 0));
 
-const totalReceivable = computed(() => receivableList.value.reduce((s, i) => s + i.remainingAmount, 0));
-const overdueReceivable = computed(() => receivableList.value.filter((i) => i.status === 'Jatuh Tempo').reduce((s, i) => s + i.remainingAmount, 0));
-const dueReceivable = computed(() => receivableList.value.filter((i) => i.status === 'Sebagian / Termin').reduce((s, i) => s + i.remainingAmount, 0));
+const totalReceivable = computed(() => receivableList.value.reduce((s, i) => s + (Number(i.remainingAmount) || 0), 0));
+const overdueReceivable = computed(() => receivableList.value.filter((i) => i.status === 'Jatuh Tempo').reduce((s, i) => s + (Number(i.remainingAmount) || 0), 0));
+const dueReceivable = computed(() => receivableList.value.filter((i) => i.status === 'Sebagian / Termin').reduce((s, i) => s + (Number(i.remainingAmount) || 0), 0));
 const currentReceivable = computed(() => totalReceivable.value - overdueReceivable.value);
 
 const openRemindModal = (inv) => {
   selectedInvoice.value = inv;
-  remindNote.value = `Tagihan invoice ${inv.invoiceNumber} belum lunas (Sisa: Rp ${inv.remainingAmount.toLocaleString('id-ID')}). Mohon bantu konfirmasi tanggal pembayaran ke PIC client.`;
+  remindNote.value = `Tagihan invoice ${inv.invoiceNumber} belum lunas (Sisa: Rp ${Number(inv.remainingAmount || 0).toLocaleString('id-ID')}). Mohon bantu konfirmasi tanggal pembayaran ke PIC client.`;
   remindModalOpen.value = true;
 };
 

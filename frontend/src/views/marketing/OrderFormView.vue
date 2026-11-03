@@ -5,11 +5,11 @@
         <div>
           <div class="flex items-center gap-2 mb-1">
             <router-link
-              to="/marketing/orders"
+              to="/marketing/orders/monitoring"
               class="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
             >
               <ArrowLeft class="w-3.5 h-3.5" />
-              <span>Kembali ke Kelola Order & Proyek</span>
+              <span>Kembali ke Monitoring Order</span>
             </router-link>
           </div>
           <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
@@ -23,6 +23,35 @@
     </template>
 
     <form class="space-y-6 max-w-7xl mx-auto pb-12" @submit.prevent="handleSubmit">
+      <!-- BANNER JIKA MERINCI DARI PENGAJUAN KLIEN -->
+      <div
+        v-if="fromClientOrder"
+        class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+      >
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+            <ClipboardList class="w-5 h-5 text-amber-300 stroke-[2.5]" />
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-emerald-900">Merinci Pengajuan Rekanan Klien:</span>
+              <span class="font-mono font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded text-xs">
+                {{ fromClientOrder.orderNumber }} &bull; {{ fromClientOrder.clientName }}
+              </span>
+            </div>
+            <p class="text-[11px] text-emerald-700 mt-0.5">
+              Data instansi, permohonan proyek, dan {{ (fromClientOrder.items || []).length }} item barang telah dimuat otomatis. Silakan lengkapi spesifikasi pengadaan & nomor dokumen resmi di bawah.
+            </p>
+          </div>
+        </div>
+        <router-link
+          to="/marketing/orders/monitoring"
+          class="text-xs font-bold text-emerald-700 hover:text-emerald-900 underline whitespace-nowrap"
+        >
+          ← Kembali ke Monitoring
+        </router-link>
+      </div>
+
       <!-- 4-CARD 2x2 GRID (SESUAI DOKUMEN TANGKAPAN LAYAR) -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         
@@ -86,11 +115,11 @@
                 </select>
                 <button
                   type="button"
-                  class="h-6 px-2.5 rounded-full border border-slate-900 text-emerald-600 hover:bg-slate-50 flex items-center justify-center shrink-0 font-bold transition-colors shadow-2xs"
+                  class="h-[38px] w-[38px] rounded-lg border border-emerald-500 hover:bg-emerald-50 flex items-center justify-center shrink-0 font-bold transition-colors shadow-2xs"
                   title="Tambah Customer"
                   @click="quickCustomerModalOpen = true"
                 >
-                  <Plus class="w-3.5 h-3.5 text-emerald-600 stroke-[2.5]" />
+                  <Plus class="w-4 h-4 text-emerald-600 stroke-[2.5]" />
                 </button>
               </div>
             </div>
@@ -104,7 +133,7 @@
                 required
                 class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600"
               >
-                <option value="" disabled>Pilih Marketing</option>
+                <option value="" disabled selected>Pilih Marketing</option>
                 <option value="Budi Hartono, S.T.">Budi Hartono, S.T.</option>
                 <option value="Ahmad Fauzi">Ahmad Fauzi</option>
                 <option value="Rina Wijaya, S.E.">Rina Wijaya, S.E.</option>
@@ -116,12 +145,16 @@
               <label class="block text-xs font-semibold text-slate-700 mb-1.5">
                 Company <span class="text-rose-500">*</span>
               </label>
-              <input
-                :value="form.company || 'CV Alpharo Artha Jaya'"
-                type="text"
-                readonly
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 text-slate-700 font-medium cursor-not-allowed select-none focus:outline-hidden"
-              />
+              <select
+                v-model="form.company"
+                required
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600"
+                @change="updateDocNumbers"
+              >
+                <option value="" disabled selected>Pilih Company</option>
+                <option value="CV Alpharo Artha Jaya">CV Alpharo Artha Jaya</option>
+                <option value="PT Alpharo Multi Kreasi">PT Alpharo Multi Kreasi</option>
+              </select>
             </div>
           </div>
         </div>
@@ -139,7 +172,6 @@
               <input
                 v-model="form.namaKegiatan"
                 type="text"
-                placeholder="Contoh: Belanja Pemeliharaan Sarana dan Prasarana"
                 class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800"
               />
             </div>
@@ -149,24 +181,19 @@
               <input
                 v-model="form.rincianKegiatan"
                 type="text"
-                placeholder="Rincian sub-kegiatan pekerjaan pengadaan..."
                 class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800"
               />
             </div>
 
             <div>
               <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kode Rekening</label>
-              <select
-                v-model="form.kodeRekening"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600"
-              >
-                <option value="" selected>Pilih Kode Rekening</option>
-                <option value="5.1.02.01.01.0024">5.1.02.01.01.0024 - Belanja Alat/Bahan untuk Kegiatan Kantor-Alat Tulis Kantor</option>
-                <option value="5.1.02.01.01.0026">5.1.02.01.01.0026 - Belanja Bahan-Bahan Cetak dan Penggandaan</option>
-                <option value="5.1.02.01.01.0052">5.1.02.01.01.0052 - Belanja Bahan Material dan Bangunan</option>
-                <option value="5.1.02.02.01.0004">5.1.02.02.01.0004 - Belanja Jasa Tenaga Kerja / Tukang Konstruksi</option>
-                <option value="5.2.02.05.01.0005">5.2.02.05.01.0005 - Belanja Modal Peralatan Komputer dan Jaringan</option>
-              </select>
+              <input
+                type="text"
+                value="52323628813 (Bank BCA Jakarta - a.n. CV ALPHARO ARTHA JAYA)"
+                disabled
+                readonly
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 text-slate-700 font-mono font-bold cursor-not-allowed focus:outline-hidden"
+              />
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -316,11 +343,11 @@
                 </select>
                 <button
                   type="button"
-                  class="h-6 px-2.5 rounded-full border border-slate-900 text-emerald-600 hover:bg-slate-50 flex items-center justify-center shrink-0 font-bold transition-colors shadow-2xs"
+                  class="h-[38px] w-[38px] rounded-lg border border-emerald-500 hover:bg-emerald-50 flex items-center justify-center shrink-0 font-bold transition-colors shadow-2xs"
                   title="Tambah Penanggung Jawab"
                   @click="quickPjModalOpen = true"
                 >
-                  <Plus class="w-3.5 h-3.5 text-emerald-600 stroke-[2.5]" />
+                  <Plus class="w-4 h-4 text-emerald-600 stroke-[2.5]" />
                 </button>
               </div>
             </div>
@@ -330,8 +357,8 @@
               <input
                 v-model="form.kotaTandaTangan"
                 type="text"
-                placeholder="Contoh: Jakarta Timur"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800"
+                readonly
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 text-slate-600 cursor-not-allowed select-none focus:outline-hidden"
               />
             </div>
 
@@ -340,8 +367,8 @@
               <input
                 v-model="form.penanggungJawabNama"
                 type="text"
-                placeholder="Nama lengkap pejabat / kepala sekolah..."
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800"
+                readonly
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 text-slate-600 cursor-not-allowed select-none focus:outline-hidden"
               />
             </div>
 
@@ -350,8 +377,8 @@
               <input
                 v-model="form.penanggungJawabJabatan"
                 type="text"
-                placeholder="Contoh: Kepala Sekolah / Kuasa Pengguna Anggaran"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800"
+                readonly
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 text-slate-600 cursor-not-allowed select-none focus:outline-hidden"
               />
             </div>
 
@@ -360,8 +387,8 @@
               <input
                 v-model="form.penanggungJawabNip"
                 type="text"
-                placeholder="Contoh: 19720815 199803 1 004"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800 font-mono"
+                readonly
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 text-slate-600 font-mono cursor-not-allowed select-none focus:outline-hidden"
               />
             </div>
           </div>
@@ -490,17 +517,26 @@
               </thead>
               <tbody class="divide-y divide-slate-100">
                 <tr v-for="(it, idx) in form.items" :key="idx" class="hover:bg-slate-50/50">
-                  <td class="py-2.5 px-3">
+                  <td class="py-2.5 px-3 space-y-1">
                     <select
                       v-model="it.productId"
                       class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 bg-white"
                       @change="onProductSelect(it)"
                     >
-                      <option value="" disabled>-- Pilih Katalog Barang --</option>
+                      <option :value="null">-- Non-Katalog / Kebutuhan Klien --</option>
                       <option v-for="p in store.products" :key="p.id" :value="p.id">
                         [{{ p.sku }}] {{ p.name }} (Stok: {{ p.stock }} {{ p.unit }})
                       </option>
                     </select>
+                    <input
+                      v-model="it.name"
+                      type="text"
+                      placeholder="Nama barang / spesifikasi..."
+                      class="w-full px-2 py-1 text-xs rounded border border-slate-200 bg-slate-50/70 focus:bg-white text-slate-800 font-medium"
+                    />
+                    <div v-if="it.specs" class="text-[10px] text-amber-800 bg-amber-50/80 border border-amber-200/60 rounded px-1.5 py-0.5">
+                      <strong>Permintaan Klien:</strong> {{ it.specs }}
+                    </div>
                   </td>
                   <td class="py-2.5 px-3">
                     <input
@@ -557,7 +593,7 @@
       <!-- ACTION BUTTONS (BATAL & SIMPAN SEPERTI GAMBAR) -->
       <div class="flex items-center justify-end gap-3 pt-4">
         <router-link
-          to="/marketing/orders"
+          to="/marketing/orders/monitoring"
           class="px-5 py-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg transition-colors shadow-2xs"
         >
           Batal
@@ -647,7 +683,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import Modal from '../../components/common/Modal.vue';
@@ -692,6 +728,8 @@ const quickPj = ref({
   kota: 'Jakarta Timur',
 });
 
+const fromClientOrder = ref(null);
+
 // Dynamic next project ID
 const displayProjectId = computed(() => {
   if (isEdit.value && form.value.projectId) {
@@ -701,16 +739,18 @@ const displayProjectId = computed(() => {
   return `PR${String(nextNum).padStart(5, '0')}`;
 });
 
+
 const todayDate = new Date().toISOString().split('T')[0];
 
 const form = ref({
   id: null,
+  fromOrderId: null,
   projectId: '',
   projectName: '',
   description: '',
   customerId: '',
-  marketingName: store.currentUser?.name || 'Budi Hartono, S.T.',
-  company: 'CV Alpharo Artha Jaya',
+  marketingName: '',
+  company: '',
   namaKegiatan: '',
   rincianKegiatan: '',
   kodeRekening: '',
@@ -727,23 +767,14 @@ const form = ref({
   penanggungJawabNama: '',
   penanggungJawabJabatan: '',
   penanggungJawabNip: '',
-  kotaTandaTangan: 'Jakarta Timur',
+  kotaTandaTangan: '',
   docNumbers: {
-    penawaran: '001/SPH/AAJ/X/2026',
-    suratJalan: '001/SJ/AAJ/X/2026',
-    faktur: '001/FP/AAJ/X/2026',
-    kuitansi: '001/KW/AAJ/X/2026',
+    penawaran: '',
+    suratJalan: '',
+    faktur: '',
+    kuitansi: '',
   },
-  items: [
-    {
-      productId: 1,
-      name: 'Semen Portland Komposit 50kg',
-      sku: 'MAT-SMN-01',
-      qty: 100,
-      unit: 'Zak',
-      price: 68000,
-    },
-  ],
+  items: [],
 });
 
 // Available Penanggung Jawab list
@@ -792,6 +823,7 @@ const onNilaiProjectChange = () => {
 const applyItemsTotalToProject = () => {
   form.value.nilaiProject = calculatedItemsTotal.value;
   form.value.nilaiInvoice = calculatedItemsTotal.value;
+  form.value.paguAnggaran = calculatedItemsTotal.value;
   toast.info(`Nilai Project diperbarui: Rp ${calculatedItemsTotal.value.toLocaleString('id-ID')}`);
 };
 
@@ -862,7 +894,7 @@ const onProductSelect = (it) => {
     it.name = prod.name;
     it.sku = prod.sku;
     it.unit = prod.unit;
-    it.price = prod.price || 0;
+    it.price = prod.sell_price || prod.price || 0;
   }
 };
 
@@ -889,7 +921,7 @@ const saveQuickPj = () => {
   toast.success('Penanggung jawab berhasil ditambahkan!');
 };
 
-onMounted(() => {
+const initForm = () => {
   if (isEdit.value) {
     const existing = store.orders.find((o) => o.id === Number(route.params.id));
     if (existing) {
@@ -900,11 +932,11 @@ onMounted(() => {
         projectName: existing.projectName || '',
         description: existing.description || '',
         customerId: existing.clientId || '',
-        marketingName: existing.submittedBy || store.currentUser.name,
+        marketingName: existing.submittedBy || store.currentUser?.name || 'Budi Hartono, S.T.',
         company: existing.company || 'CV Alpharo Artha Jaya',
         namaKegiatan: existing.namaKegiatan || existing.projectName || '',
         rincianKegiatan: existing.rincianKegiatan || '',
-        kodeRekening: existing.kodeRekening || '5.1.02.01.01.0024',
+        kodeRekening: existing.kodeRekening || '52323628813',
         tahunAnggaran: existing.tahunAnggaran || '2026',
         sumberDana: existing.sumberDana || 'BOP',
         kategori: existing.kategori || 'Barang/Jasa',
@@ -915,27 +947,90 @@ onMounted(() => {
         nilaiInvoice: existing.nilaiInvoice || existing.grandTotal || 0,
         invoiceDibayar: existing.invoiceDibayar || 0,
         penanggungJawabSelection: existing.penanggungJawabNama || '',
-        penanggungJawabNama: existing.penanggungJawabNama || 'Bpk. supri, M.Pd.',
-        penanggungJawabJabatan: existing.penanggungJawabJabatan || 'Kepala Sekolah / KPA',
-        penanggungJawabNip: existing.penanggungJawabNip || '19720815 199803 1 004',
-        kotaTandaTangan: existing.kotaTandaTangan || 'Jakarta Timur',
+        penanggungJawabNama: existing.penanggungJawabNama || '',
+        penanggungJawabJabatan: existing.penanggungJawabJabatan || '',
+        penanggungJawabNip: existing.penanggungJawabNip || '',
+        kotaTandaTangan: existing.kotaTandaTangan || '',
         docNumbers: existing.docNumbers || {
           penawaran: `00${existing.id}/SPH/AAJ/X/2026`,
           suratJalan: `00${existing.id}/SJ/AAJ/X/2026`,
           faktur: `00${existing.id}/FP/AAJ/X/2026`,
           kuitansi: `00${existing.id}/KW/AAJ/X/2026`,
         },
-        items: existing.items && existing.items.length ? JSON.parse(JSON.stringify(existing.items)) : form.value.items,
+        items: existing.items && existing.items.length ? JSON.parse(JSON.stringify(existing.items)) : [],
       };
       updateDocNumbers();
+      if (form.value.items.length > 0) {
+        showItemsSection.value = true;
+      }
+    }
+  } else if (route.query.fromOrderId) {
+    const target = String(route.query.fromOrderId).trim();
+    const fromOrder = store.orders.find(
+      (o) =>
+        String(o.id) === target ||
+        (o.orderNumber && o.orderNumber.trim().toUpperCase() === target.toUpperCase())
+    );
+    if (fromOrder) {
+      fromClientOrder.value = fromOrder;
+      form.value.fromOrderId = fromOrder.id;
+      form.value.projectId = displayProjectId.value;
+      form.value.projectName = fromOrder.projectName || '';
+      form.value.description = fromOrder.notes || `Pengajuan kebutuhan dari rekanan ${fromOrder.clientName}`;
+      form.value.customerId = fromOrder.clientId || '';
+
+      // Fallback: match by client name if clientId wasn't directly found
+      if (!form.value.customerId && fromOrder.clientName) {
+        const foundClient = store.clients.find(
+          (c) =>
+            c.name.toLowerCase() === fromOrder.clientName.toLowerCase() ||
+            c.name.toLowerCase().includes(fromOrder.clientName.toLowerCase()) ||
+            fromOrder.clientName.toLowerCase().includes(c.name.toLowerCase())
+        );
+        if (foundClient) {
+          form.value.customerId = foundClient.id;
+        }
+      }
+
+      form.value.marketingName = store.currentUser?.name || 'Budi Hartono, S.T.';
+      form.value.company = fromOrder.company || 'CV Alpharo Artha Jaya';
+      form.value.namaKegiatan = fromOrder.projectName || '';
+      form.value.rincianKegiatan = fromOrder.notes || '';
+      form.value.kodeRekening = '52323628813';
+      form.value.tahunAnggaran = '2026';
+      form.value.sumberDana = 'BOP';
+      form.value.kategori = 'Barang/Jasa';
+      form.value.paguAnggaran = fromOrder.grandTotal || 0;
+      form.value.nilaiProject = fromOrder.grandTotal || fromOrder.subtotal || 0;
+      form.value.nilaiInvoice = fromOrder.grandTotal || 0;
+      form.value.invoiceDibayar = 0;
+      form.value.items = fromOrder.items && fromOrder.items.length ? JSON.parse(JSON.stringify(fromOrder.items)) : [];
+      showItemsSection.value = true;
+      updateDocNumbers();
+      onCustomerChange();
+      if (fromOrder.contactPerson) {
+        form.value.penanggungJawabSelection = fromOrder.contactPerson;
+        form.value.penanggungJawabNama = fromOrder.contactPerson;
+        form.value.penanggungJawabJabatan = 'Kepala Sekolah / Kuasa Pengguna Anggaran';
+        form.value.penanggungJawabNip = '19750101 200212 1 005';
+      }
     }
   } else {
     form.value.projectId = displayProjectId.value;
-    // Set default company to CV Alpharo Artha Jaya to generate previews nicely
-    form.value.company = 'CV Alpharo Artha Jaya';
-    updateDocNumbers();
+    form.value.marketingName = '';
+    form.value.company = '';
+    form.value.docNumbers = {
+      penawaran: '',
+      suratJalan: '',
+      faktur: '',
+      kuitansi: '',
+    };
+    form.value.items = [];
   }
-});
+};
+
+onMounted(initForm);
+watch(() => [route.params.id, route.query.fromOrderId], initForm);
 
 const handleSubmit = () => {
   if (!form.value.customerId) {
@@ -949,8 +1044,8 @@ const handleSubmit = () => {
 
   const client = store.clients.find((c) => c.id === Number(form.value.customerId)) || { name: 'Customer' };
 
-  // If items empty, generate default project item based on Nilai Project
-  const finalItems = form.value.items.length > 0 && form.value.items[0].productId
+  // Final items from form
+  const finalItems = form.value.items.length > 0 && form.value.items[0].name
     ? form.value.items
     : [
         {
@@ -968,11 +1063,13 @@ const handleSubmit = () => {
     clientId: Number(form.value.customerId),
     projectName: form.value.projectName,
     description: form.value.description,
-    company: form.value.company,
-    marketingName: form.value.marketingName,
+    company: form.value.company || 'CV Alpharo Artha Jaya',
+    marketingName: form.value.marketingName || store.currentUser?.name,
     namaKegiatan: form.value.namaKegiatan,
     rincianKegiatan: form.value.rincianKegiatan,
-    kodeRekening: form.value.kodeRekening,
+    kodeRekening: '52323628813',
+    nomorRekening: '52323628813',
+    bankPenerima: 'Bank BCA Jakarta (a.n. CV ALPHARO ARTHA JAYA)',
     tahunAnggaran: form.value.tahunAnggaran,
     sumberDana: form.value.sumberDana,
     kategori: form.value.kategori,
@@ -1002,15 +1099,54 @@ const handleSubmit = () => {
       };
       toast.success(`Data Project ${displayProjectId.value} berhasil diperbarui!`);
     }
+  } else if (form.value.fromOrderId) {
+    const target = String(form.value.fromOrderId).trim();
+    const existingIdx = store.orders.findIndex(
+      (o) =>
+        String(o.id) === target ||
+        (o.orderNumber && o.orderNumber.trim().toUpperCase() === target.toUpperCase())
+    );
+    if (existingIdx !== -1) {
+      store.orders[existingIdx] = {
+        ...store.orders[existingIdx],
+        ...payload,
+        clientName: client.name,
+        status: 'Menunggu Verifikasi', // Langsung siap telaah Direktur setelah dirinci marketing!
+        grandTotal: form.value.nilaiProject || payload.nilaiProject,
+      };
+      const alreadyHasTimeline = store.orders[existingIdx].timeline.some((t) =>
+        t.stage.includes('Spesifikasi Project')
+      );
+      if (!alreadyHasTimeline) {
+        store.orders[existingIdx].timeline.push({
+          stage: 'Spesifikasi Project & Dokumen Lengkap',
+          user: store.currentUser.name,
+          timestamp: new Date().toLocaleString('id-ID'),
+          status: 'completed',
+          notes: `Marketing merinci data pengadaan, jadwal, penanggung jawab, dan nomor dokumen resmi (${displayProjectId.value}). Diteruskan ke Direktur.`,
+        });
+      }
+      storeActions.addNotification(
+        'DIREKTUR',
+        'Verifikasi Order Spesifik Siap Telaah',
+        `Marketing telah merinci spesifikasi lengkap order ${store.orders[existingIdx].orderNumber} (${client.name}). Silakan telaah & verifikasi.`,
+        'order',
+        '/director/verification'
+      );
+      toast.success(`Order dari ${client.name} berhasil dirinci dan diteruskan ke Direktur!`);
+      router.push('/marketing/orders/monitoring');
+      return;
+    }
   } else {
     const newOrder = storeActions.createOrder(payload);
-    // Enrich with additional project fields
     Object.assign(newOrder, {
       projectId: displayProjectId.value,
-      company: form.value.company,
+      company: form.value.company || 'CV Alpharo Artha Jaya',
       namaKegiatan: form.value.namaKegiatan,
       rincianKegiatan: form.value.rincianKegiatan,
-      kodeRekening: form.value.kodeRekening,
+      kodeRekening: '52323628813',
+      nomorRekening: '52323628813',
+      bankPenerima: 'Bank BCA Jakarta (a.n. CV ALPHARO ARTHA JAYA)',
       tahunAnggaran: form.value.tahunAnggaran,
       sumberDana: form.value.sumberDana,
       kategori: form.value.kategori,
@@ -1029,6 +1165,6 @@ const handleSubmit = () => {
     toast.success(`Project ${displayProjectId.value} (${form.value.projectName}) berhasil disimpan!`);
   }
 
-  router.push('/marketing/orders');
+  router.push('/marketing/orders/monitoring');
 };
 </script>

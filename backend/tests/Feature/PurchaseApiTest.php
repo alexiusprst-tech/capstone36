@@ -57,7 +57,7 @@ class PurchaseApiTest extends TestCase
             ->assertJsonPath('success', true);
     }
 
-    public function test_can_create_purchase_transaction_and_update_request_and_stock(): void
+    public function test_purchase_receipt_updates_request_and_stock_exactly_once(): void
     {
         $prod = Product::create([
             'sku' => 'A00001770',
@@ -126,12 +126,40 @@ class PurchaseApiTest extends TestCase
             ->assertJsonPath('success', true)
             ->assertJsonPath('data.purchase_code', 'PB20261014114148');
 
-        // Check request status updated
-        $this->assertEquals('DIPROSES_PEMBELIAN', $req->fresh()->status);
+        $purchaseId = $response->json('data.id');
 
-        // Check product stock increased and last buy price updated
-        $prodFresh = $prod->fresh();
-        $this->assertEquals(100, $prodFresh->stock);
-        $this->assertEquals(100000, (float) $prodFresh->last_buy_price);
+        // Creating a PO starts procurement but does not increase physical stock.
+        $this->assertEquals('DIPROSES_PEMBELIAN', $req->fresh()->status);
+        $this->assertEquals('PB20261014114148', $req->fresh()->purchase_code);
+        $this->assertEquals(0, $prod->fresh()->stock);
+
+        $this->assertEquals(100000, (float) $prod->fresh()->last_buy_price);
+        $this->assertEquals(100000, (float) $prod->fresh()->hpp);
+
+        $receipt = $this->postJson("/api/purchases/{$purchaseId}/receive", [
+            'notes' => 'Barang diterima dan diperiksa oleh Warehouse.',
+        ]);
+
+        $receipt->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.purchase.status', 'DITERIMA_GUDANG')
+            ->assertJsonPath('data.items_received.0.sku', 'A00001770')
+            ->assertJsonPath('data.items_received.0.qty_received', 100)
+            ->assertJsonPath('data.items_received.0.current_stock', 100);
+
+        $this->assertEquals('SELESAI', $req->fresh()->status);
+        $this->assertEquals(100, $prod->fresh()->stock);
+        $this->assertEquals('Tersedia', $prod->fresh()->status);
+
+        $inventory = $this->getJson('/api/products?search=A00001770');
+        $inventory->assertOk()
+            ->assertJsonPath('data.0.stock', 100);
+
+        // Replaying the receipt must not add the same shipment to stock twice.
+        $this->postJson("/api/purchases/{$purchaseId}/receive")
+            ->assertOk()
+            ->assertJsonPath('data.status', 'DITERIMA_GUDANG');
+
+        $this->assertEquals(100, $prod->fresh()->stock);
     }
 }

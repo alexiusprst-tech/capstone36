@@ -1433,7 +1433,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import Modal from '../../components/common/Modal.vue';
 import { store } from '../../stores/mockData';
@@ -2390,34 +2390,68 @@ const exportToExcel = () => {
   toast.success(`Export ${exportItems.length} data barang ke Excel berhasil.`);
 };
 
-// Initialize Catalog Data
+// Initialize Catalog Data (Real-time synchronization with store.products)
 const initializeCatalog = async () => {
   isLoading.value = true;
+
+  // Helper: Merge catalog items without overwriting live stock of existing products
+  const mergeCatalogItems = (items) => {
+    if (!Array.isArray(store.products)) {
+      store.products = [];
+    }
+    const seenMap = new Map();
+    store.products.forEach((p) => {
+      if (p.sku) seenMap.set(p.sku.toLowerCase(), true);
+      if (p.name) seenMap.set(p.name.toLowerCase(), true);
+    });
+
+    items.forEach((item) => {
+      const skuKey = item.sku ? item.sku.toLowerCase() : '';
+      const nameKey = item.name ? item.name.toLowerCase() : '';
+      if (!seenMap.has(skuKey) && !seenMap.has(nameKey)) {
+        store.products.push({
+          id: item.id || Date.now() + Math.random(),
+          sku: item.sku || 'PRD-' + Math.floor(1000 + Math.random() * 9000),
+          name: item.name,
+          category: item.category || 'Umum',
+          unit: item.unit || 'UNIT',
+          stock: Number(item.stock) || 0,
+          minStock: item.min_stock || item.minStock || 10,
+          price: Number(item.sell_price || item.price || 0),
+          last_buy_price: Number(item.last_buy_price || 0),
+          hpp: Number(item.hpp || 0),
+          sell_price: Number(item.sell_price || item.price || 0),
+          status: (Number(item.stock) || 0) > 10 ? 'Tersedia' : ((Number(item.stock) || 0) > 0 ? 'Menipis' : 'Habis'),
+          location: item.location || 'Gudang Utama',
+          description: item.description || '',
+        });
+        if (skuKey) seenMap.set(skuKey, true);
+        if (nameKey) seenMap.set(nameKey, true);
+      }
+    });
+  };
+
   try {
-    // 1. First attempt to load complete catalog from backend API
+    // 1. Fetch fresh database catalog from backend API
     const res = await api.get('/products?per_page=5000');
     if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
-      allCatalogProducts.value = res.data.data;
-      store.products = [...res.data.data];
+      mergeCatalogItems(res.data.data);
     } else {
-      throw new Error('API products list empty');
+      throw new Error('API products empty');
     }
   } catch (err) {
-    // 2. Fallback to pre-seeded JSON file for instant zero-latency loading
+    // 2. Fallback to pre-seeded JSON file
     try {
       const seedRes = await fetch('/data/products_seed.json');
       if (seedRes.ok) {
         const seedJson = await seedRes.json();
-        allCatalogProducts.value = seedJson.products;
-        store.products = [...seedJson.products];
-        categoriesList.value = seedJson.categories;
-        unitsList.value = seedJson.units;
+        mergeCatalogItems(seedJson.products || []);
       }
-    } catch (e2) {
-      // 3. Fallback to existing store
-      allCatalogProducts.value = Array.isArray(store.products) ? [...store.products] : [];
-    }
+    } catch (e2) {}
   } finally {
+    // 3. Keep allCatalogProducts strictly synced with store.products
+    allCatalogProducts.value = [...store.products];
+
     // Extract unique categories & units
     const cats = new Set();
     const units = new Set();
@@ -2430,6 +2464,17 @@ const initializeCatalog = async () => {
     isLoading.value = false;
   }
 };
+
+// Watch store.products for instant real-time changes (e.g. goods receipt ACC from supplier)
+watch(
+  () => store.products,
+  (newProds) => {
+    if (Array.isArray(newProds) && newProds.length > 0) {
+      allCatalogProducts.value = [...newProds];
+    }
+  },
+  { deep: true }
+);
 
 onMounted(async () => {
   await initializeCatalog();

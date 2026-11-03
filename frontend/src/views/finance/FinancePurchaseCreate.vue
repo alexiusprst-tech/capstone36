@@ -28,21 +28,50 @@
     <!-- AUTO-GENERATE NOTIFICATION BANNER (When generated from Warehouse Request) -->
     <div
       v-if="sourceRequest"
-      class="mb-4 p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-900 shadow-2xs"
+      class="mb-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-3 shadow-2xs"
     >
-      <div class="flex items-center gap-2.5">
-        <span class="p-1 bg-emerald-600 text-white rounded-md shrink-0">
-          <Check class="w-4 h-4 stroke-[3]" />
-        </span>
-        <div>
-          <span class="font-bold">Data Ter-generate Otomatis dari Pengajuan Gudang: </span>
-          <span class="font-mono font-bold bg-emerald-100 px-1.5 py-0.5 rounded">{{ sourceRequest.requestCode || sourceRequest.request_code }}</span>
-          <span class="text-emerald-700 ml-1">({{ sourceRequest.purpose }})</span>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-emerald-950">
+        <div class="flex items-center gap-2.5">
+          <span class="p-1 bg-emerald-600 text-white rounded-md shrink-0">
+            <Check class="w-4 h-4 stroke-[3]" />
+          </span>
+          <div>
+            <span class="font-bold">Pengajuan Kebutuhan Barang dari Gudang: </span>
+            <span class="font-mono font-bold bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded border border-emerald-300">
+              {{ sourceRequest.requestCode || sourceRequest.request_code }}
+            </span>
+            <span class="text-emerald-800 ml-1.5 font-medium">({{ sourceRequest.purpose || sourceRequest.projectName }})</span>
+          </div>
         </div>
+        <span class="text-[11px] font-semibold text-emerald-800 bg-emerald-100/90 px-2.5 py-0.5 rounded-full border border-emerald-200 self-start sm:self-auto">
+          Auto-Sync Material Request Gudang
+        </span>
       </div>
-      <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-full">
-        Auto-Sync Finance
-      </span>
+
+      <!-- Quick Supplier Selection Bar -->
+      <div class="pt-2 border-t border-emerald-200/80 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 text-xs">
+        <div class="flex items-center gap-1.5 text-slate-800 font-bold shrink-0">
+          <Building class="w-4 h-4 text-emerald-700" />
+          <span>Pilih Supplier Rekanan untuk Membeli Barang Ini:</span>
+        </div>
+        <select
+          v-model="form.default_supplier"
+          class="flex-1 px-3 py-1.5 text-xs border border-emerald-300 rounded-lg bg-white font-medium text-slate-800 focus:ring-2 focus:ring-emerald-500 cursor-pointer shadow-2xs"
+          @change="applySupplierToAllRows"
+        >
+          <option value="" disabled>-- Pilih Supplier Rekanan --</option>
+          <option v-for="sup in suppliersList" :key="sup.code || sup.name" :value="sup.name">
+            {{ sup.name }} ({{ sup.code || 'SUP' }}) - {{ sup.address || '-' }}
+          </option>
+        </select>
+        <button
+          type="button"
+          class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-lg shadow-2xs transition-colors shrink-0 cursor-pointer text-xs"
+          @click="applySupplierToAllRows"
+        >
+          Terapkan ke Seluruh Baris
+        </button>
+      </div>
     </div>
 
     <!-- MAIN FORM CARD WITH GREEN ACCENT LINE MATCHING USER IMAGE -->
@@ -597,7 +626,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import Modal from '../../components/common/Modal.vue';
-import { store } from '../../stores/mockData';
+import { store, storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
 import {
   ShoppingBag,
@@ -608,6 +637,7 @@ import {
   Trash2,
   Save,
   Check,
+  Building,
 } from 'lucide-vue-next';
 
 const router = useRouter();
@@ -718,6 +748,14 @@ onMounted(async () => {
         suppliersList.value = data.data;
       }
     }
+    // Also include all store.suppliers
+    if (store.suppliers && store.suppliers.length) {
+      store.suppliers.forEach((s) => {
+        if (!suppliersList.value.some((existing) => existing.name === s.name || existing.code === s.code)) {
+          suppliersList.value.push(s);
+        }
+      });
+    }
   } catch (e) {}
 
   // Check if routed from a Warehouse Request (Auto-generate data!)
@@ -737,6 +775,11 @@ const loadFromWarehouseRequest = (reqId) => {
     form.value.warehouse_request_id = req.id;
     form.value.warehouse_request_code = req.requestCode || req.request_code;
     form.value.project_name = req.projectName || req.project_name || form.value.project_name;
+
+    const initialSupplier = route.query.supplier || form.value.default_supplier || (suppliersList.value[0]?.name || '');
+    if (initialSupplier) {
+      form.value.default_supplier = initialSupplier;
+    }
 
     if (req.items && req.items.length > 0) {
       form.value.items = req.items.map((it) => {
@@ -899,6 +942,17 @@ const selectSupplier = (sup) => {
   supplierPickerOpen.value = false;
 };
 
+const applySupplierToAllRows = () => {
+  if (form.value.default_supplier) {
+    form.value.items.forEach((r) => {
+      if (r.barang) {
+        r.supplier = form.value.default_supplier;
+      }
+    });
+    toast.success(`Supplier "${form.value.default_supplier}" berhasil diterapkan ke semua item barang.`);
+  }
+};
+
 const saveNewSupplier = async () => {
   const newSup = {
     code: `SUP${String(suppliersList.value.length + 1).padStart(5, '0')}`,
@@ -908,6 +962,9 @@ const saveNewSupplier = async () => {
     address: newSupplierForm.value.address,
   };
   suppliersList.value.push(newSup);
+  if (storeActions?.addSupplier) {
+    storeActions.addSupplier(newSup);
+  }
 
   // Sync to backend
   try {
@@ -954,6 +1011,7 @@ const savePurchase = async () => {
     total_price: computedTotalHarga.value,
     payment_method: form.value.payment_method,
     items: validItems,
+    supplier_status: 'Menunggu Konfirmasi',
   };
 
   // Update in-memory reactive store
@@ -985,6 +1043,33 @@ const savePurchase = async () => {
   } catch (e) {
     console.error('Failed to sync purchase to API:', e);
   }
+
+  // PROBIS TO-BE Tahap 4: Notifikasi multi-role
+  storeActions.addNotification(
+    'WAREHOUSE',
+    'Pesanan Barang Supplier Diterbitkan (PO)',
+    `Finance telah memesan barang ke Supplier ${form.value.default_supplier || 'Rekanan'} (No: ${form.value.purchase_code}) untuk proyek "${form.value.project_name}". Mohon bersiap menerima dan memeriksa fisik barang saat tiba.`,
+    'purchase',
+    '/warehouse/fulfillment'
+  );
+
+  storeActions.addNotification(
+    'MARKETING',
+    'Pemesanan Barang Supplier Berhasil',
+    `Barang pengadaan proyek "${form.value.project_name}" telah dipesan oleh Finance ke Supplier ${form.value.default_supplier || ''} (${form.value.purchase_code}).`,
+    'finance',
+    '/marketing/orders'
+  );
+
+  storeActions.addNotification(
+    'SUPPLIER',
+    'Pesanan Pembelian Baru (PO) dari CV Alpharo',
+    `Finance CV Alpharo Artha Jaya telah menerbitkan pesanan PO ${form.value.purchase_code} untuk proyek "${form.value.project_name}". Silakan tinjau dan konfirmasi ketersediaan barang.`,
+    'purchase',
+    '/supplier/portal'
+  );
+
+  storeActions.addActivityLog('Menerbitkan Pembelian Supplier', form.value.purchase_code, `Supplier: ${form.value.default_supplier}, Proyek: ${form.value.project_name}`);
 
   toast.success(`Transaksi Pembelian ${form.value.purchase_code} berhasil disimpan!`);
   router.push('/finance/purchases');

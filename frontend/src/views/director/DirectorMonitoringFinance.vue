@@ -13,12 +13,12 @@
 
     <!-- KPIS FOR FINANCE MONITORING (SPECIFIED IN PROMPT) -->
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
-      <KpiCard title="Total Tagihan Invoice" :value="store.invoices.length" subtitle="Semua berkas tagihan" icon-variant="slate" />
-      <KpiCard title="Belum Dibayar" :value="unpaidCount" subtitle="Menunggu pencairan" icon-variant="amber" />
-      <KpiCard title="Jatuh Tempo" :value="overdueCount" subtitle="Perlu tindak lanjut" icon-variant="rose" />
+      <KpiCard title="Total Tagihan Invoice" :value="store.invoices.length" subtitle="Semua berkas tagihan" icon-variant="blue" />
+      <KpiCard title="Belum Dibayar" :value="unpaidCount" subtitle="Menunggu pencairan" icon-variant="blue" />
+      <KpiCard title="Jatuh Tempo" :value="overdueCount" subtitle="Perlu tindak lanjut" icon-variant="blue" />
       <KpiCard title="Pembayaran Sebagian" :value="partialCount" subtitle="Termin berjalan" icon-variant="blue" />
-      <KpiCard title="Lunas Penuh" :value="paidCount" subtitle="Pembayaran rampung" icon-variant="emerald" />
-      <KpiCard title="Total Piutang Berjalan" :value="totalReceivable" :is-currency="true" subtitle="Sisa tagihan rekanan" icon-variant="rose" />
+      <KpiCard title="Lunas Penuh" :value="paidCount" subtitle="Pembayaran rampung" icon-variant="blue" />
+      <KpiCard title="Total Piutang Berjalan" :value="totalReceivable" :is-currency="true" subtitle="Sisa tagihan rekanan" icon-variant="blue" />
     </div>
 
     <!-- INVOICE & RECEIVABLE MONITORING TABLE -->
@@ -27,7 +27,7 @@
         <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
           Portofolio Tagihan & Status Penerimaan Termin
         </h3>
-        <span class="text-xs text-slate-500">Total Transaksi: Rp {{ totalInvoiceSum.toLocaleString('id-ID') }}</span>
+        <span class="text-xs text-slate-500">Total Transaksi: Rp {{ Number(totalInvoiceSum || 0).toLocaleString('id-ID') }}</span>
       </div>
 
       <div class="overflow-x-auto">
@@ -51,13 +51,13 @@
               <td class="py-3.5 px-4 font-mono text-slate-600">{{ inv.orderNumber }}</td>
               <td class="py-3.5 px-4 font-bold text-slate-800">{{ inv.clientName }}</td>
               <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">
-                Rp {{ inv.totalAmount.toLocaleString('id-ID') }}
+                Rp {{ Number(inv.totalAmount || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-right font-mono text-emerald-600 font-semibold">
-                Rp {{ inv.paidAmount.toLocaleString('id-ID') }}
+                Rp {{ Number(inv.paidAmount || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-right font-mono text-rose-600 font-bold">
-                Rp {{ inv.remainingAmount.toLocaleString('id-ID') }}
+                Rp {{ Number(inv.remainingAmount || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ inv.dueDate }}</td>
               <td class="py-3.5 px-4 text-center">
@@ -93,15 +93,15 @@
           </div>
           <div class="flex justify-between pt-2 border-t border-slate-200">
             <span class="text-slate-600">Total Nilai Tagihan:</span>
-            <span class="font-bold font-mono text-slate-900">Rp {{ selectedInvoice.totalAmount.toLocaleString('id-ID') }}</span>
+            <span class="font-bold font-mono text-slate-900">Rp {{ Number(selectedInvoice.totalAmount || 0).toLocaleString('id-ID') }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-slate-600">Total Telah Diterima:</span>
-            <span class="font-bold font-mono text-emerald-600">Rp {{ selectedInvoice.paidAmount.toLocaleString('id-ID') }}</span>
+            <span class="font-bold font-mono text-emerald-600">Rp {{ Number(selectedInvoice.paidAmount || 0).toLocaleString('id-ID') }}</span>
           </div>
           <div class="flex justify-between font-bold text-sm pt-1 border-t border-slate-200">
             <span>Sisa Piutang Berjalan:</span>
-            <span class="font-mono text-rose-600">Rp {{ selectedInvoice.remainingAmount.toLocaleString('id-ID') }}</span>
+            <span class="font-mono text-rose-600">Rp {{ Number(selectedInvoice.remainingAmount || 0).toLocaleString('id-ID') }}</span>
           </div>
         </div>
 
@@ -118,7 +118,7 @@
                 <span class="block text-[11px] text-slate-500">Jatuh Tempo: {{ term.dueDate }}</span>
               </div>
               <div class="text-right">
-                <span class="font-mono font-bold text-slate-900 block">Rp {{ term.amount.toLocaleString('id-ID') }}</span>
+                <span class="font-mono font-bold text-slate-900 block">Rp {{ Number(term.amount || 0).toLocaleString('id-ID') }}</span>
                 <StatusBadge :status="term.status" />
               </div>
             </div>
