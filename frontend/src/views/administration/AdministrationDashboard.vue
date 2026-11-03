@@ -16,6 +16,13 @@
             <FolderCheck class="w-4 h-4" />
             <span>Kelola Dokumen SPJ</span>
           </router-link>
+          <router-link
+            to="/administration/accounts"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold rounded-lg text-xs shadow-xs transition-colors"
+          >
+            <Users class="w-4 h-4" />
+            <span>Kelola Akun</span>
+          </router-link>
         </div>
       </div>
     </template>
@@ -265,7 +272,7 @@ import DocumentChecklist from '../../components/common/DocumentChecklist.vue';
 import Modal from '../../components/common/Modal.vue';
 import { store, storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
-import { Archive, ChevronRight, FolderCheck } from 'lucide-vue-next';
+import { Archive, ChevronRight, FolderCheck, Users } from 'lucide-vue-next';
 
 const toast = useToast();
 

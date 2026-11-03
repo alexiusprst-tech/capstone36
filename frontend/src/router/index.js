@@ -3,7 +3,6 @@ import { store, storeActions } from '../stores/mockData';
 
 // Auth Views
 import LoginView from '../views/auth/LoginView.vue';
-import RegisterView from '../views/RegisterView.vue';
 
 // Marketing Views
 import MarketingDashboard from '../views/marketing/MarketingDashboard.vue';
@@ -33,6 +32,7 @@ import AdministrationInvoices from '../views/administration/AdministrationInvoic
 import AdministrationDocuments from '../views/administration/AdministrationDocuments.vue';
 import AdministrationMonitoring from '../views/administration/AdministrationMonitoring.vue';
 import AdministrationSpj from '../views/administration/AdministrationSpj.vue';
+import AdministrationAccounts from '../views/administration/AdministrationAccounts.vue';
 
 // Warehouse Views
 import WarehouseDashboard from '../views/warehouse/WarehouseDashboard.vue';
@@ -89,9 +89,7 @@ const routes = [
   },
   {
     path: '/register',
-    name: 'register',
-    component: RegisterView,
-    meta: { title: 'Daftar Akun' },
+    redirect: '/login',
   },
 
   // 1. MARKETING ROUTES
@@ -234,6 +232,12 @@ const routes = [
     name: 'administration-spj',
     component: AdministrationSpj,
     meta: { title: 'Dokumen SPJ (Surat Pertanggungjawaban)', role: 'ADMINISTRASI', requiresAuth: true },
+  },
+  {
+    path: '/administration/accounts',
+    name: 'administration-accounts',
+    component: AdministrationAccounts,
+    meta: { title: 'Kelola Akun', role: 'ADMINISTRASI', requiresAuth: true },
   },
   {
     path: '/administration/purchase-orders',
@@ -431,6 +435,15 @@ const routes = [
   },
 ];
 
+const roleHome = {
+  MARKETING: '/marketing/dashboard',
+  DIREKTUR: '/director/dashboard',
+  ADMINISTRASI: '/administration/dashboard',
+  WAREHOUSE: '/warehouse/dashboard',
+  FINANCE: '/finance/dashboard',
+  CLIENT: '/client/dashboard',
+};
+
 const router = createRouter({
   history: createWebHistory(),
   routes,
@@ -439,34 +452,34 @@ const router = createRouter({
   },
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
   const token = localStorage.getItem('token');
+  const savedUser = localStorage.getItem('user');
+  if (token && savedUser) {
+    try {
+      const authenticatedUser = JSON.parse(savedUser);
+      if (authenticatedUser.role && store.currentUser.role !== authenticatedUser.role) {
+        storeActions.setAuthenticatedUser(authenticatedUser);
+      }
+    } catch (error) {
+      console.warn('Failed to restore authenticated user before navigation', error);
+    }
+  }
 
   // If requiresAuth and no token, redirect to login
   if (to.meta.requiresAuth && !token) {
-    return next({ name: 'login', query: { redirect: to.fullPath } });
+    return { name: 'login', query: { redirect: to.fullPath } };
   }
 
   // If guestOnly and user is logged in, redirect to their role dashboard
   if (to.meta.guestOnly && token) {
     const role = store.currentUser?.role || 'MARKETING';
-    const roleMap = {
-      MARKETING: '/marketing/dashboard',
-      DIREKTUR: '/director/dashboard',
-      ADMINISTRASI: '/administration/dashboard',
-      WAREHOUSE: '/warehouse/dashboard',
-      FINANCE: '/finance/dashboard',
-      CLIENT: '/client/dashboard',
-    };
-    return next(roleMap[role] || '/marketing/dashboard');
+    return roleHome[role] || roleHome.MARKETING;
   }
 
-  // Auto sync store role if route specifies a role
   if (to.meta.role && store.currentUser.role !== to.meta.role) {
-    storeActions.switchRole(to.meta.role);
+    return roleHome[store.currentUser?.role] || '/login';
   }
-
-  next();
 });
 
 export default router;

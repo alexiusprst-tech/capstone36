@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\DocumentTemplateController;
 use App\Http\Controllers\Api\OrderDocumentController;
 use App\Http\Controllers\Api\ProductController;
@@ -10,7 +11,6 @@ use App\Http\Controllers\Api\SpjController;
 use Illuminate\Support\Facades\Route;
 
 // Public Auth Routes
-Route::post('/auth/register', [AuthController::class, 'register'])->name('api.auth.register');
 Route::post('/auth/login', [AuthController::class, 'login'])->name('api.auth.login');
 
 // Products & Inventory Catalog
@@ -61,6 +61,8 @@ Route::get('/documents/{id}/download', [OrderDocumentController::class, 'downloa
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/user', [AuthController::class, 'user'])->name('api.auth.user');
     Route::post('/auth/logout', [AuthController::class, 'logout'])->name('api.auth.logout');
+    Route::get('/admin/accounts', [AccountController::class, 'index'])->name('api.admin.accounts.index');
+    Route::post('/admin/accounts', [AccountController::class, 'store'])->name('api.admin.accounts.store');
 
     // Template Administration
     Route::post('/document-templates/{id}/upload', [DocumentTemplateController::class, 'upload'])->name('api.templates.upload');

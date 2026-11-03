@@ -130,6 +130,7 @@ import { useRouter } from 'vue-router';
 import AlpharoLogo from '../../components/common/AlpharoLogo.vue';
 import { storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
+import api from '../../services/api';
 
 const router = useRouter();
 const toast = useToast();
@@ -141,6 +142,15 @@ const form = ref({
 const showPassword = ref(false);
 const loading = ref(false);
 const errorMessage = ref('');
+
+const roleHome = {
+  MARKETING: '/marketing/dashboard',
+  DIREKTUR: '/director/dashboard',
+  ADMINISTRASI: '/administration/dashboard',
+  WAREHOUSE: '/warehouse/dashboard',
+  FINANCE: '/finance/dashboard',
+  CLIENT: '/client/dashboard',
+};
 
 const demoRoles = [
   {
@@ -204,42 +214,29 @@ const handleSubmit = async () => {
   loading.value = true;
 
   try {
-    const emailLower = form.value.email.toLowerCase().trim();
-    let matchedRole = 'MARKETING';
-    let targetRoute = '/marketing/dashboard';
-
-    if (emailLower.includes('direktur')) {
-      matchedRole = 'DIREKTUR';
-      targetRoute = '/director/dashboard';
-    } else if (emailLower.includes('admin')) {
-      matchedRole = 'ADMINISTRASI';
-      targetRoute = '/administration/dashboard';
-    } else if (emailLower.includes('warehouse')) {
-      matchedRole = 'WAREHOUSE';
-      targetRoute = '/warehouse/dashboard';
-    } else if (emailLower.includes('finance')) {
-      matchedRole = 'FINANCE';
-      targetRoute = '/finance/dashboard';
-    } else if (emailLower.includes('client') || emailLower.includes('sekolah') || emailLower.includes('sma')) {
-      matchedRole = 'CLIENT';
-      targetRoute = '/client/dashboard';
-    } else {
-      matchedRole = 'MARKETING';
-      targetRoute = '/marketing/dashboard';
-    }
-
-    if (form.value.password !== 'password123') {
-      errorMessage.value = 'Kata sandi salah. Gunakan: password123';
-      loading.value = false;
-      return;
-    }
-
-    // Switch role in reactive store & sync localStorage
-    storeActions.switchRole(matchedRole);
-    toast.success(`Berhasil masuk sebagai ${matchedRole}`);
-    router.push(targetRoute);
-  } catch (err) {
-    errorMessage.value = 'Terjadi kesalahan autentikasi.';
+    const response = await api.post('/auth/login', {
+      email: form.value.email.trim().toLowerCase(),
+      password: form.value.password,
+    });
+    const { user, token } = response.data;
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+    storeActions.setAuthenticatedUser(user);
+    toast.success(`Berhasil masuk sebagai ${user.role}`);
+    const requestedRoute = router.currentRoute.value.query.redirect;
+    const requestedRole = typeof requestedRoute === 'string'
+      ? router.resolve(requestedRoute).meta.role
+      : null;
+    const destination = requestedRole === user.role
+      ? requestedRoute
+      : roleHome[user.role] || '/';
+    router.push({
+      path: destination,
+      replace: true,
+    });
+  } catch (error) {
+    const validationMessage = Object.values(error.response?.data?.errors || {}).flat()[0];
+    errorMessage.value = validationMessage || error.response?.data?.message || 'Tidak dapat terhubung ke layanan autentikasi.';
   } finally {
     loading.value = false;
   }

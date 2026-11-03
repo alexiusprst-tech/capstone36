@@ -1088,12 +1088,39 @@ const defaultData = {
   ],
 };
 
+function applyAuthenticatedUser(data) {
+  const savedUser = localStorage.getItem('user');
+  if (!savedUser) return;
+
+  let user;
+  try {
+    user = JSON.parse(savedUser);
+  } catch (error) {
+    console.warn('Failed to parse authenticated user from storage', error);
+    return;
+  }
+
+  const role = data.roles.find((item) => item.key === user.role);
+  if (role) {
+    data.currentUser = {
+      ...data.currentUser,
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: role.key,
+      division: role.division,
+      clientId: role.key === 'CLIENT' ? 1 : null,
+    };
+  }
+}
+
 function loadInitialState() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
       const merged = { ...defaultData, ...parsed };
+      applyAuthenticatedUser(merged);
       if (!merged.clients || !merged.clients.some((c) => c.code === 'CS00001')) {
         merged.clients = JSON.parse(JSON.stringify(defaultData.clients));
       }
@@ -1124,7 +1151,9 @@ function loadInitialState() {
       console.warn('Failed to parse saved state, resetting to defaults', e);
     }
   }
-  return JSON.parse(JSON.stringify(defaultData));
+  const defaults = JSON.parse(JSON.stringify(defaultData));
+  applyAuthenticatedUser(defaults);
+  return defaults;
 }
 
 export const store = reactive(loadInitialState());
@@ -1150,21 +1179,20 @@ export const storeActions = {
     Object.assign(store, defaults);
   },
 
-  switchRole(roleKey) {
-    const roleObj = store.roles.find((r) => r.key === roleKey);
+  setAuthenticatedUser(user) {
+    const roleObj = store.roles.find((r) => r.key === user.role);
     if (roleObj) {
       store.currentUser = {
-        id: roleObj.key === 'MARKETING' ? 1 : roleObj.key === 'DIREKTUR' ? 2 : roleObj.key === 'ADMINISTRASI' ? 3 : roleObj.key === 'WAREHOUSE' ? 4 : roleObj.key === 'FINANCE' ? 5 : 6,
-        name: roleObj.name,
-        email: roleObj.email,
+        id: user.id,
+        name: user.name,
+        email: user.email,
         role: roleObj.key,
         division: roleObj.division,
         avatar: store.currentUser.avatar,
-        phone: '0812-3456-7890',
+        phone: '',
         clientId: roleObj.key === 'CLIENT' ? 1 : null,
       };
-      localStorage.setItem('user', JSON.stringify(store.currentUser));
-      localStorage.setItem('token', 'mock-token-' + roleKey.toLowerCase());
+      localStorage.setItem('user', JSON.stringify(user));
     }
   },
 

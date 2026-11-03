@@ -148,50 +148,8 @@
             </nav>
           </div>
 
-          <!-- Right: Actions, Notifications, Role Switcher & User Profile -->
+          <!-- Right: Actions, Notifications & User Profile -->
           <div class="flex items-center gap-3">
-            <!-- Quick Role Switcher (For Capstone Evaluation & Review) -->
-            <div class="relative">
-              <button
-                type="button"
-                class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-medium text-slate-700 transition-colors"
-                @click="roleDropdownOpen = !roleDropdownOpen"
-              >
-                <ShieldCheck class="w-3.5 h-3.5 text-alpharo-500" />
-                <span class="font-semibold text-slate-900">Peran: {{ roleLabel }}</span>
-                <ChevronDown class="w-3.5 h-3.5 text-slate-400" />
-              </button>
-
-              <!-- Role Switcher Dropdown -->
-              <div
-                v-if="roleDropdownOpen"
-                class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in zoom-in-95 duration-150"
-              >
-                <div class="px-4 py-2 border-b border-slate-100 text-xs">
-                  <p class="font-semibold text-slate-900">Pilih Role Pengguna</p>
-                  <p class="text-slate-500 text-[11px]">Beralih konteks kerja secara instan</p>
-                </div>
-                <div class="py-1">
-                  <button
-                    v-for="r in store.roles"
-                    :key="r.key"
-                    type="button"
-                    :class="[
-                      store.currentUser.role === r.key ? 'bg-blue-50 text-alpharo-500 font-semibold' : 'text-slate-700 hover:bg-slate-50',
-                      'w-full text-left px-4 py-2 text-xs flex items-center justify-between'
-                    ]"
-                    @click="onSelectRole(r.key)"
-                  >
-                    <div>
-                      <p class="font-bold">{{ r.label }}</p>
-                      <p class="text-[11px] text-slate-500">{{ r.division }}</p>
-                    </div>
-                    <span v-if="store.currentUser.role === r.key" class="text-alpharo-500">●</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
             <!-- Notifications Center Dropdown -->
             <div class="relative">
               <button
@@ -304,8 +262,9 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { store, storeActions } from '../../stores/mockData';
+import { store } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
+import api from '../../services/api';
 import ToastContainer from '../common/ToastContainer.vue';
 import AlpharoLogo from '../common/AlpharoLogo.vue';
 
@@ -330,7 +289,6 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
   Menu,
   X,
   Search,
@@ -349,7 +307,6 @@ const toast = useToast();
 
 const sidebarCollapsed = ref(false);
 const mobileSidebarOpen = ref(false);
-const roleDropdownOpen = ref(false);
 const notificationOpen = ref(false);
 
 const roleLabel = computed(() => {
@@ -441,6 +398,7 @@ const navGroups = computed(() => {
         items: [
           { label: 'Dashboard', path: '/administration/dashboard', icon: LayoutDashboard },
           { label: 'Dokumen SPJ', path: '/administration/spj', icon: FolderCheck },
+          { label: 'Kelola Akun', path: '/administration/accounts', icon: Users },
         ],
       },
       {
@@ -538,23 +496,6 @@ const navGroups = computed(() => {
   return [];
 });
 
-const onSelectRole = (newRoleKey) => {
-  storeActions.switchRole(newRoleKey);
-  roleDropdownOpen.value = false;
-  toast.success(`Beralih ke peran: ${roleLabel.value}`);
-
-  // Navigate to appropriate role dashboard
-  const targetMap = {
-    MARKETING: '/marketing/dashboard',
-    DIREKTUR: '/director/dashboard',
-    ADMINISTRASI: '/administration/dashboard',
-    WAREHOUSE: '/warehouse/dashboard',
-    FINANCE: '/finance/dashboard',
-    CLIENT: '/client/dashboard',
-  };
-  router.push(targetMap[newRoleKey] || '/marketing/dashboard');
-};
-
 const getNotificationRoute = () => {
   const r = store.currentUser.role.toLowerCase();
   return `/${r}/notifications`;
@@ -573,10 +514,16 @@ const handleNotificationClick = (notif) => {
   }
 };
 
-const handleLogout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  toast.info('Anda telah keluar dari sistem.');
-  router.push('/login');
+const handleLogout = async () => {
+  try {
+    await api.post('/auth/logout');
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Sesi tidak dapat ditutup di server.');
+  } finally {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    toast.info('Anda telah keluar dari sistem.');
+    router.push('/login');
+  }
 };
 </script>
