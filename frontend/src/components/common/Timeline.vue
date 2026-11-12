@@ -19,7 +19,7 @@
                   item.status === 'completed'
                     ? 'bg-emerald-500 text-white ring-4 ring-emerald-50 shadow-xs'
                     : item.status === 'in_progress'
-                    ? 'bg-[#0B4DA2] text-white ring-4 ring-blue-50 animate-pulse shadow-xs'
+                    ? 'bg-alpharo-600 text-white ring-4 ring-alpharo-50 animate-pulse shadow-xs'
                     : item.status === 'rejected'
                     ? 'bg-rose-500 text-white ring-4 ring-rose-50 shadow-xs'
                     : 'bg-slate-200 text-slate-400',
@@ -39,24 +39,24 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                 </svg>
                 <!-- Pending Step Number -->
-                <span v-else class="text-xs font-bold">{{ itemIdx + 1 }}</span>
+                <span v-else class="text-xs font-semibold">{{ itemIdx + 1 }}</span>
               </div>
             </div>
 
             <!-- Content -->
             <div class="min-w-0 flex-1 pt-0.5">
-              <div class="flex items-center justify-between text-xs">
-                <p class="font-bold text-slate-900 text-sm flex items-center gap-2">
+              <div class="flex flex-wrap items-center justify-between gap-y-1 text-xs">
+                <p class="font-semibold text-slate-900 text-sm flex flex-wrap items-center gap-2">
                   <span>{{ item.stage }}</span>
                   <span
                     v-if="item.status === 'in_progress'"
-                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-[#0B4DA2] border border-blue-200"
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-alpharo-100 text-alpharo-600 border border-alpharo-200"
                   >
                     Aktif Saat Ini
                   </span>
                   <span
                     v-else-if="item.status === 'rejected'"
-                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200"
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-700 border border-rose-200"
                   >
                     Perhatian
                   </span>
@@ -74,9 +74,9 @@
                     item.status === 'completed'
                       ? 'text-emerald-700 font-semibold'
                       : item.status === 'in_progress'
-                      ? 'text-[#0B4DA2] font-bold'
+                      ? 'text-alpharo-600 font-semibold'
                       : item.status === 'rejected'
-                      ? 'text-rose-700 font-bold'
+                      ? 'text-rose-700 font-semibold'
                       : 'text-slate-400'
                   ]"
                 >

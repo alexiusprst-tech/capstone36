@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Pusat Notifikasi Terpadu</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Pusat Notifikasi Terpadu</h1>
           <p class="text-sm text-slate-500 mt-1">
             Pemberitahuan aktivitas operasional antar role sesuai alur proses bisnis TO-BE terintegrasi.
           </p>
@@ -31,20 +31,20 @@
     </template>
 
     <!-- Context Info Per Role -->
-    <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-3.5 mb-5 text-xs text-slate-700 flex items-center justify-between">
+    <div class="bg-alpharo-50/70 border border-alpharo-200 rounded-xl p-3.5 mb-5 text-xs text-slate-700 flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <Bell class="w-4 h-4 text-blue-600 shrink-0" />
+        <Bell class="w-4 h-4 text-alpharo-600 shrink-0" />
         <span>
-          Menampilkan notifikasi masuk khusus untuk peran aktif: <strong class="text-blue-900 uppercase">{{ store.currentUser.role }}</strong> ({{ store.currentUser.name }})
+          Menampilkan notifikasi masuk khusus untuk peran aktif: <strong class="text-alpharo-900 uppercase">{{ store.currentUser.role }}</strong> ({{ store.currentUser.name }})
         </span>
       </div>
-      <span class="px-2 py-0.5 bg-blue-100 text-blue-800 font-bold rounded text-[11px]">
+      <span class="px-2 py-0.5 bg-alpharo-100 text-alpharo-800 font-semibold rounded text-[11px]">
         {{ unreadCount }} Belum Dibaca
       </span>
     </div>
 
     <!-- MAIN NOTIFICATIONS CONTAINER -->
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
       <!-- Filter Tabs -->
       <div class="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-3 flex-wrap">
         <div class="flex items-center gap-1.5">
@@ -52,7 +52,7 @@
             type="button"
             :class="[
               filterTab === 'all'
-                ? 'bg-white text-slate-900 shadow-2xs font-bold border-slate-300'
+                ? 'bg-white text-slate-900 shadow-2xs font-semibold border-slate-300'
                 : 'text-slate-600 hover:text-slate-900 border-transparent',
               'px-3 py-1.5 rounded-lg border text-xs transition-all cursor-pointer'
             ]"
@@ -64,14 +64,14 @@
             type="button"
             :class="[
               filterTab === 'unread'
-                ? 'bg-white text-blue-700 shadow-2xs font-bold border-slate-300'
+                ? 'bg-white text-alpharo-700 shadow-2xs font-semibold border-slate-300'
                 : 'text-slate-600 hover:text-slate-900 border-transparent',
               'px-3 py-1.5 rounded-lg border text-xs transition-all cursor-pointer flex items-center gap-1.5'
             ]"
             @click="filterTab = 'unread'"
           >
             <span>Belum Dibaca</span>
-            <span v-if="unreadCount > 0" class="px-1.5 py-0.2 bg-rose-500 text-white rounded-full text-[10px] font-bold">
+            <span v-if="unreadCount > 0" class="px-1.5 py-0.2 bg-rose-500 text-white rounded-full text-[11px] font-semibold">
               {{ unreadCount }}
             </span>
           </button>
@@ -79,7 +79,7 @@
             type="button"
             :class="[
               filterTab === 'read'
-                ? 'bg-white text-slate-900 shadow-2xs font-bold border-slate-300'
+                ? 'bg-white text-slate-900 shadow-2xs font-semibold border-slate-300'
                 : 'text-slate-600 hover:text-slate-900 border-transparent',
               'px-3 py-1.5 rounded-lg border text-xs transition-all cursor-pointer'
             ]"
@@ -100,7 +100,7 @@
           v-for="notif in displayedNotifs"
           :key="notif.id"
           :class="[
-            notif.isRead ? 'bg-white' : 'bg-blue-50/40',
+            notif.isRead ? 'bg-white' : 'bg-alpharo-50/40',
             'p-4 hover:bg-slate-50/80 transition-colors flex items-start gap-3.5 text-xs'
           ]"
         >
@@ -119,18 +119,18 @@
             <div class="flex items-start justify-between gap-3">
               <div>
                 <div class="flex items-center gap-2 flex-wrap">
-                  <span class="font-bold text-slate-900 text-sm">{{ notif.title }}</span>
+                  <span class="font-semibold text-slate-900 text-sm">{{ notif.title }}</span>
                   <span
                     :class="[
                       getCategoryBadge(notif.category).badgeClass,
-                      'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider'
+                      'px-2 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wider'
                     ]"
                   >
                     {{ getCategoryBadge(notif.category).label }}
                   </span>
                   <span
                     v-if="!notif.isRead"
-                    class="px-1.5 py-0.2 bg-blue-100 text-blue-700 font-bold rounded-full text-[9px]"
+                    class="px-1.5 py-0.2 bg-alpharo-100 text-alpharo-700 font-semibold rounded-full text-[9px]"
                   >
                     Baru
                   </span>
@@ -154,15 +154,15 @@
 
             <!-- Action Link Buttons -->
             <div class="mt-3 flex items-center gap-3">
-              <router-link
+              <Link
                 v-if="notif.link"
-                :to="notif.link"
-                class="inline-flex items-center gap-1 font-bold text-alpharo-500 hover:text-blue-800 hover:underline cursor-pointer"
+                :href="notif.link"
+                class="inline-flex items-center gap-1 font-semibold text-alpharo-500 hover:text-alpharo-800 hover:underline cursor-pointer"
                 @click="notif.isRead = true"
               >
                 <span>Buka Halaman Terkait</span>
                 <ArrowRight class="w-3.5 h-3.5" />
-              </router-link>
+              </Link>
               <button
                 v-if="!notif.isRead"
                 type="button"
@@ -256,8 +256,8 @@ const getCategoryBadge = (category) => {
       return {
         label: 'Pengadaan Supplier',
         icon: ShoppingBag,
-        bgClass: 'bg-purple-100 text-purple-700',
-        badgeClass: 'bg-purple-50 text-purple-700 border border-purple-200',
+        bgClass: 'bg-alpharo-100 text-alpharo-700',
+        badgeClass: 'bg-alpharo-50 text-alpharo-700 border border-alpharo-200',
       };
     case 'warehouse':
       return {

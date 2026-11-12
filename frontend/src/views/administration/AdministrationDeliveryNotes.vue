@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Surat Jalan Pengiriman (Delivery Notes)</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Surat Jalan Pengiriman (Delivery Notes)</h1>
           <p class="text-sm text-slate-500 mt-1">
             Dokumen legal pengantar barang dari gudang menuju lokasi proyek konstruksi client.
           </p>
@@ -20,38 +20,38 @@
     </template>
 
     <!-- VISUAL RELATIONSHIP BANNER: ORDER -> SURAT JALAN -> PENGIRIMAN -->
-    <div class="p-4 bg-white rounded-xl border border-slate-200/90 mb-6 shadow-2xs">
-      <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Relasi Proses Pengiriman Barang:</h3>
+    <div class="ui-panel p-4 bg-white rounded-xl border border-slate-200/90 mb-6 shadow-2xs">
+      <h3 class="text-xs font-semibold text-slate-700 uppercase tracking-wider mb-3">Relasi Proses Pengiriman Barang:</h3>
       <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
         <div class="flex-1 w-full bg-slate-50 p-3 rounded-lg border border-slate-200 text-center">
-          <span class="text-slate-400 text-[10px] uppercase font-bold block">Tahap 1</span>
-          <span class="font-bold text-slate-900 text-sm">Order Disetujui Direktur</span>
+          <span class="text-slate-400 text-[11px] uppercase font-semibold block">Tahap 1</span>
+          <span class="font-semibold text-slate-900 text-sm">Order Disetujui Direktur</span>
           <p class="text-[11px] text-slate-500 mt-0.5">Kontrak & volume barang divalidasi</p>
         </div>
-        <span class="text-slate-400 font-bold hidden sm:inline">➔</span>
-        <div class="flex-1 w-full bg-blue-50 p-3 rounded-lg border border-blue-200 text-center">
-          <span class="text-alpharo-500 text-[10px] uppercase font-bold block">Tahap 2 (Administrasi)</span>
-          <span class="font-bold text-slate-900 text-sm">Surat Jalan Diterbitkan</span>
+        <span class="text-slate-400 font-semibold hidden sm:inline">➔</span>
+        <div class="flex-1 w-full bg-alpharo-50 p-3 rounded-lg border border-alpharo-200 text-center">
+          <span class="text-alpharo-500 text-[11px] uppercase font-semibold block">Tahap 2 (Administrasi)</span>
+          <span class="font-semibold text-slate-900 text-sm">Surat Jalan Diterbitkan</span>
           <p class="text-[11px] text-slate-500 mt-0.5">Dokumen jalan resmi 3 rangkap dicetak</p>
         </div>
-        <span class="text-slate-400 font-bold hidden sm:inline">➔</span>
+        <span class="text-slate-400 font-semibold hidden sm:inline">➔</span>
         <div class="flex-1 w-full bg-emerald-50 p-3 rounded-lg border border-emerald-200 text-center">
-          <span class="text-emerald-600 text-[10px] uppercase font-bold block">Tahap 3 (Warehouse)</span>
-          <span class="font-bold text-slate-900 text-sm">Armada Pengiriman Berangkat</span>
+          <span class="text-emerald-600 text-[11px] uppercase font-semibold block">Tahap 3 (Warehouse)</span>
+          <span class="font-semibold text-slate-900 text-sm">Armada Pengiriman Berangkat</span>
           <p class="text-[11px] text-slate-500 mt-0.5">Barang dimuat dan dikonfirmasi sopir</p>
         </div>
       </div>
     </div>
 
     <!-- DELIVERY NOTES TABLE -->
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
       <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs">
-        <span class="font-bold text-slate-900 uppercase">Daftar Surat Jalan</span>
+        <span class="font-semibold text-slate-900 uppercase">Daftar Surat Jalan</span>
         <span class="text-slate-500">{{ sjList.length }} Berkas Surat Jalan</span>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
               <th class="py-3 px-4">Nomor SJ</th>
@@ -65,9 +65,9 @@
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr v-for="sj in sjList" :key="sj.number" class="hover:bg-slate-50/70 transition-colors">
-              <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ sj.number }}</td>
+              <td class="py-3.5 px-4 font-mono font-semibold text-slate-900">{{ sj.number }}</td>
               <td class="py-3.5 px-4 font-mono text-slate-600">{{ sj.orderNumber }}</td>
-              <td class="py-3.5 px-4 font-bold text-slate-800">{{ sj.clientName }}</td>
+              <td class="py-3.5 px-4 font-semibold text-slate-800">{{ sj.clientName }}</td>
               <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ sj.date }}</td>
               <td class="py-3.5 px-4 text-center"><StatusBadge :status="sj.status" /></td>
               <td class="py-3.5 px-4 text-center"><StatusBadge :status="sj.shipmentStatus" /></td>
@@ -75,19 +75,19 @@
                 <div class="flex items-center justify-end gap-1.5">
                   <button
                     type="button"
-                    class="p-1.5 text-slate-600 hover:bg-slate-100 rounded"
-                    title="Cetak Surat Jalan"
-                    @click="printSj(sj.number)"
-                  >
-                    <Printer class="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    class="px-2 py-1 bg-alpharo-500 hover:bg-alpharo-600 text-white rounded text-[11px] font-bold"
+                    class="px-3 py-1 bg-alpharo-50 hover:bg-alpharo-100 text-alpharo-700 border border-alpharo-200 rounded text-xs font-semibold cursor-pointer transition-colors"
                     @click="openDetail(sj)"
                   >
                     Detail
                   </button>
+                  <Link
+                    href="/administration/spj"
+                    class="inline-flex items-center gap-1 px-2.5 py-1 text-slate-600 hover:bg-slate-100 rounded border border-slate-200 text-xs font-semibold transition-colors"
+                    title="Buka dokumen di modul SPJ"
+                  >
+                    <span>SPJ</span>
+                    <ArrowUpRight class="w-3.5 h-3.5" />
+                  </Link>
                 </div>
               </td>
             </tr>
@@ -105,7 +105,7 @@
     >
       <form class="space-y-4 text-xs" @submit.prevent="saveSj">
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Pilih Order Disetujui</label>
+          <label class="block font-semibold text-slate-700 uppercase mb-1">Pilih Order Disetujui</label>
           <select v-model="newSj.orderId" required class="w-full px-3 py-2 border rounded-lg bg-white">
             <option value="" disabled>-- Pilih Order --</option>
             <option v-for="o in approvedOrders" :key="o.id" :value="o.id">
@@ -115,12 +115,12 @@
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Nomor Surat Jalan</label>
+          <label class="block font-semibold text-slate-700 uppercase mb-1">Nomor Surat Jalan</label>
           <input v-model="newSj.number" required placeholder="SJ-2026-XXX" class="w-full px-3 py-2 border rounded-lg" />
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Tanggal Kirim / Terbit</label>
+          <label class="block font-semibold text-slate-700 uppercase mb-1">Tanggal Kirim / Terbit</label>
           <input v-model="newSj.date" type="date" required class="w-full px-3 py-2 border rounded-lg bg-white" />
         </div>
 
@@ -128,7 +128,7 @@
           <button type="button" class="px-3.5 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg" @click="createModalOpen = false">
             Batal
           </button>
-          <button type="submit" class="px-4 py-1.5 bg-alpharo-500 hover:bg-alpharo-600 text-white font-bold rounded-lg">
+          <button type="submit" class="px-4 py-1.5 bg-alpharo-500 hover:bg-alpharo-600 text-white font-semibold rounded-lg">
             Simpan & Terbitkan
           </button>
         </div>
@@ -146,7 +146,7 @@
         <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
           <div class="flex justify-between">
             <span class="text-slate-500">Nomor Surat Jalan:</span>
-            <span class="font-mono font-bold text-slate-900">{{ selectedSj.number }}</span>
+            <span class="font-mono font-semibold text-slate-900">{{ selectedSj.number }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-slate-500">Nomor Order:</span>
@@ -154,7 +154,7 @@
           </div>
           <div class="flex justify-between">
             <span class="text-slate-500">Penerima:</span>
-            <span class="font-bold text-slate-900">{{ selectedSj.clientName }}</span>
+            <span class="font-semibold text-slate-900">{{ selectedSj.clientName }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-slate-500">Status Pengiriman:</span>
@@ -168,12 +168,13 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { Link } from '@inertiajs/vue3';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import Modal from '../../components/common/Modal.vue';
 import { store, storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
-import { Plus, Printer } from 'lucide-vue-next';
+import { Plus, ArrowUpRight } from 'lucide-vue-next';
 
 const toast = useToast();
 
@@ -183,7 +184,7 @@ const selectedSj = ref(null);
 
 const newSj = ref({
   orderId: '',
-  number: 'SJ-2026-004',
+  number: '',
   date: new Date().toISOString().split('T')[0],
 });
 

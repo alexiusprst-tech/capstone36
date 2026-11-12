@@ -53,6 +53,9 @@ class PurchaseTransaction extends Model
         'items',
         'created_by',
         'notes',
+        'supplier_progress',
+        'progress_version',
+        'progress_history',
     ];
 
     /**
@@ -60,8 +63,23 @@ class PurchaseTransaction extends Model
      */
     protected $casts = [
         'items' => 'array',
+        'supplier_progress' => 'array',
+        'progress_version' => 'integer',
+        'progress_history' => 'array',
         'subtotal' => 'decimal:2',
         'discount' => 'decimal:2',
         'total_price' => 'decimal:2',
     ];
+
+    public function toArray(): array
+    {
+        $data = parent::toArray();
+        $progress = $data['supplier_progress'] ?? [];
+        unset($data['supplier_progress']);
+
+        return [...$data, ...$progress,
+            'supplier_status' => $this->status === 'DITERIMA_GUDANG' ? 'Diterima Gudang (Lengkap & Sesuai)' : ($progress['supplier_status'] ?? 'Menunggu Konfirmasi'),
+            'progress_persisted' => $this->supplier_progress !== null || $this->status === 'DITERIMA_GUDANG',
+        ];
+    }
 }

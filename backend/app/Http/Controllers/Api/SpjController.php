@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\SpjDocument;
 use App\Models\SpjProject;
+use App\Services\SpjLetterhead;
 use App\Services\SpjService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -52,6 +53,10 @@ class SpjController extends Controller
         $project = SpjProject::where('project_id', $id)->firstOrFail();
 
         $validated = $request->validate([
+            'metadata' => ['sometimes', 'array:customer_profile,customer_address,company_address'],
+            'metadata.customer_address' => ['nullable', 'string', 'max:2000'],
+            'metadata.company_address' => ['nullable', 'string', 'max:2000'],
+            ...SpjLetterhead::rules('metadata.customer_profile'),
             'project_name' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
             'customer_name' => ['nullable', 'string'],
@@ -82,6 +87,18 @@ class SpjController extends Controller
             'director_approval' => ['nullable', 'array'],
         ]);
 
+        $metadata = $project->metadata ?? [];
+        if (isset($validated['customer_name']) && $validated['customer_name'] !== $project->customer_name && ! array_key_exists('customer_profile', $validated['metadata'] ?? [])) {
+            $metadata['customer_profile'] = [];
+            unset($metadata['customer_address']);
+        }
+        if (array_key_exists('metadata', $validated)) {
+            $metadata = array_replace($metadata, $validated['metadata']);
+        }
+        if (array_key_exists('customer_profile', $validated['metadata'] ?? [])) {
+            $metadata['customer_profile_source'] = 'project';
+        }
+        $validated['metadata'] = $metadata;
         $project->update($validated);
 
         return response()->json([
@@ -97,6 +114,7 @@ class SpjController extends Controller
     public function getDocuments(string $id): JsonResponse
     {
         $project = SpjProject::where('project_id', $id)->firstOrFail();
+        $project->setAttribute('customer_profile', app(SpjLetterhead::class)->profile($project));
         $documents = $project->documents()->orderBy('doc_order')->get();
 
         // Evaluasi kelengkapan data secara real-time
@@ -149,13 +167,17 @@ class SpjController extends Controller
             'doc_number' => ['nullable', 'string'],
             'doc_date' => ['nullable', 'string'],
             'form_data' => ['required', 'array'],
+            'form_data.items' => ['sometimes', 'array'],
+            'form_data.items.*' => ['array'],
+            'form_data.photos' => ['sometimes', 'array'],
+            'form_data.photos.*' => ['array'],
         ]);
 
         $doc->update([
             'doc_number' => $request->input('doc_number', $doc->doc_number),
             'doc_date' => $request->input('doc_date', $doc->doc_date),
             'form_data' => array_merge($doc->form_data ?? [], $request->input('form_data')),
-            'status' => $doc->status === 'BELUM_DIBUAT' ? 'DRAFT' : $doc->status,
+            'status' => 'DRAFT',
         ]);
 
         return response()->json([
@@ -170,10 +192,15 @@ class SpjController extends Controller
      */
     public function generateDocument(Request $request, string $id, string $docKey): JsonResponse
     {
+        $request->validate(['form_data' => ['sometimes', 'array'], 'form_data.items' => ['sometimes', 'array'], 'form_data.items.*' => ['array'], 'form_data.photos' => ['sometimes', 'array'], 'form_data.photos.*' => ['array'], 'format' => ['sometimes', 'in:docx,pdf']]);
         $project = SpjProject::where('project_id', $id)->firstOrFail();
         $formData = $request->input('form_data', []);
 
         $doc = $this->spjService->generateDocument($project, $docKey, $formData);
+        $format = $request->input('format', 'docx');
+        if ($format === 'pdf') {
+            $this->spjService->renderPdf($project, $doc);
+        }
 
         return response()->json([
             'success' => true,
@@ -182,6 +209,7 @@ class SpjController extends Controller
             'download_url' => route('api.spj.documents.download', [
                 'id' => $project->project_id,
                 'docKey' => $docKey,
+                'format' => $format,
             ]),
         ]);
     }
@@ -242,40 +270,28 @@ class SpjController extends Controller
     /**
      * Unduh file dokumen SPJ (Word atau PDF)
      */
-    public function downloadDocument(string $id, string $docKey): BinaryFileResponse|JsonResponse
+    public function downloadDocument(Request $request, string $id, string $docKey): BinaryFileResponse
     {
+        $request->validate(['format' => ['sometimes', 'in:docx,pdf,original']]);
+        $format = $request->query('format', 'docx');
         $project = SpjProject::where('project_id', $id)->firstOrFail();
-        $doc = SpjDocument::where('project_id', $project->project_id)
-            ->where('doc_key', $docKey)
-            ->firstOrFail();
-
-        $fullPath = $doc->full_path;
-
-        if (! $fullPath || ! file_exists($fullPath)) {
-            // Jika belum ada file spesifik hasil generate, coba sajikan master template terkait
-            $templateRelPath = $this->spjService->validateDocumentData($project, $docKey);
-            $templateAbsPath = storage_path("app/templates/master/{$doc->file_name}");
-
-            if (file_exists($templateAbsPath)) {
-                $fullPath = $templateAbsPath;
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => "Berkas dokumen {$doc->doc_name} belum tersedia di server.",
-                ], 404);
-            }
+        $doc = SpjDocument::where('project_id', $id)->where('doc_key', $docKey)->firstOrFail();
+        if ($format === 'original') {
+            $source = $doc->source_file_path ?: ($doc->status === 'DOKUMEN_EKSTERNAL' ? $doc->file_path : null);
+            abort_unless($source, 404, 'Berkas upload asli belum tersedia.');
+            $fullPath = config('spj.storage_root').'/'.$source;
+        } else {
+            // Always use the latest saved form/project, never an unfilled master.
+            $doc = $this->spjService->generateDocument($project, $docKey);
+            $fullPath = $format === 'pdf' ? $this->spjService->renderPdf($project, $doc) : $doc->full_path;
         }
-
-        $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
+        abort_unless($fullPath && is_file($fullPath), 404, 'Berkas dokumen belum tersedia.');
+        $extension = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
         $mime = match ($extension) {
-            'pdf' => 'application/pdf',
-            'png' => 'image/png',
-            'jpg', 'jpeg' => 'image/jpeg',
+            'pdf' => 'application/pdf', 'png' => 'image/png', 'jpg', 'jpeg' => 'image/jpeg',
             default => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         };
 
-        return response()->download($fullPath, $doc->file_name ?: "{$docKey}_{$project->project_id}.docx", [
-            'Content-Type' => $mime,
-        ]);
+        return response()->download($fullPath, basename($fullPath), ['Content-Type' => $mime, 'Cache-Control' => 'private, no-store']);
     }
 }

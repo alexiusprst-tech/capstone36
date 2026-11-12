@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Monitoring Order Pipeline</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Monitoring Order Pipeline</h1>
           <p class="text-sm text-slate-500 mt-1">
             Pantau status progress transaksi dari drafting, telaah Direktur, penagihan, hingga penuntasan proyek.
           </p>
@@ -19,7 +19,7 @@
         type="button"
         :class="[
           activeTab === tab.value
-            ? 'bg-alpharo-500 text-white font-bold shadow-xs'
+            ? 'bg-alpharo-500 text-white font-semibold shadow-xs'
             : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200',
           'px-4 py-2 rounded-xl text-xs whitespace-nowrap transition-all flex items-center gap-2'
         ]"
@@ -29,7 +29,7 @@
         <span
           :class="[
             activeTab === tab.value ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600',
-            'px-1.5 py-0.2 rounded-full text-[10px] font-mono'
+            'px-1.5 py-0.2 rounded-full text-[11px] font-mono'
           ]"
         >
           {{ getCount(tab.value) }}
@@ -42,15 +42,15 @@
       <div
         v-for="order in filteredOrders"
         :key="order.id"
-        class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between"
+        class="ui-panel bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between"
       >
         <div>
           <div class="flex items-start justify-between gap-2 mb-2">
             <div class="flex items-center gap-1.5">
-              <span class="font-mono font-bold text-slate-900 text-sm">{{ order.orderNumber }}</span>
+              <span class="font-mono font-semibold text-slate-900 text-sm">{{ order.orderNumber }}</span>
               <span
                 v-if="order.isHold"
-                class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200"
+                class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-700 border border-rose-200"
                 title="Pengiriman ditahan Direktur"
               >
                 ⛔ Hold
@@ -58,12 +58,12 @@
             </div>
             <StatusBadge :status="order.status" />
           </div>
-          <h3 class="font-bold text-slate-900 text-sm line-clamp-1">{{ order.clientName }}</h3>
+          <h3 class="font-semibold text-slate-900 text-sm line-clamp-1">{{ order.clientName }}</h3>
           <p class="text-xs text-slate-500 mt-0.5 line-clamp-2">{{ order.projectName }}</p>
 
           <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
             <span class="text-slate-500">Nilai Transaksi:</span>
-            <span class="font-bold font-mono text-slate-900">Rp {{ order.grandTotal.toLocaleString('id-ID') }}</span>
+            <span class="font-semibold font-mono text-slate-900">Rp {{ order.grandTotal.toLocaleString('id-ID') }}</span>
           </div>
 
           <div class="mt-2 text-xs text-slate-500 flex items-center justify-between">
@@ -81,7 +81,7 @@
           <span class="text-[11px] text-slate-400">{{ order.date }}</span>
           <button
             type="button"
-            class="text-xs font-bold text-alpharo-500 hover:text-alpharo-700"
+            class="text-xs font-semibold text-alpharo-500 hover:text-alpharo-700"
             @click="viewDetail(order)"
           >
             Lihat Timeline & Detail →
@@ -89,7 +89,7 @@
         </div>
       </div>
 
-      <div v-if="filteredOrders.length === 0" class="col-span-full bg-white p-12 text-center rounded-xl border border-slate-200 text-slate-400 text-sm">
+      <div v-if="filteredOrders.length === 0" class="ui-panel col-span-full bg-white p-12 text-center rounded-xl border border-slate-200 text-slate-400 text-sm">
         Tidak ada order pada tahap status "{{ activeTab }}".
       </div>
     </div>
@@ -104,13 +104,13 @@
       <div v-if="selectedOrder" class="space-y-6 text-xs">
         <!-- HOLD BANNER IF ON HOLD -->
         <div v-if="selectedOrder.isHold" class="p-3.5 bg-rose-50 rounded-xl border border-rose-200 text-rose-800">
-          <div class="flex items-center gap-2 font-bold text-xs">
+          <div class="flex items-center gap-2 font-semibold text-xs">
             <span>⛔ PENGIRIMAN DITAHAN OLEH DIREKTUR</span>
           </div>
           <p class="mt-1 text-[11px] text-rose-700">
             Alasan: <strong>{{ selectedOrder.holdReason }}</strong>
           </p>
-          <span class="text-[10px] text-rose-500 block mt-1">
+          <span class="text-[11px] text-rose-500 block mt-1">
             Oleh {{ selectedOrder.holdBy }} pada {{ selectedOrder.holdDate }}
           </span>
         </div>
@@ -120,41 +120,41 @@
             <span class="text-slate-500 block">Status Terkini</span>
             <div class="mt-1 flex items-center gap-1.5">
               <StatusBadge :status="selectedOrder.status" />
-              <span v-if="selectedOrder.isHold" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">
+              <span v-if="selectedOrder.isHold" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-700 border border-rose-200">
                 Ditahan
               </span>
             </div>
           </div>
           <div class="text-right">
             <span class="text-slate-500 block">Total Nilai</span>
-            <span class="text-base font-bold font-mono text-slate-900 mt-0.5 block">
+            <span class="text-base font-semibold font-mono text-slate-900 mt-0.5 block">
               Rp {{ selectedOrder.grandTotal.toLocaleString('id-ID') }}
             </span>
           </div>
         </div>
 
         <!-- PAYMENT & INVOICE STATUS -->
-        <div v-if="associatedInvoice" class="p-4 bg-blue-50/60 rounded-xl border border-blue-200 space-y-2">
+        <div v-if="associatedInvoice" class="p-4 bg-alpharo-50/60 rounded-xl border border-alpharo-200 space-y-2">
           <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-800 uppercase tracking-wider text-[11px]">Informasi Invoice & Piutang</span>
+            <span class="font-semibold text-slate-800 uppercase tracking-wider text-[11px]">Informasi Invoice & Piutang</span>
             <StatusBadge :status="associatedInvoice.status" />
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1 text-slate-700">
             <div>
-              <span class="text-slate-500 text-[10px] block">No. Invoice</span>
-              <span class="font-mono font-bold">{{ associatedInvoice.invoiceNumber }}</span>
+              <span class="text-slate-500 text-[11px] block">No. Invoice</span>
+              <span class="font-mono font-semibold">{{ associatedInvoice.invoiceNumber }}</span>
             </div>
             <div>
-              <span class="text-slate-500 text-[10px] block">Jatuh Tempo</span>
+              <span class="text-slate-500 text-[11px] block">Jatuh Tempo</span>
               <span class="font-medium">{{ associatedInvoice.dueDate }}</span>
             </div>
             <div>
-              <span class="text-slate-500 text-[10px] block">Telah Dibayar</span>
-              <span class="font-mono font-bold text-emerald-600">Rp {{ associatedInvoice.paidAmount.toLocaleString('id-ID') }}</span>
+              <span class="text-slate-500 text-[11px] block">Telah Dibayar</span>
+              <span class="font-mono font-semibold text-emerald-600">Rp {{ associatedInvoice.paidAmount.toLocaleString('id-ID') }}</span>
             </div>
             <div>
-              <span class="text-slate-500 text-[10px] block">Sisa Tagihan</span>
-              <span class="font-mono font-bold text-rose-600">Rp {{ associatedInvoice.remainingAmount.toLocaleString('id-ID') }}</span>
+              <span class="text-slate-500 text-[11px] block">Sisa Tagihan</span>
+              <span class="font-mono font-semibold text-rose-600">Rp {{ associatedInvoice.remainingAmount.toLocaleString('id-ID') }}</span>
             </div>
           </div>
         </div>
@@ -163,12 +163,12 @@
         <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
           <div class="flex items-center justify-between">
             <div>
-              <h4 class="font-bold uppercase text-slate-700 tracking-wider text-[11px]">Log Follow-Up Client</h4>
+              <h4 class="font-semibold uppercase text-slate-700 tracking-wider text-[11px]">Log Follow-Up Client</h4>
               <p class="text-[11px] text-slate-500">Catatan komunikasi tim Marketing dengan PIC client terkait pembayaran & SP2D.</p>
             </div>
             <button
               type="button"
-              class="px-3 py-1.5 bg-alpharo-500 hover:bg-alpharo-600 text-white font-bold rounded-lg text-xs transition-colors flex items-center gap-1.5 shadow-2xs"
+              class="px-3 py-1.5 bg-alpharo-500 hover:bg-alpharo-600 text-white font-semibold rounded-lg text-xs transition-colors flex items-center gap-1.5 shadow-2xs"
               @click="openFollowUpModal"
             >
               <span>+ Catat Follow-Up</span>
@@ -182,13 +182,13 @@
               class="p-3 bg-white rounded-lg border border-slate-200 shadow-2xs text-xs space-y-1"
             >
               <div class="flex items-center justify-between text-[11px]">
-                <span class="font-bold text-slate-800">{{ log.contactPerson }} ({{ log.method }})</span>
+                <span class="font-semibold text-slate-800">{{ log.contactPerson }} ({{ log.method }})</span>
                 <span class="text-slate-400 font-mono">{{ log.date }}</span>
               </div>
               <p class="text-slate-700 font-medium text-xs">{{ log.outcome }}</p>
               <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
                 <span>Janji Bayar: <strong class="text-slate-800">{{ log.promisedPaymentDate || '-' }}</strong></span>
-                <span class="italic text-[10px]">Oleh: {{ log.recordedBy }}</span>
+                <span class="italic text-[11px]">Oleh: {{ log.recordedBy }}</span>
               </div>
               <p v-if="log.notes" class="text-[11px] text-slate-500 bg-slate-50 p-1.5 rounded">Catatan: {{ log.notes }}</p>
             </div>
@@ -206,7 +206,7 @@
         </div>
 
         <div>
-          <h4 class="font-bold uppercase text-slate-500 tracking-wider mb-3">Timeline Lengkap</h4>
+          <h4 class="font-semibold uppercase text-slate-500 tracking-wider mb-3">Timeline Lengkap</h4>
           <Timeline :timeline="selectedOrder.timeline" />
         </div>
       </div>
@@ -221,7 +221,7 @@
     >
       <form class="space-y-4 text-xs" @submit.prevent="submitFollowUp">
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Nama / Kontak PIC Client</label>
+          <label class="block font-semibold text-slate-700 uppercase mb-1">Nama / Kontak PIC Client</label>
           <input
             v-model="followUpForm.contactPerson"
             required
@@ -232,7 +232,7 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Metode Kontak</label>
+            <label class="block font-semibold text-slate-700 uppercase mb-1">Metode Kontak</label>
             <select v-model="followUpForm.method" class="w-full px-3 py-2 border rounded-lg bg-white">
               <option>Telepon Langsung</option>
               <option>WhatsApp / Chat</option>
@@ -241,7 +241,7 @@
             </select>
           </div>
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Tanggal Janji Bayar</label>
+            <label class="block font-semibold text-slate-700 uppercase mb-1">Tanggal Janji Bayar</label>
             <input
               v-model="followUpForm.promisedPaymentDate"
               type="date"
@@ -251,7 +251,7 @@
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Hasil Komunikasi / Status Penagihan</label>
+          <label class="block font-semibold text-slate-700 uppercase mb-1">Hasil Komunikasi / Status Penagihan</label>
           <textarea
             v-model="followUpForm.outcome"
             required
@@ -262,7 +262,7 @@
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Catatan Tambahan (Opsional)</label>
+          <label class="block font-semibold text-slate-700 uppercase mb-1">Catatan Tambahan (Opsional)</label>
           <input
             v-model="followUpForm.notes"
             placeholder="Contoh: Memerlukan materai tambahan pada faktur fisik..."
@@ -272,7 +272,7 @@
 
         <div class="flex justify-end gap-2 pt-2 border-t border-slate-200">
           <button type="button" class="px-3.5 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg" @click="followUpModalOpen = false">Batal</button>
-          <button type="submit" class="px-4 py-1.5 bg-alpharo-500 text-white font-bold rounded-lg hover:bg-alpharo-600">Simpan Catatan Follow-Up</button>
+          <button type="submit" class="px-4 py-1.5 bg-alpharo-500 text-white font-semibold rounded-lg hover:bg-alpharo-600">Simpan Catatan Follow-Up</button>
         </div>
       </form>
     </Modal>
@@ -317,13 +317,32 @@ const statusTabs = [
 ];
 
 const getCount = (val) => {
-  if (val === 'Semua') return store.orders.length;
-  return store.orders.filter((o) => o.status === val).length;
+  const valid = store.orders.filter((o) => {
+    if (o.orderNumber === 'ORD-2026-007' || o.orderNumber === 'ORD-2026-008') return false;
+    if (o.date && String(o.date).startsWith('2026-10')) return false;
+    return true;
+  });
+  if (val === 'Semua') return valid.length;
+  return valid.filter((o) => o.status === val).length;
 };
 
 const filteredOrders = computed(() => {
-  if (activeTab.value === 'Semua') return store.orders;
-  return store.orders.filter((o) => o.status === activeTab.value);
+  return store.orders
+    .filter((o) => {
+      if (o.orderNumber === 'ORD-2026-007' || o.orderNumber === 'ORD-2026-008') return false;
+      if (o.date && String(o.date).startsWith('2026-10')) return false;
+      if (activeTab.value === 'Semua') return true;
+      return o.status === activeTab.value;
+    })
+    .slice()
+    .sort((a, b) => {
+      const dateA = a.date || a.createdAt || '';
+      const dateB = b.date || b.createdAt || '';
+      if (dateA !== dateB) return dateB.localeCompare(dateA);
+      const numA = parseInt(String(a.orderNumber || '').replace(/\D/g, ''), 10) || Number(a.id) || 0;
+      const numB = parseInt(String(b.orderNumber || '').replace(/\D/g, ''), 10) || Number(b.id) || 0;
+      return numB - numA;
+    });
 });
 
 const getDocCount = (docs) => {

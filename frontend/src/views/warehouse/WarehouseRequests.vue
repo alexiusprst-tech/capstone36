@@ -8,7 +8,7 @@
             <ClipboardList class="w-6 h-6 stroke-[2.2]" />
           </div>
           <div>
-            <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
               Pengajuan Kebutuhan Barang (Material Request)
             </h1>
             <p class="text-xs text-slate-500 mt-0.5">
@@ -21,7 +21,7 @@
         <div class="flex items-center gap-2">
           <button
             type="button"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors cursor-pointer"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 active:bg-alpharo-800 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors cursor-pointer"
             @click="openCreateModal"
           >
             <Plus class="w-4 h-4 stroke-[2.5]" />
@@ -32,31 +32,31 @@
     </template>
 
     <!-- INFO BANNER: ALUR BPMN WAREHOUSE -> FINANCE -->
-    <div class="bg-gradient-to-r from-emerald-50 via-teal-50 to-sky-50 border border-emerald-200/80 rounded-xl p-4 mb-5 text-xs text-slate-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-2xs">
+    <div class="bg-linear-to-r from-emerald-50 via-teal-50 to-sky-50 border border-emerald-200/80 rounded-xl p-4 mb-5 text-xs text-slate-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-2xs">
       <div class="flex items-center gap-3">
         <div class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
           <ArrowRightLeft class="w-4 h-4" />
         </div>
         <div>
-          <span class="font-bold text-emerald-950 block">Alur Proses Pengadaan: Gudang &rarr; Finance</span>
+          <span class="font-semibold text-emerald-950 block">Alur Proses Pengadaan: Gudang &rarr; Finance</span>
           <span class="text-slate-600">
             Pengajuan yang dibuat di halaman ini akan langsung diteruskan ke Finance untuk di-generate menjadi <strong>Transaksi Pembelian</strong> dengan No Faktur & Supplier.
           </span>
         </div>
       </div>
       <div class="flex items-center gap-2 shrink-0">
-        <span class="px-2.5 py-1 bg-amber-100 text-amber-800 font-bold rounded-full text-[11px]">
+        <span class="px-2.5 py-1 bg-amber-100 text-amber-800 font-semibold rounded-full text-[11px]">
           {{ pendingCount }} Menunggu Finance
         </span>
-        <span class="px-2.5 py-1 bg-sky-100 text-sky-800 font-bold rounded-full text-[11px]">
+        <span class="px-2.5 py-1 bg-sky-100 text-sky-800 font-semibold rounded-full text-[11px]">
           {{ inProgressCount }} Diproses Pembelian
         </span>
       </div>
     </div>
 
     <!-- FILTER & SEARCH CARD (Green top line accent matching system) -->
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden mb-5">
-      <div class="h-1 bg-emerald-600 w-full"></div>
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden mb-5">
+      <div class="h-px bg-slate-200 w-full"></div>
       <div class="p-4 sm:p-5">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
           <!-- Search Bar -->
@@ -66,7 +66,7 @@
               v-model="searchQuery"
               type="text"
               placeholder="Cari kode pengajuan, proyek, atau material..."
-              class="w-full pl-9 pr-8 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-emerald-500 bg-white text-slate-800 placeholder-slate-400"
+              class="w-full pl-9 pr-8 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-alpharo-400 bg-white text-slate-800 placeholder-slate-400"
             />
             <button
               v-if="searchQuery"
@@ -82,7 +82,7 @@
           <div class="md:col-span-3">
             <select
               v-model="statusFilter"
-              class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-emerald-500 bg-white text-slate-800 cursor-pointer"
+              class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-alpharo-400 bg-white text-slate-800 cursor-pointer"
             >
               <option value="">Semua Status Pengajuan</option>
               <option value="MENUNGGU_FINANCE">Menunggu Finance</option>
@@ -95,7 +95,7 @@
           <div class="md:col-span-3">
             <select
               v-model="projectFilter"
-              class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-emerald-500 bg-white text-slate-800 cursor-pointer"
+              class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-alpharo-400 bg-white text-slate-800 cursor-pointer"
             >
               <option value="">Semua Proyek Pengadaan</option>
               <option v-for="proj in availableProjects" :key="proj.id" :value="proj.name">
@@ -120,18 +120,18 @@
     </div>
 
     <!-- REQUESTS TABLE CARD -->
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden mb-6">
-      <div class="h-1 bg-emerald-600 w-full"></div>
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden mb-6">
+      <div class="h-px bg-slate-200 w-full"></div>
 
       <!-- Card Table Header -->
       <div class="p-4 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between text-xs">
-        <span class="font-bold text-slate-800 uppercase tracking-wider text-[11px]">Daftar Pengajuan Kebutuhan Barang Gudang</span>
+        <span class="font-semibold text-slate-800 uppercase tracking-wider text-[11px]">Daftar Pengajuan Kebutuhan Barang Gudang</span>
         <span class="text-slate-500 font-medium font-mono">{{ filteredRequests.length }} Pengajuan Ditemukan</span>
       </div>
 
       <!-- Table Container -->
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-[11px] uppercase tracking-wide">
               <th class="py-3 px-4 whitespace-nowrap">Kode Pengajuan</th>
@@ -145,13 +145,13 @@
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr v-if="filteredRequests.length === 0">
-              <td colspan="7" class="py-12 text-center text-slate-500">
+              <td colspan="7" class="py-12 text-center text-slate-500"><div class="ui-empty-state">
                 <div class="flex flex-col items-center justify-center gap-2">
                   <Package class="w-8 h-8 text-slate-300" />
                   <span class="text-xs font-semibold text-slate-700">Tidak ada data pengajuan yang sesuai.</span>
                   <span class="text-[11px] text-slate-400">Klik "Buat Pengajuan Baru" untuk mengajukan kebutuhan ke Finance.</span>
                 </div>
-              </td>
+              </div></td>
             </tr>
 
             <tr
@@ -161,8 +161,8 @@
             >
               <!-- Kode Pengajuan -->
               <td class="py-3 px-4 whitespace-nowrap">
-                <span class="font-mono font-bold text-slate-900 block">{{ req.requestCode || req.request_code }}</span>
-                <span class="text-[10px] text-slate-400">Oleh: {{ req.requestedBy || req.requested_by }}</span>
+                <span class="font-mono font-semibold text-slate-900 block">{{ req.requestCode || req.request_code }}</span>
+                <span class="text-[11px] text-slate-400">Oleh: {{ req.requestedBy || req.requested_by }}</span>
               </td>
 
               <!-- Tanggal -->
@@ -189,13 +189,13 @@
                     class="inline-flex items-center gap-1 text-[11px] bg-slate-100 border border-slate-200 text-slate-800 px-2 py-0.5 rounded-md"
                   >
                     <span class="font-semibold">{{ it.name }}</span>
-                    <span class="text-emerald-700 font-mono font-bold">({{ it.qty }} {{ it.unit || 'UNIT' }})</span>
+                    <span class="text-emerald-700 font-mono font-semibold">({{ it.qty }} {{ it.unit || 'UNIT' }})</span>
                   </span>
                 </div>
               </td>
 
               <!-- Estimasi Biaya -->
-              <td class="py-3 px-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
+              <td class="py-3 px-4 text-right font-mono font-semibold text-slate-900 whitespace-nowrap">
                 Rp {{ Number(req.totalEstCost || req.total_est_cost || 0).toLocaleString('id-ID') }}
               </td>
 
@@ -203,27 +203,27 @@
               <td class="py-3 px-4 text-center whitespace-nowrap">
                 <span
                   v-if="(req.status === 'MENUNGGU_FINANCE' || req.status === 'Draft' || req.status === 'Menunggu Verifikasi')"
-                  class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[10px] font-bold"
+                  class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[11px] font-semibold"
                 >
                   <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                   Menunggu Finance
                 </span>
                 <span
                   v-else-if="(req.status === 'DIPROSES_PEMBELIAN' || req.status === 'Diproses')"
-                  class="inline-flex items-center gap-1 px-2.5 py-1 bg-sky-50 text-sky-700 border border-sky-200 rounded-full text-[10px] font-bold"
+                  class="inline-flex items-center gap-1 px-2.5 py-1 bg-sky-50 text-sky-700 border border-sky-200 rounded-full text-[11px] font-semibold"
                 >
                   <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
                   Diproses Pembelian
                 </span>
                 <span
                   v-else
-                  class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px] font-bold"
+                  class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[11px] font-semibold"
                 >
                   <Check class="w-3 h-3 stroke-[3]" />
                   Selesai
                 </span>
 
-                <div v-if="req.purchase_code || req.purchaseCode" class="text-[10px] text-slate-400 font-mono mt-0.5">
+                <div v-if="req.purchase_code || req.purchaseCode" class="text-[11px] text-slate-400 font-mono mt-0.5">
                   PO: {{ req.purchase_code || req.purchaseCode }}
                 </div>
               </td>
@@ -257,13 +257,13 @@
         <!-- Proyek Target -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block font-bold text-slate-700 uppercase text-[11px] mb-1">
+            <label class="block font-semibold text-slate-700 uppercase text-[11px] mb-1">
               Proyek Pengadaan <span class="text-rose-500">*</span>
             </label>
             <select
               v-model="form.project_name"
               required
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-emerald-500 bg-white"
+              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-alpharo-400 bg-white"
             >
               <option v-for="proj in availableProjects" :key="proj.id" :value="proj.name">
                 {{ proj.name }}
@@ -272,7 +272,7 @@
           </div>
 
           <div>
-            <label class="block font-bold text-slate-700 uppercase text-[11px] mb-1">
+            <label class="block font-semibold text-slate-700 uppercase text-[11px] mb-1">
               Pemohon <span class="text-rose-500">*</span>
             </label>
             <input
@@ -286,27 +286,27 @@
 
         <!-- Keperluan Pengadaan -->
         <div>
-          <label class="block font-bold text-slate-700 uppercase text-[11px] mb-1">
+          <label class="block font-semibold text-slate-700 uppercase text-[11px] mb-1">
             Keperluan / Alasan Pengadaan <span class="text-rose-500">*</span>
           </label>
           <input
             v-model="form.purpose"
             required
             placeholder="Contoh: Kebutuhan pengadaan 100 unit komputer sekolah & notebook lab TIK..."
-            class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-emerald-500"
+            class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-alpharo-400"
           />
         </div>
 
         <!-- Item Material yang Diajukan -->
         <div class="border border-slate-200 rounded-xl p-3 bg-slate-50/70 space-y-3">
           <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-800 uppercase text-[11px] flex items-center gap-1.5">
+            <span class="font-semibold text-slate-800 uppercase text-[11px] flex items-center gap-1.5">
               <Boxes class="w-4 h-4 text-emerald-600" />
               Item Material yang Diajukan ({{ form.items.length }} Barang)
             </span>
             <button
               type="button"
-              class="inline-flex items-center gap-1 text-emerald-700 font-bold hover:text-emerald-800 cursor-pointer"
+              class="inline-flex items-center gap-1 text-emerald-700 font-semibold hover:text-emerald-800 cursor-pointer"
               @click="addItem"
             >
               <Plus class="w-3.5 h-3.5" />
@@ -323,10 +323,10 @@
               <!-- Item Selector from Data Barang (Not manual typing) -->
               <div class="col-span-12 sm:col-span-6">
                 <div class="flex items-center justify-between mb-0.5">
-                  <label class="block text-[10px] text-slate-600 font-bold uppercase tracking-wider">
+                  <label class="block text-[11px] text-slate-600 font-semibold uppercase tracking-wider">
                     PILIH BARANG DARI DATA BARANG <span class="text-rose-500">*</span>
                   </label>
-                  <span v-if="it.sku" class="text-[10px] text-emerald-700 font-mono font-bold flex items-center gap-0.5">
+                  <span v-if="it.sku" class="text-[11px] text-emerald-700 font-mono font-semibold flex items-center gap-0.5">
                     <Check class="w-3 h-3 stroke-[3]" /> Master Terdaftar
                   </span>
                 </div>
@@ -340,10 +340,10 @@
                   <div class="truncate flex items-center gap-2">
                     <Boxes class="w-4 h-4 text-emerald-600 shrink-0" />
                     <div v-if="it.sku" class="truncate text-left">
-                      <span class="font-mono text-emerald-900 font-bold bg-emerald-100 px-1.5 py-0.5 rounded text-[11px] mr-1.5">
+                      <span class="font-mono text-emerald-900 font-semibold bg-emerald-100 px-1.5 py-0.5 rounded text-[11px] mr-1.5">
                         {{ it.sku }}
                       </span>
-                      <span class="font-bold text-slate-900">{{ it.name }}</span>
+                      <span class="font-semibold text-slate-900">{{ it.name }}</span>
                     </div>
                     <span v-else class="text-slate-400 font-medium italic">
                       -- Klik di sini untuk memilih barang dari Data Barang --
@@ -351,7 +351,7 @@
                   </div>
 
                   <div class="flex items-center gap-1 shrink-0 ml-2">
-                    <span class="px-2.5 py-1 bg-gradient-to-b from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white border border-sky-600/30 rounded-md font-bold text-[10px] flex items-center gap-1 transition-all shadow-2xs">
+                    <span class="px-2.5 py-1 bg-linear-to-b from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white border border-sky-600/30 rounded-md font-semibold text-[11px] flex items-center gap-1 transition-all shadow-2xs">
                       <Search class="w-3 h-3 stroke-[2.5]" />
                       <span>{{ it.sku ? 'Ganti' : 'Pilih Barang' }}</span>
                     </span>
@@ -359,7 +359,7 @@
                 </div>
 
                 <!-- Item metadata from master data barang -->
-                <div v-if="it.sku" class="flex flex-wrap items-center gap-2 mt-1 text-[10px] text-slate-500">
+                <div v-if="it.sku" class="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-slate-500">
                   <span v-if="it.category" class="bg-slate-100 px-1.5 py-0.2 rounded font-medium">
                     Kategori: <strong>{{ it.category }}</strong>
                   </span>
@@ -371,7 +371,7 @@
 
               <!-- Qty & Satuan (Satuan is locked to master Data Barang) -->
               <div class="col-span-6 sm:col-span-3">
-                <label class="block text-[10px] text-slate-600 font-bold uppercase mb-0.5">Jumlah & Satuan</label>
+                <label class="block text-[11px] text-slate-600 font-semibold uppercase mb-0.5">Jumlah & Satuan</label>
                 <div class="flex gap-1.5">
                   <input
                     v-model.number="it.qty"
@@ -379,10 +379,10 @@
                     min="1"
                     required
                     placeholder="Qty"
-                    class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg text-center font-bold text-slate-900 bg-white focus:outline-hidden focus:ring-1 focus:ring-emerald-500"
+                    class="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg text-center font-semibold text-slate-900 bg-white focus:outline-hidden focus:ring-1 focus:ring-alpharo-400"
                   />
                   <div
-                    class="w-20 px-2 py-1.5 text-xs border border-slate-200 bg-slate-100 rounded-lg text-center font-bold text-slate-700 uppercase shrink-0 flex items-center justify-center select-none"
+                    class="w-20 px-2 py-1.5 text-xs border border-slate-200 bg-slate-100 rounded-lg text-center font-semibold text-slate-700 uppercase shrink-0 flex items-center justify-center select-none"
                     title="Satuan otomatis mengikuti master data barang"
                   >
                     {{ it.unit || 'UNIT' }}
@@ -392,13 +392,13 @@
 
               <!-- Estimasi Harga -->
               <div class="col-span-5 sm:col-span-2">
-                <label class="block text-[10px] text-slate-600 font-bold uppercase mb-0.5">Est. Harga Satuan</label>
+                <label class="block text-[11px] text-slate-600 font-semibold uppercase mb-0.5">Est. Harga Satuan</label>
                 <input
                   v-model.number="it.est_price"
                   type="number"
                   min="0"
                   placeholder="Rp"
-                  class="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-lg text-right font-mono text-slate-900 bg-white focus:outline-hidden focus:ring-1 focus:ring-emerald-500"
+                  class="w-full px-2 py-1.5 text-xs border border-slate-300 rounded-lg text-right font-mono text-slate-900 bg-white focus:outline-hidden focus:ring-1 focus:ring-alpharo-400"
                 />
               </div>
 
@@ -407,7 +407,7 @@
                 <button
                   v-if="form.items.length > 1"
                   type="button"
-                  class="w-7 h-7 inline-flex items-center justify-center bg-gradient-to-b from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:from-red-700 active:to-red-800 text-white rounded-lg shadow-2xs border border-red-700/30 transition-all cursor-pointer"
+                  class="w-7 h-7 inline-flex items-center justify-center bg-linear-to-b from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:from-red-700 active:to-red-800 text-white rounded-lg shadow-2xs border border-red-700/30 transition-all cursor-pointer"
                   title="Hapus baris"
                   @click="removeItem(idx)"
                 >
@@ -418,14 +418,14 @@
 
             <!-- Subtotal Baris -->
             <div class="flex justify-end text-[11px] text-slate-500 font-mono pt-1 border-t border-slate-100">
-              Subtotal: <span class="font-bold text-slate-800 ml-1">Rp {{ (it.qty * (it.est_price || 0)).toLocaleString('id-ID') }}</span>
+              Subtotal: <span class="font-semibold text-slate-800 ml-1">Rp {{ (it.qty * (it.est_price || 0)).toLocaleString('id-ID') }}</span>
             </div>
           </div>
 
           <!-- Total Estimasi -->
           <div class="flex items-center justify-between p-3 bg-emerald-50/70 border border-emerald-200 rounded-lg">
-            <span class="font-bold text-emerald-950 uppercase text-[11px]">Total Estimasi Biaya Pengadaan:</span>
-            <span class="text-sm font-bold font-mono text-emerald-900">
+            <span class="font-semibold text-emerald-950 uppercase text-[11px]">Total Estimasi Biaya Pengadaan:</span>
+            <span class="text-sm font-semibold font-mono text-emerald-900">
               Rp {{ computedTotalEstCost.toLocaleString('id-ID') }}
             </span>
           </div>
@@ -442,7 +442,7 @@
           </button>
           <button
             type="submit"
-            class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-xs transition-colors cursor-pointer"
+            class="inline-flex items-center gap-1.5 px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white font-semibold rounded-lg shadow-xs transition-colors cursor-pointer"
           >
             <Send class="w-3.5 h-3.5" />
             <span>Kirim Pengajuan ke Finance</span>
@@ -462,21 +462,21 @@
         <!-- Header Info Card -->
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
           <div>
-            <div class="text-[10px] text-slate-400 uppercase font-semibold">Proyek</div>
-            <div class="font-bold text-slate-900 mt-0.5">{{ selectedRequest.projectName || selectedRequest.project_name || '-' }}</div>
+            <div class="text-[11px] text-slate-400 uppercase font-semibold">Proyek</div>
+            <div class="font-semibold text-slate-900 mt-0.5">{{ selectedRequest.projectName || selectedRequest.project_name || '-' }}</div>
           </div>
           <div>
-            <div class="text-[10px] text-slate-400 uppercase font-semibold">Tanggal Diajukan</div>
-            <div class="font-bold text-slate-900 font-mono mt-0.5">{{ selectedRequest.date || selectedRequest.request_date }}</div>
+            <div class="text-[11px] text-slate-400 uppercase font-semibold">Tanggal Diajukan</div>
+            <div class="font-semibold text-slate-900 font-mono mt-0.5">{{ selectedRequest.date || selectedRequest.request_date }}</div>
           </div>
           <div>
-            <div class="text-[10px] text-slate-400 uppercase font-semibold">Pemohon</div>
-            <div class="font-bold text-slate-900 mt-0.5">{{ selectedRequest.requestedBy || selectedRequest.requested_by }}</div>
+            <div class="text-[11px] text-slate-400 uppercase font-semibold">Pemohon</div>
+            <div class="font-semibold text-slate-900 mt-0.5">{{ selectedRequest.requestedBy || selectedRequest.requested_by }}</div>
           </div>
         </div>
 
         <div>
-          <div class="text-[11px] font-bold text-slate-700 uppercase mb-1">Keperluan Pengadaan</div>
+          <div class="text-[11px] font-semibold text-slate-700 uppercase mb-1">Keperluan Pengadaan</div>
           <div class="p-3 bg-white border border-slate-200 rounded-lg text-slate-800">
             {{ selectedRequest.purpose }}
           </div>
@@ -484,9 +484,9 @@
 
         <!-- Table of Items -->
         <div>
-          <div class="text-[11px] font-bold text-slate-700 uppercase mb-1">Daftar Barang yang Diajukan</div>
+          <div class="text-[11px] font-semibold text-slate-700 uppercase mb-1">Daftar Barang yang Diajukan</div>
           <div class="border border-slate-200 rounded-lg overflow-hidden">
-            <table class="w-full text-left text-xs">
+            <table class="ui-table w-full text-left text-xs">
               <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-[11px]">
                 <tr>
                   <th class="py-2.5 px-3">Nama Barang</th>
@@ -499,20 +499,20 @@
                 <tr v-for="(it, idx) in selectedRequest.items" :key="idx">
                   <td class="py-2.5 px-3">
                     <span class="font-semibold text-slate-900 block">{{ it.name }}</span>
-                    <span v-if="it.sku" class="text-[10px] text-slate-400 font-mono">SKU: {{ it.sku }}</span>
+                    <span v-if="it.sku" class="text-[11px] text-slate-400 font-mono">SKU: {{ it.sku }}</span>
                   </td>
-                  <td class="py-2.5 px-3 text-center font-bold text-slate-800">
+                  <td class="py-2.5 px-3 text-center font-semibold text-slate-800">
                     {{ it.qty }} {{ it.unit || 'UNIT' }}
                   </td>
                   <td class="py-2.5 px-3 text-right font-mono text-slate-600">
                     Rp {{ Number(it.estPrice || it.est_price || 0).toLocaleString('id-ID') }}
                   </td>
-                  <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-900">
+                  <td class="py-2.5 px-3 text-right font-mono font-semibold text-slate-900">
                     Rp {{ Number((it.qty || 0) * (it.estPrice || it.est_price || 0)).toLocaleString('id-ID') }}
                   </td>
                 </tr>
               </tbody>
-              <tfoot class="bg-slate-50 border-t border-slate-200 font-bold">
+              <tfoot class="bg-slate-50 border-t border-slate-200 font-semibold">
                 <tr>
                   <td colspan="3" class="py-2.5 px-3 text-right uppercase text-[11px] text-slate-600">Total Estimasi:</td>
                   <td class="py-2.5 px-3 text-right font-mono text-emerald-800 text-sm">
@@ -560,7 +560,7 @@
               v-model="catalogSearch"
               type="text"
               placeholder="Cari barang (contoh: A00001770, Komputer, Semen, Cat, Besi)..."
-              class="w-full pl-9 pr-8 py-2 border border-slate-300 rounded-lg text-xs focus:outline-hidden focus:ring-1 focus:ring-emerald-500"
+              class="w-full pl-9 pr-8 py-2 border border-slate-300 rounded-lg text-xs focus:outline-hidden focus:ring-1 focus:ring-alpharo-400"
               autofocus
             />
             <button
@@ -577,7 +577,7 @@
           <div class="sm:w-56">
             <select
               v-model="catalogCategoryFilter"
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white text-slate-800 focus:outline-hidden focus:ring-1 focus:ring-emerald-500"
+              class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white text-slate-800 focus:outline-hidden focus:ring-1 focus:ring-alpharo-400"
             >
               <option value="">Semua Kategori</option>
               <option v-for="cat in catalogCategories" :key="cat" :value="cat">
@@ -595,7 +595,7 @@
 
         <!-- Items Table -->
         <div class="max-h-80 overflow-y-auto border border-slate-200 rounded-lg">
-          <table class="w-full text-left text-xs border-collapse">
+          <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
             <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-[11px] sticky top-0">
               <tr>
                 <th class="py-2.5 px-3">Kode SKU</th>
@@ -609,9 +609,9 @@
             </thead>
             <tbody class="divide-y divide-slate-100">
               <tr v-if="filteredCatalogItems.length === 0">
-                <td colspan="7" class="py-8 text-center text-slate-400">
+                <td colspan="7" class="py-8 text-center text-slate-400"><div class="ui-empty-state">
                   Tidak ada barang yang sesuai dengan kata kunci pencarian.
-                </td>
+                </div></td>
               </tr>
               <tr
                 v-for="p in filteredCatalogItems"
@@ -619,7 +619,7 @@
                 class="hover:bg-emerald-50/70 transition-colors cursor-pointer group"
                 @click="selectCatalogItem(p)"
               >
-                <td class="py-2.5 px-3 font-mono font-bold text-emerald-800 whitespace-nowrap">
+                <td class="py-2.5 px-3 font-mono font-semibold text-emerald-800 whitespace-nowrap">
                   {{ p.sku }}
                 </td>
                 <td class="py-2.5 px-3 font-semibold text-slate-900 group-hover:text-emerald-900">
@@ -628,12 +628,12 @@
                 <td class="py-2.5 px-3 text-slate-600 whitespace-nowrap">
                   {{ p.category || '-' }}
                 </td>
-                <td class="py-2.5 px-3 text-center font-bold text-slate-700 uppercase whitespace-nowrap">
+                <td class="py-2.5 px-3 text-center font-semibold text-slate-700 uppercase whitespace-nowrap">
                   {{ p.unit || 'UNIT' }}
                 </td>
                 <td class="py-2.5 px-3 text-center whitespace-nowrap">
                   <span
-                    class="px-2 py-0.5 rounded-full text-[10px] font-bold"
+                    class="px-2 py-0.5 rounded-full text-[11px] font-semibold"
                     :class="p.stock > 10 ? 'bg-emerald-100 text-emerald-800' : p.stock > 0 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'"
                   >
                     {{ p.stock ?? 0 }}
@@ -645,7 +645,7 @@
                 <td class="py-2.5 px-3 text-center whitespace-nowrap">
                   <button
                     type="button"
-                    class="px-2.5 py-1 bg-emerald-600 group-hover:bg-emerald-700 text-white rounded text-[10px] font-bold shadow-2xs transition-colors cursor-pointer"
+                    class="px-2.5 py-1 bg-emerald-600 group-hover:bg-emerald-700 text-white rounded text-[11px] font-semibold shadow-2xs transition-colors cursor-pointer"
                   >
                     Pilih
                   </button>
@@ -665,6 +665,7 @@ import AppLayout from '../../components/layout/AppLayout.vue';
 import Modal from '../../components/common/Modal.vue';
 import { store, storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
+import api from '../../services/api';
 import {
   ClipboardList,
   Plus,
@@ -947,11 +948,7 @@ const saveRequest = async () => {
 
   // Sync to backend API if available
   try {
-    fetch('/api/warehouse/requests', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newReq),
-    }).catch(() => {});
+    api.post('/warehouse/requests', newReq).catch(() => {});
   } catch (e) {}
 
   toast.success(`Pengajuan ${requestCode} berhasil diajukan ke Finance.`);

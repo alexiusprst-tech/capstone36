@@ -1,10 +1,28 @@
-import { createApp } from 'vue';
-import App from './App.vue';
-import router from './router';
+import { createApp, h } from 'vue';
+import { createInertiaApp, Link } from '@inertiajs/vue3';
+import RootLayout from './App.vue';
 import './style.css';
+import './services/realtime';
+import { initEcho } from './services/echo';
 
-const app = createApp(App);
+const pages = import.meta.glob('./views/**/*.vue');
 
-app.use(router);
+createInertiaApp({
+  title: title => `${title || 'Sistem Informasi Terintegrasi'} ? CV Alpharo Artha Jaya`,
+  resolve: async name => {
+    const load = pages[`./views/${name}.vue`];
+    if (!load) throw new Error(`Halaman tidak ditemukan: ${name}`);
+    const page = await load();
+    page.default.layout = RootLayout;
+    return page;
+  },
+  setup({ el, App, props, plugin }) {
+    createApp({ render: () => h(App, props) })
+      .use(plugin)
+      .component('Link', Link)
+      .mount(el);
+  },
+  progress: { color: '#2563eb' },
+});
 
-app.mount('#app');
+initEcho();

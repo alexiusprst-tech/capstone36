@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Profil Pengguna & Hak Akses</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Profil Pengguna & Hak Akses</h1>
           <p class="text-sm text-slate-500 mt-1">
             Informasi akun internal, unit kerja divisi, dan wewenang operasional sistem.
           </p>
@@ -13,7 +13,7 @@
 
     <div class="max-w-4xl mx-auto space-y-6">
       <!-- USER OVERVIEW CARD -->
-      <div class="bg-white rounded-xl border border-slate-200/90 p-6 shadow-xs flex flex-col sm:flex-row items-center sm:items-start gap-6">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200/90 p-6 shadow-xs flex flex-col sm:flex-row items-center sm:items-start gap-6">
         <img
           :src="store.currentUser.avatar"
           alt="Avatar"
@@ -21,8 +21,8 @@
         />
         <div class="flex-1 text-center sm:text-left space-y-1">
           <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-            <h2 class="text-xl font-bold text-slate-900">{{ store.currentUser.name }}</h2>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-alpharo-600 w-fit mx-auto sm:mx-0">
+            <h2 class="text-xl font-semibold text-slate-900">{{ store.currentUser.name }}</h2>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-alpharo-100 text-alpharo-600 w-fit mx-auto sm:mx-0">
               {{ store.currentUser.role }}
             </span>
           </div>
@@ -36,8 +36,8 @@
       </div>
 
       <!-- ROLE & PERMISSION MATRIX CARD -->
-      <div class="bg-white rounded-xl border border-slate-200/90 p-6 shadow-xs">
-        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200/90 p-6 shadow-xs">
+        <h3 class="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">
           Wewenang & Hak Akses Peran ({{ store.currentUser.role }})
         </h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
@@ -46,15 +46,15 @@
             :key="idx"
             class="p-3 bg-slate-50 rounded-lg border border-slate-100 flex items-center gap-2.5"
           >
-            <span class="text-emerald-600 font-bold">✓</span>
+            <span class="text-emerald-600 font-semibold">✓</span>
             <span class="font-medium text-slate-800">{{ perm }}</span>
           </div>
         </div>
       </div>
 
       <!-- SECURITY SETTINGS -->
-      <div class="bg-white rounded-xl border border-slate-200/90 p-6 shadow-xs">
-        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200/90 p-6 shadow-xs">
+        <h3 class="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">
           Keamanan & Kata Sandi
         </h3>
         <form class="space-y-4 max-w-md text-xs" @submit.prevent="updatePassword">
@@ -66,7 +66,7 @@
             <label class="block font-semibold text-slate-700 mb-1">Kata Sandi Baru</label>
             <input v-model="newPassword" type="password" placeholder="Minimal 8 karakter..." class="w-full px-3 py-2 border rounded-lg" />
           </div>
-          <button type="submit" class="px-4 py-2 bg-alpharo-500 hover:bg-alpharo-600 text-white font-bold rounded-lg shadow-xs">
+          <button type="submit" class="px-4 py-2 bg-alpharo-500 hover:bg-alpharo-600 text-white font-semibold rounded-lg shadow-xs">
             Perbarui Kata Sandi
           </button>
         </form>
@@ -121,7 +121,7 @@ const currentPermissions = computed(() => {
   if (role === 'FINANCE') {
     return [
       'Penerbitan Invoice Tagihan Berdasarkan Order',
-      'Pencatatan Pembayaran Penuh & Termin Bertahap',
+      'Pencatatan Pembayaran Tagihan & Penerimaan Kas',
       'Monitoring Umur Piutang (Aging Schedule) Rekanan',
       'Rekonsiliasi Rekening Koran & Laporan Finansial',
     ];
@@ -129,7 +129,7 @@ const currentPermissions = computed(() => {
   if (role === 'CLIENT') {
     return [
       'Pemantauan Status & Tracking Progres Pesanan Real-time',
-      'Informasi Rincian Invoice & Jadwal Termin Pembayaran',
+      'Informasi Rincian Invoice Tagihan & Pembayaran',
       'Pengiriman Konfirmasi Pembayaran & Bukti Transfer Bank',
       'Unduh Berkas Proyek: SPJ, Surat Jalan, dan BAST',
     ];

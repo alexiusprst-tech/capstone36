@@ -18,6 +18,7 @@ class SpjDocument extends Model
         'doc_number',
         'doc_date',
         'file_path',
+        'source_file_path',
         'file_name',
         'file_type',
         'version',
@@ -49,6 +50,6 @@ class SpjDocument extends Model
      */
     public function getFullPathAttribute(): ?string
     {
-        return $this->file_path ? storage_path('app/'.$this->file_path) : null;
+        return $this->file_path ? config('spj.storage_root').'/'.$this->file_path : null;
     }
 }

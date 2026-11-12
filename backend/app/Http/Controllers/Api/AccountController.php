@@ -18,6 +18,7 @@ class AccountController extends Controller
         'WAREHOUSE',
         'FINANCE',
         'CLIENT',
+        'SUPPLIER',
     ];
 
     public function index(Request $request): JsonResponse
@@ -51,6 +52,7 @@ class AccountController extends Controller
 
     private function ensureAdministrator(Request $request): void
     {
-        abort_unless($request->user()?->role === 'ADMINISTRASI', 403, 'Akses hanya untuk admin.');
+        $role = strtoupper((string) ($request->user()?->role ?? ''));
+        abort_unless(in_array($role, ['ADMINISTRASI', 'ADMIN', 'DIREKTUR']), 403, 'Akses hanya untuk admin.');
     }
 }

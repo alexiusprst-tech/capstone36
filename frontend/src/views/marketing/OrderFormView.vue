@@ -4,15 +4,15 @@
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div class="flex items-center gap-2 mb-1">
-            <router-link
-              to="/marketing/orders/monitoring"
+            <Link
+              href="/marketing/orders/monitoring"
               class="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
             >
               <ArrowLeft class="w-3.5 h-3.5" />
               <span>Kembali ke Monitoring Order</span>
-            </router-link>
+            </Link>
           </div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">
             {{ isEdit ? 'Edit Order & Proyek' : 'Tambah Order & Proyek Baru' }}
           </h1>
           <p class="text-sm text-slate-500 mt-0.5">
@@ -34,8 +34,8 @@
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-emerald-900">Merinci Pengajuan Rekanan Klien:</span>
-              <span class="font-mono font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded text-xs">
+              <span class="text-xs font-semibold text-emerald-900">Merinci Pengajuan Rekanan Klien:</span>
+              <span class="font-mono font-semibold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded text-xs">
                 {{ fromClientOrder.orderNumber }} &bull; {{ fromClientOrder.clientName }}
               </span>
             </div>
@@ -44,22 +44,22 @@
             </p>
           </div>
         </div>
-        <router-link
-          to="/marketing/orders/monitoring"
-          class="text-xs font-bold text-emerald-700 hover:text-emerald-900 underline whitespace-nowrap"
+        <Link
+          href="/marketing/orders/monitoring"
+          class="text-xs font-semibold text-emerald-700 hover:text-emerald-900 underline whitespace-nowrap"
         >
           ← Kembali ke Monitoring
-        </router-link>
+        </Link>
       </div>
 
       <!-- 4-CARD 2x2 GRID (SESUAI DOKUMEN TANGKAPAN LAYAR) -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         
         <!-- CARD 1: DATA PROJECT -->
-        <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-emerald-600">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-slate-200">
           <div class="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2.5 bg-slate-50/50">
             <FolderKanban class="w-4 h-4 text-slate-700" />
-            <h2 class="font-bold text-slate-800 text-sm">Data Project</h2>
+            <h2 class="font-semibold text-slate-800 text-sm">Data Project</h2>
           </div>
           
           <div class="p-5 space-y-4">
@@ -70,7 +70,7 @@
                 type="text"
                 disabled
                 readonly
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 text-slate-600 font-mono font-bold cursor-not-allowed focus:outline-hidden"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 text-slate-600 font-mono font-semibold cursor-not-allowed focus:outline-hidden"
               />
             </div>
 
@@ -83,7 +83,7 @@
                 type="text"
                 required
                 placeholder="Masukkan nama project / pekerjaan..."
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800"
               />
             </div>
 
@@ -93,7 +93,7 @@
                 v-model="form.description"
                 rows="3"
                 placeholder="Deskripsi ruang lingkup project..."
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800 resize-y"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800 resize-y"
               ></textarea>
             </div>
 
@@ -105,17 +105,17 @@
                 <select
                   v-model="form.customerId"
                   required
-                  class="flex-1 px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600"
+                  class="flex-1 px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400"
                   @change="onCustomerChange"
                 >
-                  <option value="" disabled selected>Pilih Customer</option>
+                  <option value="" disabled>Pilih Customer</option>
                   <option v-for="c in store.clients" :key="c.id" :value="c.id">
                     {{ c.name }} ({{ c.code }})
                   </option>
                 </select>
                 <button
                   type="button"
-                  class="h-[38px] w-[38px] rounded-lg border border-emerald-500 hover:bg-emerald-50 flex items-center justify-center shrink-0 font-bold transition-colors shadow-2xs"
+                  class="h-[38px] w-[38px] rounded-lg border border-emerald-500 hover:bg-emerald-50 flex items-center justify-center shrink-0 font-semibold transition-colors shadow-2xs"
                   title="Tambah Customer"
                   @click="quickCustomerModalOpen = true"
                 >
@@ -131,13 +131,10 @@
               <select
                 v-model="form.marketingName"
                 required
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400"
               >
-                <option value="" disabled selected>Pilih Marketing</option>
-                <option value="Budi Hartono, S.T.">Budi Hartono, S.T.</option>
-                <option value="Ahmad Fauzi">Ahmad Fauzi</option>
-                <option value="Rina Wijaya, S.E.">Rina Wijaya, S.E.</option>
-                <option value="Staff Pemasaran Internal">Staff Pemasaran Internal</option>
+                <option value="" disabled>Pilih Marketing</option>
+                <option v-for="name in marketingNames" :key="name" :value="name">{{ name }}</option>
               </select>
             </div>
 
@@ -145,25 +142,22 @@
               <label class="block text-xs font-semibold text-slate-700 mb-1.5">
                 Company <span class="text-rose-500">*</span>
               </label>
-              <select
+              <input
+                type="text"
                 v-model="form.company"
-                required
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600"
-                @change="updateDocNumbers"
-              >
-                <option value="" disabled selected>Pilih Company</option>
-                <option value="CV Alpharo Artha Jaya">CV Alpharo Artha Jaya</option>
-                <option value="PT Alpharo Multi Kreasi">PT Alpharo Multi Kreasi</option>
-              </select>
+                readonly
+                disabled
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 text-slate-700 font-semibold cursor-not-allowed focus:outline-hidden"
+              />
             </div>
           </div>
         </div>
 
         <!-- CARD 2: DATA PENGADAAN -->
-        <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-emerald-600">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-slate-200">
           <div class="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2.5 bg-slate-50/50">
             <ClipboardList class="w-4 h-4 text-slate-700" />
-            <h2 class="font-bold text-slate-800 text-sm">Data Pengadaan</h2>
+            <h2 class="font-semibold text-slate-800 text-sm">Data Pengadaan</h2>
           </div>
           
           <div class="p-5 space-y-4">
@@ -172,7 +166,7 @@
               <input
                 v-model="form.namaKegiatan"
                 type="text"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800"
               />
             </div>
 
@@ -181,7 +175,7 @@
               <input
                 v-model="form.rincianKegiatan"
                 type="text"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800"
               />
             </div>
 
@@ -192,7 +186,7 @@
                 value="52323628813 (Bank BCA Jakarta - a.n. CV ALPHARO ARTHA JAYA)"
                 disabled
                 readonly
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 text-slate-700 font-mono font-bold cursor-not-allowed focus:outline-hidden"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 text-slate-700 font-mono font-semibold cursor-not-allowed focus:outline-hidden"
               />
             </div>
 
@@ -203,7 +197,7 @@
                   v-model="form.tahunAnggaran"
                   type="text"
                   placeholder="2026"
-                  class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800 font-mono"
+                  class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800 font-mono"
                 />
               </div>
 
@@ -211,7 +205,7 @@
                 <label class="block text-xs font-semibold text-slate-700 mb-1.5">Sumber Dana</label>
                 <select
                   v-model="form.sumberDana"
-                  class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600"
+                  class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400"
                 >
                   <option value="BOP">BOP</option>
                   <option value="BOS">BOS</option>
@@ -226,7 +220,7 @@
               <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kategori Barang/Jasa</label>
               <select
                 v-model="form.kategori"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400"
               >
                 <option value="Barang/Jasa">Barang/Jasa</option>
                 <option value="Pengadaan Barang">Pengadaan Barang</option>
@@ -241,17 +235,17 @@
                 v-model.number="form.paguAnggaran"
                 type="number"
                 min="0"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800 text-right font-mono"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800 text-right font-mono"
               />
             </div>
           </div>
         </div>
 
         <!-- CARD 3: NILAI DAN JADWAL -->
-        <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-emerald-600">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-slate-200">
           <div class="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2.5 bg-slate-50/50">
             <CalendarClock class="w-4 h-4 text-slate-700" />
-            <h2 class="font-bold text-slate-800 text-sm">Nilai dan Jadwal</h2>
+            <h2 class="font-semibold text-slate-800 text-sm">Nilai dan Jadwal</h2>
           </div>
           
           <div class="p-5 space-y-4">
@@ -263,7 +257,7 @@
                 v-model="form.tglMulai"
                 type="date"
                 required
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800"
               />
             </div>
 
@@ -275,18 +269,18 @@
                 v-model="form.estimasiSelesai"
                 type="date"
                 required
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nilai Project</label>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nilai Project (termasuk PPN 11%)</label>
               <input
-                v-model.number="form.nilaiProject"
+                :value="calculatedGrandTotal" readonly
                 type="number"
                 min="0"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800 text-right font-mono font-bold"
-                @input="onNilaiProjectChange"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800 text-right font-mono font-semibold"
+                aria-description="Total barang termasuk PPN 11%, dibulatkan ke rupiah penuh"
               />
             </div>
 
@@ -317,58 +311,21 @@
         </div>
 
         <!-- CARD 4: PENANGGUNG JAWAB DOKUMEN -->
-        <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-emerald-600">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-slate-200">
           <div class="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2.5 bg-slate-50/50">
             <UserCheck class="w-4 h-4 text-slate-700" />
-            <h2 class="font-bold text-slate-800 text-sm">Penanggung Jawab Dokumen</h2>
+            <h2 class="font-semibold text-slate-800 text-sm">Penanggung Jawab Dokumen</h2>
           </div>
           
           <div class="p-5 space-y-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Penanggung Jawab</label>
-              <div class="flex items-center gap-2">
-                <select
-                  v-model="form.penanggungJawabSelection"
-                  class="flex-1 px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600"
-                  @change="onPenanggungJawabSelect"
-                >
-                  <option value="" selected>Belum ada penanggung jawab aktif</option>
-                  <option
-                    v-for="(pj, idx) in availablePenanggungJawab"
-                    :key="idx"
-                    :value="pj.nama"
-                  >
-                    {{ pj.nama }} - {{ pj.jabatan }}
-                  </option>
-                </select>
-                <button
-                  type="button"
-                  class="h-[38px] w-[38px] rounded-lg border border-emerald-500 hover:bg-emerald-50 flex items-center justify-center shrink-0 font-bold transition-colors shadow-2xs"
-                  title="Tambah Penanggung Jawab"
-                  @click="quickPjModalOpen = true"
-                >
-                  <Plus class="w-4 h-4 text-emerald-600 stroke-[2.5]" />
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kota Tanda Tangan</label>
-              <input
-                v-model="form.kotaTandaTangan"
-                type="text"
-                readonly
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 text-slate-600 cursor-not-allowed select-none focus:outline-hidden"
-              />
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Penanggung Jawab</label>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Penanggung Jawab <span class="text-rose-500">*</span></label>
               <input
                 v-model="form.penanggungJawabNama"
                 type="text"
-                readonly
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 text-slate-600 cursor-not-allowed select-none focus:outline-hidden"
+                required
+                placeholder="Contoh: Bpk. Supri, M.Pd."
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400"
               />
             </div>
 
@@ -377,8 +334,8 @@
               <input
                 v-model="form.penanggungJawabJabatan"
                 type="text"
-                readonly
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 text-slate-600 cursor-not-allowed select-none focus:outline-hidden"
+                placeholder="Contoh: Kepala Sekolah / Kuasa Pengguna Anggaran"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400"
               />
             </div>
 
@@ -387,8 +344,18 @@
               <input
                 v-model="form.penanggungJawabNip"
                 type="text"
-                readonly
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-200 bg-slate-100 text-slate-600 font-mono cursor-not-allowed select-none focus:outline-hidden"
+                placeholder="Contoh: 19720815 199803 1 004"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 font-mono focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kota Tanda Tangan</label>
+              <input
+                v-model="form.kotaTandaTangan"
+                type="text"
+                placeholder="Contoh: Jakarta Timur"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400"
               />
             </div>
           </div>
@@ -396,10 +363,10 @@
       </div>
 
       <!-- CARD 5: PREVIEW NOMOR DOKUMEN COMPANY (BOTTOM FULL-WIDTH CARD) -->
-      <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-emerald-600">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-slate-200">
         <div class="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2.5 bg-slate-50/50">
           <Hash class="w-4 h-4 text-slate-700" />
-          <h2 class="font-bold text-slate-800 text-sm"># Preview Nomor Dokumen Company</h2>
+          <h2 class="font-semibold text-slate-800 text-sm"># Preview Nomor Dokumen Company</h2>
         </div>
 
         <div class="p-5 space-y-4">
@@ -409,12 +376,8 @@
               <input
                 v-model="form.docNumbers.penawaran"
                 type="text"
-                :placeholder="form.company ? '001/SPH/AAJ/X/2026' : 'Pilih company dahulu'"
-                :disabled="!form.company"
-                :class="[
-                  !form.company ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-white text-slate-800',
-                  'w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 font-mono focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600'
-                ]"
+                placeholder="001/SPH/AAJ/X/2026"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 font-mono focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600"
               />
             </div>
 
@@ -423,12 +386,8 @@
               <input
                 v-model="form.docNumbers.suratJalan"
                 type="text"
-                :placeholder="form.company ? '001/SJ/AAJ/X/2026' : 'Pilih company dahulu'"
-                :disabled="!form.company"
-                :class="[
-                  !form.company ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-white text-slate-800',
-                  'w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 font-mono focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600'
-                ]"
+                placeholder="001/SJ/AAJ/X/2026"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 font-mono focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600"
               />
             </div>
 
@@ -437,12 +396,8 @@
               <input
                 v-model="form.docNumbers.faktur"
                 type="text"
-                :placeholder="form.company ? '001/FP/AAJ/X/2026' : 'Pilih company dahulu'"
-                :disabled="!form.company"
-                :class="[
-                  !form.company ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-white text-slate-800',
-                  'w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 font-mono focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600'
-                ]"
+                placeholder="001/FP/AAJ/X/2026"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 font-mono focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600"
               />
             </div>
 
@@ -451,12 +406,8 @@
               <input
                 v-model="form.docNumbers.kuitansi"
                 type="text"
-                :placeholder="form.company ? '001/KW/AAJ/X/2026' : 'Pilih company dahulu'"
-                :disabled="!form.company"
-                :class="[
-                  !form.company ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-white text-slate-800',
-                  'w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 font-mono focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600'
-                ]"
+                placeholder="001/KW/AAJ/X/2026"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 font-mono focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600"
               />
             </div>
           </div>
@@ -471,7 +422,7 @@
       </div>
 
       <!-- OPSIONAL: DAFTAR BARANG YANG DIPESAN (ACCORDION COLLAPSIBLE UNTUK INTEGRASI LOGISTIK & GUDANG) -->
-      <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
         <button
           type="button"
           class="w-full px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 hover:bg-slate-100/50 transition-colors text-left"
@@ -480,7 +431,7 @@
           <div class="flex items-center gap-2.5">
             <Boxes class="w-4 h-4 text-slate-700" />
             <div>
-              <h2 class="font-bold text-slate-800 text-sm">Rincian Barang / Material Pengadaan (Opsional)</h2>
+              <h2 class="font-semibold text-slate-800 text-sm">Rincian Barang / Material Pengadaan</h2>
               <p class="text-[11px] text-slate-500">
                 {{ form.items.length }} item barang terdaftar &bull; Total Kalkulasi: Rp {{ calculatedItemsTotal.toLocaleString('id-ID') }}
               </p>
@@ -505,8 +456,8 @@
           </div>
 
           <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs border-collapse">
-              <thead>
+            <table class="ui-table w-full text-left text-xs border-collapse">
+              <thead class="hidden sm:table-header-group">
                 <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
                   <th class="py-2.5 px-3">Produk / Material Gudang</th>
                   <th class="py-2.5 px-3 text-center w-28">Jumlah Qty</th>
@@ -515,62 +466,72 @@
                   <th class="py-2.5 px-3 text-center w-12">Hapus</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-100">
-                <tr v-for="(it, idx) in form.items" :key="idx" class="hover:bg-slate-50/50">
-                  <td class="py-2.5 px-3 space-y-1">
-                    <select
+              <tbody class="block divide-y divide-slate-100 sm:table-row-group">
+                <tr v-for="(it, idx) in form.items" :key="idx" class="grid grid-cols-2 gap-x-3 px-3 py-3 hover:bg-slate-50/50 sm:table-row sm:p-0">
+                  <td class="col-span-2 block min-w-0 space-y-1 pb-3 sm:table-cell sm:px-3 sm:py-2.5">
+                    <span class="mb-1 block text-[11px] font-medium text-slate-500 sm:hidden">Produk / Material Gudang</span>
+                    <SearchableSelect
                       v-model="it.productId"
-                      class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 bg-white"
+                      :aria-label="`Barang pesanan ${idx + 1}`"
+                      :options="productOptions"
+                      placeholder="-- Non-Katalog / Kebutuhan Klien --"
+                      search-placeholder="Cari nama, kode, atau satuan barang..."
                       @change="onProductSelect(it)"
-                    >
-                      <option :value="null">-- Non-Katalog / Kebutuhan Klien --</option>
-                      <option v-for="p in store.products" :key="p.id" :value="p.id">
-                        [{{ p.sku }}] {{ p.name }} (Stok: {{ p.stock }} {{ p.unit }})
-                      </option>
-                    </select>
+                    />
+                    <p v-if="catalogSynced && it.sku && !store.products.some(product => product.sku === it.sku)" class="text-[11px] leading-relaxed text-amber-800">
+                      Barang ini belum terdaftar di katalog gudang. Pilih ulang barang yang sesuai dan periksa satuannya.
+                    </p>
                     <input
                       v-model="it.name"
                       type="text"
                       placeholder="Nama barang / spesifikasi..."
                       class="w-full px-2 py-1 text-xs rounded border border-slate-200 bg-slate-50/70 focus:bg-white text-slate-800 font-medium"
                     />
-                    <div v-if="it.specs" class="text-[10px] text-amber-800 bg-amber-50/80 border border-amber-200/60 rounded px-1.5 py-0.5">
+                    <div v-if="it.specs" class="text-[11px] text-amber-800 bg-amber-50/80 border border-amber-200/60 rounded px-1.5 py-0.5">
                       <strong>Permintaan Klien:</strong> {{ it.specs }}
                     </div>
                   </td>
-                  <td class="py-2.5 px-3">
+                  <td class="block min-w-0 py-2 sm:table-cell sm:px-3 sm:py-2.5">
+                    <span class="mb-1 block text-[11px] font-medium text-slate-500 sm:hidden">Jumlah</span>
                     <input
                       v-model.number="it.qty"
                       type="number"
                       min="1"
-                      class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 text-center font-bold"
+                      :aria-label="`Jumlah barang ${idx + 1}`"
+                      class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 text-center font-semibold"
                     />
+                    <p class="mt-1 text-center text-[11px] text-slate-500">{{ it.unit }}</p>
                   </td>
-                  <td class="py-2.5 px-3">
+                  <td class="block min-w-0 py-2 sm:table-cell sm:px-3 sm:py-2.5">
+                    <span class="mb-1 block text-[11px] font-medium text-slate-500 sm:hidden">Harga Satuan (Rp)</span>
                     <input
-                      v-model.number="it.price"
+                      v-model.number="it.price" step="0.01" min="0.01"
+                      :aria-label="`Harga barang ${idx + 1}`"
                       type="number"
-                      min="0"
                       class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 text-right font-mono"
                     />
+                    <p v-if="catalogSynced && it.productId && !(Number(it.price) > 0)" class="mt-1 text-[11px] leading-relaxed text-amber-800">Harga jual belum diisi. Isi harga penawaran.</p>
                   </td>
-                  <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-900">
+                  <td class="block min-w-0 py-2 font-mono font-semibold text-slate-900 sm:table-cell sm:px-3 sm:py-2.5 sm:text-right">
+                    <span class="mb-1 block font-sans text-[11px] font-medium text-slate-500 sm:hidden">Subtotal</span>
                     Rp {{ ((it.qty || 0) * (it.price || 0)).toLocaleString('id-ID') }}
                   </td>
-                  <td class="py-2.5 px-3 text-center">
+                  <td class="block self-end justify-self-end py-2 text-center sm:table-cell sm:px-3 sm:py-2.5">
                     <button
                       type="button"
-                      class="text-rose-500 hover:text-rose-700 p-1"
+                      :aria-label="`Hapus barang ${idx + 1}`"
+                      class="inline-flex min-h-9 items-center justify-center gap-1.5 p-2 text-rose-500 hover:text-rose-700"
                       @click="removeItemRow(idx)"
                     >
                       <Trash2 class="w-4 h-4 mx-auto" />
+                      <span class="text-xs sm:hidden">Hapus</span>
                     </button>
                   </td>
                 </tr>
                 <tr v-if="form.items.length === 0">
-                  <td colspan="5" class="py-6 text-center text-slate-400">
+                  <td colspan="5" class="py-6 text-center text-slate-400"><div class="ui-empty-state">
                     Belum ada item barang ditambahkan. (Opsional)
-                  </td>
+                  </div></td>
                 </tr>
               </tbody>
             </table>
@@ -592,16 +553,16 @@
 
       <!-- ACTION BUTTONS (BATAL & SIMPAN SEPERTI GAMBAR) -->
       <div class="flex items-center justify-end gap-3 pt-4">
-        <router-link
-          to="/marketing/orders/monitoring"
+        <Link
+          href="/marketing/orders/monitoring"
           class="px-5 py-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg transition-colors shadow-2xs"
         >
           Batal
-        </router-link>
+        </Link>
 
         <button
-          type="submit"
-          class="px-6 py-2.5 text-xs font-bold text-white bg-[#059669] hover:bg-emerald-700 rounded-lg shadow-sm transition-all flex items-center gap-2"
+          type="submit" :disabled="orderSync.busy || orderSync.loading"
+          class="px-6 py-2.5 text-xs font-semibold text-white bg-alpharo-600 hover:bg-alpharo-700 rounded-lg shadow-xs transition-all flex items-center gap-2"
         >
           <CheckSquare class="w-4 h-4" />
           <span>Simpan</span>
@@ -616,79 +577,19 @@
       @saved="onCustomerCreated"
     />
 
-    <!-- QUICK ADD PENANGGUNG JAWAB MODAL -->
-    <Modal
-      :show="quickPjModalOpen"
-      title="Tambah Penanggung Jawab Baru"
-      size="md"
-      @close="quickPjModalOpen = false"
-    >
-      <form class="space-y-4 text-xs" @submit.prevent="saveQuickPj">
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Nama Penanggung Jawab *</label>
-          <input
-            v-model="quickPj.nama"
-            type="text"
-            required
-            placeholder="Nama lengkap beserta gelar..."
-            class="w-full px-3 py-2 rounded-lg border border-slate-300"
-          />
-        </div>
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Jabatan *</label>
-          <input
-            v-model="quickPj.jabatan"
-            type="text"
-            required
-            placeholder="Kepala Sekolah / Pejabat Pengadaan / KPA"
-            class="w-full px-3 py-2 rounded-lg border border-slate-300"
-          />
-        </div>
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">NIP</label>
-          <input
-            v-model="quickPj.nip"
-            type="text"
-            placeholder="197xxxx xxxxx xx x"
-            class="w-full px-3 py-2 rounded-lg border border-slate-300 font-mono"
-          />
-        </div>
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Kota Tanda Tangan</label>
-          <input
-            v-model="quickPj.kota"
-            type="text"
-            placeholder="Jakarta Timur"
-            class="w-full px-3 py-2 rounded-lg border border-slate-300"
-          />
-        </div>
-        <div class="pt-2 flex justify-end gap-2">
-          <button
-            type="button"
-            class="px-3 py-2 border rounded-lg text-slate-600 hover:bg-slate-50"
-            @click="quickPjModalOpen = false"
-          >
-            Batal
-          </button>
-          <button
-            type="submit"
-            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg"
-          >
-            Gunakan Penanggung Jawab
-          </button>
-        </div>
-      </form>
-    </Modal>
+
   </AppLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter, useRoute } from '../../navigation';
 import AppLayout from '../../components/layout/AppLayout.vue';
-import Modal from '../../components/common/Modal.vue';
 import CustomerFormModal from '../../components/common/CustomerFormModal.vue';
-import { store, storeActions } from '../../stores/mockData';
+import { store, storeActions, orderSync } from '../../stores/mockData';
+import { orderError } from '../../services/orderWorkflow';
+import api from '../../services/api';
+import SearchableSelect from '../../components/common/SearchableSelect.vue';
 import { useToast } from '../../services/toast';
 import {
   ArrowLeft,
@@ -708,35 +609,41 @@ import {
 const router = useRouter();
 const route = useRoute();
 const toast = useToast();
+const catalogSynced = ref(false);
+const productOptions = computed(() => [
+  { value: null, label: '-- Non-Katalog / Kebutuhan Klien --' },
+  ...store.products.map(product => ({
+    value: product.id,
+    label: `[${product.sku}] ${product.name}`,
+    description: `Tersedia: ${product.available_stock ?? product.stock} ${product.unit}`,
+    searchText: `${product.sku} ${product.name} ${product.unit}`,
+  })),
+]);
 
 const isEdit = computed(() => Boolean(route.params.id));
+const marketingNames = computed(() => [...new Set([
+  'Budi Hartono, S.T.', 'Ahmad Fauzi', 'Rina Wijaya, S.E.', 'Staff Pemasaran Internal',
+  store.currentUser?.name, form.value.marketingName,
+].filter(Boolean))]);
 const showItemsSection = ref(false);
 
 const quickCustomerModalOpen = ref(false);
-const quickCustomer = ref({
-  name: '',
-  contactPerson: '',
-  phone: '',
-  city: 'Jakarta Timur',
-});
-
-const quickPjModalOpen = ref(false);
-const quickPj = ref({
-  nama: '',
-  jabatan: '',
-  nip: '',
-  kota: 'Jakarta Timur',
-});
 
 const fromClientOrder = ref(null);
+const existingProjectNumbers = ref([]);
 
 // Dynamic next project ID
 const displayProjectId = computed(() => {
   if (isEdit.value && form.value.projectId) {
     return form.value.projectId;
   }
-  const nextNum = (store.orders?.length || 0) + 1;
-  return `PR${String(nextNum).padStart(5, '0')}`;
+  const orderNums = (store.orders || []).map(o => {
+    const num = parseInt(String(o.projectId || o.details?.projectId || '').replace(/\D/g, ''), 10);
+    return isNaN(num) ? 0 : num;
+  });
+  const allNums = [...orderNums, ...existingProjectNumbers.value, store.orders.length];
+  const maxNum = Math.max(0, ...allNums);
+  return `PR${String(maxNum + 1).padStart(5, '0')}`;
 });
 
 
@@ -750,7 +657,7 @@ const form = ref({
   description: '',
   customerId: '',
   marketingName: '',
-  company: '',
+  company: 'CV Alpharo Artha Jaya',
   namaKegiatan: '',
   rincianKegiatan: '',
   kodeRekening: '',
@@ -763,7 +670,6 @@ const form = ref({
   nilaiProject: 0,
   nilaiInvoice: 0,
   invoiceDibayar: 0,
-  penanggungJawabSelection: '',
   penanggungJawabNama: '',
   penanggungJawabJabatan: '',
   penanggungJawabNip: '',
@@ -777,52 +683,16 @@ const form = ref({
   items: [],
 });
 
-// Available Penanggung Jawab list
-const availablePenanggungJawab = ref([
-  {
-    nama: 'Bpk. supri, M.Pd.',
-    jabatan: 'Kepala Sekolah / Kuasa Pengguna Anggaran',
-    nip: '19720815 199803 1 004',
-    kota: 'Jakarta Timur',
-  },
-  {
-    nama: 'Bu Nis Kepsek, M.Si.',
-    jabatan: 'Kepala Sekolah / Kuasa Pengguna Anggaran',
-    nip: '19740512 200003 2 003',
-    kota: 'Jakarta Timur',
-  },
-  {
-    nama: 'Ibu Shifa, S.Pd.',
-    jabatan: 'Kepala Sekolah / KPA',
-    nip: '19810920 200604 2 015',
-    kota: 'Jakarta Timur',
-  },
-  {
-    nama: 'Bu Murti, M.Pd.',
-    jabatan: 'Kepala Sekolah / KPA',
-    nip: '19730419 199903 2 002',
-    kota: 'Jakarta Pusat',
-  },
-  {
-    nama: 'Bu Eka Kepsek, M.M.',
-    jabatan: 'Kepala Sekolah / KPA',
-    nip: '19751108 200112 2 001',
-    kota: 'Jakarta Timur',
-  },
-]);
-
 const calculatedItemsTotal = computed(() => {
   return form.value.items.reduce((sum, it) => sum + (it.qty || 0) * (it.price || 0), 0);
 });
 
-const onNilaiProjectChange = () => {
-  // If user adjusts Nilai Project, auto sync invoice calculations
-  form.value.nilaiInvoice = form.value.nilaiProject;
-};
+const calculatedGrandTotal = computed(() => Math.round(calculatedItemsTotal.value * 1.11));
+watch(calculatedGrandTotal, total => { form.value.nilaiProject = total; form.value.nilaiInvoice = total; });
 
 const applyItemsTotalToProject = () => {
-  form.value.nilaiProject = calculatedItemsTotal.value;
-  form.value.nilaiInvoice = calculatedItemsTotal.value;
+  form.value.nilaiProject = calculatedGrandTotal.value;
+  form.value.nilaiInvoice = calculatedGrandTotal.value;
   form.value.paguAnggaran = calculatedItemsTotal.value;
   toast.info(`Nilai Project diperbarui: Rp ${calculatedItemsTotal.value.toLocaleString('id-ID')}`);
 };
@@ -832,7 +702,6 @@ const onCustomerChange = () => {
   if (client) {
     form.value.kotaTandaTangan = client.city || 'Jakarta Timur';
     if (client.contactPerson) {
-      form.value.penanggungJawabSelection = client.contactPerson;
       form.value.penanggungJawabNama = client.contactPerson;
       form.value.penanggungJawabJabatan = 'Kepala Sekolah / Kuasa Pengguna Anggaran';
       form.value.penanggungJawabNip = '19750101 200212 1 005';
@@ -840,26 +709,8 @@ const onCustomerChange = () => {
   }
 };
 
-const onPenanggungJawabSelect = () => {
-  const match = availablePenanggungJawab.value.find((pj) => pj.nama === form.value.penanggungJawabSelection);
-  if (match) {
-    form.value.penanggungJawabNama = match.nama;
-    form.value.penanggungJawabJabatan = match.jabatan;
-    form.value.penanggungJawabNip = match.nip;
-    form.value.kotaTandaTangan = match.kota;
-  }
-};
-
 const updateDocNumbers = () => {
-  if (!form.value.company) {
-    form.value.docNumbers = {
-      penawaran: '',
-      suratJalan: '',
-      faktur: '',
-      kuitansi: '',
-    };
-    return;
-  }
+  form.value.company = 'CV Alpharo Artha Jaya';
 
   const nextNum = String((store.orders?.length || 0) + 1).padStart(3, '0');
   const romanMonth = 'X';
@@ -904,36 +755,43 @@ const onCustomerCreated = (newClient) => {
   toast.success(`Customer ${newClient.name} terpilih otomatis!`);
 };
 
-const saveQuickPj = () => {
-  const newPj = {
-    nama: quickPj.value.nama,
-    jabatan: quickPj.value.jabatan,
-    nip: quickPj.value.nip || '-',
-    kota: quickPj.value.kota || 'Jakarta Timur',
-  };
-  availablePenanggungJawab.value.unshift(newPj);
-  form.value.penanggungJawabSelection = newPj.nama;
-  form.value.penanggungJawabNama = newPj.nama;
-  form.value.penanggungJawabJabatan = newPj.jabatan;
-  form.value.penanggungJawabNip = newPj.nip;
-  form.value.kotaTandaTangan = newPj.kota;
-  quickPjModalOpen.value = false;
-  toast.success('Penanggung jawab berhasil ditambahkan!');
-};
+const initForm = async () => {
+  await storeActions.loadOrders();
+  try {
+    const projRes = await api.get('/spj/projects');
+    if (Array.isArray(projRes.data?.data)) {
+      existingProjectNumbers.value = projRes.data.data.map(p => {
+        const num = parseInt(String(p.project_id || '').replace(/\D/g, ''), 10);
+        return isNaN(num) ? 0 : num;
+      });
+    }
+  } catch { /* Ignored */ }
+  try {
+    const response = await api.get('/products?per_page=5000');
+    if (Array.isArray(response.data.data)) store.products = response.data.data.map(product => ({
+      ...product, price: product.sell_price ?? product.price, costPrice: product.hpp ?? product.costPrice,
+    }));
+    catalogSynced.value = Array.isArray(response.data.data);
+  } catch { toast.warning('Katalog gudang belum tersinkron. Pengajuan tetap akan diperiksa dari stok server.'); }
 
-const initForm = () => {
   if (isEdit.value) {
-    const existing = store.orders.find((o) => o.id === Number(route.params.id));
+    const existing = store.orders.find((o) => String(o.id) === String(route.params.id));
     if (existing) {
+      if (existing.status !== 'Draft') {
+        toast.error('Rincian pesanan terkunci setelah diajukan.');
+        router.replace('/marketing/orders');
+        return;
+      }
       form.value = {
         ...form.value,
         id: existing.id,
+        version: existing.version,
         projectId: existing.projectId || `PR${String(existing.id).padStart(5, '0')}`,
         projectName: existing.projectName || '',
         description: existing.description || '',
         customerId: existing.clientId || '',
         marketingName: existing.submittedBy || store.currentUser?.name || 'Budi Hartono, S.T.',
-        company: existing.company || 'CV Alpharo Artha Jaya',
+        company: 'CV Alpharo Artha Jaya',
         namaKegiatan: existing.namaKegiatan || existing.projectName || '',
         rincianKegiatan: existing.rincianKegiatan || '',
         kodeRekening: existing.kodeRekening || '52323628813',
@@ -946,7 +804,6 @@ const initForm = () => {
         nilaiProject: existing.grandTotal || 0,
         nilaiInvoice: existing.nilaiInvoice || existing.grandTotal || 0,
         invoiceDibayar: existing.invoiceDibayar || 0,
-        penanggungJawabSelection: existing.penanggungJawabNama || '',
         penanggungJawabNama: existing.penanggungJawabNama || '',
         penanggungJawabJabatan: existing.penanggungJawabJabatan || '',
         penanggungJawabNip: existing.penanggungJawabNip || '',
@@ -957,7 +814,7 @@ const initForm = () => {
           faktur: `00${existing.id}/FP/AAJ/X/2026`,
           kuitansi: `00${existing.id}/KW/AAJ/X/2026`,
         },
-        items: existing.items && existing.items.length ? JSON.parse(JSON.stringify(existing.items)) : [],
+        items: existing.items && existing.items.length ? existing.items.map(item => ({ ...item, productId: store.products.find(product => product.sku === item.sku)?.id })) : [],
       };
       updateDocNumbers();
       if (form.value.items.length > 0) {
@@ -974,6 +831,7 @@ const initForm = () => {
     if (fromOrder) {
       fromClientOrder.value = fromOrder;
       form.value.fromOrderId = fromOrder.id;
+      form.value.version = fromOrder.version;
       form.value.projectId = displayProjectId.value;
       form.value.projectName = fromOrder.projectName || '';
       form.value.description = fromOrder.notes || `Pengajuan kebutuhan dari rekanan ${fromOrder.clientName}`;
@@ -992,8 +850,8 @@ const initForm = () => {
         }
       }
 
-      form.value.marketingName = store.currentUser?.name || 'Budi Hartono, S.T.';
-      form.value.company = fromOrder.company || 'CV Alpharo Artha Jaya';
+      form.value.marketingName = fromOrder.marketingName || store.currentUser?.name || 'Budi Hartono, S.T.';
+      form.value.company = 'CV Alpharo Artha Jaya';
       form.value.namaKegiatan = fromOrder.projectName || '';
       form.value.rincianKegiatan = fromOrder.notes || '';
       form.value.kodeRekening = '52323628813';
@@ -1009,7 +867,6 @@ const initForm = () => {
       updateDocNumbers();
       onCustomerChange();
       if (fromOrder.contactPerson) {
-        form.value.penanggungJawabSelection = fromOrder.contactPerson;
         form.value.penanggungJawabNama = fromOrder.contactPerson;
         form.value.penanggungJawabJabatan = 'Kepala Sekolah / Kuasa Pengguna Anggaran';
         form.value.penanggungJawabNip = '19750101 200212 1 005';
@@ -1018,13 +875,8 @@ const initForm = () => {
   } else {
     form.value.projectId = displayProjectId.value;
     form.value.marketingName = '';
-    form.value.company = '';
-    form.value.docNumbers = {
-      penawaran: '',
-      suratJalan: '',
-      faktur: '',
-      kuitansi: '',
-    };
+    form.value.company = 'CV Alpharo Artha Jaya';
+    updateDocNumbers();
     form.value.items = [];
   }
 };
@@ -1032,7 +884,8 @@ const initForm = () => {
 onMounted(initForm);
 watch(() => [route.params.id, route.query.fromOrderId], initForm);
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
+  if (orderSync.busy) return;
   if (!form.value.customerId) {
     toast.error('Silakan pilih Customer terlebih dahulu.');
     return;
@@ -1045,18 +898,11 @@ const handleSubmit = () => {
   const client = store.clients.find((c) => c.id === Number(form.value.customerId)) || { name: 'Customer' };
 
   // Final items from form
-  const finalItems = form.value.items.length > 0 && form.value.items[0].name
-    ? form.value.items
-    : [
-        {
-          productId: 1,
-          name: form.value.projectName || 'Pengadaan Paket Barang & Jasa',
-          sku: 'PKG-PRJ',
-          qty: 1,
-          unit: 'Paket',
-          price: form.value.nilaiProject || 10000000,
-        },
-      ];
+  if (!form.value.items.length || form.value.items.some(item => !item.sku || !item.name || !(Number(item.qty) > 0) || !(Number(item.price) > 0))) {
+    toast.error('Lengkapi barang, jumlah, dan harga pesanan terlebih dahulu.');
+    return;
+  }
+  const finalItems = form.value.items;
 
   const payload = {
     projectId: displayProjectId.value,
@@ -1088,83 +934,19 @@ const handleSubmit = () => {
     items: finalItems,
   };
 
-  if (isEdit.value && form.value.id) {
-    const idx = store.orders.findIndex((o) => o.id === form.value.id);
-    if (idx !== -1) {
-      store.orders[idx] = {
-        ...store.orders[idx],
-        ...payload,
-        clientName: client.name,
-        grandTotal: form.value.nilaiProject || payload.nilaiProject,
-      };
-      toast.success(`Data Project ${displayProjectId.value} berhasil diperbarui!`);
-    }
-  } else if (form.value.fromOrderId) {
-    const target = String(form.value.fromOrderId).trim();
-    const existingIdx = store.orders.findIndex(
-      (o) =>
-        String(o.id) === target ||
-        (o.orderNumber && o.orderNumber.trim().toUpperCase() === target.toUpperCase())
-    );
-    if (existingIdx !== -1) {
-      store.orders[existingIdx] = {
-        ...store.orders[existingIdx],
-        ...payload,
-        clientName: client.name,
-        status: 'Menunggu Verifikasi', // Langsung siap telaah Direktur setelah dirinci marketing!
-        grandTotal: form.value.nilaiProject || payload.nilaiProject,
-      };
-      const alreadyHasTimeline = store.orders[existingIdx].timeline.some((t) =>
-        t.stage.includes('Spesifikasi Project')
-      );
-      if (!alreadyHasTimeline) {
-        store.orders[existingIdx].timeline.push({
-          stage: 'Spesifikasi Project & Dokumen Lengkap',
-          user: store.currentUser.name,
-          timestamp: new Date().toLocaleString('id-ID'),
-          status: 'completed',
-          notes: `Marketing merinci data pengadaan, jadwal, penanggung jawab, dan nomor dokumen resmi (${displayProjectId.value}). Diteruskan ke Direktur.`,
-        });
+  try {
+    const target = form.value.id || form.value.fromOrderId;
+    if (target) {
+      const existing = store.orders.find(order => String(order.id) === String(target));
+      if (!existing || !['Draft', 'Diajukan Client'].includes(existing.status)) {
+        throw new Error('Rincian pesanan terkunci setelah diajukan.');
       }
-      storeActions.addNotification(
-        'DIREKTUR',
-        'Verifikasi Order Spesifik Siap Telaah',
-        `Marketing telah merinci spesifikasi lengkap order ${store.orders[existingIdx].orderNumber} (${client.name}). Silakan telaah & verifikasi.`,
-        'order',
-        '/director/verification'
-      );
-      toast.success(`Order dari ${client.name} berhasil dirinci dan diteruskan ke Direktur!`);
-      router.push('/marketing/orders/monitoring');
-      return;
+      await storeActions.saveOrderDraft({ ...existing, ...payload, version: form.value.version ?? existing.version, clientName: client.name });
+    } else {
+      await storeActions.createOrder(payload);
     }
-  } else {
-    const newOrder = storeActions.createOrder(payload);
-    Object.assign(newOrder, {
-      projectId: displayProjectId.value,
-      company: form.value.company || 'CV Alpharo Artha Jaya',
-      namaKegiatan: form.value.namaKegiatan,
-      rincianKegiatan: form.value.rincianKegiatan,
-      kodeRekening: '52323628813',
-      nomorRekening: '52323628813',
-      bankPenerima: 'Bank BCA Jakarta (a.n. CV ALPHARO ARTHA JAYA)',
-      tahunAnggaran: form.value.tahunAnggaran,
-      sumberDana: form.value.sumberDana,
-      kategori: form.value.kategori,
-      paguAnggaran: form.value.paguAnggaran,
-      tglMulai: form.value.tglMulai,
-      estimasiSelesai: form.value.estimasiSelesai,
-      penanggungJawabNama: form.value.penanggungJawabNama,
-      penanggungJawabJabatan: form.value.penanggungJawabJabatan,
-      penanggungJawabNip: form.value.penanggungJawabNip,
-      kotaTandaTangan: form.value.kotaTandaTangan,
-      docNumbers: form.value.docNumbers,
-    });
-    if (form.value.nilaiProject > 0) {
-      newOrder.grandTotal = form.value.nilaiProject;
-    }
-    toast.success(`Project ${displayProjectId.value} (${form.value.projectName}) berhasil disimpan!`);
-  }
-
-  router.push('/marketing/orders/monitoring');
+    toast.success('Draft pesanan tersimpan. Ajukan persetujuan setelah stok terpenuhi.');
+    router.push('/marketing/orders');
+  } catch (error) { toast.error(orderError(error)); }
 };
 </script>

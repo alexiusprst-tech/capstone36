@@ -3,19 +3,19 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Kelola Order & Proyek</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Kelola Order & Proyek</h1>
           <p class="text-sm text-slate-500 mt-1">
-            Pengajuan pesanan barang/jasa supplier & kontraktor menuju proses verifikasi Direktur.
+            Ajukan pesanan setelah stok teralokasi penuh. Nilai di atas Rp5 juta memerlukan persetujuan Direktur.
           </p>
         </div>
         <div class="flex items-center gap-2">
-          <router-link
-            to="/marketing/orders/create"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0B4DA2] to-[#062F69] hover:from-[#09428F] hover:to-[#042452] text-white font-bold rounded-lg text-xs shadow-xs transition-all"
+          <Link
+            href="/marketing/orders/create"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-alpharo-600 text-white font-semibold rounded-lg text-xs shadow-xs transition-all hover:bg-alpharo-700"
           >
             <Plus class="w-4 h-4 text-amber-300 stroke-[2.5]" />
             <span>Buat Order Baru</span>
-          </router-link>
+          </Link>
         </div>
       </div>
     </template>
@@ -23,16 +23,16 @@
     <!-- BANNER: PENGAJUAN PESANAN MASUK DARI CLIENT -->
     <div
       v-if="pendingClientOrders.length > 0"
-      class="bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-purple-200/90 rounded-xl p-4 mb-5 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+      class="bg-linear-to-r from-alpharo-50 via-alpharo-50 to-alpharo-50 border border-alpharo-200/90 rounded-xl p-4 mb-5 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
     >
       <div class="flex items-start sm:items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+        <div class="w-10 h-10 rounded-xl bg-alpharo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
           <Inbox class="w-5 h-5 text-amber-300 stroke-[2.5]" />
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h3 class="text-sm font-bold text-slate-900">Pengajuan Pesanan Baru dari Rekanan Client</h3>
-            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-700 border border-purple-200 animate-pulse">
+            <h3 class="text-sm font-semibold text-slate-900">Pengajuan Pesanan Baru dari Rekanan Client</h3>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-alpharo-100 text-alpharo-700 border border-alpharo-200 animate-pulse">
               {{ pendingClientOrders.length }} Pengajuan Menunggu
             </span>
           </div>
@@ -44,7 +44,7 @@
       <div class="flex items-center gap-2 shrink-0">
         <button
           type="button"
-          class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5 transition-colors"
+          class="px-3.5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg shadow-xs flex items-center gap-1.5 transition-colors"
           @click="statusFilter = statusFilter === 'Diajukan Client' ? '' : 'Diajukan Client'"
         >
           <Filter class="w-3.5 h-3.5" />
@@ -54,7 +54,7 @@
     </div>
 
     <!-- QUICK STATUS TABS & SEARCH / FILTER -->
-    <div class="bg-white p-4 rounded-xl border border-slate-200/90 mb-5 space-y-3 shadow-2xs">
+    <div class="ui-panel bg-white p-4 rounded-xl border border-slate-200/90 mb-5 space-y-3 shadow-2xs">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="relative w-full sm:w-80">
           <Search class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -62,18 +62,19 @@
             v-model="searchQuery"
             type="text"
             placeholder="Cari no order, client, proyek..."
-            class="w-full pl-9 pr-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#0B4DA2]"
+            class="w-full pl-9 pr-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-600"
           />
         </div>
 
         <div class="flex items-center gap-2 w-full sm:w-auto">
           <select
             v-model="statusFilter"
-            class="text-xs px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-[#0B4DA2]"
+            class="text-xs px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-alpharo-600"
           >
             <option value="">Semua Status</option>
-            <option value="Diajukan Client">Diajukan Client (Pengajuan Baru)</option>
+            <option value="Diajukan Client">Diajukan Client</option>
             <option value="Draft">Draft</option>
+            <option value="Siap Invoice">Siap Invoice</option>
             <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
             <option value="Disetujui">Disetujui</option>
             <option value="Menunggu Pembayaran">Menunggu Pembayaran</option>
@@ -90,22 +91,22 @@
           type="button"
           :class="[
             !statusFilter
-              ? 'bg-[#0B4DA2] text-white font-bold'
+              ? 'bg-alpharo-600 text-white font-semibold'
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
             'px-3 py-1 rounded-full whitespace-nowrap transition-colors'
           ]"
           @click="statusFilter = ''"
         >
-          Semua ({{ store.orders.length }})
+          Semua ({{ totalOrdersCount }})
         </button>
 
         <button
           type="button"
           :class="[
             statusFilter === 'Diajukan Client'
-              ? 'bg-purple-600 text-white font-bold shadow-xs'
+              ? 'bg-alpharo-600 text-white font-semibold shadow-xs'
               : pendingClientOrders.length > 0
-                ? 'bg-purple-50 text-purple-700 font-bold border border-purple-200 hover:bg-purple-100'
+                ? 'bg-alpharo-50 text-alpharo-700 font-semibold border border-alpharo-200 hover:bg-alpharo-100'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
             'px-3 py-1 rounded-full whitespace-nowrap transition-colors flex items-center gap-1.5'
           ]"
@@ -114,8 +115,8 @@
           <span>Pengajuan Masuk Client</span>
           <span
             v-if="pendingClientOrders.length > 0"
-            :class="statusFilter === 'Diajukan Client' ? 'bg-white text-purple-700' : 'bg-purple-600 text-white'"
-            class="px-1.5 py-0.2 rounded-full text-[10px] font-bold"
+            :class="statusFilter === 'Diajukan Client' ? 'bg-white text-alpharo-700' : 'bg-alpharo-600 text-white'"
+            class="px-1.5 py-0.2 rounded-full text-[11px] font-semibold"
           >
             {{ pendingClientOrders.length }}
           </span>
@@ -125,7 +126,7 @@
           type="button"
           :class="[
             statusFilter === 'Draft'
-              ? 'bg-slate-800 text-white font-bold'
+              ? 'bg-slate-800 text-white font-semibold'
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
             'px-3 py-1 rounded-full whitespace-nowrap transition-colors'
           ]"
@@ -138,7 +139,7 @@
           type="button"
           :class="[
             statusFilter === 'Menunggu Verifikasi'
-              ? 'bg-amber-500 text-white font-bold'
+              ? 'bg-amber-500 text-white font-semibold'
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
             'px-3 py-1 rounded-full whitespace-nowrap transition-colors'
           ]"
@@ -151,7 +152,7 @@
           type="button"
           :class="[
             statusFilter === 'Disetujui'
-              ? 'bg-emerald-600 text-white font-bold'
+              ? 'bg-emerald-600 text-white font-semibold'
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
             'px-3 py-1 rounded-full whitespace-nowrap transition-colors'
           ]"
@@ -164,7 +165,7 @@
           type="button"
           :class="[
             statusFilter === 'Diproses'
-              ? 'bg-blue-600 text-white font-bold'
+              ? 'bg-alpharo-600 text-white font-semibold'
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
             'px-3 py-1 rounded-full whitespace-nowrap transition-colors'
           ]"
@@ -177,7 +178,7 @@
           type="button"
           :class="[
             statusFilter === 'Selesai'
-              ? 'bg-emerald-700 text-white font-bold'
+              ? 'bg-emerald-700 text-white font-semibold'
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
             'px-3 py-1 rounded-full whitespace-nowrap transition-colors'
           ]"
@@ -189,18 +190,18 @@
     </div>
 
     <!-- ORDERS TABLE -->
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px] tracking-wider">
-              <th class="py-3 px-4">No. Order</th>
-              <th class="py-3 px-4">Client & Proyek</th>
-              <th class="py-3 px-4">Tanggal</th>
-              <th class="py-3 px-4 text-right">Nilai Transaksi</th>
-              <th class="py-3 px-4 text-center">Status</th>
-              <th class="py-3 px-4 text-center">Kelengkapan</th>
-              <th class="py-3 px-4 text-right">Aksi</th>
+              <th class="py-3 px-4 min-w-[140px] whitespace-nowrap">No. Order</th>
+              <th class="py-3 px-4 min-w-[200px]">Client & Proyek</th>
+              <th class="py-3 px-4 whitespace-nowrap">Tanggal</th>
+              <th class="py-3 px-4 text-right whitespace-nowrap">Nilai Transaksi</th>
+              <th class="py-3 px-4 text-center whitespace-nowrap min-w-[120px]">Status</th>
+              <th class="py-3 px-4 text-center whitespace-nowrap min-w-[140px]">Kelengkapan</th>
+              <th class="py-3 px-4 text-right whitespace-nowrap">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
@@ -208,114 +209,123 @@
               v-for="order in filteredOrders"
               :key="order.id"
               :class="[
-                order.status === 'Diajukan Client' ? 'bg-purple-50/30 hover:bg-purple-50/60' : 'hover:bg-slate-50/70',
+                order.status === 'Diajukan Client' ? 'bg-alpharo-50/30 hover:bg-alpharo-50/60' : 'hover:bg-slate-50/70',
                 'transition-colors'
               ]"
             >
-              <td class="py-3.5 px-4 font-mono font-bold text-slate-900">
-                <!-- If Client-submitted order, quick route to create order -->
-                <router-link
-                  v-if="order.status === 'Diajukan Client'"
-                  :to="`/marketing/orders/create?fromOrderId=${order.id}`"
-                  class="text-[#0B4DA2] hover:text-[#062F69] hover:underline inline-flex items-center gap-1.5 group transition-colors cursor-pointer"
-                  :title="`Klik ${order.orderNumber} untuk buka 'Buat Order Baru' berbasis pengajuan ini`"
-                >
-                  <span class="underline decoration-[#0B4DA2]/40 group-hover:decoration-[#0B4DA2]">{{ order.orderNumber }}</span>
-                  <ExternalLink class="w-3.5 h-3.5 text-blue-500 opacity-60 group-hover:opacity-100 transition-opacity" />
-                </router-link>
-                <!-- For standard orders, clicking order number directly opens Drawer Detail & Monitoring -->
-                <button
-                  v-else
-                  type="button"
-                  @click="viewDetail(order)"
-                  class="text-[#0B4DA2] hover:text-[#062F69] hover:underline inline-flex items-center gap-1.5 group transition-colors cursor-pointer text-left font-mono font-bold"
-                  :title="`Buka Rincian & Monitoring ${order.orderNumber}`"
-                >
-                  <span class="underline decoration-[#0B4DA2]/40 group-hover:decoration-[#0B4DA2]">{{ order.orderNumber }}</span>
-                </button>
-
-                <div v-if="order.isHold" class="mt-0.5">
-                  <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">
-                    ⛔ Ditahan Direktur
-                  </span>
-                </div>
-                <div v-else-if="order.status === 'Diajukan Client'" class="mt-0.5">
-                  <router-link
-                    :to="`/marketing/orders/create?fromOrderId=${order.id}`"
-                    class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-700 border border-purple-200 hover:bg-purple-200 transition-colors cursor-pointer"
-                    :title="`Klik untuk buat order baru berbasis pengajuan ${order.orderNumber}`"
+              <td class="py-3.5 px-4 font-mono font-semibold text-slate-900 whitespace-nowrap">
+                <div class="flex flex-col items-start gap-1">
+                  <!-- If Client-submitted order, quick route to create order -->
+                  <Link
+                    v-if="order.status === 'Diajukan Client'"
+                    :href="`/marketing/orders/create?fromOrderId=${order.id}`"
+                    class="text-alpharo-600 hover:text-alpharo-800 hover:underline inline-flex items-center gap-1.5 group transition-colors cursor-pointer"
+                    :title="`Klik ${order.orderNumber} untuk buka 'Buat Order Baru' berbasis pengajuan ini`"
                   >
-                    ⚡ Pengajuan Baru
-                  </router-link>
+                    <span class="underline decoration-alpharo-600/40 group-hover:decoration-alpharo-600">{{ order.orderNumber }}</span>
+                    <ExternalLink class="w-3.5 h-3.5 text-alpharo-500 opacity-60 group-hover:opacity-100 transition-opacity shrink-0" />
+                  </Link>
+                  <!-- For standard orders, clicking order number directly opens Drawer Detail & Monitoring -->
+                  <button
+                    v-else
+                    type="button"
+                    @click="viewDetail(order)"
+                    class="text-alpharo-600 hover:text-alpharo-800 hover:underline inline-flex items-center gap-1.5 group transition-colors cursor-pointer text-left font-mono font-semibold"
+                    :title="`Buka Rincian & Monitoring ${order.orderNumber}`"
+                  >
+                    <span class="underline decoration-alpharo-600/40 group-hover:decoration-alpharo-600">{{ order.orderNumber }}</span>
+                  </button>
+
+                  <div v-if="order.isHold">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-700 border border-rose-200 whitespace-nowrap">
+                      Ditahan Direktur
+                    </span>
+                  </div>
                 </div>
               </td>
               <td class="py-3.5 px-4">
-                <span class="font-bold text-slate-900 block">{{ order.clientName }}</span>
+                <span class="font-semibold text-slate-900 block">{{ order.clientName }}</span>
                 <span class="text-[11px] text-slate-400 block truncate max-w-xs">{{ order.projectName }}</span>
+                <span v-if="order.marketingName" class="text-[10px] text-slate-500 font-medium inline-block mt-0.5">
+                  PIC: {{ order.marketingName }}
+                </span>
               </td>
               <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">
                 {{ order.date }}
               </td>
-              <td class="py-3.5 px-4 text-right font-bold text-slate-900 whitespace-nowrap">
+              <td class="py-3.5 px-4 text-right font-semibold text-slate-900 whitespace-nowrap">
                 Rp {{ (order.grandTotal || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-center">
                 <StatusBadge :status="order.status" />
+                <p v-if="order.serverManaged && order.status === 'Draft'" class="mt-1 text-[11px]" :class="catalogIssues(order).length ? 'text-amber-800' : 'text-slate-500'">{{ catalogIssues(order).length ? 'Perbarui barang katalog' : order.stockReadiness?.status }}</p>
               </td>
-              <td class="py-3.5 px-4 text-center">
+              <td class="py-3.5 px-4 text-center whitespace-nowrap">
                 <span
                   v-if="order.status === 'Diajukan Client'"
-                  class="text-[11px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-100"
+                  class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-alpharo-700 bg-alpharo-50 px-2.5 py-1 rounded-full border border-alpharo-200 whitespace-nowrap shadow-2xs"
                 >
-                  {{ (order.items || []).length }} Item Diajukan
+                  <span class="w-1.5 h-1.5 rounded-full bg-alpharo-600 shrink-0"></span>
+                  <span class="whitespace-nowrap">{{ (order.items || []).length }} Item Diajukan</span>
                 </span>
                 <span
                   v-else
-                  class="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded"
+                  class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full whitespace-nowrap"
                 >
-                  {{ getDocCount(order.documents) }}/4 Dokumen
+                  <span class="w-1.5 h-1.5 rounded-full shrink-0" :class="getDocCount(order.documents) === 4 ? 'bg-emerald-500' : 'bg-amber-500'"></span>
+                  <span class="whitespace-nowrap">{{ getDocCount(order.documents) }}/4 Dokumen</span>
                 </span>
               </td>
               <td class="py-3.5 px-4 text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-1.5">
                   <!-- KHUSUS DIAJUKAN CLIENT: TOMBOL BUAT ORDER BARU -->
-                  <router-link
+                  <Link
                     v-if="order.status === 'Diajukan Client'"
-                    :to="`/marketing/orders/create?fromOrderId=${order.id}`"
-                    class="px-2.5 py-1.5 bg-gradient-to-r from-[#0B4DA2] to-[#062F69] hover:from-[#09428F] hover:to-[#042452] text-white rounded-lg text-[11px] font-bold flex items-center gap-1.5 shadow-2xs transition-all"
+                    :href="`/marketing/orders/create?fromOrderId=${order.id}`"
+                    class="px-2.5 py-1.5 bg-alpharo-600 text-white rounded-lg text-[11px] font-semibold flex items-center gap-1.5 shadow-2xs transition-all hover:bg-alpharo-700"
                     :title="`Buat Order Baru berbasis pengajuan ${order.orderNumber}`"
                   >
                     <ClipboardCheck class="w-3.5 h-3.5 text-amber-300 stroke-[2.5]" />
                     <span>Buat Order Baru</span>
-                  </router-link>
+                  </Link>
 
                   <!-- SATU BUTTON AKSI: RINCIAN BARANG & MONITORING -->
                   <button
                     type="button"
-                    class="p-1.5 text-alpharo-500 hover:text-alpharo-700 hover:bg-blue-50 rounded transition-colors cursor-pointer"
+                    class="p-1.5 text-alpharo-500 hover:text-alpharo-700 hover:bg-alpharo-50 rounded transition-colors cursor-pointer"
                     title="Lihat Rincian Barang & Monitoring Order"
                     @click="viewDetail(order)"
                   >
                     <Eye class="w-4 h-4" />
                   </button>
 
-                  <router-link
+                  <Link
                     v-if="order.status === 'Draft'"
-                    :to="`/marketing/orders/${order.id}/edit`"
+                    :href="`/marketing/orders/${order.id}/edit`"
                     class="p-1.5 text-slate-600 hover:bg-slate-100 rounded transition-colors cursor-pointer"
-                    title="Edit Order"
+                    :title="catalogIssues(order).length ? 'Perbarui Barang' : 'Edit Order'"
+                    :aria-label="catalogIssues(order).length ? 'Perbarui Barang' : 'Edit Order'"
                   >
                     <Pencil class="w-4 h-4" />
-                  </router-link>
+                  </Link>
 
                   <button
-                    v-if="order.status === 'Draft'"
+                    v-if="['Draft', 'Diajukan Client'].includes(order.status) || (!order.serverManaged && order.status === 'Menunggu Verifikasi')"
                     type="button"
-                    class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-[11px] font-bold flex items-center gap-1 cursor-pointer"
-                    title="Ajukan Verifikasi"
+                    :class="[
+                      (Number(order.grandTotal) || 0) > 5000000
+                        ? 'bg-amber-600 hover:bg-amber-700 text-white shadow-amber-600/20'
+                        : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20',
+                      'px-2.5 py-1.5 rounded-lg text-[11px] font-semibold flex items-center gap-1.5 cursor-pointer shadow-2xs transition-all whitespace-nowrap active:scale-95'
+                    ]"
+                    :title="(Number(order.grandTotal) || 0) > 5000000
+                      ? `Nominal Rp ${Number(order.grandTotal || 0).toLocaleString('id-ID')} (> Rp 5 Juta) - Ajukan ke Direktur untuk verifikasi & persetujuan`
+                      : `Nominal Rp ${Number(order.grandTotal || 0).toLocaleString('id-ID')} (<= Rp 5 Juta) - Ajukan langsung ke Finance (Siap Invoice)`"
+                    :disabled="orderSync.busy || orderSync.loading"
                     @click="submitVerification(order)"
                   >
-                    <Send class="w-3 h-3" /> Ajukan
+                    <Send class="w-3.5 h-3.5" />
+                    <span>{{ (Number(order.grandTotal) || 0) > 5000000 ? 'Ajukan ke Direktur' : 'Ajukan ke Finance' }}</span>
                   </button>
 
                   <button
@@ -332,9 +342,9 @@
             </tr>
 
             <tr v-if="filteredOrders.length === 0">
-              <td colspan="7" class="py-12 text-center text-slate-400">
+              <td colspan="7" class="py-12 text-center text-slate-400"><div class="ui-empty-state">
                 Tidak ada data order yang sesuai.
-              </td>
+              </div></td>
             </tr>
           </tbody>
         </table>
@@ -350,15 +360,15 @@
     >
       <div v-if="reviewOrder" class="space-y-6">
         <!-- HEADER SUMMARY BADGE -->
-        <div class="bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-purple-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="bg-linear-to-r from-alpharo-50 via-alpharo-50 to-alpharo-50 border border-alpharo-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+            <div class="w-10 h-10 rounded-xl bg-alpharo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
               <ClipboardCheck class="w-5 h-5 text-amber-300 stroke-[2.5]" />
             </div>
             <div>
               <div class="flex items-center gap-2">
-                <span class="text-xs font-bold text-slate-900">{{ reviewOrder.projectName }}</span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700 border border-purple-200">
+                <span class="text-xs font-semibold text-slate-900">{{ reviewOrder.projectName }}</span>
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-alpharo-100 text-alpharo-700 border border-alpharo-200">
                   Pengajuan Rekanan Client
                 </span>
               </div>
@@ -368,8 +378,8 @@
             </div>
           </div>
           <div class="text-right shrink-0">
-            <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Estimasi Nilai</span>
-            <span class="text-base font-bold font-mono text-[#0B4DA2]">
+            <span class="text-[11px] uppercase font-semibold text-slate-400 block tracking-wider">Estimasi Nilai</span>
+            <span class="text-base font-semibold font-mono text-alpharo-600">
               Rp {{ reviewGrandTotal.toLocaleString('id-ID') }}
             </span>
           </div>
@@ -377,15 +387,15 @@
 
         <!-- SECTION 1: PROFIL CLIENT & DETAIL PENGIRIMAN -->
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
-            <span class="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px]">1</span>
+          <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-alpharo-600 text-white flex items-center justify-center text-[11px]">1</span>
             Data Instansi, PIC & Lokasi Pengiriman
           </h4>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div class="bg-white p-3 rounded-lg border border-slate-200">
-              <span class="text-[10px] font-bold text-slate-400 uppercase block">Instansi & PIC</span>
-              <p class="font-bold text-slate-800 mt-0.5">{{ reviewOrder.clientName }}</p>
+              <span class="text-[11px] font-semibold text-slate-400 uppercase block">Instansi & PIC</span>
+              <p class="font-semibold text-slate-800 mt-0.5">{{ reviewOrder.clientName }}</p>
               <p class="text-slate-600 flex items-center gap-1.5 mt-1">
                 <User class="w-3.5 h-3.5 text-slate-400" />
                 <span>{{ reviewOrder.contactPerson || '-' }}</span>
@@ -408,20 +418,20 @@
             </div>
 
             <div class="bg-white p-3 rounded-lg border border-slate-200">
-              <span class="text-[10px] font-bold text-slate-400 uppercase block">Lokasi & Target Pengiriman</span>
+              <span class="text-[11px] font-semibold text-slate-400 uppercase block">Lokasi & Target Pengiriman</span>
               <p class="text-slate-700 flex items-start gap-1.5 mt-1 leading-relaxed">
                 <MapPin class="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
                 <span>{{ reviewOrder.address || '-' }}</span>
               </p>
               <div class="flex items-center justify-between pt-2 mt-2 border-t border-slate-100">
                 <span class="text-slate-500">Target Tanggal Kirim:</span>
-                <span class="font-bold text-slate-800">{{ reviewOrder.targetDeliveryDate || 'Fleksibel' }}</span>
+                <span class="font-semibold text-slate-800">{{ reviewOrder.targetDeliveryDate || 'Fleksibel' }}</span>
               </div>
               <div class="flex items-center justify-between mt-1">
                 <span class="text-slate-500">Tingkat Urgensi:</span>
                 <span
-                  class="px-2 py-0.5 rounded text-[10px] font-bold"
-                  :class="reviewOrder.urgency === 'Mendesak' ? 'bg-rose-100 text-rose-700' : 'bg-blue-100 text-blue-700'"
+                  class="px-2 py-0.5 rounded text-[11px] font-semibold"
+                  :class="reviewOrder.urgency === 'Mendesak' ? 'bg-rose-100 text-rose-700' : 'bg-alpharo-100 text-alpharo-700'"
                 >
                   {{ reviewOrder.urgency || 'Normal' }}
                 </span>
@@ -432,7 +442,7 @@
           <!-- CATATAN KHUSUS & BERKAS DARI CLIENT -->
           <div v-if="reviewOrder.notes || reviewOrder.supportingDocument" class="bg-white p-3 rounded-lg border border-slate-200 text-xs">
             <div v-if="reviewOrder.notes" class="mb-2">
-              <span class="text-[10px] font-bold text-slate-400 uppercase block">Catatan Kebutuhan Client</span>
+              <span class="text-[11px] font-semibold text-slate-400 uppercase block">Catatan Kebutuhan Client</span>
               <p class="text-slate-700 italic mt-0.5">"{{ reviewOrder.notes }}"</p>
             </div>
             <div v-if="reviewOrder.supportingDocument" class="flex items-center justify-between pt-2 border-t border-slate-100">
@@ -440,7 +450,7 @@
                 <FileText class="w-4 h-4 text-alpharo-500" />
                 <span>Lampiran Dokumen Rekanan: <strong>{{ reviewOrder.supportingDocument }}</strong></span>
               </span>
-              <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              <span class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                 Tersedia
               </span>
             </div>
@@ -450,8 +460,8 @@
         <!-- SECTION 2: REVIEW DAFTAR ITEM & VERIFIKASI STOK GUDANG -->
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
           <div class="flex items-center justify-between">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
-              <span class="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px]">2</span>
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-alpharo-600 text-white flex items-center justify-center text-[11px]">2</span>
               Review Barang & Pengecekan Ketersediaan Stok Gudang
             </h4>
             <span class="text-[11px] text-slate-500 font-medium">
@@ -460,7 +470,7 @@
           </div>
 
           <div class="border border-slate-200 rounded-lg overflow-hidden bg-white">
-            <table class="w-full text-left text-xs">
+            <table class="ui-table w-full text-left text-xs">
               <thead class="bg-slate-100 text-slate-600 font-semibold text-[11px] border-b border-slate-200">
                 <tr>
                   <th class="p-2.5">Barang & Spesifikasi</th>
@@ -473,33 +483,33 @@
               <tbody class="divide-y divide-slate-100">
                 <tr v-for="(it, idx) in reviewForm.items" :key="idx" class="hover:bg-slate-50">
                   <td class="p-2.5">
-                    <div class="font-bold text-slate-800">{{ it.name }}</div>
-                    <div class="text-[10px] font-mono text-slate-400 mt-0.5">{{ it.sku }}</div>
+                    <div class="font-semibold text-slate-800">{{ it.name }}</div>
+                    <div class="text-[11px] font-mono text-slate-400 mt-0.5">{{ it.sku }}</div>
                     <div v-if="it.specs" class="text-[11px] text-slate-500 italic mt-0.5">
                       Spec: {{ it.specs }}
                     </div>
                   </td>
                   <td class="p-2.5 text-center whitespace-nowrap">
                     <span
-                      class="px-2 py-0.5 rounded text-[10px] font-semibold"
-                      :class="getStockInfo(it.productId, it.qty).class"
+                      class="px-2 py-0.5 rounded text-[11px] font-semibold"
+                      :class="getStockInfo(it.sku, it.qty).class"
                     >
-                      {{ getStockInfo(it.productId, it.qty).label }}
+                      {{ getStockInfo(it.sku, it.qty).label }}
                     </span>
                   </td>
                   <td class="p-2.5 text-center whitespace-nowrap">
-                    <span class="font-bold text-slate-900">{{ it.qty }}</span>
+                    <span class="font-semibold text-slate-900">{{ it.qty }}</span>
                     <span class="text-slate-500 ml-1 text-[11px]">{{ it.unit }}</span>
                   </td>
                   <td class="p-2.5 text-right">
                     <input
-                      v-model.number="it.price"
+                      v-model.number="it.price" step="0.01" min="0.01"
                       type="number"
                       class="w-28 px-2 py-1 text-right text-xs rounded border border-slate-300 font-mono font-semibold"
                       title="Ubah harga satuan bila ada negosiasi / kesepakatan"
                     />
                   </td>
-                  <td class="p-2.5 text-right font-mono font-bold text-slate-800 whitespace-nowrap">
+                  <td class="p-2.5 text-right font-mono font-semibold text-slate-800 whitespace-nowrap">
                     Rp {{ ((it.qty || 0) * (it.price || 0)).toLocaleString('id-ID') }}
                   </td>
                 </tr>
@@ -517,17 +527,17 @@
               <span>PPN 11%:</span>
               <span class="font-mono">Rp {{ reviewTax.toLocaleString('id-ID') }}</span>
             </div>
-            <div class="pt-1.5 border-t border-slate-200 flex justify-between font-bold text-sm text-slate-900">
+            <div class="pt-1.5 border-t border-slate-200 flex justify-between font-semibold text-sm text-slate-900">
               <span>Total Penawaran:</span>
-              <span class="font-mono text-[#0B4DA2]">Rp {{ reviewGrandTotal.toLocaleString('id-ID') }}</span>
+              <span class="font-mono text-alpharo-600">Rp {{ reviewGrandTotal.toLocaleString('id-ID') }}</span>
             </div>
           </div>
         </div>
 
         <!-- SECTION 3: KEPUTUSAN PENERIMAAN MARKETING -->
-        <div class="bg-white p-4 rounded-xl border border-blue-200 bg-blue-50/40 space-y-3">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
-            <span class="w-5 h-5 rounded-full bg-[#0B4DA2] text-white flex items-center justify-center text-[10px]">3</span>
+        <div class="ui-panel bg-white p-4 rounded-xl border border-alpharo-200 bg-alpharo-50/40 space-y-3">
+          <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-alpharo-600 text-white flex items-center justify-center text-[11px]">3</span>
             Konfirmasi Keputusan & Tindakan Penerimaan
           </h4>
 
@@ -539,7 +549,7 @@
               v-model="reviewForm.notes"
               rows="2"
               required
-              class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#0B4DA2]"
+              class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-600"
               placeholder="Catatan validasi spesifikasi barang, ketersediaan gudang, kesiapan armada..."
             ></textarea>
           </div>
@@ -549,36 +559,41 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label
                 class="flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition-colors"
-                :class="reviewForm.actionType === 'verify' ? 'bg-blue-50 border-[#0B4DA2] ring-1 ring-[#0B4DA2]' : 'bg-white border-slate-200'"
+                :class="reviewForm.actionType === 'verify' ? 'bg-alpharo-50 border-alpharo-600 ring-1 ring-alpharo-600' : 'bg-white border-slate-200'"
               >
                 <input
                   v-model="reviewForm.actionType"
                   type="radio"
                   value="verify"
-                  class="mt-0.5 text-[#0B4DA2] focus:ring-[#0B4DA2]"
+                  class="mt-0.5 text-alpharo-600 focus:ring-alpharo-600"
                 />
                 <div>
-                  <span class="text-xs font-bold text-slate-900 block">Terima & Ajukan ke Direktur (Rekomendasi)</span>
+                  <span class="text-xs font-semibold text-slate-900 block">
+                    {{ reviewGrandTotal > 5000000 ? 'Terima & Ajukan ke Direktur' : 'Terima & Ajukan ke Finance' }}
+                  </span>
                   <span class="text-[11px] text-slate-500 leading-relaxed block mt-0.5">
-                    Status menjadi <strong>Menunggu Verifikasi</strong>. Notifikasi otomatis dikirim ke Direktur dan Rekanan Client.
+                    {{ reviewGrandTotal > 5000000
+                      ? 'Stok wajib terpenuhi. Nominal Rp ' + reviewGrandTotal.toLocaleString('id-ID') + ' (> Rp 5 Juta) memerlukan verifikasi & approval Direktur.'
+                      : 'Stok wajib terpenuhi. Nominal Rp ' + reviewGrandTotal.toLocaleString('id-ID') + ' (<= Rp 5 Juta) langsung masuk ke Finance (Siap Invoice).'
+                    }}
                   </span>
                 </div>
               </label>
 
               <label
                 class="flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer transition-colors"
-                :class="reviewForm.actionType === 'draft' ? 'bg-blue-50 border-[#0B4DA2] ring-1 ring-[#0B4DA2]' : 'bg-white border-slate-200'"
+                :class="reviewForm.actionType === 'draft' ? 'bg-alpharo-50 border-alpharo-600 ring-1 ring-alpharo-600' : 'bg-white border-slate-200'"
               >
                 <input
                   v-model="reviewForm.actionType"
                   type="radio"
                   value="draft"
-                  class="mt-0.5 text-[#0B4DA2] focus:ring-[#0B4DA2]"
+                  class="mt-0.5 text-alpharo-600 focus:ring-alpharo-600"
                 />
                 <div>
-                  <span class="text-xs font-bold text-slate-900 block">Terima & Simpan ke Draft SPH</span>
+                  <span class="text-xs font-semibold text-slate-900 block">Terima & Simpan ke Draft SPH</span>
                   <span class="text-[11px] text-slate-500 leading-relaxed block mt-0.5">
-                    Status menjadi <strong>Draft</strong> untuk penyusunan surat penawaran harga formal sebelum diajukan ke Direktur.
+                    Status menjadi <strong>Draft</strong> untuk penyusunan surat penawaran harga formal sebelum diajukan untuk persetujuan.
                   </span>
                 </div>
               </label>
@@ -590,7 +605,7 @@
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
           <button
             type="button"
-            class="text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5"
+            class="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5"
             @click="openRejectPrompt"
           >
             <XCircle class="w-4 h-4" />
@@ -605,18 +620,18 @@
             >
               Tutup
             </button>
-            <router-link
+            <Link
               v-if="reviewOrder"
-              :to="`/marketing/orders/create?fromOrderId=${reviewOrder.id}`"
-              class="px-4 py-2 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg flex items-center gap-1.5 transition-colors"
+              :href="`/marketing/orders/create?fromOrderId=${reviewOrder.id}`"
+              class="px-4 py-2 text-xs font-semibold text-alpharo-700 bg-alpharo-50 hover:bg-alpharo-100 border border-alpharo-200 rounded-lg flex items-center gap-1.5 transition-colors"
               @click="reviewModalOpen = false"
             >
-              <ClipboardCheck class="w-3.5 h-3.5 text-blue-600" />
+              <ClipboardCheck class="w-3.5 h-3.5 text-alpharo-600" />
               <span>Buka di Buat Order Baru →</span>
-            </router-link>
+            </Link>
             <button
               type="button"
-              class="px-5 py-2 text-xs font-bold text-white bg-gradient-to-r from-[#0B4DA2] to-[#062F69] hover:from-[#09428F] hover:to-[#042452] rounded-lg shadow-xs flex items-center gap-1.5 transition-all"
+              class="px-5 py-2 text-xs font-semibold text-white bg-alpharo-600 rounded-lg shadow-xs flex items-center gap-1.5 transition-all hover:bg-alpharo-700"
               @click="executeAcceptOrder"
             >
               <CheckCircle2 class="w-4 h-4 text-emerald-400 stroke-[2.5]" />
@@ -663,7 +678,7 @@
           </button>
           <button
             type="button"
-            class="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-xs"
+            class="px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-xs"
             @click="executeRejectOrder"
           >
             Kirim Penolakan
@@ -683,6 +698,17 @@
       @confirm="executeDeleteDraft"
       @cancel="deleteConfirmOpen = false"
     />
+    <ConfirmationDialog
+      v-model="submitConfirmOpen"
+      :title="(Number(orderToSubmit?.grandTotal) || 0) > 5000000 ? 'Ajukan Pesanan ke Direktur?' : 'Ajukan Pesanan ke Finance?'"
+      :message="(Number(orderToSubmit?.grandTotal) || 0) > 5000000
+        ? `Total nilai pesanan adalah Rp ${Number(orderToSubmit?.grandTotal || 0).toLocaleString('id-ID')} (di atas limit Rp 5.000.000). Sesuai ketentuan, pesanan dengan nominal di atas Rp 5 Juta wajib diajukan ke Direktur untuk verifikasi & persetujuan terlebih dahulu sebelum invoice diterbitkan.`
+        : `Total nilai pesanan adalah Rp ${Number(orderToSubmit?.grandTotal || 0).toLocaleString('id-ID')} (di bawah/sama dengan batas limit Rp 5.000.000). Pesanan tidak memerlukan persetujuan Direktur dan langsung dialihkan ke Finance dengan status Siap Invoice.`"
+      :confirm-text="(Number(orderToSubmit?.grandTotal) || 0) > 5000000 ? 'Ajukan ke Direktur' : 'Ajukan ke Finance'"
+      :variant="(Number(orderToSubmit?.grandTotal) || 0) > 5000000 ? 'warning' : 'success'"
+      @confirm="executeSubmission"
+      @cancel="submitConfirmOpen = false"
+    />
 
     <!-- ORDER DETAIL & MONITORING DRAWER -->
     <Drawer
@@ -695,26 +721,26 @@
         <!-- BANNER KHUSUS PENGAJUAN CLIENT -->
         <div
           v-if="selectedOrder.status === 'Diajukan Client'"
-          class="p-4 bg-purple-50 rounded-xl border border-purple-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs"
+          class="p-4 bg-alpharo-50 rounded-xl border border-alpharo-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs"
         >
           <div>
-            <span class="font-bold text-purple-900 text-xs block">Pengajuan Baru Rekanan Client</span>
-            <span class="text-[11px] text-purple-700 block mt-0.5">
+            <span class="font-semibold text-alpharo-900 text-xs block">Pengajuan Baru Rekanan Client</span>
+            <span class="text-[11px] text-alpharo-700 block mt-0.5">
               Pesanan ini diajukan mandiri dan menunggu verifikasi & konfirmasi penerimaan oleh Marketing.
             </span>
           </div>
           <div class="flex items-center gap-2 shrink-0">
-            <router-link
-              :to="`/marketing/orders/create?fromOrderId=${selectedOrder.id}`"
-              class="px-3.5 py-1.5 bg-gradient-to-r from-[#0B4DA2] to-[#062F69] hover:from-[#09428F] hover:to-[#042452] text-white text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5 transition-all"
+            <Link
+              :href="`/marketing/orders/create?fromOrderId=${selectedOrder.id}`"
+              class="px-3.5 py-1.5 bg-alpharo-600 text-white text-xs font-semibold rounded-lg shadow-xs flex items-center gap-1.5 transition-all hover:bg-alpharo-700"
               @click="detailDrawerOpen = false"
             >
               <ClipboardCheck class="w-3.5 h-3.5 text-amber-300 stroke-[2.5]" />
               <span>Buat Order Baru →</span>
-            </router-link>
+            </Link>
             <button
               type="button"
-              class="px-3 py-1.5 bg-white border border-purple-200 text-purple-700 hover:bg-purple-50 text-xs font-semibold rounded-lg shadow-2xs transition-colors cursor-pointer"
+              class="px-3 py-1.5 bg-white border border-alpharo-200 text-alpharo-700 hover:bg-alpharo-50 text-xs font-semibold rounded-lg shadow-2xs transition-colors cursor-pointer"
               @click="openReviewModal(selectedOrder); detailDrawerOpen = false;"
             >
               Tinjau Detail
@@ -724,12 +750,12 @@
 
         <!-- BANNER DITAHAN DIREKTUR -->
         <div v-if="selectedOrder.isHold" class="p-3.5 bg-rose-50 rounded-xl border border-rose-200 text-rose-800 shadow-2xs">
-          <div class="font-bold text-xs flex items-center gap-1.5 text-rose-900">
+          <div class="font-semibold text-xs flex items-center gap-1.5 text-rose-900">
             <AlertCircle class="w-4 h-4 text-rose-600 shrink-0" />
             <span>⛔ PENGIRIMAN DITAHAN OLEH DIREKTUR</span>
           </div>
           <p class="mt-1 text-[11px] text-rose-700">Alasan: <strong>{{ selectedOrder.holdReason }}</strong></p>
-          <span class="text-[10px] text-rose-500 block mt-0.5">Ditetapkan oleh {{ selectedOrder.holdBy }} pada {{ selectedOrder.holdDate }}</span>
+          <span class="text-[11px] text-rose-500 block mt-0.5">Ditetapkan oleh {{ selectedOrder.holdBy }} pada {{ selectedOrder.holdDate }}</span>
         </div>
 
         <!-- RINGKASAN STATUS & NILAI TRANSAKSI -->
@@ -740,7 +766,7 @@
           </div>
           <div class="text-right">
             <span class="text-slate-500 block text-[11px]">Total Transaksi</span>
-            <span class="text-base font-bold font-mono text-slate-900 mt-1 block">
+            <span class="text-base font-semibold font-mono text-slate-900 mt-1 block">
               Rp {{ Number(selectedOrder.grandTotal || selectedOrder.nilaiProject || 0).toLocaleString('id-ID') }}
             </span>
           </div>
@@ -748,14 +774,14 @@
 
         <!-- SECTION 1: INFORMASI CLIENT & PROYEK -->
         <div>
-          <h4 class="font-bold uppercase text-slate-500 tracking-wider mb-2 flex items-center gap-1.5">
+          <h4 class="font-semibold uppercase text-slate-500 tracking-wider mb-2 flex items-center gap-1.5">
             <User class="w-3.5 h-3.5 text-slate-400" />
             Informasi Client & Proyek
           </h4>
           <div class="border border-slate-200 rounded-lg p-3 space-y-1.5 bg-white shadow-2xs">
             <div class="flex justify-between">
               <span class="text-slate-500">Nama Client:</span>
-              <span class="font-bold text-slate-800">{{ selectedOrder.clientName }}</span>
+              <span class="font-semibold text-slate-800">{{ selectedOrder.clientName }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-slate-500">Nama Proyek:</span>
@@ -768,6 +794,10 @@
             <div class="flex justify-between">
               <span class="text-slate-500">Dibuat Oleh:</span>
               <span class="text-slate-800">{{ selectedOrder.submittedBy }}</span>
+            </div>
+            <div v-if="selectedOrder.marketingName" class="flex justify-between">
+              <span class="text-slate-500">PIC Marketing:</span>
+              <span class="font-semibold text-slate-800">{{ selectedOrder.marketingName }}</span>
             </div>
             <div v-if="selectedOrder.contactPerson || getClientPIC(selectedOrder.clientId)" class="flex justify-between">
               <span class="text-slate-500">PIC Pemesan:</span>
@@ -785,14 +815,14 @@
         <!-- SECTION 2: RINCIAN ITEM BARANG / JASA -->
         <div>
           <div class="flex items-center justify-between mb-2">
-            <h4 class="font-bold uppercase text-slate-500 tracking-wider flex items-center gap-1.5">
+            <h4 class="font-semibold uppercase text-slate-500 tracking-wider flex items-center gap-1.5">
               <FileText class="w-3.5 h-3.5 text-slate-400" />
               Item Barang / Jasa Dipesan
             </h4>
             <span class="text-xs font-semibold text-slate-500">{{ (selectedOrder.items || []).length }} Jenis Barang</span>
           </div>
           <div class="border border-slate-200 rounded-lg overflow-hidden bg-white shadow-2xs">
-            <table class="w-full text-left">
+            <table class="ui-table w-full text-left">
               <thead class="bg-slate-50 border-b border-slate-200 font-semibold text-slate-600">
                 <tr>
                   <th class="p-2.5">Barang</th>
@@ -805,28 +835,35 @@
                 <tr v-for="it in (selectedOrder.items || [])" :key="it.sku || it.name">
                   <td class="p-2.5">
                     <span class="font-medium text-slate-800">{{ it.name }}</span>
-                    <span class="block text-[10px] text-slate-400 font-mono">{{ it.sku || '-' }}</span>
+                    <span class="block text-[11px] text-slate-400 font-mono">{{ it.sku || '-' }}</span>
                   </td>
                   <td class="p-2.5 text-center font-semibold text-slate-700">{{ it.qty }} {{ it.unit || 'Unit' }}</td>
                   <td class="p-2.5 text-right font-mono">Rp {{ (Number(it.price) || 0).toLocaleString('id-ID') }}</td>
-                  <td class="p-2.5 text-right font-bold font-mono text-slate-900">
+                  <td class="p-2.5 text-right font-semibold font-mono text-slate-900">
                     Rp {{ (Number(it.total) || (Number(it.qty || 0) * Number(it.price || 0))).toLocaleString('id-ID') }}
                   </td>
                 </tr>
               </tbody>
               <tfoot class="bg-slate-50 border-t border-slate-200">
                 <tr>
-                  <td colspan="3" class="p-2.5 text-right font-bold text-slate-700">Grand Total:</td>
-                  <td class="p-2.5 text-right font-bold font-mono text-[#0B4DA2] text-sm">
+                  <td colspan="3" class="p-2.5 text-right font-semibold text-slate-700">Grand Total:</td>
+                  <td class="p-2.5 text-right font-semibold font-mono text-alpharo-600 text-sm">
                     Rp {{ Number(selectedOrder.grandTotal || selectedOrder.nilaiProject || 0).toLocaleString('id-ID') }}
                   </td>
                 </tr>
               </tfoot>
             </table>
           </div>
+          <div v-if="selectedOrder.stockReadiness" class="mt-3 space-y-1 text-xs text-slate-600">
+            <p class="font-semibold text-slate-800">Alokasi stok: {{ selectedOrder.stockReadiness.status }}</p>
+            <p v-for="item in selectedOrder.stockReadiness.items" :key="item.sku" class="break-words">
+              <template v-if="item.catalogFound === false">{{ stockItemName(item, selectedOrder) }} — belum terdaftar di katalog gudang. Pilih ulang di Edit Order.</template>
+              <template v-else>{{ stockItemName(item, selectedOrder) }} — teralokasi {{ item.allocated }}/{{ item.required }}, kurang {{ item.shortage }} {{ item.unit || '' }}.</template>
+            </p>
+          </div>
           <div v-if="selectedOrder.notes || selectedOrder.supportingDocument" class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2 mt-2 shadow-2xs">
             <div v-if="selectedOrder.notes">
-              <span class="font-bold text-slate-700 uppercase tracking-wider text-[10px] block">Catatan Pesanan:</span>
+              <span class="font-semibold text-slate-700 uppercase tracking-wider text-[11px] block">Catatan Pesanan:</span>
               <p class="text-slate-700 italic mt-0.5">"{{ selectedOrder.notes }}"</p>
             </div>
             <div v-if="selectedOrder.supportingDocument" class="pt-2 border-t border-slate-200 text-[11px] text-slate-600 flex items-center justify-between">
@@ -837,8 +874,8 @@
 
         <!-- SECTION 3: MONITORING KELENGKAPAN DOKUMEN -->
         <div>
-          <h4 class="font-bold uppercase text-slate-500 tracking-wider mb-2 flex items-center gap-1.5">
-            <FileText class="w-3.5 h-3.5 text-blue-600" />
+          <h4 class="font-semibold uppercase text-slate-500 tracking-wider mb-2 flex items-center gap-1.5">
+            <FileText class="w-3.5 h-3.5 text-alpharo-600" />
             Monitoring Kelengkapan Dokumen (PO, Surat Jalan, BAST, Faktur)
           </h4>
           <DocumentChecklist :documents="selectedOrder.documents" />
@@ -847,11 +884,11 @@
         <!-- SECTION 4: MONITORING TIMELINE & RIWAYAT PROSES (REAL-TIME) -->
         <div>
           <div class="flex items-center justify-between mb-3">
-            <h4 class="font-bold uppercase text-slate-500 tracking-wider flex items-center gap-1.5 text-xs">
+            <h4 class="font-semibold uppercase text-slate-500 tracking-wider flex items-center gap-1.5 text-xs">
               <Clock class="w-3.5 h-3.5 text-amber-500" />
               Timeline & Riwayat Monitoring Proses
             </h4>
-            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               Real-Time Sync
             </span>
@@ -865,7 +902,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute } from '../../navigation';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import Modal from '../../components/common/Modal.vue';
@@ -873,7 +910,9 @@ import Drawer from '../../components/common/Drawer.vue';
 import ConfirmationDialog from '../../components/common/ConfirmationDialog.vue';
 import DocumentChecklist from '../../components/common/DocumentChecklist.vue';
 import Timeline from '../../components/common/Timeline.vue';
-import { store, storeActions } from '../../stores/mockData';
+import { store, storeActions, orderSync } from '../../stores/mockData';
+import { orderError } from '../../services/orderWorkflow';
+import api from '../../services/api';
 import { useToast } from '../../services/toast';
 
 import {
@@ -896,6 +935,7 @@ import {
   ExternalLink,
   Clock,
   AlertCircle,
+  Zap,
 } from 'lucide-vue-next';
 
 const route = useRoute();
@@ -909,6 +949,8 @@ const deleteConfirmOpen = ref(false);
 
 const selectedOrder = ref(null);
 const orderToDelete = ref(null);
+const submitConfirmOpen = ref(false);
+const orderToSubmit = ref(null);
 
 // Review & Acceptance Modal
 const reviewModalOpen = ref(false);
@@ -922,31 +964,77 @@ const reviewForm = reactive({
 const rejectPromptOpen = ref(false);
 const rejectReason = ref('');
 
-onMounted(() => {
+onMounted(async () => {
   if (route.query.filter === 'diajukan') {
     statusFilter.value = 'Diajukan Client';
   }
+  try {
+    const response = await api.get('/products?per_page=5000');
+    if (Array.isArray(response.data.data)) store.products = response.data.data.map(product => ({
+      ...product, price: product.sell_price ?? product.price, costPrice: product.hpp ?? product.costPrice,
+    }));
+  } catch { /* Submission always validates the authoritative inventory on the server. */ }
+});
+
+const totalOrdersCount = computed(() => {
+  return store.orders.filter((o) => {
+    if (o.orderNumber === 'ORD-2026-007' || o.orderNumber === 'ORD-2026-008') return false;
+    if (o.date && String(o.date).startsWith('2026-10')) return false;
+    return true;
+  }).length;
 });
 
 const pendingClientOrders = computed(() => {
-  return store.orders.filter((o) => o.status === 'Diajukan Client');
+  return store.orders
+    .filter((o) => {
+      if (o.orderNumber === 'ORD-2026-007' || o.orderNumber === 'ORD-2026-008') return false;
+      if (o.date && String(o.date).startsWith('2026-10')) return false;
+      return o.status === 'Diajukan Client';
+    })
+    .slice()
+    .sort((a, b) => {
+      const dateA = a.date || '';
+      const dateB = b.date || '';
+      if (dateA !== dateB) return dateB.localeCompare(dateA);
+      const numA = parseInt(String(a.orderNumber || '').replace(/\D/g, ''), 10) || Number(a.id) || 0;
+      const numB = parseInt(String(b.orderNumber || '').replace(/\D/g, ''), 10) || Number(b.id) || 0;
+      return numB - numA;
+    });
 });
 
 const getStatusCount = (status) => {
-  return store.orders.filter((o) => o.status === status).length;
+  return store.orders.filter((o) => {
+    if (o.orderNumber === 'ORD-2026-007' || o.orderNumber === 'ORD-2026-008') return false;
+    if (o.date && String(o.date).startsWith('2026-10')) return false;
+    return o.status === status;
+  }).length;
 };
 
 const filteredOrders = computed(() => {
-  return store.orders.filter((o) => {
-    const q = searchQuery.value.toLowerCase();
-    const matchSearch =
-      !q ||
-      o.orderNumber.toLowerCase().includes(q) ||
-      o.clientName.toLowerCase().includes(q) ||
-      o.projectName.toLowerCase().includes(q);
-    const matchStatus = !statusFilter.value || o.status === statusFilter.value;
-    return matchSearch && matchStatus;
-  });
+  return store.orders
+    .filter((o) => {
+      if (o.orderNumber === 'ORD-2026-007' || o.orderNumber === 'ORD-2026-008') return false;
+      if (o.date && String(o.date).startsWith('2026-10')) return false;
+
+      const q = searchQuery.value.toLowerCase();
+      const matchSearch =
+        !q ||
+        o.orderNumber.toLowerCase().includes(q) ||
+        o.clientName.toLowerCase().includes(q) ||
+        o.projectName.toLowerCase().includes(q);
+      const matchStatus = !statusFilter.value || o.status === statusFilter.value;
+      return matchSearch && matchStatus;
+    })
+    .slice()
+    .sort((a, b) => {
+      // Urutan orderan terbaru paling atas
+      const dateA = a.date || a.createdAt || '';
+      const dateB = b.date || b.createdAt || '';
+      if (dateA !== dateB) return dateB.localeCompare(dateA);
+      const numA = parseInt(String(a.orderNumber || '').replace(/\D/g, ''), 10) || Number(a.id) || 0;
+      const numB = parseInt(String(b.orderNumber || '').replace(/\D/g, ''), 10) || Number(b.id) || 0;
+      return numB - numA;
+    });
 });
 
 const getDocCount = (docs) => {
@@ -966,18 +1054,21 @@ const reviewSubtotal = computed(() => {
 });
 
 const reviewTax = computed(() => Math.round(reviewSubtotal.value * 0.11));
-const reviewGrandTotal = computed(() => reviewSubtotal.value + reviewTax.value);
+const reviewGrandTotal = computed(() => Math.round(reviewSubtotal.value * 1.11));
 
 // Check stock status for each product
-const getStockInfo = (productId, requestedQty) => {
-  if (!productId) {
+const stockItemName = (item, order) => item.name || order?.items?.find(line => line.sku === item.sku)?.name || 'Barang dalam pesanan';
+const catalogIssues = order => (order.stockReadiness?.items || []).filter(item => item.catalogFound === false);
+
+const getStockInfo = (sku, requestedQty) => {
+  if (!sku) {
     return {
       status: 'custom',
       label: 'Item Non-Katalog (Khusus)',
-      class: 'bg-purple-100 text-purple-700',
+      class: 'bg-alpharo-100 text-alpharo-700',
     };
   }
-  const prod = store.products.find((p) => p.id === productId);
+  const prod = store.products.find((p) => p.sku === sku);
   if (!prod) {
     return {
       status: 'unknown',
@@ -985,16 +1076,16 @@ const getStockInfo = (productId, requestedQty) => {
       class: 'bg-slate-100 text-slate-600',
     };
   }
-  if (prod.stock >= requestedQty) {
+  if ((prod.available_stock ?? 0) >= requestedQty) {
     return {
       status: 'available',
-      label: `Stok Tersedia (${prod.stock} ${prod.unit})`,
+      label: `Stok Tersedia (${prod.available_stock ?? 0} ${prod.unit})`,
       class: 'bg-emerald-100 text-emerald-800',
     };
   }
   return {
     status: 'shortage',
-    label: `Stok Menipis (${prod.stock}/${requestedQty} ${prod.unit})`,
+    label: `Stok Menipis (${prod.available_stock ?? 0}/${requestedQty} ${prod.unit})`,
     class: 'bg-amber-100 text-amber-800',
   };
 };
@@ -1007,10 +1098,12 @@ const openReviewModal = (order) => {
   reviewModalOpen.value = true;
 };
 
-const executeAcceptOrder = () => {
+const executeAcceptOrder = async () => {
+  try {
   if (!reviewOrder.value) return;
 
-  storeActions.acceptClientOrder(reviewOrder.value.id, {
+  const isAbove5M = (Number(reviewOrder.value.grandTotal) || 0) > 5000000;
+  const result = await storeActions.acceptClientOrder(reviewOrder.value.id, {
     notes: reviewForm.notes,
     actionType: reviewForm.actionType,
     items: reviewForm.items,
@@ -1020,8 +1113,11 @@ const executeAcceptOrder = () => {
   toast.success(
     reviewForm.actionType === 'draft'
       ? `Pesanan ${reviewOrder.value.orderNumber} berhasil disimpan ke Draft Penawaran SPH.`
-      : `Pesanan ${reviewOrder.value.orderNumber} berhasil diterima & diteruskan ke Direktur untuk approval.`
+      : isAbove5M
+        ? `Pesanan ${result.orderNumber} berhasil diajukan ke Direktur untuk proses verifikasi.`
+        : `Pesanan ${result.orderNumber} berhasil diajukan ke Finance (status Siap Invoice).`
   );
+  } catch (error) { toast.error(orderError(error)); }
 };
 
 const openRejectPrompt = () => {
@@ -1042,9 +1138,42 @@ const executeRejectOrder = () => {
   toast.info(`Pengajuan ${reviewOrder.value.orderNumber} ditolak dengan catatan.`);
 };
 
-const submitVerification = (order) => {
-  storeActions.submitOrderForVerification(order.id);
-  toast.success(`Order ${order.orderNumber} berhasil diajukan untuk verifikasi Direktur.`);
+const submitVerification = async (order) => {
+  if (orderSync.busy) return;
+  try {
+    const currentOrder = store.orders.find(o => o.orderNumber === order.orderNumber) || order;
+    if (['Menunggu Verifikasi', 'Siap Invoice', 'Disetujui', 'Diproses', 'Selesai'].includes(currentOrder.status)) {
+      toast.info(`Pesanan ${currentOrder.orderNumber} saat ini berstatus ${currentOrder.status}.`);
+      return;
+    }
+    const saved = currentOrder.serverManaged ? currentOrder : await storeActions.saveOrderDraft({ ...currentOrder, status: 'Draft' });
+    orderToSubmit.value = await storeActions.checkOrderStock(saved);
+    const missing = catalogIssues(orderToSubmit.value);
+    if (missing.length) {
+      const name = stockItemName(missing[0], orderToSubmit.value);
+      throw new Error(`Barang belum terdaftar: ${name}${missing.length > 1 ? ` dan ${missing.length - 1} lainnya` : ''}. Pilih ulang di Edit Order.`);
+    }
+    if (orderToSubmit.value.stockReadiness?.status !== 'Siap Diajukan') {
+      const shortages = orderToSubmit.value.stockReadiness?.items.filter(item => item.shortage > 0)
+        .map(item => `${stockItemName(item, orderToSubmit.value)} (${item.shortage}${item.unit ? ` ${item.unit}` : ''})`).join(', ');
+      throw new Error(`Stok kurang: ${shortages}.`);
+    }
+    submitConfirmOpen.value = true;
+  } catch (error) { toast.error(orderError(error)); }
+};
+
+const executeSubmission = async () => {
+  if (orderSync.busy || !orderToSubmit.value) return;
+  try {
+    const isAbove5M = (Number(orderToSubmit.value.grandTotal) || 0) > 5000000;
+    const result = await storeActions.submitOrderForVerification(orderToSubmit.value.id);
+    submitConfirmOpen.value = false;
+    if (isAbove5M) {
+      toast.success(`Pesanan ${result.orderNumber} berhasil diajukan ke Direktur (Menunggu Verifikasi).`);
+    } else {
+      toast.success(`Pesanan ${result.orderNumber} berhasil diajukan ke Finance (Siap Invoice).`);
+    }
+  } catch (error) { toast.error(orderError(error)); }
 };
 
 const confirmDelete = (order) => {
@@ -1052,12 +1181,14 @@ const confirmDelete = (order) => {
   deleteConfirmOpen.value = true;
 };
 
-const executeDeleteDraft = () => {
+const executeDeleteDraft = async () => {
+  try {
   if (orderToDelete.value) {
-    storeActions.deleteOrder(orderToDelete.value.id);
+    await storeActions.deleteOrder(orderToDelete.value.id);
     toast.info(`Draft order ${orderToDelete.value.orderNumber} telah dihapus.`);
     deleteConfirmOpen.value = false;
   }
+  } catch (error) { toast.error(orderError(error)); }
 };
 
 // Timeline Real-Time Generator: STRICT SINGLE ACTIVE STEP (Hanya Tepat 1 Tahap Berjalan)
@@ -1065,6 +1196,10 @@ const realtimeTimeline = computed(() => {
   const o = selectedOrder.value;
   if (!o) return [];
 
+  if (o.serverManaged) {
+    const stages = { Draft: 'Pemeriksaan stok dan pengajuan Marketing', 'Menunggu Verifikasi': 'Menunggu persetujuan Direktur', 'Siap Invoice': 'Pemeriksaan final dan penerbitan invoice oleh Finance', 'Menunggu Pembayaran': 'Menunggu pembayaran Customer' };
+    return [...(o.timeline || []), ...(stages[o.status] ? [{ stage: stages[o.status], user: '-', timestamp: '-', status: 'in_progress', notes: o.status === 'Menunggu Verifikasi' ? 'Invoice belum dapat diterbitkan sebelum Direktur menyetujui.' : 'Melanjutkan proses sesuai hak akses.' }] : [])];
+  }
   const status = o.status;
   const isHold = o.isHold;
   const isDiajukan = status === 'Diajukan Client';
@@ -1161,7 +1296,7 @@ const realtimeTimeline = computed(() => {
       timestamp: activeStep === 1 ? 'Sedang Berjalan' : (logVerif?.timestamp || `${o.date} 10:00`),
       status: getStepStatus(1),
       notes: activeStep === 1
-        ? 'Marketing sedang memverifikasi spesifikasi barang dan ketersediaan stok fisik gudang sebelum diajukan ke Direktur.'
+        ? 'Marketing sedang memverifikasi spesifikasi barang dan ketersediaan stok fisik gudang sebelum diajukan untuk persetujuan.'
         : 'Spesifikasi barang dan estimasi kebutuhan telah divalidasi oleh Marketing.',
     });
   } else {

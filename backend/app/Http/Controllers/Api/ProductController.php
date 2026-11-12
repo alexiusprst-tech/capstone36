@@ -80,6 +80,12 @@ class ProductController extends Controller
         $perPageCount = is_array($paginated) ? $paginated['per_page'] : $paginated->perPage();
         $from = is_array($paginated) ? $paginated['from'] : ($paginated->firstItem() ?? 0);
         $to = is_array($paginated) ? $paginated['to'] : ($paginated->lastItem() ?? 0);
+        $allocated = DB::table('sales_order_allocations')->whereIn('product_id', collect($items)->pluck('id'))
+            ->groupBy('product_id')->selectRaw('product_id, SUM(qty) as allocated')->pluck('allocated', 'product_id');
+        foreach ($items as $product) {
+            $product->setAttribute('allocated_stock', (int) ($allocated[$product->id] ?? 0));
+            $product->setAttribute('available_stock', max(0, $product->stock - ($allocated[$product->id] ?? 0)));
+        }
 
         return response()->json([
             'success' => true,
@@ -548,15 +554,20 @@ class ProductController extends Controller
      */
     public function downloadTemplate(): BinaryFileResponse|JsonResponse
     {
-        $filePath = public_path('templates/data_barang_template.xlsx');
-        if (! file_exists($filePath)) {
-            $filePath = base_path('../data_barang_20261014_103611.xlsx');
-        }
+        $paths = [
+            public_path('templates/data_barang_template.xlsx'),
+            public_path('templates/data_barang_template (2).xlsx'),
+            base_path('../data_barang_template (2).xlsx'),
+            base_path('../data_barang_template.xlsx'),
+            base_path('../data_barang_20261014_103611.xlsx'),
+        ];
 
-        if (file_exists($filePath)) {
-            return response()->download($filePath, 'template_import_data_barang.xlsx', [
-                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            ]);
+        foreach ($paths as $path) {
+            if (file_exists($path)) {
+                return response()->download($path, 'template_import_data_barang.xlsx', [
+                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                ]);
+            }
         }
 
         return response()->json(['error' => 'File template tidak ditemukan'], 404);

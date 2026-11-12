@@ -3,59 +3,86 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Dashboard Warehouse & Logistik</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Dashboard Warehouse & Logistik</h1>
           <p class="text-sm text-slate-500 mt-1">
             Operasional pengelolaan persediaan material gudang, antrean pemenuhan order, dan armada pengiriman.
           </p>
         </div>
         <div class="flex items-center gap-2">
-          <router-link
-            to="/warehouse/fulfillment"
+          <Link
+            href="/warehouse/fulfillment?tab=requests"
+            class="inline-flex items-center gap-2 px-3.5 py-2 bg-alpharo-600 hover:bg-alpharo-700 active:bg-alpharo-800 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors cursor-pointer"
+          >
+            <ClipboardList class="w-4 h-4 stroke-[2.2]" />
+            <span>Pengajuan Kebutuhan Barang</span>
+          </Link>
+          <Link
+            href="/warehouse/fulfillment"
             class="inline-flex items-center gap-2 px-4 py-2 bg-alpharo-500 hover:bg-alpharo-600 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors"
           >
             <CheckCircle2 class="w-4 h-4" />
             <span>Antrean Pemenuhan ({{ store.warehouseFulfillments.length }})</span>
-          </router-link>
+          </Link>
         </div>
       </div>
     </template>
 
-    <!-- KPIS FOR WAREHOUSE: STATUS PERSEDIAAN & LOGISTIK PEMENUHAN -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-      <KpiCard title="Total Ragam Barang" :value="store.products.length" subtitle="Katalog material" :icon-component="Boxes" icon-variant="blue" />
-      <KpiCard title="Total Stok Fisik" :value="totalStockUnits" unit="Unit" subtitle="Akumulasi stok" :icon-component="Package" icon-variant="blue" />
-      <KpiCard title="Barang Tersedia" :value="availableCount" subtitle="Stok aman di gudang" :icon-component="CheckCircle2" icon-variant="blue" />
-      <KpiCard title="Stok Menipis / Habis" :value="oosCount" subtitle="Perlu restock segera" :icon-component="AlertTriangle" icon-variant="blue" />
-    </div>
-
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-      <KpiCard title="Harus Dipenuhi" :value="store.warehouseFulfillments.length" subtitle="Antrean order masuk" :icon-component="Clock" icon-variant="blue" />
-      <KpiCard title="Proses Pemenuhan" :value="fulfillProcessCount" subtitle="Pengemasan & sortir" :icon-component="PackageSearch" icon-variant="blue" />
-      <KpiCard title="Siap Dikirim" :value="readyShipCount" subtitle="Menunggu armada logistik" :icon-component="PackageCheck" icon-variant="blue" />
-      <KpiCard title="Sedang Dikirim" :value="shippingCount" subtitle="Dalam perjalanan kurir" :icon-component="Truck" icon-variant="blue" />
+    <!-- KPIS FOR WAREHOUSE: 4 PRIMARY ACTION-ORIENTED METRICS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <KpiCard
+        title="Stok Kritis / Habis"
+        :value="oosCount"
+        unit="SKU"
+        subtitle="Perlu restock pengadaan segera"
+        :icon-component="AlertTriangle"
+        icon-variant="blue"
+        :trend="oosCount > 0 ? 'Perlu Pengadaan' : 'Aman'"
+        :trend-positive="oosCount === 0"
+      />
+      <KpiCard
+        title="Barang Tersedia"
+        :value="availableCount"
+        unit="SKU"
+        subtitle="Stok aman di gudang utama"
+        :icon-component="CheckCircle2"
+        icon-variant="blue"
+      />
+      <KpiCard
+        title="Order Perlu Dipenuhi"
+        :value="store.warehouseFulfillments.length"
+        unit="Order"
+        subtitle="Antrean kemas & alokasi fisik"
+        :icon-component="Clock"
+        icon-variant="blue"
+      />
+      <KpiCard
+        title="Siap & Sedang Dikirim"
+        :value="readyShipCount + shippingCount"
+        unit="Armada"
+        :subtitle="`${readyShipCount} siap muat & ${shippingCount} dalam perjalanan`"
+        :icon-component="Truck"
+        icon-variant="blue"
+      />
     </div>
 
     <!-- MAIN TWO-COLUMN DASHBOARD SECTIONS -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- LEFT 2 COLS: FULFILLMENT QUEUE & RECENT SHIPMENTS -->
-      <div class="lg:col-span-2 space-y-6">
-        <!-- FULFILLMENT QUEUE -->
-        <div class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
+    <div class="dashboard-workspace min-w-0 flex flex-col gap-4 sm:gap-5">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
           <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
             <div>
-              <h3 class="font-bold text-slate-900 text-sm">Antrean Pemenuhan Order Disetujui</h3>
+              <h3 class="font-semibold text-slate-900 text-sm">Antrean Pemenuhan Order Disetujui</h3>
               <p class="text-xs text-slate-500">Order yang telah diapprove dan membutuhkan alokasi fisik barang</p>
             </div>
-            <router-link
-              to="/warehouse/fulfillment"
-              class="text-xs font-bold text-alpharo-500 hover:underline flex items-center gap-1"
+            <Link
+              href="/warehouse/fulfillment"
+              class="text-xs font-semibold text-alpharo-500 hover:underline flex items-center gap-1"
             >
               Kelola Pemenuhan <ChevronRight class="w-3.5 h-3.5" />
-            </router-link>
+            </Link>
           </div>
 
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs border-collapse">
+          <div class="overflow-x-auto xl:max-h-[26rem] xl:overflow-y-auto overscroll-auto">
+            <table class="ui-table w-full text-left text-xs border-collapse">
               <thead>
                 <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
                   <th class="py-2.5 px-3">No. Order</th>
@@ -67,24 +94,24 @@
               </thead>
               <tbody class="divide-y divide-slate-100">
                 <tr v-for="f in store.warehouseFulfillments" :key="f.id" class="hover:bg-slate-50/60 transition-colors">
-                  <td class="py-3 px-3 font-mono font-bold text-slate-900">{{ f.orderNumber }}</td>
-                  <td class="py-3 px-3 font-bold text-slate-800">{{ f.clientName }}</td>
+                  <td class="py-3 px-3 font-mono font-semibold text-slate-900">{{ f.orderNumber }}</td>
+                  <td class="py-3 px-3 font-semibold text-slate-800">{{ f.clientName }}</td>
                   <td class="py-3 px-3">
-                    <span v-for="it in f.items" :key="it.sku" class="inline-block text-[11px] bg-slate-100 px-1.5 py-0.5 rounded mr-1">
+                    <span v-for="it in f.items" :key="it.sku" class="block text-[11px] text-slate-600 leading-relaxed">
                       {{ it.name }} ({{ it.reqQty }} {{ it.unit }})
                     </span>
                   </td>
-                  <td class="py-3 px-3 text-center"><StatusBadge :status="f.status" /></td>
+                  <td class="py-3 px-3 text-center"><StatusBadge plain :status="f.status" /></td>
                   <td class="py-3 px-3 text-right">
                     <button
                       v-if="f.status === 'Diproses'"
                       type="button"
-                      class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-[11px]"
+                      class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-semibold text-[11px]"
                       @click="handleConfirmFulfill(f)"
                     >
                       Konfirmasi Siap
                     </button>
-                    <span v-else class="text-[11px] text-emerald-600 font-bold">Siap Kirim ✓</span>
+                    <span v-else class="text-[11px] text-emerald-600 font-semibold">Siap Kirim ✓</span>
                   </td>
                 </tr>
               </tbody>
@@ -92,23 +119,22 @@
           </div>
         </div>
 
-        <!-- RECENT SHIPMENTS -->
-        <div class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
           <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
             <div>
-              <h3 class="font-bold text-slate-900 text-sm">Pengiriman Armada Terkini</h3>
+              <h3 class="font-semibold text-slate-900 text-sm">Pengiriman Armada Terkini</h3>
               <p class="text-xs text-slate-500">Pergerakan truk dan delivery material ke lokasi proyek</p>
             </div>
-            <router-link
-              to="/warehouse/shipments"
-              class="text-xs font-bold text-alpharo-500 hover:underline flex items-center gap-1"
+            <Link
+              href="/warehouse/shipments"
+              class="text-xs font-semibold text-alpharo-500 hover:underline flex items-center gap-1"
             >
               Semua Pengiriman <ChevronRight class="w-3.5 h-3.5" />
-            </router-link>
+            </Link>
           </div>
 
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs border-collapse">
+          <div class="overflow-x-auto xl:max-h-[26rem] xl:overflow-y-auto overscroll-auto">
+            <table class="ui-table w-full text-left text-xs border-collapse">
               <thead>
                 <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
                   <th class="py-2.5 px-3">No. Pengiriman</th>
@@ -120,47 +146,76 @@
               </thead>
               <tbody class="divide-y divide-slate-100">
                 <tr v-for="s in store.shipments" :key="s.id" class="hover:bg-slate-50/60 transition-colors">
-                  <td class="py-3 px-3 font-mono font-bold text-slate-900">{{ s.shipmentNumber }}</td>
+                  <td class="py-3 px-3 font-mono font-semibold text-slate-900">{{ s.shipmentNumber }}</td>
                   <td class="py-3 px-3 font-mono text-slate-600">{{ s.orderNumber }}</td>
                   <td class="py-3 px-3 font-medium text-slate-800">{{ s.destination }}</td>
                   <td class="py-3 px-3 text-slate-600">{{ s.driverName }} ({{ s.expedition }})</td>
-                  <td class="py-3 px-3 text-center"><StatusBadge :status="s.status" /></td>
+                  <td class="py-3 px-3 text-center"><StatusBadge plain :status="s.status" /></td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-      </div>
 
-      <!-- RIGHT 1 COL: LOW STOCK ALERTS & STOCK MOVEMENTS -->
-      <div class="space-y-6">
-        <!-- LOW STOCK ALERTS -->
-        <div class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
+          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+            <h3 class="font-semibold text-slate-900 text-sm">Mutasi Stok Terbaru</h3>
+            <Link href="/warehouse/inventory" class="text-xs text-alpharo-500 font-semibold hover:underline">
+              Detail →
+            </Link>
+          </div>
+
+          <div class="divide-y divide-slate-100 text-xs">
+            <div
+              v-for="m in store.stockMovements.slice(0, 4)"
+              :key="m.id"
+              class="py-3 flex items-start justify-between gap-4"
+            >
+              <div class="min-w-0 flex-1">
+                <span class="font-semibold text-slate-900 block whitespace-normal [overflow-wrap:anywhere] leading-relaxed">{{ m.name }}</span>
+                <span class="text-[11px] text-slate-400 block whitespace-normal [overflow-wrap:anywhere]">{{ m.reference }}</span>
+              </div>
+              <div class="text-right shrink-0 whitespace-nowrap">
+                <span
+                  :class="[
+                    m.type === 'Masuk' ? 'text-emerald-600 font-semibold' : m.type === 'Keluar' ? 'text-rose-600 font-semibold' : 'text-alpharo-600 font-semibold',
+                    'font-mono text-xs'
+                  ]"
+                >
+                  {{ m.type === 'Masuk' ? '+' : m.type === 'Keluar' ? '-' : '' }}{{ Math.abs(m.qty) }} {{ m.unit }}
+                </span>
+                <span class="block text-[11px] text-slate-400">{{ m.type }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <div class="ui-panel bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
           <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
             <div class="flex items-center gap-2">
               <AlertTriangle class="w-4 h-4 text-amber-500" />
-              <h3 class="font-bold text-slate-900 text-sm">Peringatan Stok Rendah / Habis</h3>
+              <h3 class="font-semibold text-slate-900 text-sm">Peringatan Stok Rendah / Habis</h3>
             </div>
-            <router-link to="/warehouse/requests" class="text-[11px] text-alpharo-500 font-bold hover:underline">
+            <Link href="/warehouse/fulfillment?tab=requests" class="text-[11px] text-alpharo-500 font-semibold hover:underline">
               + Ajukan
-            </router-link>
+            </Link>
           </div>
 
-          <div class="space-y-2.5 text-xs">
+          <div class="divide-y divide-slate-100 text-xs xl:max-h-80 xl:overflow-y-auto overscroll-auto">
             <div
               v-for="p in lowStockProducts"
               :key="p.sku"
-              class="p-2.5 rounded-lg border border-rose-100 bg-rose-50/40 flex items-center justify-between"
+              class="py-3 flex items-start justify-between gap-4"
             >
-              <div>
-                <span class="font-bold text-slate-900 block">{{ p.name }}</span>
-                <span class="font-mono text-[10px] text-slate-500">{{ p.sku }} &bull; Min: {{ p.minStock }} {{ p.unit }}</span>
+              <div class="min-w-0 flex-1">
+                <span class="font-semibold text-slate-900 block">{{ p.name }}</span>
+                <span class="font-mono text-[11px] text-slate-500">{{ p.sku }} &bull; Min: {{ p.minStock }} {{ p.unit }}</span>
               </div>
-              <div class="text-right">
-                <span :class="[p.stock === 0 ? 'text-rose-600' : 'text-amber-700', 'font-bold font-mono text-xs block']">
+              <div class="shrink-0 text-right">
+                <span :class="[p.stock === 0 ? 'text-rose-600' : 'text-amber-700', 'font-semibold font-mono text-xs block']">
                   {{ p.stock }} {{ p.unit }}
                 </span>
-                <StatusBadge :status="p.status" />
+                <StatusBadge plain :status="p.status" />
               </div>
             </div>
 
@@ -170,40 +225,7 @@
           </div>
         </div>
 
-        <!-- RECENT STOCK MOVEMENT -->
-        <div class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
-          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
-            <h3 class="font-bold text-slate-900 text-sm">Mutasi Stok Terbaru</h3>
-            <router-link to="/warehouse/inventory" class="text-xs text-alpharo-500 font-bold hover:underline">
-              Detail →
-            </router-link>
-          </div>
-
-          <div class="space-y-2 text-xs">
-            <div
-              v-for="m in store.stockMovements.slice(0, 4)"
-              :key="m.id"
-              class="p-2 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between"
-            >
-              <div>
-                <span class="font-semibold text-slate-900 block truncate max-w-[150px]">{{ m.name }}</span>
-                <span class="text-[10px] text-slate-400">{{ m.reference }}</span>
-              </div>
-              <div class="text-right">
-                <span
-                  :class="[
-                    m.type === 'Masuk' ? 'text-emerald-600 font-bold' : m.type === 'Keluar' ? 'text-rose-600 font-bold' : 'text-blue-600 font-bold',
-                    'font-mono text-xs'
-                  ]"
-                >
-                  {{ m.type === 'Masuk' ? '+' : m.type === 'Keluar' ? '-' : '' }}{{ Math.abs(m.qty) }} {{ m.unit }}
-                </span>
-                <span class="block text-[10px] text-slate-400">{{ m.type }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ActivityLogCard class="dashboard-activity" />
     </div>
   </AppLayout>
 </template>
@@ -212,6 +234,7 @@
 import { computed } from 'vue';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import KpiCard from '../../components/common/KpiCard.vue';
+import ActivityLogCard from '../../components/common/ActivityLogCard.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import { store, storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
@@ -225,6 +248,7 @@ import {
   PackageSearch,
   PackageCheck,
   Truck,
+  ClipboardList,
 } from 'lucide-vue-next';
 
 const toast = useToast();

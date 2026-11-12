@@ -1,193 +1,67 @@
-# Design System & UI Specification — CV. Alpharo Artha Jaya
+# UI redesign — 6 November 2026
 
-Dokumen ini adalah spesifikasi teknis antarmuka (UI/UX) sistem internal CV. Alpharo Artha Jaya (dalam dokumen proyek disebut juga CV. Alphate Artha Jaya). Seluruh nilai token, nama class, dan struktur komponen di bawah ini diambil langsung dari implementasi kode aktif di `frontend/src/` (Vue 3 + Tailwind CSS + Lucide Icons).
+The interface follows the supplied dashboard reference: a light sidebar, white panels, subtle borders, blue navigation and primary actions, compact typography, and semantic status colors. The Alpharo identity and existing Indonesian business content remain in place.
 
----
+## Coverage
 
-## 1. Palette Warna & Token CSS Aktif
+- Shared navigation, breadcrumbs, notification and role menus, account controls, and mobile navigation.
+- Marketing, Director, Administration, Warehouse, and Finance views, including create/edit forms, monitoring, reports, and SPJ interfaces.
+- Public partner portal, supplier portal, authentication, profiles, and notifications.
+- KPI cards, tables, filters, empty states, badges, timelines, document checklists, toasts, modals, drawers, and the quick customer form.
+- Modal keyboard focus management, Escape dismissal, focus restoration, scroll locking, visible focus indicators, and reduced-motion support.
 
-### 1.1 Navigasi & Sidebar
-| Elemen | Hex / Tailwind Class | Kegunaan |
-| :--- | :--- | :--- |
-| **Sidebar Background** | `from-[#0B4DA2] via-[#09428F] to-[#062F69]` | Gradasi vertikal biru royal pada sidebar kiri |
-| **Sidebar Border** | `border-white/10` | Garis pemisah logo header dan footer akun |
-| **Active Nav Item** | `bg-[#F5A623] text-slate-900` | Menu yang sedang dibuka (emas/oranye kontras tinggi) |
-| **Active Nav Shadow** | `shadow-md shadow-amber-900/20` | Bayangan halus item aktif |
-| **Inactive Nav Item** | `text-white/85 hover:text-white hover:bg-white/10` | Menu tidak aktif saat idle dan hover |
-| **Nav Section Title** | `text-blue-200/70 text-[11px] font-semibold tracking-wider uppercase` | Header kelompok menu (misal: OPERASIONAL MARKETING) |
-| **Active Nav Badge** | `bg-slate-900 text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full` | Indikator jumlah notifikasi pada menu aktif |
-| **Inactive Nav Badge** | `bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full` | Indikator jumlah notifikasi pada menu idle |
+## Presentation boundaries
 
-### 1.2 Layout & Dasar Halaman
-| Elemen | Hex / Tailwind Class | Kegunaan |
-| :--- | :--- | :--- |
-| **Page Background** | `#F8FAFC` (`bg-slate-50`) | Latar belakang seluruh halaman aplikasi |
-| **Topbar Background** | `#FFFFFF` (`bg-white`) | Header atas sticky setinggi 64px (`h-16`) |
-| **Topbar Border** | `#E2E8F0` (`border-slate-200`) | Garis bawah topbar dan pemisah kartu |
-| **Primary Text** | `#0F172A` (`text-slate-900`) | Judul halaman, label tebal, nominal penting |
-| **Body Text** | `#334155` (`text-slate-700`) | Teks paragraf, input form, data sel tabel |
-| **Muted Text** | `#64748B` (`text-slate-500`) | Metadata, keterangan tanggal, sub-label |
+Business scripts in all 50 views were compared with a snapshot taken before the redesign. Their content, form bindings, conditions, loops, and event handlers were also compared. Router, store, and service files were kept identical to that snapshot, including pre-existing local changes. No PHP, API contract, approval threshold, financial calculation, data record, or role rule was changed by this work. Document generation/export code was retained.
 
-### 1.3 Action Icon Buttons (Standard Gradient Fill)
-Semua icon button aksi pada tabel dan form wajib menggunakan gradasi vertikal penuh (`bg-gradient-to-b`) dengan icon warna putih pekat (`text-white`) berukuran seragam 28x28px (`w-7 h-7`) atau 32x32px (`w-8 h-8`). Tidak diperkenankan menggunakan tombol aksi bergaya outline/pucat.
+This preserves the existing application behavior; it does not certify or resolve existing differences between business-process documents and the implementation.
 
-| Aksi | Tailwind Classes | Visual & Kegunaan |
-| :--- | :--- | :--- |
-| **Search / Cari `[Q]`** | `w-7 h-7 inline-flex items-center justify-center bg-gradient-to-b from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 active:from-sky-700 active:to-sky-800 text-white rounded-lg shadow-2xs border border-sky-600/30 transition-all cursor-pointer` | Buka katalog modal (2.196 SKU / Supplier) |
-| **Tambah `[+]`** | `w-7 h-7 inline-flex items-center justify-center bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:from-emerald-700 active:to-emerald-800 text-white rounded-lg shadow-2xs border border-emerald-600/30 transition-all cursor-pointer` | Tambah cepat item atau supplier baru |
-| **Reset / Clear `[X]`** | `w-7 h-7 inline-flex items-center justify-center bg-gradient-to-b from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 active:from-rose-700 active:to-rose-800 text-white rounded-lg shadow-2xs border border-rose-600/30 transition-all cursor-pointer` | Mengosongkan nilai input terpilih |
-| **Hapus Baris `[Trash2]`** | `w-7 h-7 inline-flex items-center justify-center bg-gradient-to-b from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:from-red-700 active:to-red-800 text-white rounded-lg shadow-2xs border border-red-700/30 transition-all cursor-pointer` | Hapus baris transaksi atau hapus data |
-| **Edit `[Edit]`** | `w-7 h-7 inline-flex items-center justify-center bg-gradient-to-b from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 active:from-amber-600 active:to-amber-700 text-white rounded-lg shadow-2xs border border-amber-500/30 transition-all cursor-pointer` | Edit master barang, kategori, satuan |
+## Theme and tooling
 
-### 1.4 Status Badges
-| Status | Kelas Tailwind | Contoh Penggunaan |
-| :--- | :--- | :--- |
-| **Lunas / Selesai** | `bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-bold text-[10px] px-2.5 py-0.5` | Faktur lunas, BAST ditandatangani |
-| **Menunggu / Proses** | `bg-amber-50 text-amber-800 border border-amber-200 rounded-full font-bold text-[10px] px-2.5 py-0.5` | Pengajuan gudang pending review |
-| **Draft / Submitted** | `bg-sky-50 text-sky-700 border border-sky-200 rounded-full font-bold text-[10px] px-2.5 py-0.5` | Material request baru terbit |
-| **Ditolak / Batal** | `bg-rose-50 text-rose-700 border border-rose-200 rounded-full font-bold text-[10px] px-2.5 py-0.5` | QC gagal, pesanan dibatalkan |
+Theme tokens and shared styles live in `frontend/src/style.css`. Tailwind was migrated to v4 through `@tailwindcss/vite`; the old JavaScript theme configuration is replaced by CSS `@theme` tokens. Status badges retain green, amber, blue, and red semantics. Wide tables scroll within their panels on small screens; empty-state messages remain visible in the initial viewport.
 
----
+## Verification
 
-## 2. Struktur Layout Sistem
+From `frontend`:
 
-### 2.1 Sidebar (`AppLayout.vue`)
-* **Lebar Lebar Penuh (Expanded)**: `w-64` (256px).
-* **Lebar Ciut (Collapsed)**: `w-20` (80px), icon rata tengah (`justify-center`).
-* **Responsif Mobile**: Tersembunyi di luar layar (`-translate-x-full`), dibuka lewat drawer dengan overlay `fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-xs`.
-* **Header Sidebar**: Tinggi 80px (`h-20`), memuat logo `AlpharoLogo` dan tombol collapse toggle (`ChevronLeft` / `ChevronRight`).
-
-### 2.2 Topbar
-* **Tinggi**: `h-16` (64px) sticky di bagian atas (`sticky top-0 z-30`).
-* **Komponen Kiri**: Tombol hamburger mobile (`Menu`), breadcrumb / judul halaman aktif (`pageTitle`).
-* **Komponen Kanan**:
-  * Global Search: Input pencarian dengan icon `Search` di sebelah kiri (`w-4 h-4 text-slate-400`).
-  * Notifikasi: Tombol lonceng (`Bell`) dengan badge angka merah (`bg-red-500 text-white text-[10px] rounded-full`).
-  * Role Switcher / Profile: Avatar pengguna, nama lengkap (`text-xs font-bold text-slate-900`), dan label role aktif (`text-[10px] text-slate-500 font-medium`).
-
-### 2.3 Kontainer Konten Utama
-* `max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8`
-* Menampung slot `#header` (judul halaman dan tombol aksi primer seperti *Kembali*, *Tambah Transaksi*, *Export*) dan default slot untuk tabel/form.
-
----
-
-## 3. Spesifikasi Komponen Halaman
-
-### 3.1 Header Bagian Form (*Section Header*)
-Digunakan pada formulir transaksi panjang (seperti `FinancePurchaseCreate.vue`):
-```html
-<div class="flex items-center gap-2 pb-1.5 border-b-2 border-[#1e3a8a]">
-  <div class="w-4 h-4 border border-slate-400 rounded-xs flex items-center justify-center text-[10px] font-bold text-slate-600">
-    <span class="tracking-tighter">≡!</span>
-  </div>
-  <h2 class="text-xs sm:text-sm font-bold text-slate-900">Detail Pembelian</h2>
-</div>
-```
-* **Garis Bawah**: `border-b-2 border-[#1e3a8a]` (garis solid biru tua).
-* **Icon Badge**: Kotak persegi kecil dengan simbol identifikasi section.
-
-### 3.2 Banner Sinkronisasi Otomatis (*Auto-Sync Banner*)
-Muncul saat data form ter-generate otomatis dari modul lain (misal dari *Material Request Gudang* ke *Pembelian Finance*):
-```html
-<div class="mb-4 p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-900 shadow-2xs">
-  <div class="flex items-center gap-2.5">
-    <span class="p-1 bg-emerald-600 text-white rounded-md shrink-0">
-      <Check class="w-4 h-4 stroke-[3]" />
-    </span>
-    <div>
-      <span class="font-bold">Data Ter-generate Otomatis dari Pengajuan Gudang: </span>
-      <span class="font-mono font-bold bg-emerald-100 px-1.5 py-0.5 rounded">REQ-2026-001</span>
-      <span class="text-emerald-700 ml-1">(Renovasi Gedung Arsip)</span>
-    </div>
-  </div>
-  <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-full">
-    Auto-Sync Finance
-  </span>
-</div>
+```sh
+npm run build
+npm run test:ui
 ```
 
-### 3.3 Tabel Transaksi & Inventori
-* **Wadah Tabel**: `overflow-x-auto border border-slate-200 rounded-xl bg-white shadow-2xs`.
-* **Header Kolom (`<thead>`)**:
-  * Kelas: `bg-slate-50/90 border-b border-slate-200 text-slate-700 font-semibold text-[11px] uppercase tracking-wide`.
-  * Padding: `py-2.5 px-3` (pada form padat) atau `py-3 px-4` (pada tabel monitoring).
-* **Baris Data (`<tbody>`)**:
-  * Kelas baris: `hover:bg-slate-50/70 transition-colors divide-y divide-slate-100`.
-  * Kolom teks/deskripsi: `text-xs text-slate-800 font-medium`.
-  * Kolom nominal/angka: `font-mono text-xs text-slate-800 text-right font-semibold`.
-  * Kolom kode/SKU: `font-mono text-xs text-sky-700 font-bold bg-sky-50 px-2 py-0.5 rounded`.
-* **Footer Tabel (`<tfoot>`)**:
-  * Baris rekapitulasi / total stok: `bg-slate-50/80 border-t border-slate-200 font-bold text-slate-800 text-xs`.
-  * Pagination: `px-4 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600 bg-white`.
-  * Indikator data: *"Menampilkan 1 - 10 dari 2.196 data"*.
+The browser suite discovers all 42 active route screens and exercises desktop (1440px) and mobile (390px) rendering. It also covers role redirects, unauthenticated redirects, navigation, notifications, public portal tabs, director report categories, procurement and supplier tabs, searching and empty states, payment dialogs, detail drawers, the quick customer form, responsive Excel exports, and dashboard activity visibility. API requests are isolated during these tests so they cannot modify real transactions. Screenshots and failure traces are written to ignored `test-results/`; the HTML report is in ignored `playwright-report/`.
 
-### 3.4 Modal Dialog (*Picker Catalog & Input Cepat*)
-* **Overlay**: `fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4`.
-* **Kotak Modal**: `bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden`.
-* **Header Modal**: `p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80`.
-* **Input Filter**: `relative w-full mb-3` dengan icon `Search` di sisi kiri (`pl-9 text-xs border border-slate-300 rounded-lg`).
-* **List Item**: Daftar item tergulir (`overflow-y-auto divide-y divide-slate-100`) dengan efek `hover:bg-sky-50/70 cursor-pointer`.
-* **Tombol Pilih**: Badge hijau `px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold text-[10px]`.
+Windows uses the installed Microsoft Edge browser by default. Other platforms use Playwright Chromium (install it with `npx playwright install chromium`); `PLAYWRIGHT_CHANNEL` can select another installed channel.
 
----
+The application now uses Laravel + Inertia 2 + Vue 3. Laravel owns page routes and session authentication; the existing transaction APIs remain in use. Vite builds separate page chunks into `backend/public/build`, and Blade loads the manifest through `@vite`. Stable public assets are copied into `backend/public`; only the generated build directory is refreshed. See [INERTIA.md](INERTIA.md) for local startup and verification commands.
 
-## 4. Struktur Navigasi Berdasarkan Role
+## Dashboard activity logs
 
-Menu navigasi dikelompokkan sesuai batasan kewenangan di `AppLayout.vue`:
+The five internal dashboards share `ActivityLogCard.vue`. Marketing, Administration, Warehouse and Finance see entries authored by their own role/division. The Director retains the complete system audit, including partner activity, and can open the existing audit report. External or unknown roles cannot display the internal activity panel.
 
-### 4.1 Marketing
-* **Utama**: Dashboard (`/marketing/dashboard`)
-* **Operasional Marketing**:
-  * Client (`/marketing/clients`)
-  * Order (`/marketing/orders`)
-  * Monitoring Order (`/marketing/orders/monitoring`)
-* **Akun**: Notifikasi, Profile
+Each panel shows the action, timestamp, user, role, reference and description. Entries are sorted newest first and paginated five at a time, with no search control. Counts are calculated after role filtering. New entries in the reactive store appear while the dashboard is open; empty states are included.
 
-### 4.2 Warehouse (Gudang)
-* **Utama**: Dashboard (`/warehouse/dashboard`)
-* **Logistik & Inventori**:
-  * Data Barang (`/warehouse/products` — 2.196 SKU, Import/Export Excel, Kategori, Satuan)
-  * Stok & Mutasi (`/warehouse/inventory`)
-  * Pengajuan Kebutuhan (`/warehouse/requests` — Material Request ke Finance)
-  * Pemenuhan Barang (`/warehouse/fulfillment` — QC barang tiba dari Supplier)
-  * Pengiriman (`/warehouse/shipments`)
-  * Surat Jalan Gudang (`/warehouse/delivery-notes`)
-* **Akun**: Notifikasi, Profile
+This feature uses the existing `store.activityLogs` and `storeActions.addActivityLog` stream and its existing browser persistence. It does not add a backend audit API or change server authorization. Existing transaction actions continue to record activity as before.
 
-### 4.3 Finance (Keuangan)
-* **Utama**: Dashboard (`/finance/dashboard`)
-* **Keuangan & Pembayaran**:
-  * Transaksi Pembelian (`/finance/purchases` — Daftar PO & Form Tambah Pembelian Supplier)
-  * Invoice (`/finance/invoices` — Penagihan klien)
-  * Pembayaran Penuh & Termin (`/finance/payments`)
-  * Monitoring Keuangan (`/finance/monitoring`)
-  * Laporan Keuangan (`/finance/reports`)
-* **Akun**: Notifikasi, Profile
+Run `npm run test:unit` for division filtering and ordering checks, and `npm run test:ui -- activity-logs.spec.js` for all five roles on desktop and mobile, including role visibility across pages, pagination, empty states and new log entries.
 
-### 4.4 Administrasi (SPJ)
-* **Utama**: Dashboard (`/administration/dashboard`)
-* **Dokumen Legal & Proyek**:
-  * Dokumen SPJ (`/administration/spj` — Verifikasi 5 dokumen & kompilasi berkas SPJ)
-* **Akun**: Notifikasi, Profile
+## Dashboard card layout
 
-### 4.5 Direktur (Executive)
-* **Utama**: Dashboard (`/director/dashboard`)
-* **Monitoring Eksekutif**:
-  * Monitoring Order, Monitoring Warehouse, Monitoring Administrasi, Monitoring Finance
-* **Analitik & Audit**:
-  * Laporan (`/director/reports`), Activity Log (`/director/activities`)
-* **Akun**: Notifikasi
+The five internal dashboard workspaces use a single full-width card flow at every screen size. Each card fills the content width and follows the preceding card with a 16–20px gap, so uneven column heights cannot leave an unused area beside the final card. The role-scoped activity panel is the last card, immediately followed by normal page padding and the footer.
 
----
+KPI rows and paired charts retain their existing layout. Dashboard panel interiors use full-width data rows and thin separators for notifications, stock movements, stock alerts, documents, receivables and approval history. Operational division summaries use plain columns with separators. Rounded backgrounds and borders are reserved for the outer panels and actual interactive controls.
 
-## 5. Kaidah Tipografi & Format Data
+Dashboard status labels use the shared `StatusBadge` plain variant: semantic text color and a dot, without a surrounding box. Other screens retain their existing badge variant. KPI icons and trends, and activity role labels, are also unboxed. Descriptions wrap naturally instead of being truncated.
 
-* **Font Utama**: Inter / system-ui sans-serif (`font-sans`).
-* **Font Monospace**: Consolas, Menlo, Monaco, monospace (`font-mono`) untuk:
-  * Nomor SKU (`A00001770`)
-  * Kode Pengajuan (`REQ-2026-001`)
-  * Kode Transaksi (`TRX-20261014-0001`)
-  * Nominal Uang (`Rp 1.450.000`)
-  * Kuantitas Stok (`100 ZAK`)
-* **Format Mata Uang**: Wajib diawali prefiks `Rp ` dengan pemisah ribuan titik (`toLocaleString('id-ID')`), contoh: `Rp 24.500.000`.
-* **Format Tanggal**: Format ISO tampilan Indonesia `DD/MM/YYYY` atau `YYYY-MM-DD` yang konsisten.
+Long desktop lists and tables scroll within their card bodies. At either end, wheel scrolling continues into the page instead of getting trapped over the panel. The activity body is capped at 240px on desktop, with pagination remaining outside the scroll area; changing the page resets the list's scroll position. Smaller screens keep the natural vertical flow. Card content, dashboard scripts, event handlers and role scoping remain unchanged.
+
+`npm run test:ui -- dashboard-layout.spec.js activity-logs.spec.js` checks sparse and populated dashboards, full-width cards, gaps, overlap, absence of nested decorative panels, plain status labels, footer proximity, scrolling, mobile/tablet behavior and activity permissions.
+
+
+## Company profile ? 8 November 2026
+
+The public company profile is now a separate presentation component, `frontend/src/components/company/CompanyProfile.vue`. The supplied references inform its two-column hero, large heading, serif emphasis, aligned service columns, and restrained section spacing. Alpharo keeps its blue palette, company facts, services, vision, mission, office details, bank account, and existing portal actions.
+
+The public header keeps all four service destinations visible, including on mobile, with an active-page indicator and a staff login link. A single hero replaces the repeated introductions. Facts and services use separators rather than nested cards. Photos are locally stored illustrations, explicitly captioned as such; source URLs are recorded in `frontend/public/images/company/SOURCES.md`. The location panel displays the embedded Google map directly, without an activation button, and also offers a direct Maps link.
+
+`company-profile.spec.js` covers responsive layouts from 320 to 1920 pixels, local image loading, navigation reachability, direct map display, and form preservation through profile/request/tracking/payment switches. Review screenshots are written to ignored `.ui-review/company-profile/`.

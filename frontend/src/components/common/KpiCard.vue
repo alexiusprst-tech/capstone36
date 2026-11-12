@@ -1,11 +1,11 @@
 <template>
-  <div class="bg-white rounded-xl border border-slate-200/90 p-4 sm:p-5 shadow-xs hover:border-slate-300 transition-all duration-200 flex flex-col justify-between min-w-0 overflow-hidden group">
+  <div class="ui-panel kpi-card bg-white rounded-xl border border-slate-200/90 p-4 sm:p-5 hover:border-alpharo-200 transition-all duration-200 flex flex-col justify-between min-w-0 overflow-hidden group">
     <div class="flex items-start justify-between gap-2.5">
       <div class="flex-1 min-w-0">
         <!-- Title with graceful multi-line or tooltip -->
         <p
           :title="title"
-          class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 leading-snug line-clamp-2 min-h-[28px]"
+          class="text-xs font-medium text-slate-500 leading-snug line-clamp-2"
         >
           {{ title }}
         </p>
@@ -17,7 +17,7 @@
             <span
               :class="[
                 valueFontSizeClass,
-                'font-extrabold text-slate-900 tracking-tight tabular-nums truncate max-w-full'
+                'font-semibold text-slate-900 tracking-tight tabular-nums truncate max-w-full'
               ]"
             >
               {{ formattedNumber }}
@@ -28,7 +28,7 @@
             <span
               :class="[
                 valueFontSizeClass,
-                'font-extrabold text-slate-900 tracking-tight tabular-nums truncate max-w-full'
+                'font-semibold text-slate-900 tracking-tight tabular-nums truncate max-w-full'
               ]"
             >
               {{ formattedNumber }}
@@ -43,23 +43,20 @@
       <!-- Icon Component -->
       <div
         v-if="iconComponent"
-        :class="[
-          iconBgClass,
-          'w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0 border transition-transform group-hover:scale-105'
-        ]"
+        class="flex items-center justify-center shrink-0 pt-0.5"
       >
-        <component :is="iconComponent" :class="[iconColorClass, 'w-4 h-4 sm:w-5 sm:h-5']" />
+        <component :is="iconComponent" :class="[iconColorClass, 'w-4 h-4']" :stroke-width="1.7" />
       </div>
     </div>
 
     <!-- Subtitle / Trend Footer -->
-    <div v-if="subtitle || trend" class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] min-w-0">
-      <span class="text-slate-400 truncate" :title="subtitle">{{ subtitle }}</span>
+    <div v-if="subtitle || trend" class="mt-3 flex flex-wrap gap-y-1 items-center justify-between text-[11px] min-w-0">
+      <span class="text-slate-500 truncate" :title="subtitle">{{ subtitle }}</span>
       <span
         v-if="trend"
         :class="[
-          trendPositive ? 'text-emerald-700 bg-emerald-50' : 'text-slate-600 bg-slate-100',
-          'px-1.5 py-0.5 rounded font-medium shrink-0 ml-2 font-mono text-[10px]'
+          trendPositive ? 'text-emerald-700' : 'text-slate-600',
+          'font-medium shrink-0 ml-2 text-[11px]'
         ]"
       >
         {{ trend }}
@@ -69,7 +66,6 @@
 </template>
 
 <script setup>
-import { Activity } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -100,16 +96,11 @@ const valueFontSizeClass = computed(() => {
   }
   if (strLen > 8) return 'text-lg sm:text-xl';
   if (strLen > 5) return 'text-xl sm:text-2xl';
-  return 'text-2xl sm:text-3xl';
-});
-
-const iconBgClass = computed(() => {
-  // Uniform corporate blue style across all dashboard roles
-  return 'bg-blue-50 border-blue-100';
+  return 'text-2xl';
 });
 
 const iconColorClass = computed(() => {
-  // Uniform corporate blue icon across all dashboard roles
-  return 'text-[#0B4DA2]';
+  const variants = { amber: 'text-amber-600', emerald: 'text-emerald-600', rose: 'text-rose-600', slate: 'text-slate-500' };
+  return variants[props.iconVariant] || 'text-alpharo-600';
 });
 </script>

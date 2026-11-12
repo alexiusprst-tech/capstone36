@@ -124,7 +124,7 @@ class DatabaseSeeder extends Seeder
                 [
                     'name' => $acc['name'],
                     'password' => $acc['password'],
-                    'role' => $acc['role'],
+                    'role' => $acc['role'] ?? 'SUPPLIER',
                 ]
             );
         }

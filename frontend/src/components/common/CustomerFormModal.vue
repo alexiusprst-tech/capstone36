@@ -1,17 +1,23 @@
 <template>
+  <Teleport to="body">
   <div
     v-if="show"
-    class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-150"
+    ref="dialogElement"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Tambah Customer"
+    tabindex="-1"
+    class="ui-scope fixed inset-0 z-50 overflow-y-auto bg-slate-950/30 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6"
     @click.self="$emit('close')"
   >
     <div
-      class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-6xl overflow-hidden my-auto animate-in zoom-in-95 duration-150"
+      class="ui-dialog-panel bg-white rounded-xl border border-slate-200 w-full max-w-6xl max-h-[calc(100dvh-2rem)] overflow-y-auto my-auto"
     >
       <!-- MODAL HEADER (SESUAI GAMBAR) -->
       <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
         <div class="flex items-center gap-2 text-slate-800">
           <UserPlus class="w-5 h-5 text-slate-700" />
-          <h2 class="text-base font-bold text-slate-900 tracking-tight">Tambah Customer</h2>
+          <h2 class="text-base font-semibold text-slate-900 tracking-tight">Tambah Customer</h2>
         </div>
         <button
           type="button"
@@ -28,10 +34,10 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
           
           <!-- KOLOM 1: IDENTITAS CUSTOMER -->
-          <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-[#0B4DA2]">
+          <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-alpharo-600">
             <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-2 bg-slate-50/50">
               <User class="w-4 h-4 text-slate-700" />
-              <h3 class="font-bold text-slate-800 text-xs sm:text-sm">Identitas Customer</h3>
+              <h3 class="font-semibold text-slate-800 text-xs sm:text-sm">Identitas Customer</h3>
             </div>
             
             <div class="p-4 space-y-3.5">
@@ -45,7 +51,7 @@
                   type="text"
                   required
                   placeholder="Contoh: SMAN 9 JAKARTA"
-                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2] text-slate-800"
+                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800"
                   @input="onNameInput"
                 />
               </div>
@@ -56,7 +62,7 @@
                   v-model="form.orgFullName"
                   type="text"
                   placeholder="Contoh: SMA Negeri 9 Jakarta"
-                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2] text-slate-800"
+                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800"
                 />
               </div>
 
@@ -66,7 +72,7 @@
                   v-model="form.orgShortName"
                   type="text"
                   placeholder="Contoh: SMAN 9"
-                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2] text-slate-800"
+                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800"
                 />
               </div>
 
@@ -79,7 +85,7 @@
                   rows="3"
                   required
                   placeholder="Alamat lengkap instansi..."
-                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2] text-slate-800 resize-y"
+                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800 resize-y"
                   @input="syncLetterheadAddress"
                 ></textarea>
               </div>
@@ -90,7 +96,7 @@
                   v-model="form.letterheadAddress"
                   rows="3"
                   placeholder="Alamat resmi untuk kop surat..."
-                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2] text-slate-800 resize-y"
+                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800 resize-y"
                 ></textarea>
               </div>
 
@@ -100,17 +106,17 @@
                   v-model="form.npwp"
                   type="text"
                   placeholder="01.234.567.8-001.000"
-                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2] text-slate-800 font-mono"
+                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800 font-mono"
                 />
               </div>
             </div>
           </div>
 
           <!-- KOLOM 2: WILAYAH -->
-          <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-[#0B4DA2]">
+          <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-alpharo-600">
             <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-2 bg-slate-50/50">
               <MapPin class="w-4 h-4 text-slate-700" />
-              <h3 class="font-bold text-slate-800 text-xs sm:text-sm">Wilayah</h3>
+              <h3 class="font-semibold text-slate-800 text-xs sm:text-sm">Wilayah</h3>
             </div>
 
             <div class="p-4 space-y-3.5">
@@ -133,7 +139,7 @@
                 <select
                   v-model="form.city"
                   required
-                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2]"
+                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600"
                   @change="onCityChange"
                 >
                   <option value="" disabled>Pilih kota</option>
@@ -148,7 +154,7 @@
                 <select
                   v-model="form.district"
                   required
-                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2]"
+                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600"
                   @change="onDistrictChange"
                 >
                   <option value="" disabled>Pilih kecamatan</option>
@@ -163,7 +169,7 @@
                 <select
                   v-model="form.subdistrict"
                   required
-                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2]"
+                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600"
                   @change="onSubdistrictChange"
                 >
                   <option value="" disabled>Pilih kelurahan</option>
@@ -190,7 +196,7 @@
                   v-model="form.letterheadCity"
                   type="text"
                   placeholder="Contoh: Jakarta Timur"
-                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2] text-slate-800"
+                  class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800"
                 />
               </div>
             </div>
@@ -200,7 +206,7 @@
           <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-emerald-600">
             <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-2 bg-slate-50/50">
               <Phone class="w-4 h-4 text-slate-700" />
-              <h3 class="font-bold text-slate-800 text-xs sm:text-sm">Kontak</h3>
+              <h3 class="font-semibold text-slate-800 text-xs sm:text-sm">Kontak</h3>
             </div>
 
             <div class="p-4 space-y-3.5">
@@ -285,7 +291,7 @@
           
           <button
             type="submit"
-            class="px-5 py-2 text-xs font-bold text-white bg-[#059669] hover:bg-emerald-700 rounded-lg shadow-xs transition-all flex items-center gap-1.5"
+            class="px-5 py-2 text-xs font-semibold text-white bg-alpharo-600 hover:bg-alpharo-700 rounded-lg shadow-xs transition-all flex items-center gap-1.5"
           >
             <CheckSquare class="w-4 h-4" />
             <span>Simpan</span>
@@ -294,13 +300,16 @@
       </form>
     </div>
   </div>
+  </Teleport>
 </template>
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue';
+import { useDialog } from '../../composables/useDialog';
 import { UserPlus, User, MapPin, Phone, X, CheckSquare } from 'lucide-vue-next';
 import { storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
+import { expandSchoolName } from '../../services/customerProfile';
 import { KOTA_OPTIONS, getKecamatanList, getKelurahanList, getPostalCode } from '../../data/wilayahDki';
 
 const props = defineProps({
@@ -315,6 +324,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close', 'saved']);
+const dialogElement = ref(null);
+useDialog(dialogElement, () => props.show, () => emit('close'));
 const toast = useToast();
 const namaInput = ref(null);
 
@@ -382,7 +393,7 @@ const resetForm = () => {
 
 const onNameInput = () => {
   if (!form.value.orgFullName) {
-    form.value.orgFullName = form.value.name;
+    form.value.orgFullName = expandSchoolName(form.value.name);
   }
   if (!form.value.orgShortName && form.value.name.length <= 15) {
     form.value.orgShortName = form.value.name;
@@ -434,6 +445,8 @@ const handleSubmit = () => {
     toast.error('Nomor HP wajib diisi.');
     return;
   }
+
+  form.value.orgFullName = expandSchoolName(form.value.orgFullName || form.value.name);
 
   const newClient = storeActions.addClient({
     ...form.value,

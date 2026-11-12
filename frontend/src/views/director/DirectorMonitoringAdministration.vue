@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Monitoring Administrasi & Dokumen</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Monitoring Administrasi & Dokumen</h1>
           <p class="text-sm text-slate-500 mt-1">
             Pengawasan kelengkapan legalitas transaksi (PO, Surat Jalan, BAST, dan Faktur Pajak).
           </p>
@@ -23,16 +23,16 @@
     </div>
 
     <!-- DOCUMENT COMPLETENESS CHECKLIST TABLE -->
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
       <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-        <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
+        <h3 class="font-semibold text-slate-900 text-xs uppercase tracking-wider">
           Status Kelengkapan Dokumen Per Order Disetujui
         </h3>
         <span class="text-xs text-slate-500">Standar 4 Berkas Legalitas Proyek</span>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
               <th class="py-3 px-4">No. Order</th>
@@ -47,7 +47,7 @@
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr v-for="order in store.orders" :key="order.id" class="hover:bg-slate-50/70 transition-colors">
-              <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ order.orderNumber }}</td>
+              <td class="py-3.5 px-4 font-mono font-semibold text-slate-900">{{ order.orderNumber }}</td>
               <td class="py-3.5 px-4 font-medium text-slate-800">{{ order.clientName }}</td>
               
               <td class="py-3.5 px-4 text-center">
@@ -71,14 +71,14 @@
                       :style="{ width: `${(getDocProgress(order) / 4) * 100}%` }"
                     ></div>
                   </div>
-                  <span class="font-bold text-[11px] text-slate-700">{{ getDocProgress(order) }}/4</span>
+                  <span class="font-semibold text-[11px] text-slate-700">{{ getDocProgress(order) }}/4</span>
                 </div>
               </td>
 
               <td class="py-3.5 px-4 text-right">
                 <button
                   type="button"
-                  class="px-2.5 py-1 text-alpharo-500 hover:bg-blue-50 rounded border border-blue-200 font-bold text-xs"
+                  class="px-2.5 py-1 text-alpharo-500 hover:bg-alpharo-50 rounded border border-alpharo-200 font-semibold text-xs"
                   @click="openInspect(order)"
                 >
                   Detail Berkas
@@ -101,7 +101,7 @@
         <DocumentChecklist :documents="selectedOrder.documents" />
 
         <div class="space-y-3">
-          <h4 class="font-bold uppercase text-slate-500 tracking-wider">Detail Tiap Berkas</h4>
+          <h4 class="font-semibold uppercase text-slate-500 tracking-wider">Detail Tiap Berkas</h4>
           
           <div
             v-for="(docKey, dIdx) in ['po', 'suratJalan', 'bast', 'faktur']"
@@ -109,7 +109,7 @@
             class="p-3 rounded-lg border border-slate-200 bg-white flex items-center justify-between"
           >
             <div>
-              <span class="font-bold text-slate-800 uppercase text-[11px] block">
+              <span class="font-semibold text-slate-800 uppercase text-[11px] block">
                 {{ docKey === 'po' ? 'Purchase Order (PO)' : docKey === 'suratJalan' ? 'Surat Jalan Pengiriman' : docKey === 'bast' ? 'Berita Acara Serah Terima (BAST)' : 'Faktur Pajak / Komersial' }}
               </span>
               <span class="font-mono text-slate-500 text-[11px]">

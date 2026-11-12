@@ -1,8 +1,11 @@
 <template>
   <span
+    :data-status="status"
     :class="[
-      badgeClasses,
-      'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium tracking-wide transition-colors whitespace-nowrap'
+      plain ? plainClasses : badgeClasses,
+      plain
+        ? 'inline-flex items-center gap-1.5 text-[11px] font-medium whitespace-nowrap'
+        : 'ui-status inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium transition-colors whitespace-nowrap'
     ]"
   >
     <span :class="[dotClasses, 'w-1.5 h-1.5 rounded-full shrink-0']"></span>
@@ -22,6 +25,7 @@ const props = defineProps({
     type: String,
     default: 'auto', // 'order', 'document', 'payment', 'warehouse', or 'auto'
   },
+  plain: { type: Boolean, default: false },
 });
 
 const normalized = computed(() => (props.status || '').toLowerCase().trim());
@@ -36,7 +40,7 @@ const colorScheme = computed(() => {
 
   // Yellow / Amber / Warning
   if (
-    ['menunggu verifikasi', 'sebagian / termin', 'termin', 'draft', 'menipis'].includes(s) ||
+    ['menunggu verifikasi', 'sebagian', 'belum lunas', 'draft', 'menipis'].includes(s) ||
     s.includes('sebagian') ||
     s.includes('menunggu')
   ) {
@@ -44,7 +48,7 @@ const colorScheme = computed(() => {
   }
 
   // Blue / Info
-  if (['diproses', 'siap dikirim', 'sedang dikirim'].includes(s) || s.includes('proses') || s.includes('kirim')) {
+  if (['diproses', 'siap invoice', 'siap dikirim', 'sedang dikirim'].includes(s) || s.includes('proses') || s.includes('kirim')) {
     return 'info';
   }
 
@@ -67,6 +71,15 @@ const colorScheme = computed(() => {
   return 'neutral';
 });
 
+const plainClasses = computed(() => ({
+  success: 'text-emerald-700',
+  warning: 'text-amber-800',
+  info: 'text-blue-700',
+  purple: 'text-alpharo-700',
+  danger: 'text-rose-700',
+  neutral: 'text-slate-600',
+})[colorScheme.value]);
+
 const badgeClasses = computed(() => {
   switch (colorScheme.value) {
     case 'success':
@@ -76,7 +89,7 @@ const badgeClasses = computed(() => {
     case 'info':
       return 'bg-blue-50 text-blue-700 border border-blue-200';
     case 'purple':
-      return 'bg-purple-50 text-purple-700 border border-purple-200 font-semibold';
+      return 'bg-alpharo-50 text-alpharo-700 border border-alpharo-200 font-semibold';
     case 'danger':
       return 'bg-rose-50 text-rose-700 border border-rose-200';
     default:
@@ -93,7 +106,7 @@ const dotClasses = computed(() => {
     case 'info':
       return 'bg-blue-500';
     case 'purple':
-      return 'bg-purple-500';
+      return 'bg-alpharo-500';
     case 'danger':
       return 'bg-rose-500';
     default:

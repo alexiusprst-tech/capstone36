@@ -1,5 +1,5 @@
 <template>
-  <div :class="['select-none', vertical ? 'flex flex-col items-center text-center gap-3' : 'flex items-center gap-3']">
+  <div :class="['select-none shrink-0', vertical ? 'flex flex-col items-center text-center gap-3' : 'flex items-center gap-3']">
     <!-- Real Emblem Image from assets/logo.png / public/images/logo.png -->
     <div :class="[sizeClasses.emblem, 'relative flex items-center justify-center shrink-0']">
       <img
@@ -20,7 +20,7 @@
       </span>
       <span
         v-if="showTagline"
-        :class="[taglineColorClass, sizeClasses.taglineText, 'font-semibold uppercase tracking-wider mt-1 block']"
+        :class="[taglineColorClass, sizeClasses.taglineText, 'font-medium uppercase tracking-wider mt-1 block whitespace-nowrap']"
       >
         Supplier & Contractor
       </span>

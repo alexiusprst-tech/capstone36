@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Piutang Usaha & Tagihan Rekanan</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Piutang Usaha & Tagihan Rekanan</h1>
           <p class="text-sm text-slate-500 mt-1">
             Monitoring umur piutang (aging schedule), tagihan jatuh tempo, dan koordinasi penagihan dengan Marketing.
           </p>
@@ -20,14 +20,14 @@
     </div>
 
     <!-- RECEIVABLES TABLE -->
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
       <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs">
-        <span class="font-bold text-slate-900 uppercase">Daftar Piutang Rekanan Belum Lunas</span>
+        <span class="font-semibold text-slate-900 uppercase">Daftar Piutang Rekanan Belum Lunas</span>
         <span class="text-slate-500">{{ receivableList.length }} Rekening Tagihan</span>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
               <th class="py-3 px-4">Client</th>
@@ -42,15 +42,15 @@
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr v-for="inv in receivableList" :key="inv.id" class="hover:bg-slate-50/70 transition-colors">
-              <td class="py-3.5 px-4 font-bold text-slate-800">{{ inv.clientName }}</td>
-              <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ inv.invoiceNumber }}</td>
-              <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
+              <td class="py-3.5 px-4 font-semibold text-slate-800">{{ inv.clientName }}</td>
+              <td class="py-3.5 px-4 font-mono font-semibold text-slate-900">{{ inv.invoiceNumber }}</td>
+              <td class="py-3.5 px-4 text-right font-mono font-semibold text-slate-900 whitespace-nowrap">
                 Rp {{ Number(inv.totalAmount || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-right font-mono text-emerald-600 font-semibold whitespace-nowrap">
                 Rp {{ Number(inv.paidAmount || 0).toLocaleString('id-ID') }}
               </td>
-              <td class="py-3.5 px-4 text-right font-mono text-rose-600 font-bold whitespace-nowrap">
+              <td class="py-3.5 px-4 text-right font-mono text-rose-600 font-semibold whitespace-nowrap">
                 Rp {{ Number(inv.remainingAmount || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ inv.dueDate }}</td>
@@ -59,18 +59,25 @@
                 <div class="flex items-center justify-end gap-1.5">
                   <button
                     type="button"
-                    class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded font-bold text-xs transition-colors shadow-2xs"
+                    class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded font-semibold text-xs transition-colors shadow-2xs"
                     title="Kirim notifikasi ke Marketing untuk follow-up PIC"
                     @click="openRemindModal(inv)"
                   >
                     Ingatkan Marketing
                   </button>
-                  <router-link
-                    to="/finance/payments"
-                    class="px-2.5 py-1 bg-alpharo-500 hover:bg-alpharo-600 text-white rounded font-bold text-xs"
+                  <Link
+                    href="/finance/payments"
+                    class="px-2.5 py-1 bg-alpharo-500 hover:bg-alpharo-600 text-white rounded font-semibold text-xs"
                   >
                     Bayar
-                  </router-link>
+                  </Link>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="receivableList.length === 0">
+              <td colspan="8" class="py-12 text-center text-slate-400">
+                <div class="ui-empty-state">
+                  Tidak ada data piutang rekanan yang belum lunas.
                 </div>
               </td>
             </tr>
@@ -90,28 +97,28 @@
         <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1">
           <div class="flex justify-between">
             <span class="text-slate-500">Sisa Tagihan Piutang:</span>
-            <span class="font-mono font-bold text-rose-600">Rp {{ (selectedInvoice?.remainingAmount || 0).toLocaleString('id-ID') }}</span>
+            <span class="font-mono font-semibold text-rose-600">Rp {{ (selectedInvoice?.remainingAmount || 0).toLocaleString('id-ID') }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-slate-500">Tanggal Jatuh Tempo:</span>
-            <span class="font-bold text-slate-800">{{ selectedInvoice?.dueDate }}</span>
+            <span class="font-semibold text-slate-800">{{ selectedInvoice?.dueDate }}</span>
           </div>
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Catatan Instruksi untuk Marketing</label>
+          <label class="block font-semibold text-slate-700 uppercase mb-1">Catatan Instruksi untuk Marketing</label>
           <textarea
             v-model="remindNote"
             rows="3"
             required
-            placeholder="Contoh: Tagihan mendekati jatuh tempo. Mohon bantu follow-up PIC client terkait SP2D atau transfer termin..."
+            placeholder="Contoh: Tagihan mendekati jatuh tempo. Mohon bantu follow-up PIC client terkait SP2D atau transfer pelunasan tagihan..."
             class="w-full px-3 py-2 border rounded-lg bg-white"
           ></textarea>
         </div>
 
         <div class="flex justify-end gap-2 pt-2 border-t border-slate-200">
           <button type="button" class="px-3.5 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg" @click="remindModalOpen = false">Batal</button>
-          <button type="submit" class="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg transition-colors">Kirim Notifikasi ke Marketing</button>
+          <button type="submit" class="px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-colors">Kirim Notifikasi ke Marketing</button>
         </div>
       </form>
     </Modal>
@@ -137,7 +144,7 @@ const receivableList = computed(() => store.invoices.filter((i) => i.remainingAm
 
 const totalReceivable = computed(() => receivableList.value.reduce((s, i) => s + (Number(i.remainingAmount) || 0), 0));
 const overdueReceivable = computed(() => receivableList.value.filter((i) => i.status === 'Jatuh Tempo').reduce((s, i) => s + (Number(i.remainingAmount) || 0), 0));
-const dueReceivable = computed(() => receivableList.value.filter((i) => i.status === 'Sebagian / Termin').reduce((s, i) => s + (Number(i.remainingAmount) || 0), 0));
+const dueReceivable = computed(() => receivableList.value.filter((i) => i.status === 'Sebagian' || i.status === 'Sebagian / Termin').reduce((s, i) => s + (Number(i.remainingAmount) || 0), 0));
 const currentReceivable = computed(() => totalReceivable.value - overdueReceivable.value);
 
 const openRemindModal = (inv) => {

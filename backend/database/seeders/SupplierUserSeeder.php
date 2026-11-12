@@ -67,6 +67,7 @@ class SupplierUserSeeder extends Seeder
                 [
                     'name' => $acc['name'],
                     'password' => $acc['password'],
+                    'role' => 'SUPPLIER',
                 ]
             );
         }

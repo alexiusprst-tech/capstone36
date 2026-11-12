@@ -207,6 +207,7 @@ class PurchaseController extends Controller
             'items.*.barang' => 'required|string',
             'items.*.sku' => 'nullable|string',
             'items.*.supplier' => 'nullable|string',
+            'items.*.unit' => 'nullable|string|max:50',
             'items.*.qty' => 'required|numeric|min:0',
             'items.*.harga_beli' => 'required|numeric|min:0',
             'items.*.diskon_percent' => 'nullable|numeric|min:0',
@@ -215,6 +216,15 @@ class PurchaseController extends Controller
         ]);
 
         return DB::transaction(function () use ($validated) {
+            $linkedRequest = ! empty($validated['warehouse_request_code'])
+                ? WarehouseRequest::where('request_code', $validated['warehouse_request_code'])->lockForUpdate()->first()
+                : (! empty($validated['warehouse_request_id']) ? WarehouseRequest::whereKey($validated['warehouse_request_id'])->lockForUpdate()->first() : null);
+            if (! empty($validated['warehouse_request_code']) || ! empty($validated['warehouse_request_id'])) {
+                abort_unless($linkedRequest, 422, 'Pengajuan Gudang belum tersimpan di server. Muat ulang daftar pengajuan.');
+                abort_if($linkedRequest->purchase_code || $linkedRequest->status === 'SELESAI', 409, 'Pengajuan Gudang ini sudah diterbitkan PO.');
+                $validated['warehouse_request_id'] = $linkedRequest->id;
+                $validated['warehouse_request_code'] = $linkedRequest->request_code;
+            }
             $purchase = PurchaseTransaction::create([
                 'purchase_code' => $validated['purchase_code'],
                 'transaction_date' => $validated['transaction_date'],
@@ -229,6 +239,8 @@ class PurchaseController extends Controller
                 'total_price' => $validated['total_price'],
                 'payment_method' => $validated['payment_method'],
                 'status' => 'DIPESAN',
+                'supplier_progress' => ['supplier_status' => 'Menunggu Konfirmasi'],
+                'progress_version' => 1,
                 'items' => $validated['items'],
                 'created_by' => $validated['created_by'] ?? 'Dewi Lestari (Finance)',
                 'notes' => $validated['notes'] ?? null,
@@ -300,11 +312,18 @@ class PurchaseController extends Controller
         }
 
         return DB::transaction(function () use ($purchase, $request) {
+            $purchase = PurchaseTransaction::whereKey($purchase->id)->lockForUpdate()->firstOrFail();
+            if ($purchase->status === 'DITERIMA_GUDANG') {
+                return response()->json(['success' => true, 'data' => $purchase]);
+            }
+            $purchase->progress_version++;
+            $purchase->supplier_progress = [...($purchase->supplier_progress ?? []), 'supplier_status' => 'Diterima Gudang (Lengkap & Sesuai)',
+                'warehouse_arrived' => true, 'received_at' => now()->toDateString()];
             $notes = $request->input('notes', 'Barang diterima lengkap dan sesuai spesifikasi fisik.');
 
             $purchase->update([
                 'status' => 'DITERIMA_GUDANG',
-                'notes' => $purchase->notes ? $purchase->notes . "\n" . $notes : $notes,
+                'notes' => $purchase->notes ? $purchase->notes."\n".$notes : $notes,
             ]);
 
             // Update linked warehouse request if any

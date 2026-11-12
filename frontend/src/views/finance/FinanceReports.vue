@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Laporan Keuangan & Piutang</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Laporan Keuangan & Piutang</h1>
           <p class="text-sm text-slate-500 mt-1">
             Rekapitulasi transaksi keuangan: Invoice, Pembayaran, Piutang, dan Transaksi Proyek.
           </p>
@@ -37,7 +37,7 @@
         type="button"
         :class="[
           selectedCat === cat
-            ? 'bg-alpharo-500 text-white font-bold shadow-xs'
+            ? 'bg-alpharo-500 text-white font-semibold shadow-xs'
             : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200',
           'px-4 py-2 rounded-xl text-xs whitespace-nowrap transition-all'
         ]"
@@ -48,14 +48,14 @@
     </div>
 
     <!-- TABLE -->
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
       <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs">
-        <span class="font-bold text-slate-900 uppercase">Rekapitulasi {{ selectedCat }}</span>
+        <span class="font-semibold text-slate-900 uppercase">Rekapitulasi {{ selectedCat }}</span>
         <span class="text-slate-500">{{ listData.length }} Data Ditemukan</span>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
               <th v-for="c in cols" :key="c.key" :class="[c.align === 'right' ? 'text-right' : c.align === 'center' ? 'text-center' : '', 'py-3 px-4']">
@@ -67,7 +67,7 @@
             <tr v-for="(row, idx) in listData" :key="idx" class="hover:bg-slate-50/70 transition-colors">
               <td v-for="c in cols" :key="c.key" :class="[c.align === 'right' ? 'text-right' : c.align === 'center' ? 'text-center' : '', 'py-3.5 px-4']">
                 <StatusBadge v-if="c.isBadge" :status="row[c.key]" />
-                <span v-else-if="c.isCurrency" class="font-mono font-bold text-slate-900">
+                <span v-else-if="c.isCurrency" class="font-mono font-semibold text-slate-900">
                   Rp {{ (row[c.key] || 0).toLocaleString('id-ID') }}
                 </span>
                 <span v-else>{{ row[c.key] }}</span>

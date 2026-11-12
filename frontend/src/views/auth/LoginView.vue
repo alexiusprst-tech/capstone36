@@ -1,138 +1,145 @@
 <template>
-  <div class="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-    <!-- Ambient enterprise subtle background accents -->
-    <div class="absolute inset-0 bg-gradient-to-br from-[#072B5E] via-[#0B4DA2] to-[#041A3B] opacity-95"></div>
-    <div class="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px] opacity-10"></div>
-
-    <div class="sm:mx-auto sm:w-full sm:max-w-md relative z-10 text-center">
-      <!-- Logo Branding -->
-      <div class="flex justify-center mb-4">
-        <AlpharoLogo
-          theme="white"
-          size="lg"
-          :show-tagline="true"
-          :vertical="true"
+  <div class="login-shell">
+    <aside class="login-side" aria-labelledby="login-title">
+      <div class="login-brand">
+        <img
+          src="/images/logo.png"
+          alt="Logo CV. Alpharo Artha Jaya"
+          class="login-logo"
+          width="56"
+          height="56"
         />
-      </div>
-      <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white">
-        Sistem Informasi Terintegrasi
-      </h2>
-      <p class="mt-1 text-xs sm:text-sm text-blue-200">
-        Enterprise Supply & Contractor Management Platform
-      </p>
-    </div>
-
-    <div class="mt-6 sm:mx-auto sm:w-full sm:max-w-xl relative z-10 px-4 sm:px-0">
-      <div class="bg-white py-8 px-6 sm:px-10 shadow-2xl rounded-2xl border border-slate-200">
-        <!-- Error Alert -->
-        <div
-          v-if="errorMessage"
-          class="mb-5 p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2"
-        >
-          <span class="font-bold">⚠</span>
-          <span>{{ errorMessage }}</span>
+        <div>
+          <strong>CV. Alpharo Artha Jaya</strong>
+          <span>Supplier &amp; kontraktor</span>
         </div>
+      </div>
 
-        <!-- Login Form -->
-        <form class="space-y-4" @submit.prevent="handleSubmit">
+      <div class="login-intro">
+        <h1 id="login-title">Sistem Informasi Terintegrasi</h1>
+        <p>Kelola pengadaan barang, distribusi logistik, dan pekerjaan proyek dalam satu portal.</p>
+      </div>
+
+      <ul class="login-divisions">
+        <li>
+          <HardHat aria-hidden="true" />
           <div>
-            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Alamat Email Perusahaan
-            </label>
-            <input
-              v-model="form.email"
-              type="email"
-              required
-              placeholder="nama@alpharo.co.id"
-              class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-alpharo-500 focus:border-alpharo-500 transition-all outline-hidden"
-            />
+            <strong>Kontraktor</strong>
+            <span>Pelaksanaan proyek, pengawasan, dan Berita Acara (BAST)</span>
+          </div>
+        </li>
+        <li>
+          <Truck aria-hidden="true" />
+          <div>
+            <strong>Supplier</strong>
+            <span>Pesanan pembelian (PO) dan pengiriman Surat Jalan</span>
+          </div>
+        </li>
+        <li>
+          <Warehouse aria-hidden="true" />
+          <div>
+            <strong>Gudang &amp; inventaris</strong>
+            <span>Stok terpusat, bongkar muat, dan persetujuan</span>
+          </div>
+        </li>
+      </ul>
+    </aside>
+
+    <main class="login-main">
+      <div class="login-card">
+        <h2>Selamat datang kembali</h2>
+        <p class="login-subtitle">Masuk untuk mengelola aktivitas dan operasional perusahaan.</p>
+
+        <form @submit.prevent="handleSubmit" :aria-busy="loading">
+          <div class="login-field">
+            <label for="login-email">Email perusahaan</label>
+            <div class="login-input">
+              <Mail aria-hidden="true" />
+              <input
+                id="login-email"
+                v-model="form.email"
+                type="email"
+                name="email"
+                autocomplete="username"
+                placeholder="nama@alpharo.co.id"
+                :aria-invalid="errorMessage ? true : undefined"
+                :aria-describedby="errorMessage ? 'login-error' : undefined"
+                required
+              />
+            </div>
           </div>
 
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                Kata Sandi
-              </label>
-              <span class="text-[11px] text-slate-400">Staff: password123 | Supplier: password</span>
-            </div>
-            <div class="relative">
+          <div class="login-field">
+            <label for="login-password">Kata sandi</label>
+            <div class="login-input">
+              <Lock aria-hidden="true" />
               <input
+                id="login-password"
                 v-model="form.password"
                 :type="showPassword ? 'text' : 'password'"
+                name="password"
+                class="login-password"
+                autocomplete="current-password"
+                placeholder="Masukkan kata sandi"
+                :aria-invalid="errorMessage ? true : undefined"
+                :aria-describedby="errorMessage ? 'login-error' : undefined"
                 required
-                placeholder="••••••••"
-                class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-alpharo-500 focus:border-alpharo-500 transition-all outline-hidden pr-10"
               />
               <button
                 type="button"
-                class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 text-xs"
+                class="login-toggle"
+                :aria-label="showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
+                :aria-pressed="showPassword"
+                aria-controls="login-password"
                 @click="showPassword = !showPassword"
               >
-                {{ showPassword ? 'Sembunyikan' : 'Lihat' }}
+                <component :is="showPassword ? EyeOff : Eye" aria-hidden="true" />
+                <span>{{ showPassword ? 'Tutup' : 'Lihat' }}</span>
               </button>
             </div>
           </div>
 
-          <button
-            type="submit"
-            :disabled="loading"
-            class="w-full mt-2 py-2.5 px-4 bg-alpharo-500 hover:bg-alpharo-600 text-white font-semibold rounded-lg shadow-sm text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-70"
-          >
-            <span v-if="loading" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-            <span>{{ loading ? 'Memverifikasi Kredensial...' : 'Masuk ke Sistem' }}</span>
+          <p v-if="errorMessage" id="login-error" class="login-error" role="alert">{{ errorMessage }}</p>
+
+          <button type="submit" class="login-submit" :disabled="loading">
+            <span v-if="loading" class="login-spinner" aria-hidden="true"></span>
+            <span>{{ loading ? 'Memverifikasi...' : 'Masuk ke sistem' }}</span>
+            <ArrowRight v-if="!loading" aria-hidden="true" />
           </button>
         </form>
 
-        <!-- DEMO ROLE QUICK SWITCHER FOR CAPSTONE EVALUATION -->
-        <div class="mt-8 pt-6 border-t border-slate-200">
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">
-              Akses Cepat Penguji / Demo Role
-            </span>
-            <span class="text-[10px] text-slate-400 font-mono">Staff: password123 &bull; Supplier: password</span>
-          </div>
-          <p class="text-xs text-slate-500 mb-3 leading-relaxed">
-            Klik tombol role di bawah untuk mengisi kredensial dan langsung masuk ke hak akses terkait:
-          </p>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <section class="login-demo" aria-labelledby="login-demo-title">
+          <h3 id="login-demo-title">Akses cepat untuk uji coba</h3>
+          <p>Pilih peran untuk langsung masuk dan mencoba modul sesuai hak akses.</p>
+          <div class="login-roles">
             <button
               v-for="r in demoRoles"
               :key="r.role"
               type="button"
-              class="flex items-start gap-2.5 p-2.5 rounded-lg border border-slate-200 hover:border-alpharo-500 hover:bg-blue-50/50 text-left transition-all group cursor-pointer"
+              class="login-role"
+              :disabled="loading"
               @click="loginAs(r)"
             >
-              <span :class="[r.badgeColor, 'w-2 h-2 rounded-full mt-1.5 shrink-0']"></span>
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center justify-between gap-1.5">
-                  <span class="text-xs font-bold text-slate-900 group-hover:text-alpharo-600">{{ r.title }}</span>
-                  <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-mono">{{ r.role }}</span>
-                </div>
-                <p class="text-[11px] text-slate-500 truncate mt-0.5">{{ r.email }}</p>
-                <p class="text-[10px] text-slate-400 line-clamp-1 mt-0.5">{{ r.desc }}</p>
-              </div>
+              <strong>{{ r.title }}</strong>
+              <span>{{ r.desc }}</span>
             </button>
           </div>
-        </div>
+          <p class="login-hint">Staf: <code>password123</code> <span aria-hidden="true">&middot;</span> Supplier: <code>password</code></p>
+        </section>
       </div>
-
-      <p class="mt-6 text-center text-xs text-blue-200/70">
-        CV Alpharo Artha Jaya &bull; Supplier & Contractor &bull; Capstone Evaluation 2026
-      </p>
-    </div>
+    </main>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import AlpharoLogo from '../../components/common/AlpharoLogo.vue';
-import { store, storeActions } from '../../stores/mockData';
+import { useRoute, useRouter } from '../../navigation';
 import { useToast } from '../../services/toast';
-import api from '../../services/api';
+import { login } from '../../services/session';
+import { HardHat, Truck, Warehouse, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-vue-next';
 
 const router = useRouter();
+const route = useRoute();
 const toast = useToast();
 
 const form = ref({
@@ -149,7 +156,8 @@ const roleHome = {
   ADMINISTRASI: '/administration/dashboard',
   WAREHOUSE: '/warehouse/dashboard',
   FINANCE: '/finance/dashboard',
-  CLIENT: '/client/dashboard',
+  CLIENT: '/portal',
+  SUPPLIER: '/supplier/portal',
 };
 
 const demoRoles = [
@@ -165,7 +173,7 @@ const demoRoles = [
     role: 'DIREKTUR',
     title: 'Direktur',
     email: 'direktur@alpharo.co.id',
-    badgeColor: 'bg-purple-500',
+    badgeColor: 'bg-alpharo-500',
     desc: 'Verifier, Approver & Managerial Monitoring',
     target: '/director/dashboard',
   },
@@ -190,7 +198,7 @@ const demoRoles = [
     title: 'Finance',
     email: 'finance@alpharo.co.id',
     badgeColor: 'bg-rose-500',
-    desc: 'Invoice, Pembayaran (Penuh/Termin), & Laporan',
+    desc: 'Invoice Tagihan, Pembayaran Masuk, & Laporan',
     target: '/finance/dashboard',
   },
   {
@@ -213,12 +221,10 @@ const demoRoles = [
 ];
 
 // 1-Click Login directly from Demo Role cards
-const loginAs = (demo) => {
+const loginAs = async (demo) => {
   form.value.email = demo.email;
   form.value.password = demo.password || 'password123';
-  storeActions.switchRole(demo.role);
-  toast.success(`Berhasil masuk sebagai ${demo.title}`);
-  router.push(demo.target);
+  await handleSubmit();
 };
 
 const quickFill = (demo) => {
@@ -230,91 +236,414 @@ const quickFill = (demo) => {
 const handleSubmit = async () => {
   errorMessage.value = '';
   loading.value = true;
-
   try {
-<<<<<<< HEAD
-    const response = await api.post('/auth/login', {
-      email: form.value.email.trim().toLowerCase(),
-      password: form.value.password,
-    });
-    const { user, token } = response.data;
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    storeActions.setAuthenticatedUser(user);
+    const user = await login({ email: form.value.email.trim().toLowerCase(), password: form.value.password });
+    const requested = route.query.redirect;
+    const home = roleHome[user.role] || '/';
+    const prefix = home.split('/')[1];
+    const destination = typeof requested === 'string' && requested.startsWith(`/${prefix}/`)
+      ? requested : home;
     toast.success(`Berhasil masuk sebagai ${user.role}`);
-    const requestedRoute = router.currentRoute.value.query.redirect;
-    const requestedRole = typeof requestedRoute === 'string'
-      ? router.resolve(requestedRoute).meta.role
-      : null;
-    const destination = requestedRole === user.role
-      ? requestedRoute
-      : roleHome[user.role] || '/';
-    router.push({
-      path: destination,
-      replace: true,
-    });
+    router.replace(destination);
   } catch (error) {
-    const validationMessage = Object.values(error.response?.data?.errors || {}).flat()[0];
-    errorMessage.value = validationMessage || error.response?.data?.message || 'Tidak dapat terhubung ke layanan autentikasi.';
-=======
-    const emailLower = (form.value.email || '').toLowerCase().trim();
-    let matchedRole = 'MARKETING';
-    let targetRoute = '/marketing/dashboard';
-
-    let matchedSupplier = null;
-    if (
-      emailLower.includes('supplier') ||
-      emailLower.includes('synnex') ||
-      emailLower.includes('sumbermakmur') ||
-      emailLower.includes('indokomputer') ||
-      emailLower.includes('mandiriperkasa') ||
-      emailLower.includes('ciptakarya') ||
-      emailLower.includes('globalsarana') ||
-      emailLower.includes('graha') ||
-      emailLower.includes('mitrasejahtera') ||
-      (store.suppliers && store.suppliers.some((s) => s.email?.toLowerCase() === emailLower))
-    ) {
-      matchedRole = 'SUPPLIER';
-      targetRoute = '/supplier/portal';
-      matchedSupplier = (store.suppliers || []).find((s) => s.email?.toLowerCase() === emailLower) || (store.suppliers?.[0]);
-    } else if (emailLower.includes('direktur') || emailLower.includes('alpharo')) {
-      matchedRole = 'DIREKTUR';
-      targetRoute = '/director/dashboard';
-    } else if (emailLower.includes('admin') || emailLower.includes('administrasi') || emailLower.includes('siti')) {
-      matchedRole = 'ADMINISTRASI';
-      targetRoute = '/administration/dashboard';
-    } else if (emailLower.includes('warehouse') || emailLower.includes('gudang') || emailLower.includes('agus')) {
-      matchedRole = 'WAREHOUSE';
-      targetRoute = '/warehouse/dashboard';
-    } else if (emailLower.includes('finance') || emailLower.includes('keuangan') || emailLower.includes('dewi')) {
-      matchedRole = 'FINANCE';
-      targetRoute = '/finance/dashboard';
-    } else if (emailLower.includes('client') || emailLower.includes('sekolah') || emailLower.includes('sma')) {
-      matchedRole = 'CLIENT';
-      targetRoute = '/portal';
-    } else {
-      matchedRole = 'MARKETING';
-      targetRoute = '/marketing/dashboard';
-    }
-
-    const validPasswords = ['password', 'password123', 'admin', '123456'];
-    if (form.value.password && !validPasswords.includes(form.value.password)) {
-      errorMessage.value = matchedRole === 'SUPPLIER'
-        ? 'Kata sandi salah. Gunakan default: password'
-        : 'Kata sandi salah. Gunakan default: password123';
-      loading.value = false;
-      return;
-    }
-
-    // Switch role in reactive store & sync localStorage
-    storeActions.switchRole(matchedRole, matchedSupplier);
-    toast.success(`Berhasil masuk sebagai ${matchedSupplier ? matchedSupplier.name : matchedRole}`);
-    router.push(targetRoute);
-  } catch (err) {
-    errorMessage.value = 'Terjadi kesalahan autentikasi.';
->>>>>>> origin/Pras
+    errorMessage.value = Object.values(error.response?.data?.errors || {}).flat()[0]
+      || error.response?.data?.message || 'Tidak dapat menghubungi server. Silakan coba lagi.';
   } finally {
     loading.value = false;
   }
 };
+
 </script>
+
+<style scoped>
+.login-shell {
+  --login-navy: #1e3a8a;
+  --login-blue: #2563eb;
+  --login-tint: #eff6ff;
+  --login-ink: #1c2130;
+  --login-muted: #686e7e;
+  --login-line: #e5e7ed;
+  display: grid;
+  grid-template-columns: minmax(320px, 5fr) minmax(360px, 6fr);
+  min-height: 100vh;
+  min-height: 100svh;
+  color: var(--login-ink);
+  background: #fafafb;
+  color-scheme: light;
+}
+
+.login-side {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 48px;
+  padding: 48px clamp(28px, 4vw, 72px);
+  color: var(--login-navy);
+  background: #eff6ff;
+  border-right: 1px solid #dbeafe;
+}
+
+.login-side::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .06;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .3 0 0 0 0 .55 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.login-logo {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  object-fit: contain;
+}
+
+.login-brand strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.login-brand span {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: #515868;
+}
+
+.login-intro h1 {
+  max-width: 13ch;
+  margin: 0 0 20px;
+  font-size: clamp(30px, 3.2vw, 44px);
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -.035em;
+}
+
+.login-intro p {
+  max-width: 40ch;
+  margin: 0;
+  color: #515868;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.login-divisions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.login-divisions li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 14px;
+  padding: 17px 0;
+  border-top: 1px solid rgb(37 99 235 / 10%);
+}
+
+.login-divisions li:last-child {
+  border-bottom: 1px solid rgb(37 99 235 / 10%);
+}
+
+.login-divisions svg {
+  width: 24px;
+  height: 24px;
+  margin-top: 2px;
+  stroke-width: 1.7;
+}
+
+.login-divisions strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.login-divisions span {
+  display: block;
+  margin-top: 3px;
+  color: #515868;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.login-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 40px clamp(20px, 4vw, 64px);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-card h2 {
+  margin: 0 0 8px;
+  color: var(--login-navy);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -.025em;
+}
+
+.login-subtitle {
+  margin: 0 0 28px;
+  color: var(--login-muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.login-field {
+  margin-bottom: 18px;
+}
+
+.login-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.login-input {
+  position: relative;
+}
+
+.login-input > svg {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  transform: translateY(-50%);
+  color: var(--login-muted);
+  pointer-events: none;
+}
+
+.login-input input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px 0 42px;
+  border: 1px solid var(--login-line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--login-ink);
+  font: inherit;
+  font-size: 15px;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.login-input input:focus {
+  outline: none;
+  border-color: var(--login-blue);
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 12%);
+}
+
+.login-input input[aria-invalid='true'] {
+  border-color: #b3261e;
+}
+
+.login-input .login-password {
+  padding-right: 100px;
+}
+
+.login-toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 36px;
+  padding: 8px 10px;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--login-blue);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login-toggle svg {
+  width: 15px;
+  height: 15px;
+}
+
+.login-toggle:hover {
+  background: var(--login-tint);
+}
+
+.login-toggle:focus-visible,
+.login-submit:focus-visible,
+.login-role:focus-visible {
+  outline: 3px solid var(--login-blue);
+  outline-offset: 3px;
+}
+
+.login-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 50px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--login-blue);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.login-submit:hover {
+  background: #1d4ed8;
+}
+
+.login-submit svg {
+  width: 17px;
+  height: 17px;
+}
+
+.login-submit:disabled,
+.login-role:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.login-error {
+  margin: 0 0 16px;
+  color: #b3261e;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.login-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgb(255 255 255 / 40%);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: login-spin .8s linear infinite;
+}
+
+.login-demo {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--login-line);
+}
+
+.login-demo h3 {
+  margin: 0 0 5px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.login-demo > p {
+  margin: 0 0 14px;
+  color: var(--login-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.login-roles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.login-role {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+  padding: 11px 14px;
+  border: 1px solid var(--login-line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--login-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+
+.login-role:hover {
+  border-color: var(--login-blue);
+  background: var(--login-tint);
+}
+
+.login-role strong {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.login-role span {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: var(--login-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.login-demo .login-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  margin: 16px 0 0;
+  font-size: 11px;
+}
+
+.login-hint code {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--login-tint);
+  font-family: ui-monospace, Menlo, monospace;
+}
+
+@keyframes login-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 860px) {
+  .login-shell { grid-template-columns: minmax(0, 1fr); }
+  .login-side { gap: 28px; padding: 28px 22px 32px; }
+  .login-intro h1 { max-width: none; font-size: 28px; margin-bottom: 12px; }
+  .login-intro p { max-width: 48ch; font-size: 14px; }
+  .login-divisions { display: none; }
+  .login-main { padding: 24px 16px 40px; }
+  .login-card { padding: 24px 20px; }
+}
+
+@media (max-width: 380px) {
+  .login-brand strong { font-size: 15px; }
+  .login-card h2 { font-size: 25px; }
+  .login-role { padding: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-input input, .login-submit, .login-role { transition: none; }
+  .login-spinner { animation: none; }
+}
+</style>

@@ -4,8 +4,8 @@
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div class="flex items-center gap-2.5">
-            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Executive Dashboard Direktur</h1>
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#0B4DA2] border border-blue-200">
+            <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Executive Dashboard Direktur</h1>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-alpharo-50 text-alpharo-600 border border-alpharo-200">
               Otoritas Eksekutif
             </span>
           </div>
@@ -14,22 +14,22 @@
           </p>
         </div>
         <div class="flex items-center gap-3">
-          <router-link
-            to="/director/verification"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-[#0B4DA2] hover:bg-[#062F69] text-white font-bold rounded-xl text-sm shadow-xs transition-all active:scale-95"
+          <Link
+            href="/director/verification"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-alpharo-600 hover:bg-alpharo-800 text-white font-semibold rounded-xl text-sm shadow-xs transition-all active:scale-95"
           >
             <FileCheck2 class="w-4 h-4 text-amber-300 stroke-[2.5]" />
             <span>Pusat Verifikasi</span>
             <span
               v-if="waitingOrders.length > 0"
-              class="ml-1 px-1.5 py-0.2 rounded-full text-xs font-mono font-bold bg-amber-400 text-slate-900 animate-pulse"
+              class="ml-1 px-1.5 py-0.2 rounded-full text-xs font-mono font-semibold bg-amber-400 text-slate-900 animate-pulse"
             >
               {{ waitingOrders.length }}
             </span>
             <span v-else class="ml-1 px-1.5 py-0.2 rounded-full text-xs font-mono bg-white/20 text-white">
               0
             </span>
-          </router-link>
+          </Link>
         </div>
       </div>
     </template>
@@ -87,16 +87,16 @@
       <!-- 2. ANALITIK EKSEKUTIF: GRAFIK PERMINTAAN & PENJUALAN (AREA SPLINE BERSIH TANPA DIAGRAM BATANG & TANPA CARD KECIL) -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <!-- GRAFIK 1: TREN PERMINTAAN (DEMAND) -->
-        <div class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-2xs flex flex-col justify-between">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200/90 p-5 shadow-2xs flex flex-col justify-between">
           <div>
             <!-- Header Grafik (Bersih & Rapi tanpa Card Kecil) -->
             <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
               <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-blue-50 text-[#0B4DA2] flex items-center justify-center border border-blue-100">
+                <div class="flex items-center text-alpharo-600 shrink-0">
                   <TrendingUp class="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 class="font-bold text-slate-900 text-sm">Grafik Tren Permintaan (Demand)</h3>
+                  <h3 class="font-semibold text-slate-900 text-sm">Grafik Tren Permintaan (Demand)</h3>
                   <p class="text-[11px] text-slate-500">Volume pengajuan order & kuantitas kebutuhan material</p>
                 </div>
               </div>
@@ -108,8 +108,8 @@
                 <defs>
                   <!-- Gradient for Order Count (Blue) -->
                   <linearGradient id="demandOrderGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#0B4DA2" stop-opacity="0.3" />
-                    <stop offset="100%" stop-color="#0B4DA2" stop-opacity="0.0" />
+                    <stop offset="0%" stop-color="#2563eb" stop-opacity="0.3" />
+                    <stop offset="100%" stop-color="#2563eb" stop-opacity="0.0" />
                   </linearGradient>
                   <!-- Gradient for Material Volume (Emerald) -->
                   <linearGradient id="demandVolumeGradient" x1="0" y1="0" x2="0" y2="1">
@@ -149,7 +149,7 @@
                 <path
                   :d="demandOrderLinePath"
                   fill="none"
-                  stroke="#0B4DA2"
+                  stroke="#2563eb"
                   stroke-width="2.5"
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -174,8 +174,8 @@
                     :cx="item.x"
                     :cy="item.orderY"
                     r="4"
-                    :fill="hoveredDemandIdx === idx ? '#062F69' : '#ffffff'"
-                    stroke="#0B4DA2"
+                    :fill="hoveredDemandIdx === idx ? '#1e40af' : '#ffffff'"
+                    stroke="#2563eb"
                     stroke-width="2.5"
                     class="cursor-pointer transition-all"
                     @mouseenter="hoveredDemandIdx = idx"
@@ -199,7 +199,7 @@
                     y="145"
                     text-anchor="middle"
                     class="text-[11px] font-semibold tracking-tight"
-                    :class="hoveredDemandIdx === idx ? 'fill-[#0B4DA2] font-bold' : 'fill-slate-500'"
+                    :class="hoveredDemandIdx === idx ? 'fill-alpharo-600 font-semibold' : 'fill-slate-500'"
                   >
                     {{ item.month }}
                   </text>
@@ -215,26 +215,26 @@
                   top: `${((demandMonthlyData[hoveredDemandIdx].orderY) / 170) * 100 - 8}%`
                 }"
               >
-                <div class="font-bold text-amber-300 border-b border-slate-700 pb-1 mb-1 flex items-center justify-between">
+                <div class="font-semibold text-amber-300 border-b border-slate-700 pb-1 mb-1 flex items-center justify-between">
                   <span>{{ demandMonthlyData[hoveredDemandIdx].month }} 2026</span>
-                  <span class="text-[10px] text-slate-300 font-mono">{{ demandMonthlyData[hoveredDemandIdx].orders }} Order Masuk</span>
+                  <span class="text-[11px] text-slate-300 font-mono">{{ demandMonthlyData[hoveredDemandIdx].orders }} Order Masuk</span>
                 </div>
                 <div class="space-y-1 text-slate-200">
                   <div class="flex justify-between items-center">
-                    <span class="text-blue-400 flex items-center gap-1">
-                      <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                    <span class="text-alpharo-400 flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 rounded-full bg-alpharo-400"></span>
                       Volume Order:
                     </span>
-                    <span class="font-mono font-bold text-white">{{ demandMonthlyData[hoveredDemandIdx].orders }} Order</span>
+                    <span class="font-mono font-semibold text-white">{{ demandMonthlyData[hoveredDemandIdx].orders }} Order</span>
                   </div>
                   <div class="flex justify-between items-center">
                     <span class="text-emerald-400 flex items-center gap-1">
                       <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                       Kebutuhan Material:
                     </span>
-                    <span class="font-mono font-bold text-white">{{ demandMonthlyData[hoveredDemandIdx].volume }} unit</span>
+                    <span class="font-mono font-semibold text-white">{{ demandMonthlyData[hoveredDemandIdx].volume }} unit</span>
                   </div>
-                  <div class="flex justify-between items-center pt-0.5 border-t border-slate-700/80 text-[10px]">
+                  <div class="flex justify-between items-center pt-0.5 border-t border-slate-700/80 text-[11px]">
                     <span class="text-slate-400">Kategori Top:</span>
                     <span class="font-medium text-amber-300 truncate max-w-[100px]">{{ demandMonthlyData[hoveredDemandIdx].dominantCategory }}</span>
                   </div>
@@ -247,7 +247,7 @@
           <div class="pt-3 mt-2 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-600 gap-2">
             <div class="flex items-center gap-3">
               <span class="flex items-center gap-1.5">
-                <span class="w-2.5 h-2.5 rounded-full bg-[#0B4DA2]"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-alpharo-600"></span>
                 <span class="text-[11px] text-slate-600">Volume Order Masuk</span>
               </span>
               <span class="flex items-center gap-1.5">
@@ -262,16 +262,16 @@
         </div>
 
         <!-- GRAFIK 2: REALISASI PENJUALAN & OMZET (SALES & REVENUE) -->
-        <div class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-2xs flex flex-col justify-between">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200/90 p-5 shadow-2xs flex flex-col justify-between">
           <div>
             <!-- Header Grafik (Bersih & Rapi tanpa Card Kecil) -->
             <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
               <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                <div class="flex items-center text-emerald-600 shrink-0">
                   <BadgeDollarSign class="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 class="font-bold text-slate-900 text-sm">Grafik Realisasi Penjualan & Arus Kas</h3>
+                  <h3 class="font-semibold text-slate-900 text-sm">Grafik Realisasi Penjualan & Arus Kas</h3>
                   <p class="text-[11px] text-slate-500">Perbandingan omzet kontrak penjualan vs penerimaan kas masuk</p>
                 </div>
               </div>
@@ -288,8 +288,8 @@
                   </linearGradient>
                   <!-- Gradient for Cash Inflow -->
                   <linearGradient id="cashGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#0B4DA2" stop-opacity="0.25" />
-                    <stop offset="100%" stop-color="#0B4DA2" stop-opacity="0.0" />
+                    <stop offset="0%" stop-color="#2563eb" stop-opacity="0.25" />
+                    <stop offset="100%" stop-color="#2563eb" stop-opacity="0.0" />
                   </linearGradient>
                 </defs>
 
@@ -324,7 +324,7 @@
                 <path
                   :d="cashLinePath"
                   fill="none"
-                  stroke="#0B4DA2"
+                  stroke="#2563eb"
                   stroke-width="2.5"
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -361,8 +361,8 @@
                     :cx="item.x"
                     :cy="item.cashY"
                     r="3.5"
-                    :fill="hoveredSalesIdx === idx ? '#062F69' : '#ffffff'"
-                    stroke="#0B4DA2"
+                    :fill="hoveredSalesIdx === idx ? '#1e40af' : '#ffffff'"
+                    stroke="#2563eb"
                     stroke-width="2"
                     class="cursor-pointer transition-all"
                     @mouseenter="hoveredSalesIdx = idx"
@@ -374,7 +374,7 @@
                     y="145"
                     text-anchor="middle"
                     class="text-[11px] font-semibold tracking-tight"
-                    :class="hoveredSalesIdx === idx ? 'fill-emerald-700 font-bold' : 'fill-slate-500'"
+                    :class="hoveredSalesIdx === idx ? 'fill-emerald-700 font-semibold' : 'fill-slate-500'"
                   >
                     {{ item.month }}
                   </text>
@@ -390,9 +390,9 @@
                   top: `${((salesMonthlyData[hoveredSalesIdx].salesY) / 170) * 100 - 8}%`
                 }"
               >
-                <div class="font-bold text-emerald-300 border-b border-slate-700 pb-1 mb-1 flex items-center justify-between">
+                <div class="font-semibold text-emerald-300 border-b border-slate-700 pb-1 mb-1 flex items-center justify-between">
                   <span>{{ salesMonthlyData[hoveredSalesIdx].month }} 2026</span>
-                  <span class="text-[10px] text-slate-300 font-mono">{{ salesMonthlyData[hoveredSalesIdx].ratio }} Terbayar</span>
+                  <span class="text-[11px] text-slate-300 font-mono">{{ salesMonthlyData[hoveredSalesIdx].ratio }} Terbayar</span>
                 </div>
                 <div class="space-y-1 text-slate-200">
                   <div class="flex justify-between items-center">
@@ -400,16 +400,16 @@
                       <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                       Omzet Penjualan:
                     </span>
-                    <span class="font-mono font-bold text-white">Rp {{ salesMonthlyData[hoveredSalesIdx].salesStr }}</span>
+                    <span class="font-mono font-semibold text-white">Rp {{ salesMonthlyData[hoveredSalesIdx].salesStr }}</span>
                   </div>
                   <div class="flex justify-between items-center">
-                    <span class="text-blue-400 flex items-center gap-1">
-                      <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                    <span class="text-alpharo-400 flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 rounded-full bg-alpharo-400"></span>
                       Realisasi Kas:
                     </span>
-                    <span class="font-mono font-bold text-white">Rp {{ salesMonthlyData[hoveredSalesIdx].cashStr }}</span>
+                    <span class="font-mono font-semibold text-white">Rp {{ salesMonthlyData[hoveredSalesIdx].cashStr }}</span>
                   </div>
-                  <div class="flex justify-between items-center pt-0.5 border-t border-slate-700/80 text-[10px]">
+                  <div class="flex justify-between items-center pt-0.5 border-t border-slate-700/80 text-[11px]">
                     <span class="text-slate-400">Sisa Piutang:</span>
                     <span class="font-mono font-medium text-amber-300">Rp {{ salesMonthlyData[hoveredSalesIdx].receivableStr }}</span>
                   </div>
@@ -426,7 +426,7 @@
                 <span class="text-[11px] text-slate-600">Realisasi Omzet Penjualan</span>
               </span>
               <span class="flex items-center gap-1.5">
-                <span class="w-2.5 h-2.5 rounded-full bg-[#0B4DA2]"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-alpharo-600"></span>
                 <span class="text-[11px] text-slate-600">Realisasi Penerimaan Kas</span>
               </span>
             </div>
@@ -438,37 +438,136 @@
       </div>
 
       <!-- 3. MAIN WORKSPACE: BALANCED 2-COLUMN LAYOUT -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <!-- LEFT COLUMN (7 COLS): ANTREAN APPROVAL & KONTROL 3 DIVISI OPERASIONAL -->
-        <div class="lg:col-span-7 space-y-6">
-          <!-- CARD A: ANTREAN ORDER MENUNGGU VERIFIKASI -->
-          <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+      <div class="dashboard-workspace min-w-0 flex flex-col gap-4 sm:gap-5">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs p-5">
+            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+              <div>
+                <h3 class="font-semibold text-slate-900 text-sm">Monitoring Pengawasan 3 Divisi Operasional</h3>
+                <p class="text-[11px] text-slate-500 mt-0.5">Kontrol status kesiapan stok gudang, legalitas administrasi, dan penagihan piutang.</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 divide-y divide-slate-100 sm:divide-y-0 sm:divide-x">
+              <!-- B1. DIVISI GUDANG (WAREHOUSE) -->
+              <div class="py-3 sm:py-0 sm:px-5 first:pt-0 last:pb-0 sm:first:pl-0 sm:last:pr-0">
+                <div>
+                  <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-200/60">
+                    <span class="font-semibold text-xs uppercase text-slate-800 tracking-wider flex items-center gap-1.5">
+                      <Package class="w-3.5 h-3.5 text-alpharo-600" />
+                      Gudang
+                    </span>
+                    <Link href="/director/warehouse" class="text-[11px] text-alpharo-600 font-semibold hover:underline">
+                      Detail →
+                    </Link>
+                  </div>
+                  <div class="space-y-2 text-xs">
+                    <div class="flex justify-between">
+                      <span class="text-slate-500 text-[11px]">Antrean Alokasi:</span>
+                      <span class="font-semibold text-slate-800">{{ store.warehouseFulfillments.length }} Order</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-500 text-[11px]">Pengiriman:</span>
+                      <span class="font-semibold text-alpharo-600">{{ activeShipmentsCount }} Armada</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-500 text-[11px]">Stok Menipis:</span>
+                      <span :class="lowStockCount > 0 ? 'text-rose-600 font-semibold' : 'text-slate-600 font-medium'">
+                        {{ lowStockCount }} Item
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- B2. DIVISI ADMINISTRASI -->
+              <div class="py-3 sm:py-0 sm:px-5 first:pt-0 last:pb-0 sm:first:pl-0 sm:last:pr-0">
+                <div>
+                  <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-200/60">
+                    <span class="font-semibold text-xs uppercase text-slate-800 tracking-wider flex items-center gap-1.5">
+                      <FileCheck2 class="w-3.5 h-3.5 text-alpharo-600" />
+                      Administrasi
+                    </span>
+                    <Link href="/director/administration" class="text-[11px] text-alpharo-600 font-semibold hover:underline">
+                      Detail →
+                    </Link>
+                  </div>
+                  <div class="space-y-2 text-xs">
+                    <div class="flex justify-between">
+                      <span class="text-slate-500 text-[11px]">Berkas Lengkap:</span>
+                      <span class="font-semibold text-emerald-600">{{ completeDocsOrders }} Order</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-500 text-[11px]">Belum Lengkap:</span>
+                      <span class="font-semibold text-amber-600">{{ incompleteDocsOrders }} Order</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-500 text-[11px]">PO Diterbitkan:</span>
+                      <span class="font-semibold text-slate-800">{{ poCount }} Berkas</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- B3. DIVISI FINANCE -->
+              <div class="py-3 sm:py-0 sm:px-5 first:pt-0 last:pb-0 sm:first:pl-0 sm:last:pr-0">
+                <div>
+                  <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-200/60">
+                    <span class="font-semibold text-xs uppercase text-slate-800 tracking-wider flex items-center gap-1.5">
+                      <CreditCard class="w-3.5 h-3.5 text-emerald-600" />
+                      Finance
+                    </span>
+                    <Link href="/director/finance" class="text-[11px] text-alpharo-600 font-semibold hover:underline">
+                      Detail →
+                    </Link>
+                  </div>
+                  <div class="space-y-2 text-xs">
+                    <div class="flex justify-between">
+                      <span class="text-slate-500 text-[11px]">Jatuh Tempo:</span>
+                      <span :class="overdueInvoicesCount > 0 ? 'text-rose-600 font-semibold' : 'text-slate-600 font-medium'">
+                        {{ overdueInvoicesCount }} Berkas
+                      </span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-500 text-[11px]">Belum Lunas:</span>
+                      <span class="font-semibold text-amber-600">{{ partialInvoicesCount }} Berkas</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-500 text-[11px]">Invoice Lunas:</span>
+                      <span class="font-semibold text-emerald-600">{{ paidInvoicesCount }} Berkas</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+      <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
               <div class="flex items-center gap-2.5">
                 <span
                   class="w-2.5 h-2.5 rounded-full"
                   :class="waitingOrders.length > 0 ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'"
                 ></span>
-                <h3 class="font-bold text-slate-900 text-sm">Antrean Verifikasi & Persetujuan Order</h3>
+                <h3 class="font-semibold text-slate-900 text-sm">Antrean Verifikasi & Persetujuan Order</h3>
                 <span
-                  class="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                  class="text-[11px] font-semibold px-2 py-0.5 rounded-full"
                   :class="waitingOrders.length > 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'"
                 >
                   {{ waitingOrders.length }} Order
                 </span>
               </div>
-              <router-link
-                to="/director/verification"
-                class="text-xs text-[#0B4DA2] font-bold hover:underline inline-flex items-center gap-1"
+              <Link
+                href="/director/verification"
+                class="text-xs text-alpharo-600 font-semibold hover:underline inline-flex items-center gap-1"
               >
                 <span>Buka Detail</span>
                 <ChevronRight class="w-3.5 h-3.5" />
-              </router-link>
+              </Link>
             </div>
 
             <!-- Table Jika Ada Antrean -->
-            <div v-if="waitingOrders.length > 0" class="overflow-x-auto">
-              <table class="w-full text-left text-xs">
+            <div v-if="waitingOrders.length > 0" class="overflow-x-auto xl:max-h-[26rem] xl:overflow-y-auto overscroll-auto">
+              <table class="ui-table w-full text-left text-xs">
                 <thead class="bg-slate-50/90 text-slate-600 font-semibold uppercase text-[11px] border-b border-slate-200">
                   <tr>
                     <th class="py-2.5 px-4">No. Order</th>
@@ -483,34 +582,27 @@
                     :key="order.id"
                     class="hover:bg-amber-50/30 transition-colors"
                   >
-                    <td class="py-3 px-4 font-mono font-bold text-slate-900 whitespace-nowrap">
+                    <td class="py-3 px-4 font-mono font-semibold text-slate-900 whitespace-nowrap">
                       {{ order.orderNumber }}
                     </td>
                     <td class="py-3 px-4 min-w-[180px]">
-                      <div class="font-bold text-slate-900">{{ order.clientName }}</div>
+                      <div class="font-semibold text-slate-900">{{ order.clientName }}</div>
                       <div class="text-[11px] text-slate-500 line-clamp-1">{{ order.projectName }}</div>
                     </td>
-                    <td class="py-3 px-3 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
+                    <td class="py-3 px-3 text-right font-mono font-semibold text-slate-900 whitespace-nowrap">
                       Rp {{ Number(order.grandTotal || 0).toLocaleString('id-ID') }}
                     </td>
                     <td class="py-3 px-4 text-center whitespace-nowrap">
                       <div class="flex items-center justify-center gap-1.5">
                         <button
                           type="button"
-                          class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] shadow-2xs transition-all cursor-pointer"
+                          class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-[11px] shadow-2xs transition-all cursor-pointer"
                           title="Setujui order langsung"
-                          @click="handleQuickApprove(order)"
+                          :disabled="orderSync.busy" @click="handleQuickApprove(order)"
                         >
                           Setujui
                         </button>
-                        <button
-                          type="button"
-                          class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold text-[11px] shadow-2xs transition-all cursor-pointer"
-                          title="Tolak pengajuan dengan catatan"
-                          @click="openRejectModal(order)"
-                        >
-                          Tolak
-                        </button>
+                        
                       </div>
                     </td>
                   </tr>
@@ -525,226 +617,49 @@
                   <CheckCircle2 class="w-5 h-5 stroke-[2.5]" />
                 </div>
                 <div class="text-center sm:text-left">
-                  <p class="text-xs font-bold text-slate-800">Semua Pengajuan Order Telah Diverifikasi</p>
+                  <p class="text-xs font-semibold text-slate-800">Semua Pengajuan Order Telah Diverifikasi</p>
                   <p class="text-[11px] text-slate-500">Tidak ada order yang tertunda. Seluruh proses berjalan lancar pada divisi terkait.</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- CARD B: PENGAWASAN OPERASIONAL LINTAS 3 DIVISI (WAREHOUSE, ADMINISTRASI, FINANCE) -->
-          <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs p-5">
-            <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
-              <div>
-                <h3 class="font-bold text-slate-900 text-sm">Monitoring Pengawasan 3 Divisi Operasional</h3>
-                <p class="text-[11px] text-slate-500 mt-0.5">Kontrol status kesiapan stok gudang, legalitas administrasi, dan penagihan piutang.</p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-              <!-- B1. DIVISI GUDANG (WAREHOUSE) -->
-              <div class="bg-slate-50/80 rounded-xl border border-slate-200/80 p-3.5 flex flex-col justify-between hover:border-slate-300 transition-colors">
-                <div>
-                  <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-200/60">
-                    <span class="font-bold text-xs uppercase text-slate-800 tracking-wider flex items-center gap-1.5">
-                      <Package class="w-3.5 h-3.5 text-blue-600" />
-                      Gudang
-                    </span>
-                    <router-link to="/director/warehouse" class="text-[11px] text-[#0B4DA2] font-bold hover:underline">
-                      Detail →
-                    </router-link>
-                  </div>
-                  <div class="space-y-2 text-xs">
-                    <div class="flex justify-between">
-                      <span class="text-slate-500 text-[11px]">Antrean Alokasi:</span>
-                      <span class="font-bold text-slate-800">{{ store.warehouseFulfillments.length }} Order</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500 text-[11px]">Pengiriman OTW:</span>
-                      <span class="font-bold text-blue-600">{{ activeShipmentsCount }} Armada</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500 text-[11px]">Stok Menipis:</span>
-                      <span :class="lowStockCount > 0 ? 'text-rose-600 font-bold' : 'text-slate-600 font-medium'">
-                        {{ lowStockCount }} Item
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- B2. DIVISI ADMINISTRASI -->
-              <div class="bg-slate-50/80 rounded-xl border border-slate-200/80 p-3.5 flex flex-col justify-between hover:border-slate-300 transition-colors">
-                <div>
-                  <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-200/60">
-                    <span class="font-bold text-xs uppercase text-slate-800 tracking-wider flex items-center gap-1.5">
-                      <FileCheck2 class="w-3.5 h-3.5 text-purple-600" />
-                      Administrasi
-                    </span>
-                    <router-link to="/director/administration" class="text-[11px] text-[#0B4DA2] font-bold hover:underline">
-                      Detail →
-                    </router-link>
-                  </div>
-                  <div class="space-y-2 text-xs">
-                    <div class="flex justify-between">
-                      <span class="text-slate-500 text-[11px]">Berkas Lengkap:</span>
-                      <span class="font-bold text-emerald-600">{{ completeDocsOrders }} Order</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500 text-[11px]">Belum Lengkap:</span>
-                      <span class="font-bold text-amber-600">{{ incompleteDocsOrders }} Order</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500 text-[11px]">PO Diterbitkan:</span>
-                      <span class="font-bold text-slate-800">{{ poCount }} Berkas</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- B3. DIVISI FINANCE -->
-              <div class="bg-slate-50/80 rounded-xl border border-slate-200/80 p-3.5 flex flex-col justify-between hover:border-slate-300 transition-colors">
-                <div>
-                  <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-200/60">
-                    <span class="font-bold text-xs uppercase text-slate-800 tracking-wider flex items-center gap-1.5">
-                      <CreditCard class="w-3.5 h-3.5 text-emerald-600" />
-                      Finance
-                    </span>
-                    <router-link to="/director/finance" class="text-[11px] text-[#0B4DA2] font-bold hover:underline">
-                      Detail →
-                    </router-link>
-                  </div>
-                  <div class="space-y-2 text-xs">
-                    <div class="flex justify-between">
-                      <span class="text-slate-500 text-[11px]">Jatuh Tempo:</span>
-                      <span :class="overdueInvoicesCount > 0 ? 'text-rose-600 font-bold' : 'text-slate-600 font-medium'">
-                        {{ overdueInvoicesCount }} Berkas
-                      </span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500 text-[11px]">Termin Berjalan:</span>
-                      <span class="font-bold text-amber-600">{{ partialInvoicesCount }} Berjalan</span>
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-slate-500 text-[11px]">Invoice Lunas:</span>
-                      <span class="font-bold text-emerald-600">{{ paidInvoicesCount }} Berkas</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- RIGHT COLUMN (5 COLS): RIWAYAT KEPUTUSAN & AUDIT SISTEM -->
-        <div class="lg:col-span-5 space-y-6">
-          <!-- CARD C: RIWAYAT KEPUTUSAN APPROVAL DIREKTUR -->
-          <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs p-5">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs p-5">
             <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100">
               <div class="flex items-center gap-2">
                 <CheckCircle2 class="w-4 h-4 text-emerald-600" />
-                <h3 class="font-bold text-slate-900 text-sm">Riwayat Keputusan Approval</h3>
+                <h3 class="font-semibold text-slate-900 text-sm">Riwayat Keputusan Approval</h3>
               </div>
-              <span class="text-[10px] text-slate-400 font-mono bg-slate-100 px-2 py-0.5 rounded">Log Direktur</span>
+              <span class="text-[11px] text-slate-400">Log Direktur</span>
             </div>
 
-            <div class="space-y-2.5">
+            <div class="divide-y divide-slate-100">
               <div
                 v-for="app in approvedOrRejectedOrders.slice(0, 3)"
                 :key="app.id"
-                class="p-3 rounded-lg border border-slate-100 bg-slate-50/70 text-xs hover:bg-slate-50 transition-colors"
+                class="py-4 text-xs"
               >
                 <div class="flex items-center justify-between">
-                  <span class="font-mono font-bold text-slate-900">{{ app.orderNumber }}</span>
-                  <StatusBadge :status="app.status" />
+                  <span class="font-mono font-semibold text-slate-900">{{ app.orderNumber }}</span>
+                  <StatusBadge plain :status="app.status" />
                 </div>
-                <p class="font-semibold text-slate-800 mt-1 line-clamp-1">{{ app.clientName }}</p>
-                <p class="text-[11px] text-slate-500 mt-0.5 line-clamp-2 italic bg-white/70 p-1.5 rounded border border-slate-100">
+                <p class="font-medium text-slate-800 mt-1 whitespace-normal [overflow-wrap:anywhere]">{{ app.clientName }}</p>
+                <p class="text-xs text-slate-500 mt-1 leading-relaxed whitespace-normal [overflow-wrap:anywhere]">
                   "{{ app.approvalNotes || 'Persetujuan eksekutif Direktur' }}"
                 </p>
-                <div class="flex items-center justify-between text-[10px] text-slate-400 mt-1.5 pt-1 border-t border-slate-100">
+                <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1.5 pt-1 border-t border-slate-100">
                   <span>{{ app.approvalDate }}</span>
-                  <span class="font-mono font-bold text-slate-700">Rp {{ Number(app.grandTotal || 0).toLocaleString('id-ID') }}</span>
+                  <span class="font-mono font-semibold text-slate-700">Rp {{ Number(app.grandTotal || 0).toLocaleString('id-ID') }}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- CARD D: AUDIT AKTIVITAS SISTEM -->
-          <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs p-5">
-            <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100">
-              <div class="flex items-center gap-2">
-                <Clock class="w-4 h-4 text-[#0B4DA2]" />
-                <h3 class="font-bold text-slate-900 text-sm">Audit Aktivitas Sistem</h3>
-              </div>
-              <router-link to="/director/orders" class="text-xs text-[#0B4DA2] font-bold hover:underline">
-                Monitoring →
-              </router-link>
-            </div>
-
-            <div class="space-y-3">
-              <div
-                v-for="act in store.activityLogs.slice(0, 4)"
-                :key="act.id"
-                class="text-xs flex items-start gap-2.5 pb-2.5 border-b border-slate-50 last:border-b-0 last:pb-0"
-              >
-                <span class="w-2 h-2 rounded-full bg-[#0B4DA2] mt-1 shrink-0"></span>
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center justify-between">
-                    <p class="font-bold text-slate-800 truncate text-xs">{{ act.action }}</p>
-                    <span class="text-[10px] text-slate-400 whitespace-nowrap ml-2 font-mono">{{ act.timestamp }}</span>
-                  </div>
-                  <p class="text-[11px] text-slate-500 truncate mt-0.5">{{ act.details }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ActivityLogCard class="dashboard-activity" />
+    </div>
     </div>
 
-    <!-- REJECT MODAL WITH MANDATORY REASON NOTES -->
-    <Modal
-      v-model="rejectModalOpen"
-      title="Tolak Pengajuan Order"
-      :subtitle="`Order: ${orderToReject?.orderNumber} (${orderToReject?.clientName})`"
-      size="md"
-    >
-      <div class="space-y-3">
-        <p class="text-xs text-slate-600">
-          Sesuai SOP Direksi, penolakan order <strong>wajib mencantumkan alasan tertulis</strong> (misal: kendala limit kredit, stok habis, atau spesifikasi tidak sesuai).
-        </p>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">
-            Alasan Penolakan (Wajib Diisi) *
-          </label>
-          <textarea
-            v-model="rejectReason"
-            rows="3"
-            required
-            placeholder="Contoh: Stok material tidak mencukupi dan termin pembayaran melanggar batas kredit limit..."
-            class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-rose-500"
-          ></textarea>
-        </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button
-            type="button"
-            class="px-3 py-1.5 text-xs text-slate-600 hover:text-slate-800 font-semibold"
-            @click="rejectModalOpen = false"
-          >
-            Batal
-          </button>
-          <button
-            type="button"
-            class="px-3 py-1.5 text-xs bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg shadow-xs"
-            :disabled="!rejectReason.trim()"
-            @click="executeReject"
-          >
-            Konfirmasi Tolak Order
-          </button>
-        </div>
-      </div>
-    </Modal>
+    
   </AppLayout>
 </template>
 
@@ -752,9 +667,10 @@
 import { ref, computed } from 'vue';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import KpiCard from '../../components/common/KpiCard.vue';
+import ActivityLogCard from '../../components/common/ActivityLogCard.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
-import Modal from '../../components/common/Modal.vue';
-import { store, storeActions } from '../../stores/mockData';
+import { store, storeActions, orderSync } from '../../stores/mockData';
+import { orderError } from '../../services/orderWorkflow';
 import { useToast } from '../../services/toast';
 
 import {
@@ -772,16 +688,13 @@ import {
 
 const toast = useToast();
 
-const rejectModalOpen = ref(false);
-const orderToReject = ref(null);
-const rejectReason = ref('');
 
 // Analytics Hover States
 const hoveredDemandIdx = ref(null);
 const hoveredSalesIdx = ref(null);
 
 const totalOrders = computed(() => store.orders.length);
-const waitingOrders = computed(() => store.orders.filter((o) => o.status === 'Menunggu Verifikasi'));
+const waitingOrders = computed(() => store.orders.filter((o) => o.serverManaged && o.status === 'Menunggu Verifikasi'));
 
 const totalOrderValue = computed(() => store.orders.reduce((sum, o) => sum + (Number(o.grandTotal) || 0), 0));
 const unpaidInvoicesCount = computed(() => store.invoices.filter((i) => i.status !== 'Lunas').length);
@@ -801,7 +714,7 @@ const incompleteDocsOrders = computed(() => store.orders.length - completeDocsOr
 const poCount = computed(() => store.orders.filter((o) => o.documents?.po?.exists).length);
 
 const overdueInvoicesCount = computed(() => store.invoices.filter((i) => i.status === 'Jatuh Tempo').length);
-const partialInvoicesCount = computed(() => store.invoices.filter((i) => i.status === 'Sebagian / Termin').length);
+const partialInvoicesCount = computed(() => store.invoices.filter((i) => i.status === 'Sebagian' || i.status === 'Sebagian / Termin').length);
 const paidInvoicesCount = computed(() => store.invoices.filter((i) => i.status === 'Lunas').length);
 
 const approvedOrRejectedOrders = computed(() => store.orders.filter((o) => o.approvalDate));
@@ -939,22 +852,13 @@ const cashAreaPath = computed(() => {
   return `${line} L ${pts[pts.length - 1].x} 125 L ${pts[0].x} 125 Z`;
 });
 
-const handleQuickApprove = (order) => {
-  storeActions.approveOrder(order.id, 'Disetujui langsung oleh Direktur via Executive Dashboard.');
-  toast.success(`Order ${order.orderNumber} berhasil disetujui.`);
+const handleQuickApprove = async (order) => {
+  if (orderSync.busy) return;
+  try {
+    await storeActions.approveOrder(order.id, 'Disetujui oleh Direktur via Dashboard.');
+    toast.success(`Pesanan ${order.orderNumber} siap diperiksa Finance.`);
+  } catch (error) { toast.error(orderError(error)); }
 };
 
-const openRejectModal = (order) => {
-  orderToReject.value = order;
-  rejectReason.value = '';
-  rejectModalOpen.value = true;
-};
 
-const executeReject = () => {
-  if (orderToReject.value && rejectReason.value.trim()) {
-    storeActions.rejectOrder(orderToReject.value.id, rejectReason.value.trim());
-    toast.error(`Order ${orderToReject.value.orderNumber} telah ditolak.`);
-    rejectModalOpen.value = false;
-  }
-};
 </script>

@@ -8,7 +8,7 @@
             <Truck class="w-6 h-6 stroke-[2.2]" />
           </div>
           <div>
-            <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Data Supplier</h1>
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">Data Supplier</h1>
           </div>
         </div>
 
@@ -17,18 +17,18 @@
           <!-- Info Alur PROBIS TO-BE Button -->
           <button
             type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-[#0B4DA2] font-semibold rounded-lg text-xs border border-blue-200 shadow-2xs transition-colors cursor-pointer"
+            class="inline-flex items-center gap-1.5 px-3 py-2 bg-alpharo-50 hover:bg-alpharo-100 text-alpharo-600 font-semibold rounded-lg text-xs border border-alpharo-200 shadow-2xs transition-colors cursor-pointer"
             title="Klik untuk melihat peran Supplier pada Alur PROBIS TO-BE"
             @click="showProbisInfo = !showProbisInfo"
           >
-            <Info class="w-4 h-4 text-[#0B4DA2]" />
+            <Info class="w-4 h-4 text-alpharo-600" />
             <span>Alur PROBIS TO-BE</span>
           </button>
 
           <!-- Tambah Button matching screenshot (+ Tambah in Blue) -->
           <button
             type="button"
-            class="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0284c7] hover:bg-[#0369a1] active:bg-[#075985] text-white font-semibold rounded-lg text-xs shadow-xs transition-colors cursor-pointer"
+            class="inline-flex items-center gap-1.5 px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 active:bg-alpharo-800 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors cursor-pointer"
             @click="openAddModal"
           >
             <Plus class="w-4 h-4 stroke-[2.5]" />
@@ -41,20 +41,20 @@
     <!-- PROBIS TO-BE CONTEXT BANNER (Collapsible) -->
     <div
       v-if="showProbisInfo"
-      class="bg-blue-50/80 border border-blue-200 rounded-xl p-4 mb-5 text-xs text-slate-700 animate-in fade-in duration-200"
+      class="bg-alpharo-50/80 border border-alpharo-200 rounded-xl p-4 mb-5 text-xs text-slate-700 animate-in fade-in duration-200"
     >
       <div class="flex items-start justify-between gap-3">
         <div class="flex items-start gap-2.5">
-          <Info class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+          <Info class="w-5 h-5 text-alpharo-600 shrink-0 mt-0.5" />
           <div class="space-y-1">
-            <p class="font-bold text-blue-900 text-sm">Peran Finance & Supplier dalam Alur Bisnis TO-BE (CV Alpharo Artha Jaya)</p>
+            <p class="font-semibold text-alpharo-900 text-sm">Peran Finance & Supplier dalam Alur Bisnis TO-BE (CV Alpharo Artha Jaya)</p>
             <p class="leading-relaxed text-slate-600">
               Berdasarkan alur proses bisnis TO-BE:
             </p>
             <ul class="list-disc list-inside space-y-0.5 text-slate-600 pl-1">
               <li><strong>Tahap 4 (Pengadaan Barang):</strong> Jika stok di gudang tidak tersedia, Warehouse mengajukan kebutuhan pengadaan ke Finance. Finance bertugas memesan barang ke supplier sesuai database ini.</li>
               <li><strong>Tahap 5 (Pemeriksaan Fisik Gudang):</strong> Warehouse memeriksa barang yang dikirim supplier. Apabila terdapat ketidaksesuaian/cacat fisik, divisi Finance yang menindaklanjuti ketidaksesuaian kepada supplier untuk penggantian/pemenuhan ulang.</li>
-              <li><strong>Faktur & Pembayaran:</strong> Finance melakukan verifikasi faktur pembelian, termin/tempo, serta penyelesaian pembayaran supplier.</li>
+              <li><strong>Faktur & Pembayaran:</strong> Finance melakukan verifikasi faktur pembelian, jatuh tempo, serta penyelesaian pembayaran supplier.</li>
             </ul>
           </div>
         </div>
@@ -69,9 +69,9 @@
     </div>
 
     <!-- PENCARIAN CARD (Matching Screenshot Exactly) -->
-    <div class="bg-white rounded-xl border border-slate-200/90 mb-5 shadow-2xs overflow-hidden">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 mb-5 shadow-2xs overflow-hidden">
       <!-- Top green accent line -->
-      <div class="h-1 bg-emerald-600 w-full"></div>
+      <div class="h-px bg-slate-200 w-full"></div>
 
       <div class="p-4 sm:p-5">
         <label class="block text-xs font-semibold text-slate-700 mb-2">Pencarian</label>
@@ -101,7 +101,7 @@
             <!-- Cari Button -->
             <button
               type="button"
-              class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#0284c7] hover:bg-[#0369a1] active:bg-[#075985] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+              class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 active:bg-alpharo-800 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
               @click="handleSearch"
             >
               <Search class="w-3.5 h-3.5 stroke-[2.5]" />
@@ -133,12 +133,12 @@
     </div>
 
     <!-- DATA TABLE CONTAINER (Matching Screenshot Exactly) -->
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
       <!-- Top green accent line -->
-      <div class="h-1 bg-emerald-600 w-full"></div>
+      <div class="h-px bg-slate-200 w-full"></div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-700 font-semibold text-[11px] tracking-normal select-none">
               <!-- ID Column with ▲ sort indicator -->
@@ -148,7 +148,7 @@
               >
                 <div class="flex items-center gap-1">
                   <span>ID</span>
-                  <span class="text-[10px] text-slate-500 font-mono">
+                  <span class="text-[11px] text-slate-500 font-mono">
                     {{ sortCol === 'code' ? (sortDir === 'asc' ? '▲' : '▼') : '▲' }}
                   </span>
                 </div>
@@ -161,7 +161,7 @@
               >
                 <div class="flex items-center gap-1">
                   <span>Nama Supplier</span>
-                  <span class="text-[10px] text-slate-400">
+                  <span class="text-[11px] text-slate-400">
                     {{ sortCol === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : '↓↑' }}
                   </span>
                 </div>
@@ -179,7 +179,7 @@
               >
                 <div class="flex items-center gap-1">
                   <span>Contact Person</span>
-                  <span class="text-[10px] text-slate-400">
+                  <span class="text-[11px] text-slate-400">
                     {{ sortCol === 'contactPerson' ? (sortDir === 'asc' ? '▲' : '▼') : '↓↑' }}
                   </span>
                 </div>
@@ -192,7 +192,7 @@
               >
                 <div class="flex items-center gap-1">
                   <span>No HP</span>
-                  <span class="text-[10px] text-slate-400">
+                  <span class="text-[11px] text-slate-400">
                     {{ sortCol === 'phone' ? (sortDir === 'asc' ? '▲' : '▼') : '↓↑' }}
                   </span>
                 </div>
@@ -205,7 +205,7 @@
               >
                 <div class="flex items-center gap-1">
                   <span>Email</span>
-                  <span class="text-[10px] text-slate-400">
+                  <span class="text-[11px] text-slate-400">
                     {{ sortCol === 'email' ? (sortDir === 'asc' ? '▲' : '▼') : '↓↑' }}
                   </span>
                 </div>
@@ -218,7 +218,7 @@
               >
                 <div class="flex items-center gap-1">
                   <span>NPWP</span>
-                  <span class="text-[10px] text-slate-400">
+                  <span class="text-[11px] text-slate-400">
                     {{ sortCol === 'npwp' ? (sortDir === 'asc' ? '▲' : '▼') : '↓↑' }}
                   </span>
                 </div>
@@ -239,7 +239,7 @@
               class="hover:bg-slate-50/70 transition-colors"
             >
               <!-- ID -->
-              <td class="py-3.5 px-4 font-bold text-[#1e40af] font-mono whitespace-nowrap">
+              <td class="py-3.5 px-4 font-semibold text-[#1e40af] font-mono whitespace-nowrap">
                 {{ sup.code || `SUP${String(sup.id).padStart(5, '0')}` }}
               </td>
 
@@ -249,7 +249,7 @@
                   <span>{{ sup.name }}</span>
                   <span
                     v-if="sup.status === 'Nonaktif'"
-                    class="px-1.5 py-0.2 bg-slate-100 text-slate-500 rounded text-[10px] font-semibold"
+                    class="px-1.5 py-0.2 bg-slate-100 text-slate-500 rounded text-[11px] font-semibold"
                   >
                     Nonaktif
                   </span>
@@ -287,7 +287,7 @@
                   <!-- Detail Button -->
                   <button
                     type="button"
-                    class="p-1.5 bg-[#0284c7] hover:bg-[#0369a1] text-white rounded shadow-2xs transition-colors cursor-pointer"
+                    class="p-1.5 bg-alpharo-600 hover:bg-alpharo-700 text-white rounded shadow-2xs transition-colors cursor-pointer"
                     title="Lihat Detail Supplier"
                     @click="openDetailModal(sup)"
                   >
@@ -302,16 +302,6 @@
                     @click="openEditModal(sup)"
                   >
                     <Edit3 class="w-3.5 h-3.5" />
-                  </button>
-
-                  <!-- Quick Create PO to this Supplier (PROBIS TO-BE Stage 4) -->
-                  <button
-                    type="button"
-                    class="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded shadow-2xs transition-colors cursor-pointer"
-                    title="Buat Pesanan Pembelian ke Supplier Ini (PO)"
-                    @click="goToPurchaseCreate(sup)"
-                  >
-                    <ShoppingBag class="w-3.5 h-3.5" />
                   </button>
 
                   <!-- Delete Button (Red) -->
@@ -329,9 +319,9 @@
 
             <!-- Empty State matching screenshot: "Tidak ada data" -->
             <tr v-if="filteredSuppliers.length === 0">
-              <td colspan="8" class="py-12 text-center text-slate-400 font-medium text-xs">
+              <td colspan="8" class="py-12 text-center text-slate-400 font-medium text-xs"><div class="ui-empty-state">
                 Tidak ada data
-              </td>
+              </div></td>
             </tr>
           </tbody>
         </table>
@@ -381,7 +371,7 @@
             type="button"
             :class="[
               currentPage === page
-                ? 'bg-[#1e40af] text-white font-bold border-[#1e40af]'
+                ? 'bg-[#1e40af] text-white font-semibold border-[#1e40af]'
                 : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-300 font-medium',
               'px-3 py-1 rounded border text-xs cursor-pointer transition-colors'
             ]"
@@ -438,7 +428,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <!-- Kode Supplier -->
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">
               ID / Kode Supplier <span class="text-rose-500">*</span>
             </label>
             <input
@@ -452,7 +442,7 @@
 
           <!-- Status -->
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Status Keaktifan</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Status Keaktifan</label>
             <select
               v-model="supplierForm.status"
               class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#0284c7] bg-white cursor-pointer"
@@ -464,7 +454,7 @@
 
           <!-- Nama Supplier -->
           <div class="sm:col-span-2">
-            <label class="block text-xs font-bold text-slate-700 mb-1">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">
               Nama Supplier / Perusahaan <span class="text-rose-500">*</span>
             </label>
             <input
@@ -478,7 +468,7 @@
 
           <!-- Contact Person -->
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Contact Person (PIC)</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Contact Person (PIC)</label>
             <input
               v-model="supplierForm.contactPerson"
               type="text"
@@ -489,7 +479,7 @@
 
           <!-- No HP / Telepon -->
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">No HP / Telepon / WhatsApp</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">No HP / Telepon / WhatsApp</label>
             <input
               v-model="supplierForm.phone"
               type="text"
@@ -500,7 +490,7 @@
 
           <!-- Email -->
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Email</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Email</label>
             <input
               v-model="supplierForm.email"
               type="email"
@@ -511,7 +501,7 @@
 
           <!-- NPWP -->
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">NPWP Supplier</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">NPWP Supplier</label>
             <input
               v-model="supplierForm.npwp"
               type="text"
@@ -522,7 +512,7 @@
 
           <!-- Rekening Bank (Finance Payment Info) -->
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Bank</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Bank</label>
             <input
               v-model="supplierForm.bankName"
               type="text"
@@ -532,7 +522,7 @@
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Nomor Rekening</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor Rekening</label>
             <input
               v-model="supplierForm.bankAccountNumber"
               type="text"
@@ -542,7 +532,7 @@
           </div>
 
           <div class="sm:col-span-2">
-            <label class="block text-xs font-bold text-slate-700 mb-1">Atas Nama Rekening</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Atas Nama Rekening</label>
             <input
               v-model="supplierForm.bankAccountName"
               type="text"
@@ -553,7 +543,7 @@
 
           <!-- Alamat -->
           <div class="sm:col-span-2">
-            <label class="block text-xs font-bold text-slate-700 mb-1">Alamat Kantor / Gudang</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat Kantor / Gudang</label>
             <textarea
               v-model="supplierForm.address"
               rows="2"
@@ -564,7 +554,7 @@
 
           <!-- Catatan / Spesialisasi Produk -->
           <div class="sm:col-span-2">
-            <label class="block text-xs font-bold text-slate-700 mb-1">Catatan / Spesialisasi Pengadaan</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Catatan / Spesialisasi Pengadaan</label>
             <textarea
               v-model="supplierForm.notes"
               rows="2"
@@ -585,7 +575,7 @@
           </button>
           <button
             type="submit"
-            class="px-5 py-2 text-xs font-bold bg-[#0284c7] hover:bg-[#0369a1] text-white rounded-lg shadow-xs transition-colors cursor-pointer"
+            class="px-5 py-2 text-xs font-semibold bg-alpharo-600 hover:bg-alpharo-700 text-white rounded-lg shadow-xs transition-colors cursor-pointer"
           >
             {{ isEditing ? 'Simpan Perubahan' : 'Simpan Supplier' }}
           </button>
@@ -605,7 +595,7 @@
         <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 bg-blue-100 text-[#1e40af] font-mono font-bold rounded text-xs">
+              <span class="px-2 py-0.5 bg-alpharo-100 text-[#1e40af] font-mono font-semibold rounded text-xs">
                 {{ selectedSupplier.code || `SUP${String(selectedSupplier.id).padStart(5, '0')}` }}
               </span>
               <span
@@ -617,13 +607,13 @@
                 {{ selectedSupplier.status || 'Aktif' }}
               </span>
             </div>
-            <h3 class="text-base font-bold text-slate-900 mt-1.5">{{ selectedSupplier.name }}</h3>
+            <h3 class="text-base font-semibold text-slate-900 mt-1.5">{{ selectedSupplier.name }}</h3>
           </div>
 
           <!-- Quick Action PO -->
           <button
             type="button"
-            class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-xs transition-colors cursor-pointer"
+            class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors cursor-pointer"
             @click="goToPurchaseCreate(selectedSupplier)"
           >
             <ShoppingBag class="w-3.5 h-3.5" />
@@ -635,14 +625,14 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           <div class="p-3 bg-white border border-slate-200 rounded-lg">
             <span class="text-slate-400 block text-[11px] font-medium">Contact Person (PIC)</span>
-            <span class="font-bold text-slate-800 text-sm mt-0.5 block">
+            <span class="font-semibold text-slate-800 text-sm mt-0.5 block">
               {{ selectedSupplier.contactPerson || selectedSupplier.contact_person || '-' }}
             </span>
           </div>
 
           <div class="p-3 bg-white border border-slate-200 rounded-lg">
             <span class="text-slate-400 block text-[11px] font-medium">Nomor HP / Telepon</span>
-            <span class="font-bold text-slate-800 text-sm mt-0.5 block font-mono">
+            <span class="font-semibold text-slate-800 text-sm mt-0.5 block font-mono">
               {{ selectedSupplier.phone || '-' }}
             </span>
           </div>
@@ -663,18 +653,18 @@
 
           <!-- Bank Account Info -->
           <div class="sm:col-span-2 p-3 bg-slate-50/70 border border-slate-200 rounded-lg">
-            <span class="text-slate-500 block text-[11px] font-bold uppercase tracking-wider mb-1">Informasi Pembayaran Bank (Finance)</span>
+            <span class="text-slate-500 block text-[11px] font-semibold uppercase tracking-wider mb-1">Informasi Pembayaran Bank (Finance)</span>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-1">
               <div>
-                <span class="text-slate-400 text-[10px] block">Bank:</span>
-                <span class="font-bold text-slate-800">{{ selectedSupplier.bankName || selectedSupplier.bank_name || '-' }}</span>
+                <span class="text-slate-400 text-[11px] block">Bank:</span>
+                <span class="font-semibold text-slate-800">{{ selectedSupplier.bankName || selectedSupplier.bank_name || '-' }}</span>
               </div>
               <div>
-                <span class="text-slate-400 text-[10px] block">No Rekening:</span>
-                <span class="font-mono font-bold text-slate-800">{{ selectedSupplier.bankAccountNumber || selectedSupplier.bank_account_number || '-' }}</span>
+                <span class="text-slate-400 text-[11px] block">No Rekening:</span>
+                <span class="font-mono font-semibold text-slate-800">{{ selectedSupplier.bankAccountNumber || selectedSupplier.bank_account_number || '-' }}</span>
               </div>
               <div>
-                <span class="text-slate-400 text-[10px] block">Atas Nama:</span>
+                <span class="text-slate-400 text-[11px] block">Atas Nama:</span>
                 <span class="font-semibold text-slate-800">{{ selectedSupplier.bankAccountName || selectedSupplier.bank_account_name || selectedSupplier.name }}</span>
               </div>
             </div>
@@ -719,7 +709,7 @@
           <div class="flex items-center gap-2">
             <button
               type="button"
-              class="px-3.5 py-1.5 bg-[#eab308] hover:bg-[#ca8a04] text-white font-bold rounded-lg text-xs transition-colors cursor-pointer"
+              class="px-3.5 py-1.5 bg-[#eab308] hover:bg-[#ca8a04] text-white font-semibold rounded-lg text-xs transition-colors cursor-pointer"
               @click="openEditFromDetail"
             >
               Edit Data
@@ -760,7 +750,7 @@
           </button>
           <button
             type="button"
-            class="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-xs transition-colors cursor-pointer"
+            class="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg text-xs transition-colors cursor-pointer"
             @click="executeDelete"
           >
             Hapus Supplier
@@ -773,7 +763,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter } from '../../navigation';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import Modal from '../../components/common/Modal.vue';
 import { store, storeActions } from '../../stores/mockData';

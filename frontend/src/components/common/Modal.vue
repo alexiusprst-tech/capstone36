@@ -2,14 +2,16 @@
   <Teleport to="body">
     <div
       v-if="modelValue"
-      class="fixed inset-0 z-50 overflow-y-auto"
+      ref="dialogElement"
+      tabindex="-1"
+      :aria-label="title"
+      class="ui-scope fixed inset-0 z-50 overflow-y-auto"
       role="dialog"
       aria-modal="true"
-      @keydown.esc="$emit('update:modelValue', false)"
     >
       <!-- Backdrop -->
       <div
-        class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+        class="fixed inset-0 bg-slate-950/30 backdrop-blur-xs transition-opacity"
         @click="$emit('update:modelValue', false)"
       ></div>
 
@@ -18,11 +20,11 @@
         <div
           :class="[
             maxWidthClass,
-            'relative w-full transform overflow-hidden rounded-xl bg-white text-left shadow-xl transition-all border border-slate-200 animate-in zoom-in-95 duration-200'
+            'ui-dialog-panel relative w-full max-h-[calc(100dvh-2rem)] flex flex-col overflow-hidden rounded-xl bg-white text-left border border-slate-200'
           ]"
         >
           <!-- Modal Header -->
-          <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50/70">
+          <div class="ui-dialog-header flex items-center justify-between gap-4 border-b border-slate-100 px-5 sm:px-6 py-4 shrink-0">
             <div>
               <h3 class="text-base font-semibold text-slate-900">
                 {{ title }}
@@ -33,6 +35,7 @@
             </div>
             <button
               type="button"
+              aria-label="Tutup dialog"
               class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
               @click="$emit('update:modelValue', false)"
             >
@@ -43,12 +46,12 @@
           </div>
 
           <!-- Modal Body -->
-          <div class="px-6 py-5 max-h-[75vh] overflow-y-auto">
+          <div class="ui-dialog-body px-5 sm:px-6 py-5 min-h-0 flex-1 overflow-y-auto">
             <slot></slot>
           </div>
 
           <!-- Modal Footer -->
-          <div v-if="$slots.footer" class="border-t border-slate-200 px-6 py-3.5 bg-slate-50 flex items-center justify-end gap-3">
+          <div v-if="$slots.footer" class="ui-dialog-footer border-t border-slate-100 px-5 sm:px-6 py-4 flex items-center justify-end gap-3 shrink-0">
             <slot name="footer"></slot>
           </div>
         </div>
@@ -58,7 +61,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { useDialog } from '../../composables/useDialog';
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -67,7 +71,9 @@ const props = defineProps({
   size: { type: String, default: 'md' }, // 'sm', 'md', 'lg', 'xl', '2xl', 'full'
 });
 
-defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue']);
+const dialogElement = ref(null);
+useDialog(dialogElement, () => props.modelValue, () => emit('update:modelValue', false));
 
 const maxWidthClass = computed(() => {
   switch (props.size) {

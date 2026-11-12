@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Monitoring Kelengkapan Berkas</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Monitoring Kelengkapan Berkas</h1>
           <p class="text-sm text-slate-500 mt-1">
             Pantau status pemenuhan dokumen legal proyek: Belum Lengkap, Sedang Diproses, dan Selesai.
           </p>
@@ -19,7 +19,7 @@
         type="button"
         :class="[
           activeFilter === tab
-            ? 'bg-alpharo-500 text-white font-bold shadow-xs'
+            ? 'bg-alpharo-500 text-white font-semibold shadow-xs'
             : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200',
           'px-4 py-2 rounded-xl text-xs whitespace-nowrap transition-all'
         ]"
@@ -30,9 +30,9 @@
     </div>
 
     <!-- MONITORING TABLE -->
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
               <th class="py-3 px-4">No. Order</th>
@@ -47,8 +47,8 @@
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr v-for="order in filteredList" :key="order.id" class="hover:bg-slate-50/70 transition-colors">
-              <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ order.orderNumber }}</td>
-              <td class="py-3.5 px-4 font-bold text-slate-800">{{ order.clientName }}</td>
+              <td class="py-3.5 px-4 font-mono font-semibold text-slate-900">{{ order.orderNumber }}</td>
+              <td class="py-3.5 px-4 font-semibold text-slate-800">{{ order.clientName }}</td>
               <td class="py-3.5 px-4 text-center"><StatusBadge :status="order.documents?.po?.status || 'Belum Dibuat'" /></td>
               <td class="py-3.5 px-4 text-center"><StatusBadge :status="order.documents?.suratJalan?.status || 'Belum Dibuat'" /></td>
               <td class="py-3.5 px-4 text-center"><StatusBadge :status="order.documents?.bast?.status || 'Belum Dibuat'" /></td>
@@ -56,8 +56,8 @@
               <td class="py-3.5 px-4 text-center">
                 <span
                   :class="[
-                    getCompCount(order) === 4 ? 'bg-emerald-50 text-emerald-700' : getCompCount(order) > 0 ? 'bg-blue-50 text-blue-700' : 'bg-rose-50 text-rose-700',
-                    'px-2 py-0.5 rounded font-bold text-[10px]'
+                    getCompCount(order) === 4 ? 'bg-emerald-50 text-emerald-700' : getCompCount(order) > 0 ? 'bg-alpharo-50 text-alpharo-700' : 'bg-rose-50 text-rose-700',
+                    'px-2 py-0.5 rounded font-semibold text-[11px]'
                   ]"
                 >
                   {{ getCompCount(order) === 4 ? 'Dokumen Selesai (4/4)' : getCompCount(order) > 0 ? 'Sedang Diproses' : 'Belum Lengkap (0/4)' }}
@@ -66,7 +66,7 @@
               <td class="py-3.5 px-4 text-right">
                 <button
                   type="button"
-                  class="px-2.5 py-1 text-alpharo-500 hover:bg-blue-50 border border-blue-200 rounded font-bold text-xs"
+                  class="px-2.5 py-1 text-alpharo-500 hover:bg-alpharo-50 border border-alpharo-200 rounded font-semibold text-xs"
                   @click="inspectOrder(order)"
                 >
                   Detail

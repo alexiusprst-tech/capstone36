@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Manajemen Dokumen & Template Surat</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Manajemen Dokumen & Template Surat</h1>
           <p class="text-sm text-slate-500 mt-1">
             Repositori sentral arsip SPJ, pembuatan surat otomatis dari data order, dan pengelolaan master template.
           </p>
@@ -11,7 +11,7 @@
         <div class="flex items-center gap-2">
           <button
             type="button"
-            class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors"
             @click="openGenerateModal()"
           >
             <Sparkles class="w-4 h-4" />
@@ -34,9 +34,9 @@
       <button
         type="button"
         :class="[
-          'px-4 py-2.5 text-xs font-bold border-b-2 transition-colors flex items-center gap-2',
+          'px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors flex items-center gap-2',
           activeTab === 'documents'
-            ? 'border-alpharo-500 text-alpharo-600 bg-blue-50/50'
+            ? 'border-alpharo-500 text-alpharo-600 bg-alpharo-50/50'
             : 'border-transparent text-slate-500 hover:text-slate-800'
         ]"
         @click="activeTab = 'documents'"
@@ -48,9 +48,9 @@
       <button
         type="button"
         :class="[
-          'px-4 py-2.5 text-xs font-bold border-b-2 transition-colors flex items-center gap-2',
+          'px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors flex items-center gap-2',
           activeTab === 'templates'
-            ? 'border-alpharo-500 text-alpharo-600 bg-blue-50/50'
+            ? 'border-alpharo-500 text-alpharo-600 bg-alpharo-50/50'
             : 'border-transparent text-slate-500 hover:text-slate-800'
         ]"
         @click="activeTab = 'templates'"
@@ -67,12 +67,12 @@
         <div
           v-for="order in store.orders.filter(o => o.status !== 'Draft')"
           :key="order.id"
-          class="bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between"
+          class="ui-panel bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between"
         >
           <div>
             <div class="flex items-start justify-between mb-2">
               <div>
-                <span class="font-mono font-bold text-slate-900 text-sm">Order #{{ order.orderNumber }}</span>
+                <span class="font-mono font-semibold text-slate-900 text-sm">Order #{{ order.orderNumber }}</span>
                 <p class="text-xs text-slate-600 font-medium truncate max-w-xs mt-0.5">{{ order.clientName }}</p>
               </div>
               <StatusBadge :status="getCompleteCount(order) === 4 ? 'Lengkap' : 'Diproses'" />
@@ -82,7 +82,7 @@
             <div class="my-3 space-y-1.5 text-xs">
               <div class="flex items-center justify-between">
                 <span class="flex items-center gap-1.5">
-                  <span :class="order.documents?.po?.status === 'Lengkap' ? 'text-emerald-600 font-bold' : 'text-slate-400'">
+                  <span :class="order.documents?.po?.status === 'Lengkap' ? 'text-emerald-600 font-semibold' : 'text-slate-400'">
                     {{ order.documents?.po?.status === 'Lengkap' ? '✓' : '○' }}
                   </span>
                   <span>Purchase Order (PO)</span>
@@ -92,7 +92,7 @@
 
               <div class="flex items-center justify-between">
                 <span class="flex items-center gap-1.5">
-                  <span :class="order.documents?.suratJalan?.status === 'Lengkap' ? 'text-emerald-600 font-bold' : 'text-slate-400'">
+                  <span :class="order.documents?.suratJalan?.status === 'Lengkap' ? 'text-emerald-600 font-semibold' : 'text-slate-400'">
                     {{ order.documents?.suratJalan?.status === 'Lengkap' ? '✓' : '○' }}
                   </span>
                   <span>Surat Jalan</span>
@@ -102,7 +102,7 @@
 
               <div class="flex items-center justify-between">
                 <span class="flex items-center gap-1.5">
-                  <span :class="order.documents?.bast?.status === 'Lengkap' ? 'text-emerald-600 font-bold' : 'text-slate-400'">
+                  <span :class="order.documents?.bast?.status === 'Lengkap' ? 'text-emerald-600 font-semibold' : 'text-slate-400'">
                     {{ order.documents?.bast?.status === 'Lengkap' ? '✓' : '○' }}
                   </span>
                   <span>BAST</span>
@@ -112,7 +112,7 @@
 
               <div class="flex items-center justify-between">
                 <span class="flex items-center gap-1.5">
-                  <span :class="order.documents?.faktur?.status === 'Lengkap' ? 'text-emerald-600 font-bold' : 'text-slate-400'">
+                  <span :class="order.documents?.faktur?.status === 'Lengkap' ? 'text-emerald-600 font-semibold' : 'text-slate-400'">
                     {{ order.documents?.faktur?.status === 'Lengkap' ? '✓' : '○' }}
                   </span>
                   <span>Faktur Pajak</span>
@@ -123,20 +123,20 @@
           </div>
 
           <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-700">
+            <span class="text-xs font-semibold text-slate-700">
               Progress: {{ getCompleteCount(order) }} / 4 Berkas
             </span>
             <div class="flex items-center gap-2">
               <button
                 type="button"
-                class="text-xs font-bold text-indigo-600 hover:text-indigo-800"
+                class="text-xs font-semibold text-alpharo-600 hover:text-alpharo-800"
                 @click="openGenerateModal(order)"
               >
                 + Buat Surat
               </button>
               <button
                 type="button"
-                class="text-xs font-bold text-alpharo-500 hover:text-alpharo-700"
+                class="text-xs font-semibold text-alpharo-500 hover:text-alpharo-700"
                 @click="previewOrderDocs(order)"
               >
                 Arsip →
@@ -147,14 +147,14 @@
       </div>
 
       <!-- CENTRAL DOCUMENTS TABLE -->
-      <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
         <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs">
-          <span class="font-bold text-slate-900 uppercase">Seluruh Berkas Dokumen Proyek</span>
+          <span class="font-semibold text-slate-900 uppercase">Seluruh Berkas Dokumen Proyek</span>
           <span class="text-slate-500">Total {{ allDocRows.length }} Dokumen Tersimpan</span>
         </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs border-collapse">
+          <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
             <thead>
               <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
                 <th class="py-3 px-4">Nama Dokumen</th>
@@ -169,17 +169,17 @@
             <tbody class="divide-y divide-slate-100">
               <tr v-for="(doc, idx) in allDocRows" :key="idx" class="hover:bg-slate-50/70 transition-colors">
                 <td class="py-3.5 px-4">
-                  <span class="font-mono font-bold text-slate-900 block">{{ doc.number }}</span>
+                  <span class="font-mono font-semibold text-slate-900 block">{{ doc.number }}</span>
                   <span class="text-[11px] text-slate-400">{{ doc.fileName }}</span>
                 </td>
                 <td class="py-3.5 px-4 font-semibold text-slate-700">{{ doc.type }}</td>
                 <td class="py-3.5 px-4 font-mono text-slate-600">{{ doc.orderNumber }}</td>
-                <td class="py-3.5 px-4 font-bold text-slate-800">{{ doc.clientName }}</td>
+                <td class="py-3.5 px-4 font-semibold text-slate-800">{{ doc.clientName }}</td>
                 <td class="py-3.5 px-4 text-slate-500">{{ doc.date }}</td>
                 <td class="py-3.5 px-4 text-center"><StatusBadge :status="doc.status" /></td>
                 <td class="py-3.5 px-4 text-right whitespace-nowrap">
                   <div class="flex items-center justify-end gap-1.5">
-                    <button type="button" class="p-1.5 text-alpharo-500 hover:bg-blue-50 rounded" title="Pratinjau" @click="previewFile(doc)">
+                    <button type="button" class="p-1.5 text-alpharo-500 hover:bg-alpharo-50 rounded" title="Pratinjau" @click="previewFile(doc)">
                       <Eye class="w-4 h-4" />
                     </button>
                     <button type="button" class="p-1.5 text-slate-600 hover:bg-slate-100 rounded" title="Unduh" @click="downloadFile(doc)">
@@ -196,11 +196,11 @@
 
     <!-- TAB 2: MASTER TEMPLATE SURAT & SPJ -->
     <div v-else-if="activeTab === 'templates'">
-      <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
         <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
           <div class="flex items-center gap-2">
-            <span class="font-bold text-slate-900 uppercase">Daftar Master Template Surat (.docx)</span>
-            <span class="px-2 py-0.5 bg-blue-100 text-alpharo-700 rounded-full font-mono text-[10px] font-bold">
+            <span class="font-semibold text-slate-900 uppercase">Daftar Master Template Surat (.docx)</span>
+            <span class="px-2 py-0.5 bg-alpharo-100 text-alpharo-700 rounded-full font-mono text-[11px] font-semibold">
               {{ filteredTemplates.length }} Template
             </span>
           </div>
@@ -223,7 +223,7 @@
         </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs border-collapse">
+          <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
             <thead>
               <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
                 <th class="py-3 px-4">Nama Template</th>
@@ -238,24 +238,24 @@
               <tr v-for="tpl in filteredTemplates" :key="tpl.code" class="hover:bg-slate-50/70 transition-colors">
                 <td class="py-3.5 px-4">
                   <div class="flex items-start gap-2.5">
-                    <div class="w-8 h-8 rounded-lg bg-blue-50 text-alpharo-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <div class="w-8 h-8 rounded-lg bg-alpharo-50 text-alpharo-600 flex items-center justify-center shrink-0 mt-0.5">
                       <FileSpreadsheet class="w-4 h-4" />
                     </div>
                     <div>
-                      <span class="font-bold text-slate-900 block text-sm">{{ tpl.name }}</span>
+                      <span class="font-semibold text-slate-900 block text-sm">{{ tpl.name }}</span>
                       <span class="text-[11px] text-slate-500">{{ tpl.description }}</span>
                     </div>
                   </div>
                 </td>
                 <td class="py-3.5 px-4">
-                  <span class="px-2 py-1 bg-slate-100 text-slate-700 font-mono font-bold rounded text-[10px]">
+                  <span class="px-2 py-1 bg-slate-100 text-slate-700 font-mono font-semibold rounded text-[11px]">
                     {{ tpl.category }}
                   </span>
                 </td>
                 <td class="py-3.5 px-4">
                   <span
                     :class="[
-                      'inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold text-[10px]',
+                      'inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-semibold text-[11px]',
                       tpl.type === 'AUTO_FILL'
                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                         : 'bg-amber-50 text-amber-700 border border-amber-200'
@@ -270,7 +270,7 @@
                   {{ tpl.file_name }}
                 </td>
                 <td class="py-3.5 px-4 text-center">
-                  <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold text-[10px]">
+                  <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-semibold text-[11px]">
                     Aktif
                   </span>
                 </td>
@@ -291,7 +291,7 @@
                     <button
                       v-if="tpl.available_variables?.length"
                       type="button"
-                      class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded"
+                      class="p-1.5 text-alpharo-600 hover:bg-alpharo-50 rounded"
                       title="Lihat Placeholder Variabel"
                       @click="viewTemplateVariables(tpl)"
                     >
@@ -302,7 +302,7 @@
                     <button
                       v-if="tpl.type === 'AUTO_FILL'"
                       type="button"
-                      class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded text-[11px] flex items-center gap-1"
+                      class="px-2.5 py-1.5 bg-alpharo-50 hover:bg-alpharo-100 text-alpharo-700 font-semibold rounded text-[11px] flex items-center gap-1"
                       title="Generate Surat Otomatis dari Template Ini"
                       @click="openGenerateModal(null, tpl)"
                     >
@@ -323,7 +323,7 @@
       <form class="space-y-4 text-xs" @submit.prevent="handleGenerateDoc">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Pilih Order Terkait *</label>
+            <label class="block font-semibold text-slate-700 uppercase mb-1">Pilih Order Terkait *</label>
             <select v-model="generateForm.orderNumber" required class="w-full px-3 py-2 border rounded-lg bg-white" @change="onOrderChange">
               <option value="" disabled>-- Pilih Order --</option>
               <option v-for="o in store.orders" :key="o.id" :value="o.orderNumber">
@@ -333,7 +333,7 @@
           </div>
 
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Pilih Template Dokumen *</label>
+            <label class="block font-semibold text-slate-700 uppercase mb-1">Pilih Template Dokumen *</label>
             <select v-model="generateForm.templateId" required class="w-full px-3 py-2 border rounded-lg bg-white">
               <option value="" disabled>-- Pilih Template --</option>
               <option v-for="t in templateList.filter(x => x.type === 'AUTO_FILL')" :key="t.id" :value="t.id">
@@ -345,7 +345,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Nomor Surat Resmi</label>
+            <label class="block font-semibold text-slate-700 uppercase mb-1">Nomor Surat Resmi</label>
             <input
               v-model="generateForm.docNumber"
               type="text"
@@ -354,7 +354,7 @@
             />
           </div>
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Tanggal Surat</label>
+            <label class="block font-semibold text-slate-700 uppercase mb-1">Tanggal Surat</label>
             <input
               v-model="generateForm.variables.tanggal"
               type="text"
@@ -366,7 +366,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Nama Klien / Sekolah</label>
+            <label class="block font-semibold text-slate-700 uppercase mb-1">Nama Klien / Sekolah</label>
             <input
               v-model="generateForm.variables.nama_sekolah"
               type="text"
@@ -375,7 +375,7 @@
             />
           </div>
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Nilai Kontrak / Total</label>
+            <label class="block font-semibold text-slate-700 uppercase mb-1">Nilai Kontrak / Total</label>
             <input
               v-model="generateForm.variables.nilai_kontrak"
               type="text"
@@ -385,19 +385,19 @@
           </div>
         </div>
 
-        <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-slate-700 text-[11px] leading-relaxed">
-          <p class="font-bold text-alpharo-800 mb-1 flex items-center gap-1.5">
+        <div class="p-3 bg-alpharo-50 border border-alpharo-200 rounded-lg text-slate-700 text-[11px] leading-relaxed">
+          <p class="font-semibold text-alpharo-800 mb-1 flex items-center gap-1.5">
             <Sparkles class="w-3.5 h-3.5" />
             Alur Otomatisasi:
           </p>
-          Dokumen akan diproses oleh mesin backend dari master template di <code class="bg-blue-100 px-1 py-0.5 rounded font-mono">storage/app/templates/master/</code>. Hasil akhir akan disimpan ke <code class="bg-blue-100 px-1 py-0.5 rounded font-mono">storage/app/generated_docs/</code> dan langsung diunduh ke browser Anda.
+          Dokumen akan diproses oleh mesin backend dari master template di <code class="bg-alpharo-100 px-1 py-0.5 rounded font-mono">storage/app/templates/master/</code>. Hasil akhir akan disimpan ke <code class="bg-alpharo-100 px-1 py-0.5 rounded font-mono">storage/app/generated_docs/</code> dan langsung diunduh ke browser Anda.
         </div>
 
         <div class="flex justify-end gap-2 pt-2 border-t border-slate-200">
           <button type="button" class="px-3.5 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg" @click="generateModalOpen = false">
             Batal
           </button>
-          <button type="submit" :disabled="isGenerating" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg flex items-center gap-1.5">
+          <button type="submit" :disabled="isGenerating" class="px-4 py-1.5 bg-alpharo-600 hover:bg-alpharo-700 text-white font-semibold rounded-lg flex items-center gap-1.5">
             <Sparkles class="w-4 h-4" />
             <span>{{ isGenerating ? 'Memproses Dokumen...' : 'Generate Surat (.docx)' }}</span>
           </button>
@@ -418,13 +418,13 @@
             :key="v"
             class="flex items-center justify-between p-2 bg-white rounded border border-slate-200"
           >
-            <span class="text-indigo-600 font-bold">&#36;&#123;{{ v }}&#125;</span>
-            <span class="text-slate-400 text-[10px] font-sans">atau &#123;&#123;{{ v }}&#125;&#125;</span>
+            <span class="text-alpharo-600 font-semibold">&#36;&#123;{{ v }}&#125;</span>
+            <span class="text-slate-400 text-[11px] font-sans">atau &#123;&#123;{{ v }}&#125;&#125;</span>
           </div>
         </div>
 
         <div class="flex justify-end pt-2 border-t border-slate-200">
-          <button type="button" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg" @click="variablesModalOpen = false">
+          <button type="button" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg" @click="variablesModalOpen = false">
             Tutup
           </button>
         </div>
@@ -435,21 +435,21 @@
     <Modal v-model="previewModalOpen" :title="`Pratinjau Dokumen: ${previewDoc?.number || ''}`" :subtitle="previewDoc?.type || ''" size="md">
       <div v-if="previewDoc" class="space-y-4 text-xs">
         <div class="p-8 bg-slate-100 rounded-xl border border-slate-200 text-center space-y-3">
-          <div class="w-16 h-16 rounded-full bg-blue-100 text-alpharo-500 mx-auto flex items-center justify-center">
+          <div class="w-16 h-16 rounded-full bg-alpharo-100 text-alpharo-500 mx-auto flex items-center justify-center">
             <FileText class="w-8 h-8" />
           </div>
           <div>
-            <h4 class="font-bold text-sm text-slate-900">{{ previewDoc.fileName }}</h4>
+            <h4 class="font-semibold text-sm text-slate-900">{{ previewDoc.fileName }}</h4>
             <p class="text-[11px] text-slate-500">Format: Microsoft Word / PDF &bull; Tervalidasi Legal</p>
           </div>
-          <span class="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full font-bold text-[10px]">
+          <span class="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full font-semibold text-[11px]">
             Dokumen Sah CV Alpharo Artha Jaya
           </span>
         </div>
 
         <div class="flex justify-end gap-2 pt-2 border-t border-slate-200">
           <button type="button" class="px-3.5 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg" @click="previewModalOpen = false">Tutup</button>
-          <button type="button" class="px-4 py-1.5 bg-alpharo-500 text-white font-bold rounded-lg" @click="downloadFile(previewDoc)">Unduh Berkas</button>
+          <button type="button" class="px-4 py-1.5 bg-alpharo-500 text-white font-semibold rounded-lg" @click="downloadFile(previewDoc)">Unduh Berkas</button>
         </div>
       </div>
     </Modal>
@@ -458,13 +458,13 @@
     <Modal v-model="uploadModalOpen" title="Unggah Arsip Scan Basah Dokumen" subtitle="Simpan berkas scan stempel/tanda tangan basah ke arsip terpusat" size="md">
       <form class="space-y-4 text-xs" @submit.prevent="handleUpload">
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Pilih Order Terkait *</label>
+          <label class="block font-semibold text-slate-700 uppercase mb-1">Pilih Order Terkait *</label>
           <select required class="w-full px-3 py-2 border rounded-lg bg-white">
             <option v-for="o in store.orders" :key="o.id">{{ o.orderNumber }} - {{ o.clientName }}</option>
           </select>
         </div>
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Jenis Dokumen *</label>
+          <label class="block font-semibold text-slate-700 uppercase mb-1">Jenis Dokumen *</label>
           <select required class="w-full px-3 py-2 border rounded-lg bg-white">
             <option>Purchase Order (PO)</option>
             <option>Surat Jalan Pengiriman</option>
@@ -473,12 +473,12 @@
           </select>
         </div>
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Pilih File PDF / Scan *</label>
+          <label class="block font-semibold text-slate-700 uppercase mb-1">Pilih File PDF / Scan *</label>
           <input type="file" required class="w-full px-3 py-2 border rounded-lg bg-slate-50" />
         </div>
         <div class="flex justify-end gap-2 pt-2 border-t border-slate-200">
           <button type="button" class="px-3.5 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg" @click="uploadModalOpen = false">Batal</button>
-          <button type="submit" class="px-4 py-1.5 bg-alpharo-500 text-white font-bold rounded-lg">Upload Arsip</button>
+          <button type="submit" class="px-4 py-1.5 bg-alpharo-500 text-white font-semibold rounded-lg">Upload Arsip</button>
         </div>
       </form>
     </Modal>
@@ -571,7 +571,7 @@ const templateList = ref([
     name: 'Faktur Tagihan & Pajak',
     code: 'FAKTUR',
     category: 'FAKTUR',
-    description: 'Faktur resmi penagihan pembayaran termin/lunas beserta kalkulasi PPN/PPh.',
+    description: 'Faktur resmi penagihan pembayaran pelunasan beserta kalkulasi PPN/PPh.',
     file_name: 'Faktur-TEMPLATE.docx',
     type: 'AUTO_FILL',
     available_variables: ['nomor_faktur', 'tanggal_faktur', 'jatuh_tempo', 'nama_klien', 'npwp_klien', 'subtotal', 'ppn', 'grand_total', 'terbilang'],

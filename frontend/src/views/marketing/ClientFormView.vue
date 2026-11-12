@@ -4,17 +4,17 @@
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div class="flex items-center gap-2 mb-1">
-            <router-link
-              to="/marketing/clients"
+            <Link
+              href="/marketing/clients"
               class="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
             >
               <ArrowLeft class="w-3.5 h-3.5" />
               <span>Kembali ke Data Client</span>
-            </router-link>
+            </Link>
           </div>
           <div class="flex items-center gap-2">
             <UserPlus class="w-6 h-6 text-slate-800" />
-            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
+            <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">
               {{ isEdit ? 'Edit Customer' : 'Tambah Customer' }}
             </h1>
           </div>
@@ -30,10 +30,10 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         
         <!-- CARD 1: IDENTITAS CUSTOMER -->
-        <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-[#0B4DA2]">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-slate-200">
           <div class="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2.5 bg-slate-50/50">
             <User class="w-4 h-4 text-slate-700" />
-            <h2 class="font-bold text-slate-800 text-sm">Identitas Customer</h2>
+            <h2 class="font-semibold text-slate-800 text-sm">Identitas Customer</h2>
           </div>
           
           <div class="p-5 space-y-4">
@@ -47,7 +47,7 @@
                 type="text"
                 required
                 placeholder="Contoh: SMAN 9 JAKARTA"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2] text-slate-800"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800"
                 @input="onNameInput"
               />
             </div>
@@ -58,7 +58,7 @@
                 v-model="form.orgFullName"
                 type="text"
                 placeholder="Contoh: SMA Negeri 9 Jakarta"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2] text-slate-800"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800"
               />
             </div>
 
@@ -68,7 +68,7 @@
                 v-model="form.orgShortName"
                 type="text"
                 placeholder="Contoh: SMAN 9"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2] text-slate-800"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800"
               />
             </div>
 
@@ -81,7 +81,7 @@
                 rows="3"
                 required
                 placeholder="Alamat lengkap instansi..."
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2] text-slate-800 resize-y"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800 resize-y"
                 @input="syncLetterheadAddress"
               ></textarea>
             </div>
@@ -92,7 +92,7 @@
                 v-model="form.letterheadAddress"
                 rows="3"
                 placeholder="Alamat resmi untuk kop surat..."
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2] text-slate-800 resize-y"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800 resize-y"
               ></textarea>
             </div>
 
@@ -102,17 +102,17 @@
                 v-model="form.npwp"
                 type="text"
                 placeholder="01.234.567.8-001.000"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2] text-slate-800 font-mono"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800 font-mono"
               />
             </div>
           </div>
         </div>
 
         <!-- CARD 2: WILAYAH -->
-        <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-[#0B4DA2]">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-slate-200">
           <div class="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2.5 bg-slate-50/50">
             <MapPin class="w-4 h-4 text-slate-700" />
-            <h2 class="font-bold text-slate-800 text-sm">Wilayah</h2>
+            <h2 class="font-semibold text-slate-800 text-sm">Wilayah</h2>
           </div>
 
           <div class="p-5 space-y-4">
@@ -135,7 +135,7 @@
               <select
                 v-model="form.city"
                 required
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2]"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600"
                 @change="onCityChange"
               >
                 <option value="" disabled>Pilih kota</option>
@@ -150,7 +150,7 @@
               <select
                 v-model="form.district"
                 required
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2]"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600"
                 @change="onDistrictChange"
               >
                 <option value="" disabled>Pilih kecamatan</option>
@@ -165,7 +165,7 @@
               <select
                 v-model="form.subdistrict"
                 required
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2]"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600"
                 @change="onSubdistrictChange"
               >
                 <option value="" disabled>Pilih kelurahan</option>
@@ -192,17 +192,17 @@
                 v-model="form.letterheadCity"
                 type="text"
                 placeholder="Contoh: Jakarta Timur"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500/30 focus:border-[#0B4DA2] text-slate-800"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800"
               />
             </div>
           </div>
         </div>
 
         <!-- CARD 3: KONTAK -->
-        <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-emerald-600">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-[3px] border-t-slate-200">
           <div class="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2.5 bg-slate-50/50">
             <Phone class="w-4 h-4 text-slate-700" />
-            <h2 class="font-bold text-slate-800 text-sm">Kontak</h2>
+            <h2 class="font-semibold text-slate-800 text-sm">Kontak</h2>
           </div>
 
           <div class="p-5 space-y-4">
@@ -215,7 +215,7 @@
                 type="text"
                 required
                 placeholder="Contoh: Bpk. Supri / Bu Nis Kepsek"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800"
               />
             </div>
 
@@ -228,7 +228,7 @@
                 type="text"
                 required
                 placeholder="Contoh: 081316673264"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800 font-mono"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800 font-mono"
               />
             </div>
 
@@ -238,7 +238,7 @@
                 v-model="form.orgPhone"
                 type="text"
                 placeholder="Contoh: 021-8091234"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800 font-mono"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800 font-mono"
               />
             </div>
 
@@ -248,7 +248,7 @@
                 v-model="form.fax"
                 type="text"
                 placeholder="Contoh: 021-8091235"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800 font-mono"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800 font-mono"
               />
             </div>
 
@@ -258,7 +258,7 @@
                 v-model="form.website"
                 type="text"
                 placeholder="https://sman9jkt.sch.id"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800"
               />
             </div>
 
@@ -268,7 +268,7 @@
                 v-model="form.email"
                 type="email"
                 placeholder="info@sman9jkt.sch.id"
-                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800"
+                class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800"
               />
             </div>
           </div>
@@ -277,16 +277,16 @@
 
       <!-- ACTION BUTTONS: BATAL & SIMPAN (SESUAI GAMBAR) -->
       <div class="flex items-center justify-end gap-3 pt-3">
-        <router-link
-          to="/marketing/clients"
+        <Link
+          href="/marketing/clients"
           class="px-5 py-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg shadow-2xs transition-colors"
         >
           Batal
-        </router-link>
+        </Link>
         
         <button
           type="submit"
-          class="px-6 py-2.5 text-xs font-bold text-white bg-[#059669] hover:bg-emerald-700 rounded-lg shadow-xs transition-all flex items-center gap-2"
+          class="px-6 py-2.5 text-xs font-semibold text-white bg-alpharo-600 hover:bg-alpharo-700 rounded-lg shadow-xs transition-all flex items-center gap-2"
         >
           <CheckSquare class="w-4 h-4" />
           <span>Simpan</span>
@@ -298,7 +298,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter } from '../../navigation';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import { store, storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';

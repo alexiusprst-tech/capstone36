@@ -1,30 +1,48 @@
 <?php
 
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\SessionController;
+use App\Http\Middleware\EnsurePageRole;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-/**
- * Serve the compiled SPA for CV Alpharo Artha Jaya
- */
-if (! function_exists('serveSpa')) {
-    function serveSpa()
-    {
-        $spaPath = public_path('index.html');
-        if (file_exists($spaPath)) {
-            return response()->file($spaPath, [
-                'Content-Type' => 'text/html; charset=utf-8',
+Route::get('/', fn (Request $request) => redirect(
+    config('pages.homes.'.$request->user()?->role, '/login'),
+));
+
+Route::post('/login', [SessionController::class, 'store'])->middleware('throttle:10,1');
+Route::post('/logout', [SessionController::class, 'destroy'])->middleware('auth');
+
+Route::get('/templates/{filename}', function (string $filename) {
+    $cleanFilename = basename($filename);
+    $paths = [
+        public_path('templates/'.$cleanFilename),
+        public_path('templates/data_barang_template.xlsx'),
+        public_path('templates/data_barang_template (2).xlsx'),
+        base_path('../data_barang_template (2).xlsx'),
+        base_path('../data_barang_template.xlsx'),
+    ];
+
+    foreach ($paths as $path) {
+        if (file_exists($path)) {
+            return response()->download($path, 'data_barang_template.xlsx', [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ]);
         }
+    }
 
-        return response('Frontend belum di-build. Silakan jalankan `npm run build` di direktori frontend.', 404);
+    abort(404, 'Berkas template data barang tidak ditemukan.');
+})->where('filename', '.*');
+
+foreach (config('pages.routes') as $page) {
+    if (isset($page['redirect'])) {
+        Route::redirect($page['path'], $page['redirect']);
+
+        continue;
+    }
+
+    $route = Route::get($page['path'], PageController::class)->name($page['name']);
+    if ($page['role']) {
+        $route->middleware(['auth', EnsurePageRole::class.':'.$page['role']]);
     }
 }
-
-// Root entry point
-Route::get('/', function () {
-    return serveSpa();
-});
-
-// SPA catch-all for Vue Router (excludes API and Boost routes)
-Route::get('/{any}', function () {
-    return serveSpa();
-})->where('any', '^(?!api|_boost).*$');

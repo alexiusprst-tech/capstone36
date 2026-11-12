@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Verifikasi & Approval Order</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Verifikasi & Approval Order</h1>
           <p class="text-sm text-slate-500 mt-1">
             Wewenang eksekutif Direktur untuk memeriksa kelaikan margin, ketersediaan stok, dan menerbitkan persetujuan resmi.
           </p>
@@ -11,12 +11,15 @@
       </div>
     </template>
 
+    <p v-if="legacyPendingCount" class="mb-4 text-xs text-amber-700">
+      {{ legacyPendingCount }} pengajuan lama perlu divalidasi ulang Marketing agar rincian dan alokasi stok tersimpan di server.
+    </p>
     <!-- TABS NAVIGATION -->
     <div class="flex items-center gap-2 border-b border-slate-200 mb-6 pb-2">
       <button
         type="button"
         :class="[
-          'px-4 py-2 text-xs font-bold rounded-lg transition-colors flex items-center gap-2 cursor-pointer',
+          'px-4 py-2 text-xs font-semibold rounded-lg transition-colors flex items-center gap-2 cursor-pointer',
           activeTab === 'pending'
             ? 'bg-alpharo-500 text-white shadow-xs'
             : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
@@ -27,7 +30,7 @@
         <span>Antrean Menunggu Telaah</span>
         <span
           :class="[
-            'px-1.5 py-0.5 rounded-full text-[10px]',
+            'px-1.5 py-0.5 rounded-full text-[11px]',
             activeTab === 'pending' ? 'bg-alpharo-600 text-white' : 'bg-slate-200 text-slate-700'
           ]"
         >
@@ -38,7 +41,7 @@
       <button
         type="button"
         :class="[
-          'px-4 py-2 text-xs font-bold rounded-lg transition-colors flex items-center gap-2 cursor-pointer',
+          'px-4 py-2 text-xs font-semibold rounded-lg transition-colors flex items-center gap-2 cursor-pointer',
           activeTab === 'hold'
             ? 'bg-alpharo-500 text-white shadow-xs'
             : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
@@ -49,7 +52,7 @@
         <span>Order Ditahan / Revisi</span>
         <span
           :class="[
-            'px-1.5 py-0.5 rounded-full text-[10px]',
+            'px-1.5 py-0.5 rounded-full text-[11px]',
             activeTab === 'hold' ? 'bg-alpharo-600 text-white' : 'bg-slate-200 text-slate-700'
           ]"
         >
@@ -60,7 +63,7 @@
       <button
         type="button"
         :class="[
-          'px-4 py-2 text-xs font-bold rounded-lg transition-colors flex items-center gap-2 cursor-pointer',
+          'px-4 py-2 text-xs font-semibold rounded-lg transition-colors flex items-center gap-2 cursor-pointer',
           activeTab === 'history'
             ? 'bg-alpharo-500 text-white shadow-xs'
             : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
@@ -71,7 +74,7 @@
         <span>Riwayat Keputusan</span>
         <span
           :class="[
-            'px-1.5 py-0.5 rounded-full text-[10px]',
+            'px-1.5 py-0.5 rounded-full text-[11px]',
             activeTab === 'history' ? 'bg-alpharo-600 text-white' : 'bg-slate-200 text-slate-700'
           ]"
         >
@@ -82,11 +85,11 @@
 
     <!-- TAB 1: PENDING APPROVAL TABLE -->
     <div v-if="activeTab === 'pending'" class="space-y-6">
-      <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
         <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">
+            <h3 class="text-xs font-semibold text-slate-900 uppercase tracking-wider">
               Antrean Menunggu Telaah Direktur ({{ pendingOrders.length }} Order)
             </h3>
           </div>
@@ -96,7 +99,7 @@
         </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs border-collapse">
+          <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
             <thead>
               <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px] tracking-wider">
                 <th class="py-3 px-4">Order Number</th>
@@ -113,28 +116,28 @@
                 v-for="order in pendingOrders"
                 :key="order.id"
                 :class="[
-                  selectedOrder?.id === order.id ? 'bg-blue-50/50' : 'hover:bg-slate-50/80',
+                  selectedOrder?.id === order.id ? 'bg-alpharo-50/50' : 'hover:bg-slate-50/80',
                   'transition-colors cursor-pointer'
                 ]"
                 @click="selectForVerification(order)"
               >
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">
+                <td class="py-3.5 px-4 font-mono font-semibold text-slate-900">
                   <div class="flex items-center gap-2">
                     <span v-if="selectedOrder?.id === order.id" class="w-1.5 h-1.5 rounded-full bg-alpharo-500"></span>
                     <span>{{ order.orderNumber }}</span>
                   </div>
                 </td>
                 <td class="py-3.5 px-4">
-                  <span class="font-bold text-slate-900 block">{{ order.clientName }}</span>
+                  <span class="font-semibold text-slate-900 block">{{ order.clientName }}</span>
                   <span class="text-[11px] text-slate-400 block truncate max-w-xs">{{ order.projectName || 'Pengadaan Barang & Jasa' }}</span>
                 </td>
                 <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ order.date }}</td>
-                <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
+                <td class="py-3.5 px-4 text-right font-mono font-semibold text-slate-900 whitespace-nowrap">
                   Rp {{ Number(order.grandTotal || 0).toLocaleString('id-ID') }}
                 </td>
                 <td class="py-3.5 px-4 text-slate-600">
                   <span class="font-medium text-slate-700 block">{{ order.submittedBy }}</span>
-                  <span v-if="order.urgency" class="text-[10px] text-amber-600 font-semibold uppercase tracking-wider block">
+                  <span v-if="order.urgency" class="text-[11px] text-amber-600 font-semibold uppercase tracking-wider block">
                     Urgensi: {{ order.urgency }}
                   </span>
                 </td>
@@ -144,7 +147,7 @@
                 <td class="py-3.5 px-4 text-right whitespace-nowrap">
                   <button
                     type="button"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-alpharo-500 hover:bg-alpharo-600 active:bg-alpharo-700 text-white rounded-lg font-bold text-xs shadow-xs transition-all cursor-pointer transform hover:-translate-y-0.5"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-alpharo-500 hover:bg-alpharo-600 active:bg-alpharo-700 text-white rounded-lg font-semibold text-xs shadow-xs transition-all cursor-pointer transform hover:-translate-y-0.5"
                     title="Buka panel telaah kelaikan margin dan putuskan order"
                     @click.stop="openVerificationModal(order)"
                   >
@@ -155,13 +158,13 @@
               </tr>
 
               <tr v-if="pendingOrders.length === 0">
-                <td colspan="7" class="py-12 text-center text-slate-400">
+                <td colspan="7" class="py-12 text-center text-slate-400"><div class="ui-empty-state">
                   <div class="flex flex-col items-center justify-center gap-2">
                     <CheckCircle2 class="w-8 h-8 text-emerald-500" />
                     <p class="font-medium text-slate-600">Semua antrean order telah diverifikasi Direktur.</p>
                     <p class="text-xs text-slate-400">Tidak ada pengajuan yang membutuhkan keputusan saat ini.</p>
                   </div>
-                </td>
+                </div></td>
               </tr>
             </tbody>
           </table>
@@ -172,7 +175,7 @@
       <div
         v-if="selectedOrder"
         ref="verificationPanelRef"
-        class="bg-white rounded-xl border border-slate-200/90 shadow-sm p-6 space-y-6 animate-in fade-in duration-200"
+        class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-sm p-6 space-y-6 animate-in fade-in duration-200"
       >
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-slate-200">
           <div>
@@ -181,7 +184,7 @@
               <span class="text-slate-300">&bull;</span>
               <span class="text-xs text-slate-500">Wewenang Eksekutif</span>
             </div>
-            <h2 class="text-lg font-bold text-slate-900 mt-0.5">
+            <h2 class="text-lg font-semibold text-slate-900 mt-0.5">
               Telaah Wewenang: {{ selectedOrder.orderNumber }} &bull; {{ selectedOrder.clientName }}
             </h2>
           </div>
@@ -203,7 +206,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 text-xs">
           <!-- LEFT COLUMN (4 COLS): ORDER INFORMATION & CLIENT -->
           <div class="lg:col-span-4 bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4">
-            <h4 class="font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2 pb-2 border-b border-slate-200">
+            <h4 class="font-semibold uppercase tracking-wider text-slate-700 flex items-center gap-2 pb-2 border-b border-slate-200">
               <Building class="w-4 h-4 text-alpharo-500" />
               <span>1. Informasi Order & Rekanan Klien</span>
             </h4>
@@ -211,7 +214,7 @@
             <div class="space-y-3">
               <div>
                 <span class="text-slate-400 text-[11px] block">Nama Rekanan Client</span>
-                <span class="font-bold text-slate-900 text-sm block">{{ selectedOrder.clientName }}</span>
+                <span class="font-semibold text-slate-900 text-sm block">{{ selectedOrder.clientName }}</span>
               </div>
               <div>
                 <span class="text-slate-400 text-[11px] block">Nama Kegiatan / Proyek</span>
@@ -249,7 +252,7 @@
           <!-- CENTER COLUMN (5 COLS): ITEMS & SERVICES + LIVE STOCK CHECK -->
           <div class="lg:col-span-5 bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4">
             <div class="flex items-center justify-between pb-2 border-b border-slate-200">
-              <h4 class="font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+              <h4 class="font-semibold uppercase tracking-wider text-slate-700 flex items-center gap-2">
                 <Box class="w-4 h-4 text-alpharo-500" />
                 <span>2. Rincian Barang & Cek Stok Gudang</span>
               </h4>
@@ -257,7 +260,7 @@
             </div>
 
             <div class="border border-slate-200 rounded-lg overflow-hidden bg-white shadow-2xs">
-              <table class="w-full text-left text-xs">
+              <table class="ui-table w-full text-left text-xs">
                 <thead class="bg-slate-100/70 border-b border-slate-200 text-slate-600 font-semibold">
                   <tr>
                     <th class="p-2.5">Item Barang / Jasa</th>
@@ -271,7 +274,7 @@
                   <tr v-for="(it, idx) in (selectedOrder.items || [])" :key="it.id || it.sku + '-' + idx">
                     <td class="p-2.5">
                       <span class="font-medium text-slate-800 block">{{ it.name }}</span>
-                      <span class="font-mono text-[10px] text-slate-400">{{ it.sku || 'SKU-CUSTOM' }}</span>
+                      <span class="font-mono text-[11px] text-slate-400">{{ it.sku || 'SKU-CUSTOM' }}</span>
                     </td>
                     <td class="p-2.5 text-center whitespace-nowrap font-medium">
                       {{ it.qty }} {{ it.unit || 'Unit' }}
@@ -280,40 +283,40 @@
                       <span
                         v-if="getStockInfo(it).found"
                         :class="[
-                          'px-2 py-0.5 rounded-full text-[10px] font-bold border inline-block',
+                          'px-2 py-0.5 rounded-full text-[11px] font-semibold border inline-block',
                           getStockInfo(it).isReady
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                             : 'bg-rose-50 text-rose-700 border-rose-200'
                         ]"
                       >
-                        {{ getStockInfo(it).isReady ? `Ready (${getStockInfo(it).stock})` : `Kurang (${getStockInfo(it).stock})` }}
+                        {{ getStockInfo(it).isReady ? `Teralokasi (${getStockInfo(it).stock})` : `Kurang (${getStockInfo(it).stock})` }}
                       </span>
-                      <span v-else class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200 inline-block">
+                      <span v-else class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-alpharo-50 text-alpharo-700 border border-alpharo-200 inline-block">
                         Custom / Jasa
                       </span>
                     </td>
                     <td class="p-2.5 text-right whitespace-nowrap text-slate-600">
                       Rp {{ Number(it.price || 0).toLocaleString('id-ID') }}
                     </td>
-                    <td class="p-2.5 text-right font-bold whitespace-nowrap text-slate-900">
+                    <td class="p-2.5 text-right font-semibold whitespace-nowrap text-slate-900">
                       Rp {{ Number(it.total || ((it.qty || 0) * (it.price || 0))).toLocaleString('id-ID') }}
                     </td>
                   </tr>
 
                   <tr v-if="!selectedOrder.items || selectedOrder.items.length === 0">
-                    <td colspan="5" class="p-4 text-center text-slate-400 italic">
+                    <td colspan="5" class="p-4 text-center text-slate-400 italic"><div class="ui-empty-state">
                       Tidak ada rincian item barang pada order ini.
-                    </td>
+                    </div></td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
             <!-- STOCK SUMMARY ALERT -->
-            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-[11px] text-slate-700 flex items-start gap-2">
-              <ShieldAlert class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+            <div class="p-3 bg-alpharo-50 border border-alpharo-200 rounded-lg text-[11px] text-slate-700 flex items-start gap-2">
+              <ShieldAlert class="w-4 h-4 text-alpharo-600 shrink-0 mt-0.5" />
               <div class="leading-relaxed">
-                <strong>Ketentuan Alur Pemenuhan:</strong> Jika stok gudang tidak mencukupi, persetujuan Direktur akan menerbitkan izin bagi Warehouse & Administrasi untuk menerbitkan Purchase Order (PO) pengadaan ke Supplier rekanan.
+                <strong>Ketentuan Alur Pemenuhan:</strong> Pesanan hanya dapat disetujui setelah stok teralokasi penuh. Persetujuan meneruskan pesanan ke Finance untuk pemeriksaan final dan penerbitan invoice.
               </div>
             </div>
           </div>
@@ -321,7 +324,7 @@
           <!-- RIGHT COLUMN (3 COLS): SUMMARY & MARGIN FEASIBILITY -->
           <div class="lg:col-span-3 bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4 flex flex-col justify-between">
             <div>
-              <h4 class="font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2 pb-2 border-b border-slate-200 mb-3">
+              <h4 class="font-semibold uppercase tracking-wider text-slate-700 flex items-center gap-2 pb-2 border-b border-slate-200 mb-3">
                 <DollarSign class="w-4 h-4 text-alpharo-500" />
                 <span>3. Kelaikan Margin & Nilai</span>
               </h4>
@@ -337,7 +340,7 @@
                 </div>
                 <div class="pt-2 border-t border-dashed border-slate-200 flex justify-between items-center">
                   <span class="font-semibold text-slate-700">Gross Margin:</span>
-                  <span class="font-mono font-bold text-emerald-600">
+                  <span class="font-mono font-semibold text-emerald-600">
                     Rp {{ Number(computedFinancials.grossMarginRp).toLocaleString('id-ID') }}
                     <span class="text-xs">({{ computedFinancials.grossMarginPct }}%)</span>
                   </span>
@@ -347,7 +350,7 @@
                 <div class="pt-2">
                   <div
                     :class="[
-                      'p-2 rounded text-center font-bold text-xs border flex items-center justify-center gap-1.5',
+                      'p-2 rounded text-center font-semibold text-xs border flex items-center justify-center gap-1.5',
                       computedFinancials.grossMarginPct >= 20
                         ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
                         : computedFinancials.grossMarginPct >= 10
@@ -365,7 +368,7 @@
                   <span>PPN 11%:</span>
                   <span class="font-mono">Rp {{ Number(computedFinancials.tax).toLocaleString('id-ID') }}</span>
                 </div>
-                <div class="pt-2 border-t border-slate-200 flex justify-between font-bold text-sm text-slate-900">
+                <div class="pt-2 border-t border-slate-200 flex justify-between font-semibold text-sm text-slate-900">
                   <span>Grand Total:</span>
                   <span class="font-mono text-alpharo-600">Rp {{ Number(computedFinancials.grandTotal).toLocaleString('id-ID') }}</span>
                 </div>
@@ -381,7 +384,7 @@
         <!-- BOTTOM: APPROVAL ACTION -->
         <div class="pt-4 border-t border-slate-200 bg-slate-50/50 -mx-6 -mb-6 p-6 rounded-b-xl flex flex-col sm:flex-row items-center justify-between gap-4">
           <div class="w-full sm:w-auto flex-1 max-w-lg">
-            <label class="block text-xs font-bold text-slate-700 mb-1">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">
               Catatan Verifikasi Direktur (Terekam dalam Audit Trail):
             </label>
             <input
@@ -393,20 +396,10 @@
           </div>
 
           <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-            <!-- REJECT BUTTON -->
-            <button
-              type="button"
-              class="px-4 py-2 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-bold text-xs rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
-              @click="openRejectModal(selectedOrder)"
-            >
-              <AlertCircle class="w-4 h-4" />
-              <span>Tolak Order (Reject)</span>
-            </button>
-
             <!-- HOLD BUTTON -->
             <button
               type="button"
-              class="px-4 py-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-bold text-xs rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+              class="px-4 py-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-semibold text-xs rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
               @click="openHoldModal(selectedOrder)"
             >
               <PauseCircle class="w-4 h-4" />
@@ -416,8 +409,8 @@
             <!-- APPROVE BUTTON -->
             <button
               type="button"
-              class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
-              @click="executeApprove(selectedOrder)"
+              class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold text-xs rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+              :disabled="orderSync.busy" @click="executeApprove(selectedOrder)"
             >
               <CheckCircle2 class="w-4 h-4" />
               <span>Setujui Order (Approve)</span>
@@ -428,18 +421,18 @@
     </div>
 
     <!-- TAB 2: HELD / REVISION ORDERS TABLE -->
-    <div v-else-if="activeTab === 'hold'" class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+    <div v-else-if="activeTab === 'hold'" class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
       <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <PauseCircle class="w-4 h-4 text-amber-500" />
-          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">
+          <h3 class="text-xs font-semibold text-slate-900 uppercase tracking-wider">
             Daftar Order Yang Sedang Ditahan / Memerlukan Revisi ({{ heldOrders.length }} Order)
           </h3>
         </div>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px] tracking-wider">
               <th class="py-3 px-4">No. Order</th>
@@ -453,13 +446,13 @@
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr v-for="ord in heldOrders" :key="ord.id" class="hover:bg-slate-50/80">
-              <td class="py-3 px-4 font-mono font-bold text-slate-900">{{ ord.orderNumber }}</td>
+              <td class="py-3 px-4 font-mono font-semibold text-slate-900">{{ ord.orderNumber }}</td>
               <td class="py-3 px-4">
-                <span class="font-bold text-slate-900 block">{{ ord.clientName }}</span>
+                <span class="font-semibold text-slate-900 block">{{ ord.clientName }}</span>
                 <span class="text-[11px] text-slate-400 block truncate max-w-xs">{{ ord.projectName }}</span>
               </td>
               <td class="py-3 px-4 text-slate-500 whitespace-nowrap">{{ ord.holdDate || ord.date }}</td>
-              <td class="py-3 px-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
+              <td class="py-3 px-4 text-right font-mono font-semibold text-slate-900 whitespace-nowrap">
                 Rp {{ Number(ord.grandTotal || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3 px-4 text-slate-700 italic">
@@ -468,28 +461,23 @@
               <td class="py-3 px-4 text-center">
                 <StatusBadge :status="ord.status || 'Ditahan'" />
               </td>
-              <td class="py-3 px-4 text-right whitespace-nowrap space-x-2">
+              <td class="py-3 px-4 text-right whitespace-nowrap">
                 <button
                   type="button"
-                  class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-xs shadow-2xs transition-colors cursor-pointer"
-                  @click="executeReleaseHold(ord)"
-                >
-                  Lepas Tahanan
-                </button>
-                <button
-                  type="button"
-                  class="px-3 py-1 bg-alpharo-500 hover:bg-alpharo-600 text-white rounded font-bold text-xs shadow-2xs transition-colors cursor-pointer"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-alpharo-600 hover:bg-alpharo-700 text-white rounded-lg font-semibold text-xs shadow-2xs transition-colors cursor-pointer"
+                  title="Telaah rincian pesanan dan lakukan tindak lanjut"
                   @click="openVerificationModal(ord)"
                 >
-                  Telaah Ulang
+                  <Eye class="w-3.5 h-3.5" />
+                  <span>Telaah Order</span>
                 </button>
               </td>
             </tr>
 
             <tr v-if="heldOrders.length === 0">
-              <td colspan="7" class="py-12 text-center text-slate-400">
+              <td colspan="7" class="py-12 text-center text-slate-400"><div class="ui-empty-state">
                 Tidak ada order yang sedang ditahan.
-              </td>
+              </div></td>
             </tr>
           </tbody>
         </table>
@@ -497,13 +485,13 @@
     </div>
 
     <!-- TAB 3: APPROVAL HISTORY SECTION -->
-    <div v-else-if="activeTab === 'history'" class="bg-white rounded-xl border border-slate-200/90 shadow-xs p-5">
-      <h3 class="font-bold text-slate-900 text-sm mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+    <div v-else-if="activeTab === 'history'" class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs p-5">
+      <h3 class="font-semibold text-slate-900 text-sm mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
         <Clock class="w-4 h-4 text-alpharo-500" />
         <span>Riwayat Keputusan Verifikasi & Approval Direktur</span>
       </h3>
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
               <th class="py-2.5 px-3">No. Order</th>
@@ -517,11 +505,11 @@
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr v-for="ord in pastDecisions" :key="ord.id">
-              <td class="py-3 px-3 font-mono font-bold text-slate-900">{{ ord.orderNumber }}</td>
+              <td class="py-3 px-3 font-mono font-semibold text-slate-900">{{ ord.orderNumber }}</td>
               <td class="py-3 px-3 font-medium text-slate-800">{{ ord.clientName }}</td>
               <td class="py-3 px-3 text-slate-500 whitespace-nowrap">{{ ord.approvalDate }}</td>
               <td class="py-3 px-3 text-slate-700">{{ ord.approvedBy }}</td>
-              <td class="py-3 px-3 text-right font-mono font-bold text-slate-900">
+              <td class="py-3 px-3 text-right font-mono font-semibold text-slate-900">
                 Rp {{ Number(ord.grandTotal || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3 px-3 text-center"><StatusBadge :status="ord.status" /></td>
@@ -529,9 +517,9 @@
             </tr>
 
             <tr v-if="pastDecisions.length === 0">
-              <td colspan="7" class="py-8 text-center text-slate-400">
+              <td colspan="7" class="py-8 text-center text-slate-400"><div class="ui-empty-state">
                 Belum ada riwayat keputusan approval masa lalu.
-              </td>
+              </div></td>
             </tr>
           </tbody>
         </table>
@@ -550,7 +538,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <!-- LEFT COLUMN (4 COLS): ORDER INFORMATION & CLIENT -->
           <div class="lg:col-span-4 bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4">
-            <h4 class="font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2 pb-2 border-b border-slate-200">
+            <h4 class="font-semibold uppercase tracking-wider text-slate-700 flex items-center gap-2 pb-2 border-b border-slate-200">
               <Building class="w-4 h-4 text-alpharo-500" />
               <span>1. Informasi Order & Rekanan Klien</span>
             </h4>
@@ -558,7 +546,7 @@
             <div class="space-y-3">
               <div>
                 <span class="text-slate-400 text-[11px] block">Nama Rekanan Client</span>
-                <span class="font-bold text-slate-900 text-sm block">{{ selectedOrder.clientName }}</span>
+                <span class="font-semibold text-slate-900 text-sm block">{{ selectedOrder.clientName }}</span>
               </div>
               <div>
                 <span class="text-slate-400 text-[11px] block">Nama Kegiatan / Proyek</span>
@@ -571,7 +559,7 @@
                 </div>
                 <div>
                   <span class="text-slate-400 text-[11px] block">Urgensi Proyek</span>
-                  <span class="font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 inline-block text-[10px]">
+                  <span class="font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 inline-block text-[11px]">
                     {{ selectedOrder.urgency || 'Normal' }}
                   </span>
                 </div>
@@ -598,7 +586,7 @@
           <!-- CENTER COLUMN (5 COLS): ITEMS & SERVICES + LIVE STOCK CHECK -->
           <div class="lg:col-span-5 bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4">
             <div class="flex items-center justify-between pb-2 border-b border-slate-200">
-              <h4 class="font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+              <h4 class="font-semibold uppercase tracking-wider text-slate-700 flex items-center gap-2">
                 <Box class="w-4 h-4 text-alpharo-500" />
                 <span>2. Rincian Barang & Cek Kesiapan Stok</span>
               </h4>
@@ -606,7 +594,7 @@
             </div>
 
             <div class="border border-slate-200 rounded-lg overflow-hidden bg-white shadow-2xs max-h-64 overflow-y-auto">
-              <table class="w-full text-left text-xs">
+              <table class="ui-table w-full text-left text-xs">
                 <thead class="bg-slate-100/70 border-b border-slate-200 text-slate-600 font-semibold sticky top-0">
                   <tr>
                     <th class="p-2.5">Item Barang / Jasa</th>
@@ -620,7 +608,7 @@
                   <tr v-for="(it, idx) in (selectedOrder.items || [])" :key="it.id || it.sku + '-' + idx">
                     <td class="p-2.5">
                       <span class="font-medium text-slate-800 block">{{ it.name }}</span>
-                      <span class="font-mono text-[10px] text-slate-400">{{ it.sku || 'SKU-CUSTOM' }}</span>
+                      <span class="font-mono text-[11px] text-slate-400">{{ it.sku || 'SKU-CUSTOM' }}</span>
                     </td>
                     <td class="p-2.5 text-center whitespace-nowrap font-medium">
                       {{ it.qty }} {{ it.unit || 'Unit' }}
@@ -629,22 +617,22 @@
                       <span
                         v-if="getStockInfo(it).found"
                         :class="[
-                          'px-2 py-0.5 rounded-full text-[10px] font-bold border inline-block',
+                          'px-2 py-0.5 rounded-full text-[11px] font-semibold border inline-block',
                           getStockInfo(it).isReady
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                             : 'bg-rose-50 text-rose-700 border-rose-200'
                         ]"
                       >
-                        {{ getStockInfo(it).isReady ? `Ready (${getStockInfo(it).stock})` : `Kurang (${getStockInfo(it).stock})` }}
+                        {{ getStockInfo(it).isReady ? `Teralokasi (${getStockInfo(it).stock})` : `Kurang (${getStockInfo(it).stock})` }}
                       </span>
-                      <span v-else class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200 inline-block">
+                      <span v-else class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-alpharo-50 text-alpharo-700 border border-alpharo-200 inline-block">
                         Custom / Jasa
                       </span>
                     </td>
                     <td class="p-2.5 text-right whitespace-nowrap text-slate-600">
                       Rp {{ Number(it.price || 0).toLocaleString('id-ID') }}
                     </td>
-                    <td class="p-2.5 text-right font-bold whitespace-nowrap text-slate-900">
+                    <td class="p-2.5 text-right font-semibold whitespace-nowrap text-slate-900">
                       Rp {{ Number(it.total || ((it.qty || 0) * (it.price || 0))).toLocaleString('id-ID') }}
                     </td>
                   </tr>
@@ -652,10 +640,10 @@
               </table>
             </div>
 
-            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-[11px] text-slate-700 flex items-start gap-2">
-              <ShieldAlert class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+            <div class="p-3 bg-alpharo-50 border border-alpharo-200 rounded-lg text-[11px] text-slate-700 flex items-start gap-2">
+              <ShieldAlert class="w-4 h-4 text-alpharo-600 shrink-0 mt-0.5" />
               <div class="leading-relaxed">
-                <strong>Verifikasi Fisik:</strong> Jika stok barang mencukupi, order langsung dijadwalkan untuk packing oleh Tim Warehouse. Jika stok menipis, sistem akan membuka form pengadaan PO Supplier.
+                <strong>Verifikasi Fisik:</strong> Stok harus teralokasi penuh sebelum approval. Jika stok fisik berubah dan tidak mencukupi, persetujuan diblokir sampai pemenuhan selesai. Setelah disetujui, pesanan menjadi Siap Invoice.
               </div>
             </div>
           </div>
@@ -663,7 +651,7 @@
           <!-- RIGHT COLUMN (3 COLS): SUMMARY & MARGIN FEASIBILITY -->
           <div class="lg:col-span-3 bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4 flex flex-col justify-between">
             <div>
-              <h4 class="font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2 pb-2 border-b border-slate-200 mb-3">
+              <h4 class="font-semibold uppercase tracking-wider text-slate-700 flex items-center gap-2 pb-2 border-b border-slate-200 mb-3">
                 <DollarSign class="w-4 h-4 text-alpharo-500" />
                 <span>3. Analisis Finansial & Margin</span>
               </h4>
@@ -679,7 +667,7 @@
                 </div>
                 <div class="pt-2 border-t border-dashed border-slate-200 flex justify-between items-center">
                   <span class="font-semibold text-slate-700">Gross Margin:</span>
-                  <span class="font-mono font-bold text-emerald-600">
+                  <span class="font-mono font-semibold text-emerald-600">
                     Rp {{ Number(computedFinancials.grossMarginRp).toLocaleString('id-ID') }}
                     <span class="text-xs">({{ computedFinancials.grossMarginPct }}%)</span>
                   </span>
@@ -689,7 +677,7 @@
                 <div class="pt-1">
                   <div
                     :class="[
-                      'p-2 rounded text-center font-bold text-xs border flex items-center justify-center gap-1.5',
+                      'p-2 rounded text-center font-semibold text-xs border flex items-center justify-center gap-1.5',
                       computedFinancials.grossMarginPct >= 20
                         ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
                         : computedFinancials.grossMarginPct >= 10
@@ -707,7 +695,7 @@
                   <span>PPN 11%:</span>
                   <span class="font-mono">Rp {{ Number(computedFinancials.tax).toLocaleString('id-ID') }}</span>
                 </div>
-                <div class="pt-2 border-t border-slate-200 flex justify-between font-bold text-sm text-slate-900">
+                <div class="pt-2 border-t border-slate-200 flex justify-between font-semibold text-sm text-slate-900">
                   <span>Grand Total Tagihan:</span>
                   <span class="font-mono text-alpharo-600">Rp {{ Number(computedFinancials.grandTotal).toLocaleString('id-ID') }}</span>
                 </div>
@@ -715,13 +703,13 @@
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">
                 Catatan Verifikasi Direktur (Opsional untuk Setuju):
               </label>
               <textarea
                 v-model="directorNotes"
                 rows="2"
-                placeholder="Instruksi khusus kepada Administrasi atau Gudang..."
+                placeholder="Catatan persetujuan untuk Marketing dan Finance..."
                 class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-alpharo-500 focus:outline-none"
               ></textarea>
             </div>
@@ -741,19 +729,12 @@
 
           <div class="flex items-center gap-2 justify-end">
             <!-- REJECT BUTTON -->
-            <button
-              type="button"
-              class="px-4 py-2 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-bold text-xs rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
-              @click="openRejectModal(selectedOrder)"
-            >
-              <AlertCircle class="w-4 h-4" />
-              <span>Tolak Order</span>
-            </button>
+
 
             <!-- HOLD BUTTON -->
             <button
               type="button"
-              class="px-4 py-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-bold text-xs rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+              class="px-4 py-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-semibold text-xs rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
               @click="openHoldModal(selectedOrder)"
             >
               <PauseCircle class="w-4 h-4" />
@@ -763,8 +744,8 @@
             <!-- APPROVE BUTTON -->
             <button
               type="button"
-              class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
-              @click="executeApprove(selectedOrder)"
+              class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold text-xs rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+              :disabled="orderSync.busy" @click="executeApprove(selectedOrder)"
             >
               <CheckCircle2 class="w-4 h-4" />
               <span>Setujui Order (Approve)</span>
@@ -775,49 +756,7 @@
     </Modal>
 
     <!-- MODAL 2: REJECT MODAL WITH MANDATORY REASON -->
-    <Modal
-      v-model="rejectModalOpen"
-      title="Tolak Pengajuan Order (Wajib Alasan Tertulis)"
-      :subtitle="`Order ${orderToReject?.orderNumber || ''} - ${orderToReject?.clientName || ''}`"
-      size="md"
-    >
-      <div class="space-y-4">
-        <p class="text-xs text-slate-600 leading-relaxed">
-          Alasan penolakan akan dicatat permanen dalam audit trail dan dikirimkan sebagai notifikasi resmi ke staff Marketing.
-        </p>
 
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">
-            Alasan / Catatan Penolakan (Wajib Diisi) *
-          </label>
-          <textarea
-            v-model="rejectReason"
-            rows="3"
-            required
-            placeholder="Tuliskan alasan penolakan secara jelas (misal: 'Margin laba di bawah ambang batas minimal' atau 'Spesifikasi teknis tidak dapat dipenuhi')..."
-            class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-rose-500 focus:outline-none"
-          ></textarea>
-        </div>
-
-        <div class="flex justify-end gap-2 pt-2 border-t border-slate-200">
-          <button
-            type="button"
-            class="px-3.5 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
-            @click="rejectModalOpen = false"
-          >
-            Batal
-          </button>
-          <button
-            type="button"
-            :disabled="!rejectReason.trim()"
-            class="px-4 py-1.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg disabled:opacity-50 cursor-pointer"
-            @click="executeReject"
-          >
-            Konfirmasi Tolak Order
-          </button>
-        </div>
-      </div>
-    </Modal>
 
     <!-- MODAL 3: HOLD / REQUEST REVISION MODAL -->
     <Modal
@@ -832,7 +771,7 @@
         </p>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">
+          <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">
             Alasan Penahanan / Instruksi Revisi (Wajib Diisi) *
           </label>
           <textarea
@@ -855,7 +794,7 @@
           <button
             type="button"
             :disabled="!holdReason.trim()"
-            class="px-4 py-1.5 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-lg disabled:opacity-50 cursor-pointer"
+            class="px-4 py-1.5 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg disabled:opacity-50 cursor-pointer"
             @click="executeHold"
           >
             Konfirmasi Tahan Order
@@ -871,7 +810,8 @@ import { ref, computed, nextTick } from 'vue';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import Modal from '../../components/common/Modal.vue';
-import { store, storeActions } from '../../stores/mockData';
+import { store, storeActions, orderSync } from '../../stores/mockData';
+import { orderError } from '../../services/orderWorkflow';
 import { useToast } from '../../services/toast';
 import {
   CheckCircle2,
@@ -895,9 +835,6 @@ const verificationPanelRef = ref(null);
 const verificationModalOpen = ref(false);
 
 const directorNotes = ref('');
-const rejectModalOpen = ref(false);
-const orderToReject = ref(null);
-const rejectReason = ref('');
 
 const holdModalOpen = ref(false);
 const orderToHold = ref(null);
@@ -905,8 +842,9 @@ const holdReason = ref('');
 
 // Computed Lists
 const pendingOrders = computed(() => {
-  return (store.orders || []).filter((o) => o.status === 'Menunggu Verifikasi');
+  return (store.orders || []).filter((o) => o.serverManaged && o.status === 'Menunggu Verifikasi');
 });
+const legacyPendingCount = computed(() => store.orders.filter(order => !order.serverManaged && order.status === 'Menunggu Verifikasi').length);
 
 const heldOrders = computed(() => {
   return (store.orders || []).filter((o) => o.status === 'Ditahan' || o.isHold);
@@ -923,6 +861,10 @@ if (pendingOrders.value.length > 0) {
 
 // Live stock checking from master data products
 const getStockInfo = (item) => {
+  if (selectedOrder.value?.serverManaged) {
+    const stock = selectedOrder.value.stockReadiness?.items.find(line => line.sku === item?.sku);
+    return { found: !!stock, stock: stock?.allocated || 0, isReady: !!stock && stock.shortage === 0, unit: item?.unit || 'Unit' };
+  }
   if (!item) return { found: false, stock: 0, isReady: true };
   const products = store.products || [];
   const product = products.find(
@@ -1025,31 +967,18 @@ const openVerificationModal = (order) => {
 };
 
 // Approval Execution
-const executeApprove = (order) => {
-  if (!order) return;
-  storeActions.approveOrder(order.id, directorNotes.value || 'Disetujui penuh oleh Direktur.');
-  toast.success(`Order ${order.orderNumber} telah disetujui! Notifikasi diterbitkan ke Administrasi & Warehouse.`);
-  verificationModalOpen.value = false;
-  directorNotes.value = '';
-  selectedOrder.value = pendingOrders.value[0] || null;
-};
-
-// Reject Execution
-const openRejectModal = (order) => {
-  orderToReject.value = order;
-  rejectReason.value = '';
-  rejectModalOpen.value = true;
-};
-
-const executeReject = () => {
-  if (orderToReject.value && rejectReason.value.trim()) {
-    storeActions.rejectOrder(orderToReject.value.id, rejectReason.value.trim());
-    toast.error(`Order ${orderToReject.value.orderNumber} telah ditolak.`);
-    rejectModalOpen.value = false;
+const executeApprove = async (order) => {
+  if (!order || orderSync.busy) return;
+  try {
+    await storeActions.approveOrder(order.id, directorNotes.value || 'Disetujui oleh Direktur.');
+    toast.success(`Pesanan ${order.orderNumber} disetujui dan siap diperiksa Finance.`);
     verificationModalOpen.value = false;
+    directorNotes.value = '';
     selectedOrder.value = pendingOrders.value[0] || null;
-  }
+  } catch (error) { toast.error(orderError(error)); }
 };
+
+
 
 // Hold Execution
 const openHoldModal = (order) => {

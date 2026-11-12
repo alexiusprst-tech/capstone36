@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Order Disetujui (Approved Orders)</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Order Disetujui (Approved Orders)</h1>
           <p class="text-sm text-slate-500 mt-1">
             Daftar order proyek yang telah disetujui Direktur dan siap untuk penyiapan berkas administrasi legal.
           </p>
@@ -11,14 +11,14 @@
       </div>
     </template>
 
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
       <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs">
-        <span class="font-bold text-slate-900 uppercase">Daftar Order Siap Kelola Dokumen</span>
+        <span class="font-semibold text-slate-900 uppercase">Daftar Order Siap Kelola Dokumen</span>
         <span class="text-slate-500">{{ approvedOrders.length }} Order Disetujui</span>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
               <th class="py-3 px-4">No. Order</th>
@@ -31,13 +31,13 @@
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr v-for="order in approvedOrders" :key="order.id" class="hover:bg-slate-50/70 transition-colors">
-              <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ order.orderNumber }}</td>
+              <td class="py-3.5 px-4 font-mono font-semibold text-slate-900">{{ order.orderNumber }}</td>
               <td class="py-3.5 px-4">
-                <span class="font-bold text-slate-900 block">{{ order.clientName }}</span>
+                <span class="font-semibold text-slate-900 block">{{ order.clientName }}</span>
                 <span class="text-[11px] text-slate-400 block truncate max-w-xs">{{ order.projectName }}</span>
               </td>
               <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ order.approvalDate || order.date }}</td>
-              <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
+              <td class="py-3.5 px-4 text-right font-mono font-semibold text-slate-900 whitespace-nowrap">
                 Rp {{ Number(order.grandTotal || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-center">
@@ -46,7 +46,7 @@
               <td class="py-3.5 px-4 text-right whitespace-nowrap">
                 <button
                   type="button"
-                  class="px-3 py-1 bg-alpharo-500 hover:bg-alpharo-600 text-white rounded text-xs font-bold"
+                  class="px-3 py-1 bg-alpharo-500 hover:bg-alpharo-600 text-white rounded text-xs font-semibold"
                   @click="openDetail(order)"
                 >
                   Detail & Kelola
@@ -69,9 +69,9 @@
         <DocumentChecklist :documents="selectedOrder.documents" />
 
         <div>
-          <h4 class="font-bold uppercase text-slate-500 tracking-wider mb-2">Item Pekerjaan / Barang</h4>
+          <h4 class="font-semibold uppercase text-slate-500 tracking-wider mb-2">Item Pekerjaan / Barang</h4>
           <div class="border border-slate-200 rounded-lg overflow-hidden">
-            <table class="w-full text-left">
+            <table class="ui-table w-full text-left">
               <thead class="bg-slate-50 border-b border-slate-200 font-semibold text-slate-600">
                 <tr>
                   <th class="p-2.5">Item</th>
@@ -84,11 +84,11 @@
                 <tr v-for="it in selectedOrder.items" :key="it.sku">
                   <td class="p-2.5">
                     <span class="font-medium text-slate-800">{{ it.name }}</span>
-                    <span class="block text-[10px] text-slate-400 font-mono">{{ it.sku }}</span>
+                    <span class="block text-[11px] text-slate-400 font-mono">{{ it.sku }}</span>
                   </td>
                   <td class="p-2.5 text-center">{{ it.qty }} {{ it.unit }}</td>
                   <td class="p-2.5 text-right">Rp {{ Number(it.price || 0).toLocaleString('id-ID') }}</td>
-                  <td class="p-2.5 text-right font-bold">Rp {{ Number(it.total || ((it.qty || 0) * (it.price || 0))).toLocaleString('id-ID') }}</td>
+                  <td class="p-2.5 text-right font-semibold">Rp {{ Number(it.total || ((it.qty || 0) * (it.price || 0))).toLocaleString('id-ID') }}</td>
                 </tr>
               </tbody>
             </table>
@@ -96,7 +96,7 @@
         </div>
 
         <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
-          <h4 class="font-bold uppercase text-slate-700 tracking-wider mb-2">Terbitkan / Perbarui Berkas:</h4>
+          <h4 class="font-semibold uppercase text-slate-700 tracking-wider mb-2">Terbitkan / Perbarui Berkas:</h4>
           <div class="grid grid-cols-2 gap-2">
             <button
               type="button"
@@ -147,7 +147,21 @@ const drawerOpen = ref(false);
 const selectedOrder = ref(null);
 
 const approvedOrders = computed(() => {
-  return store.orders.filter((o) => o.status === 'Disetujui' || o.status === 'Diproses' || o.status === 'Selesai');
+  return store.orders
+    .filter((o) => {
+      if (o.orderNumber === 'ORD-2026-007' || o.orderNumber === 'ORD-2026-008') return false;
+      if (o.date && String(o.date).startsWith('2026-10')) return false;
+      return o.status === 'Disetujui' || o.status === 'Diproses' || o.status === 'Selesai';
+    })
+    .slice()
+    .sort((a, b) => {
+      const dateA = a.date || a.createdAt || '';
+      const dateB = b.date || b.createdAt || '';
+      if (dateA !== dateB) return dateB.localeCompare(dateA);
+      const numA = parseInt(String(a.orderNumber || '').replace(/\D/g, ''), 10) || Number(a.id) || 0;
+      const numB = parseInt(String(b.orderNumber || '').replace(/\D/g, ''), 10) || Number(b.id) || 0;
+      return numB - numA;
+    });
 });
 
 const openDetail = (order) => {

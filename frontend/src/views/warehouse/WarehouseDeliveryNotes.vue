@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Surat Jalan Gudang</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Surat Jalan Gudang</h1>
           <p class="text-sm text-slate-500 mt-1">
             Pemeriksaan fisik Surat Jalan sebelum muat armada dan konfirmasi serah terima pengemudi.
           </p>
@@ -11,14 +11,14 @@
       </div>
     </template>
 
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
       <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs">
-        <span class="font-bold text-slate-900 uppercase">Daftar Surat Jalan Aktif</span>
+        <span class="font-semibold text-slate-900 uppercase">Daftar Surat Jalan Aktif</span>
         <span class="text-slate-500">{{ sjOrders.length }} Dokumen Surat Jalan</span>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
               <th class="py-3 px-4">Nomor SJ</th>
@@ -32,11 +32,11 @@
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr v-for="order in sjOrders" :key="order.id" class="hover:bg-slate-50/70 transition-colors">
-              <td class="py-3.5 px-4 font-mono font-bold text-slate-900">
+              <td class="py-3.5 px-4 font-mono font-semibold text-slate-900">
                 {{ order.documents?.suratJalan?.number }}
               </td>
               <td class="py-3.5 px-4 font-mono text-slate-600">{{ order.orderNumber }}</td>
-              <td class="py-3.5 px-4 font-bold text-slate-800">{{ order.clientName }}</td>
+              <td class="py-3.5 px-4 font-semibold text-slate-800">{{ order.clientName }}</td>
               <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ order.documents?.suratJalan?.date }}</td>
               <td class="py-3.5 px-4 text-center">
                 <StatusBadge :status="order.documents?.suratJalan?.status" />
@@ -49,7 +49,7 @@
                   <button
                     v-if="order.fulfillmentStatus !== 'Sedang Dikirim' && order.fulfillmentStatus !== 'Selesai'"
                     type="button"
-                    class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-xs"
+                    class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-semibold text-xs"
                     @click="confirmDispatched(order)"
                   >
                     Konfirmasi Muat Truk
@@ -75,7 +75,7 @@
         <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1.5">
           <div class="flex justify-between">
             <span class="text-slate-500">Order Terkait:</span>
-            <span class="font-mono font-bold text-slate-900">{{ selectedOrder.orderNumber }}</span>
+            <span class="font-mono font-semibold text-slate-900">{{ selectedOrder.orderNumber }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-slate-500">Tujuan:</span>
@@ -84,11 +84,11 @@
         </div>
 
         <div>
-          <h4 class="font-bold uppercase text-slate-500 tracking-wider mb-2">Item Muatan Fisik</h4>
+          <h4 class="font-semibold uppercase text-slate-500 tracking-wider mb-2">Item Muatan Fisik</h4>
           <div class="border border-slate-200 rounded-lg divide-y divide-slate-100">
             <div v-for="it in selectedOrder.items" :key="it.sku" class="p-2.5 flex justify-between">
               <span>{{ it.name }}</span>
-              <span class="font-bold">{{ it.qty }} {{ it.unit }}</span>
+              <span class="font-semibold">{{ it.qty }} {{ it.unit }}</span>
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\DocumentTemplate;
 use App\Models\OrderDocument;
+use App\Models\SalesOrder;
 use App\Services\DocxTemplateService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -64,6 +65,10 @@ class OrderDocumentController extends Controller
             : DocumentTemplate::where('code', $request->input('template_code'))->firstOrFail();
 
         $userId = $request->user()?->id;
+        if (in_array(strtoupper($template->category), ['FAKTUR', 'INVOICE'], true)) {
+            $order = SalesOrder::where('order_number', $request->input('order_number'))->first();
+            abort_unless($order?->isApprovedForInvoice(), 409, 'Pesanan belum mendapat persetujuan valid untuk invoice.');
+        }
 
         $doc = $this->templateService->generate(
             template: $template,

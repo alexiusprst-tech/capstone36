@@ -3,26 +3,26 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Tracking Pesanan</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Tracking Pesanan</h1>
           <p class="text-sm text-slate-500 mt-1">
             Pantau progres real-time setiap pesanan instansi Anda: dari pembuatan order hingga barang diterima dan lunas.
           </p>
         </div>
         <div class="flex items-center gap-2">
-          <router-link
-            to="/client/order-request"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#0B4DA2] to-[#062F69] hover:from-[#09428F] hover:to-[#042452] text-white font-bold rounded-lg text-xs shadow-xs transition-all"
+          <Link
+            href="/client/order-request"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-alpharo-600 text-white font-semibold rounded-lg text-xs shadow-xs transition-all hover:bg-alpharo-700"
           >
             <Plus class="w-4 h-4 text-amber-300 stroke-[2.5]" />
             <span>Ajukan Pesanan Baru</span>
-          </router-link>
-          <router-link
-            to="/client/payments"
+          </Link>
+          <Link
+            href="/client/payments"
             class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors"
           >
             <CreditCard class="w-4 h-4" />
             <span>Status Pembayaran</span>
-          </router-link>
+          </Link>
         </div>
       </div>
     </template>
@@ -31,7 +31,7 @@
       <!-- LEFT COLUMN: ORDER LIST & SEARCH -->
       <div class="lg:col-span-1 space-y-4">
         <!-- Search & Filter -->
-        <div class="bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs space-y-3">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs space-y-3">
           <div class="relative">
             <Search class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
@@ -49,7 +49,7 @@
               type="button"
               :class="[
                 activeTab === tab.key
-                  ? 'bg-alpharo-500 text-white font-bold'
+                  ? 'bg-alpharo-500 text-white font-semibold'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
                 'px-2.5 py-1 rounded-full whitespace-nowrap transition-colors'
               ]"
@@ -68,22 +68,23 @@
             type="button"
             :class="[
               selectedOrder && selectedOrder.id === order.id
-                ? 'border-alpharo-500 ring-2 ring-alpharo-500/20 bg-blue-50/30'
+                ? 'border-alpharo-500 ring-2 ring-alpharo-500/20 bg-alpharo-50/30'
                 : 'border-slate-200 hover:border-slate-300 bg-white',
               'w-full text-left rounded-xl border p-4 shadow-xs transition-all relative overflow-hidden'
             ]"
             @click="selectedOrder = order"
           >
             <div class="flex items-center justify-between gap-2">
-              <span class="font-mono font-bold text-slate-900 text-xs">{{ order.orderNumber }}</span>
+              <span class="font-mono font-semibold text-slate-900 text-xs">{{ order.orderNumber }}</span>
               <StatusBadge :status="order.isHold ? 'Ditahan' : order.status" />
             </div>
 
             <p class="text-xs font-semibold text-slate-800 mt-2 line-clamp-1">{{ order.projectName }}</p>
+            <p v-if="order.marketingName" class="text-[11px] text-slate-500 mt-0.5">PIC: {{ order.marketingName }}</p>
             
             <div class="flex items-center justify-between text-[11px] text-slate-500 mt-2 pt-2 border-t border-slate-100">
               <span>{{ order.date }}</span>
-              <span class="font-mono font-bold text-slate-900">
+              <span class="font-mono font-semibold text-slate-900">
                 Rp {{ (order.grandTotal || 0).toLocaleString('id-ID') }}
               </span>
             </div>
@@ -91,7 +92,7 @@
             <!-- Hold Flag -->
             <div
               v-if="order.isHold"
-              class="mt-2 text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200 inline-block"
+              class="mt-2 text-[11px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200 inline-block"
             >
               ⚠ Pengiriman Ditahan
             </div>
@@ -99,7 +100,7 @@
 
           <div
             v-if="filteredOrders.length === 0"
-            class="bg-white rounded-xl border border-slate-200/90 p-8 shadow-xs text-center text-slate-400 text-xs"
+            class="ui-panel bg-white rounded-xl border border-slate-200/90 p-8 shadow-xs text-center text-slate-400 text-xs"
           >
             Tidak ada pesanan yang sesuai filter.
           </div>
@@ -110,20 +111,23 @@
       <div class="lg:col-span-2">
         <div v-if="selectedOrder" class="space-y-6">
           <!-- ORDER SUMMARY CARD -->
-          <div class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
+          <div class="ui-panel bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-4 border-b border-slate-100">
               <div>
                 <div class="flex items-center gap-2 mb-1">
-                  <span class="font-mono font-bold text-slate-900 text-base">{{ selectedOrder.orderNumber }}</span>
+                  <span class="font-mono font-semibold text-slate-900 text-base">{{ selectedOrder.orderNumber }}</span>
                   <StatusBadge :status="selectedOrder.isHold ? 'Ditahan' : selectedOrder.status" />
                 </div>
-                <h3 class="text-sm font-bold text-slate-800">{{ selectedOrder.projectName }}</h3>
-                <p class="text-xs text-slate-500 mt-0.5">Diajukan: {{ selectedOrder.date }} &bull; Oleh: {{ selectedOrder.submittedBy || 'Marketing' }}</p>
+                <h3 class="text-sm font-semibold text-slate-800">{{ selectedOrder.projectName }}</h3>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Diajukan: {{ selectedOrder.date }} &bull; Oleh: {{ selectedOrder.submittedBy || 'Marketing' }}
+                  <span v-if="selectedOrder.marketingName">&bull; PIC Marketing: <strong class="text-slate-700">{{ selectedOrder.marketingName }}</strong></span>
+                </p>
               </div>
 
               <div class="text-left sm:text-right">
                 <p class="text-[11px] text-slate-400 uppercase font-semibold">Total Nilai Pesanan</p>
-                <p class="text-lg font-bold font-mono text-slate-900">
+                <p class="text-lg font-semibold font-mono text-slate-900">
                   Rp {{ (selectedOrder.grandTotal || 0).toLocaleString('id-ID') }}
                 </p>
                 <p class="text-[11px] text-slate-500">Termasuk PPN 11%</p>
@@ -137,8 +141,8 @@
             >
               <AlertTriangle class="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
               <div>
-                <p class="font-bold">Pengiriman Ditahan Sementara (Hold Status)</p>
-                <p class="mt-0.5 leading-relaxed">{{ selectedOrder.holdReason || 'Menunggu konfirmasi atau penyelesaian kewajiban pembayaran termin.' }}</p>
+                <p class="font-semibold">Pengiriman Ditahan Sementara (Hold Status)</p>
+                <p class="mt-0.5 leading-relaxed">{{ selectedOrder.holdReason || 'Menunggu konfirmasi atau penyelesaian kewajiban pembayaran tagihan.' }}</p>
                 <p class="text-[11px] text-rose-600 mt-1">Ditahan oleh {{ selectedOrder.holdBy || 'Direktur' }} pada {{ selectedOrder.holdDate || 'Hari ini' }}. Silakan hubungi bagian Finance untuk tindak lanjut.</p>
               </div>
             </div>
@@ -146,20 +150,20 @@
             <!-- DIAJUKAN CLIENT ALERT -->
             <div
               v-if="selectedOrder.status === 'Diajukan Client'"
-              class="mt-4 p-4 rounded-xl bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-purple-200 text-xs text-purple-900 flex items-start gap-3 shadow-2xs"
+              class="mt-4 p-4 rounded-xl bg-linear-to-r from-alpharo-50 via-alpharo-50 to-alpharo-50 border border-alpharo-200 text-xs text-alpharo-900 flex items-start gap-3 shadow-2xs"
             >
-              <Inbox class="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
+              <Inbox class="w-5 h-5 text-alpharo-600 shrink-0 mt-0.5" />
               <div>
                 <div class="flex items-center gap-2">
-                  <p class="font-bold text-sm text-slate-900">Pengajuan Kebutuhan Telah Diterima Sistem Alpharo</p>
-                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700 border border-purple-200">
+                  <p class="font-semibold text-sm text-slate-900">Pengajuan Kebutuhan Telah Diterima Sistem Alpharo</p>
+                  <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-alpharo-100 text-alpharo-700 border border-alpharo-200">
                     Menunggu Verifikasi Marketing
                   </span>
                 </div>
                 <p class="mt-1 leading-relaxed text-slate-700">
                   Pesanan kebutuhan Anda telah masuk ke meja Tim Marketing CV Alpharo Artha Jaya. Staf marketing sedang memvalidasi spesifikasi teknis dan ketersediaan stok fisik di gudang sebelum diteruskan untuk approval final Direktur.
                 </p>
-                <p class="text-[11px] text-purple-700 font-semibold mt-1.5 flex items-center gap-1.5">
+                <p class="text-[11px] text-alpharo-700 font-semibold mt-1.5 flex items-center gap-1.5">
                   <Clock class="w-3.5 h-3.5" />
                   <span>Estimasi waktu respons penawaran: 1 &ndash; 3 jam kerja. Anda akan menerima notifikasi begitu status diperbarui.</span>
                 </p>
@@ -168,7 +172,7 @@
 
             <!-- TRACKING STEPPER PIPELINE -->
             <div class="mt-6">
-              <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4">
+              <h4 class="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-4">
                 Alur Tracking Tahapan Proyek
               </h4>
 
@@ -181,7 +185,7 @@
                       step.isDone
                         ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
                         : step.isCurrent
-                        ? 'bg-blue-50 border-alpharo-500 ring-2 ring-alpharo-500/20 text-alpharo-700 font-bold'
+                        ? 'bg-alpharo-50 border-alpharo-500 ring-2 ring-alpharo-500/20 text-alpharo-700 font-semibold'
                         : 'bg-slate-50 border-slate-200 text-slate-400',
                       'p-2.5 rounded-xl border text-center transition-all'
                     ]"
@@ -195,7 +199,7 @@
                         ]"
                       />
                     </div>
-                    <p class="text-[10px] font-bold uppercase tracking-wider leading-tight">{{ step.title }}</p>
+                    <p class="text-[11px] font-semibold uppercase tracking-wider leading-tight">{{ step.title }}</p>
                     <p class="text-[9px] mt-1 leading-tight opacity-80">{{ step.desc }}</p>
                   </div>
                 </div>
@@ -206,13 +210,13 @@
           <!-- DETAILED TIMELINE & SHIPMENT LOGISTICS -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- LOGISTICS & DELIVERY INFO -->
-            <div class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
+            <div class="ui-panel bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
               <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                 <div class="flex items-center gap-2">
                   <Truck class="w-4 h-4 text-alpharo-500" />
-                  <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Status Pengiriman Logistik</h4>
+                  <h4 class="text-xs font-semibold text-slate-900 uppercase tracking-wider">Status Pengiriman Logistik</h4>
                 </div>
-                <span class="text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+                <span class="text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
                   {{ shipmentInfo.status }}
                 </span>
               </div>
@@ -220,7 +224,7 @@
               <div class="space-y-3 text-xs">
                 <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
                   <span class="text-slate-500">No. Surat Jalan Gudang</span>
-                  <span class="font-mono font-bold text-slate-900">{{ shipmentInfo.deliveryNoteNumber }}</span>
+                  <span class="font-mono font-semibold text-slate-900">{{ shipmentInfo.deliveryNoteNumber }}</span>
                 </div>
                 <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
                   <span class="text-slate-500">Armada Pengantar</span>
@@ -236,27 +240,27 @@
                 </div>
                 <div class="flex items-center justify-between py-1.5">
                   <span class="text-slate-500">Estimasi Tiba di Lokasi</span>
-                  <span class="font-bold text-emerald-600">{{ shipmentInfo.eta }}</span>
+                  <span class="font-semibold text-emerald-600">{{ shipmentInfo.eta }}</span>
                 </div>
               </div>
 
-              <div class="mt-4 p-3.5 rounded-xl bg-blue-50/80 border border-blue-200 text-[11px] text-blue-900 leading-relaxed space-y-2">
+              <div class="mt-4 p-3.5 rounded-xl bg-alpharo-50/80 border border-alpharo-200 text-[11px] text-alpharo-900 leading-relaxed space-y-2">
                 <div class="flex items-center justify-between">
-                  <p class="font-bold flex items-center gap-1.5">
+                  <p class="font-semibold flex items-center gap-1.5">
                     <CheckCircle2 class="w-4 h-4 text-emerald-600" />
                     <span>Konfirmasi Penerimaan Barang (BAST):</span>
                   </p>
-                  <span v-if="selectedOrder.fulfillmentStatus === 'Selesai'" class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold text-[10px]">
+                  <span v-if="selectedOrder.fulfillmentStatus === 'Selesai'" class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-semibold text-[11px]">
                     Sudah Diterima
                   </span>
                 </div>
-                <p class="text-blue-800 text-[11px]">
+                <p class="text-alpharo-800 text-[11px]">
                   Mohon periksa fisik barang saat tiba di lokasi. Klik tombol di bawah ini untuk mengonfirmasi penerimaan secara resmi.
                 </p>
                 <button
                   v-if="selectedOrder.fulfillmentStatus !== 'Selesai'"
                   type="button"
-                  class="w-full mt-1 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-lg text-xs shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                  class="w-full mt-1 px-4 py-2 bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold rounded-lg text-xs shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
                   @click="openConfirmModal"
                 >
                   <CheckCircle2 class="w-4 h-4 stroke-[2.5]" />
@@ -266,8 +270,8 @@
             </div>
 
             <!-- RIWAYAT LOG TIMELINE -->
-            <div class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
-              <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4 pb-3 border-b border-slate-100">
+            <div class="ui-panel bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
+              <h4 class="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-4 pb-3 border-b border-slate-100">
                 Riwayat Jejak Waktu (Timeline)
               </h4>
 
@@ -277,16 +281,16 @@
                   :key="tIdx"
                   class="flex items-start gap-3 relative"
                 >
-                  <div class="w-6 h-6 rounded-full bg-blue-50 text-alpharo-500 flex items-center justify-center shrink-0 border border-blue-200">
+                  <div class="w-6 h-6 rounded-full bg-alpharo-50 text-alpharo-500 flex items-center justify-center shrink-0 border border-alpharo-200">
                     <CheckCircle2 class="w-3.5 h-3.5" />
                   </div>
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between gap-2">
-                      <p class="text-xs font-bold text-slate-900 truncate">{{ t.stage }}</p>
-                      <span class="text-[10px] text-slate-400 whitespace-nowrap">{{ t.timestamp }}</span>
+                      <p class="text-xs font-semibold text-slate-900 truncate">{{ t.stage }}</p>
+                      <span class="text-[11px] text-slate-400 whitespace-nowrap">{{ t.timestamp }}</span>
                     </div>
                     <p class="text-[11px] text-slate-600 mt-0.5">{{ t.notes }}</p>
-                    <p class="text-[10px] text-slate-400 mt-0.5">Oleh: {{ t.user }}</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Oleh: {{ t.user }}</p>
                   </div>
                 </div>
 
@@ -298,13 +302,13 @@
           </div>
 
           <!-- ORDER ITEMS TABLE -->
-          <div class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
-            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">
+          <div class="ui-panel bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs">
+            <h4 class="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-3">
               Rincian Barang yang Dipesan
             </h4>
 
             <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs border-collapse">
+              <table class="ui-table w-full text-left text-xs border-collapse">
                 <thead>
                   <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
                     <th class="py-2.5 px-3">No</th>
@@ -322,7 +326,7 @@
                   >
                     <td class="py-3 px-3 text-slate-400 font-mono">{{ idx + 1 }}</td>
                     <td class="py-3 px-3">
-                      <p class="font-bold text-slate-900">{{ item.name }}</p>
+                      <p class="font-semibold text-slate-900">{{ item.name }}</p>
                       <p class="text-[11px] text-slate-400 font-mono">{{ item.sku }}</p>
                     </td>
                     <td class="py-3 px-3 text-center font-semibold text-slate-800">
@@ -331,13 +335,13 @@
                     <td class="py-3 px-3 text-right font-mono text-slate-700 whitespace-nowrap">
                       Rp {{ (item.price || 0).toLocaleString('id-ID') }}
                     </td>
-                    <td class="py-3 px-3 text-right font-mono font-bold text-slate-900 whitespace-nowrap">
+                    <td class="py-3 px-3 text-right font-mono font-semibold text-slate-900 whitespace-nowrap">
                       Rp {{ ((item.qty || 0) * (item.price || 0)).toLocaleString('id-ID') }}
                     </td>
                   </tr>
                 </tbody>
                 <tfoot>
-                  <tr class="bg-slate-50/80 font-bold text-slate-900 border-t border-slate-200">
+                  <tr class="bg-slate-50/80 font-semibold text-slate-900 border-t border-slate-200">
                     <td colspan="4" class="py-2.5 px-3 text-right">Subtotal:</td>
                     <td class="py-2.5 px-3 text-right font-mono">
                       Rp {{ (selectedOrder.subtotal || 0).toLocaleString('id-ID') }}
@@ -349,7 +353,7 @@
                       Rp {{ (selectedOrder.tax || 0).toLocaleString('id-ID') }}
                     </td>
                   </tr>
-                  <tr class="bg-blue-50/40 font-bold text-alpharo-600 border-t border-slate-200 text-sm">
+                  <tr class="bg-alpharo-50/40 font-semibold text-alpharo-600 border-t border-slate-200 text-sm">
                     <td colspan="4" class="py-3 px-3 text-right">Grand Total:</td>
                     <td class="py-3 px-3 text-right font-mono">
                       Rp {{ (selectedOrder.grandTotal || 0).toLocaleString('id-ID') }}
@@ -361,13 +365,13 @@
           </div>
 
           <!-- DOCUMENT DOWNLOADS & ACTIONS -->
-          <div class="bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="ui-panel bg-white rounded-xl border border-slate-200/90 p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-blue-50 text-alpharo-500 flex items-center justify-center shrink-0">
+              <div class="w-10 h-10 rounded-lg bg-alpharo-50 text-alpharo-500 flex items-center justify-center shrink-0">
                 <FileText class="w-5 h-5" />
               </div>
               <div>
-                <p class="text-xs font-bold text-slate-900">Dokumen SPJ & Faktur Terkait</p>
+                <p class="text-xs font-semibold text-slate-900">Dokumen SPJ & Faktur Terkait</p>
                 <p class="text-[11px] text-slate-500">Unduh atau cetak dokumen resmi untuk keperluan arsip bendahara instansi.</p>
               </div>
             </div>
@@ -389,23 +393,23 @@
                 <Download class="w-3.5 h-3.5" />
                 <span>BAST</span>
               </button>
-              <router-link
-                to="/client/payments"
+              <Link
+                href="/client/payments"
                 class="px-3 py-2 bg-alpharo-500 hover:bg-alpharo-600 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors flex items-center gap-1.5"
               >
                 <CreditCard class="w-3.5 h-3.5" />
                 <span>Buka Invoice</span>
-              </router-link>
+              </Link>
             </div>
           </div>
         </div>
 
         <div
           v-else
-          class="bg-white rounded-xl border border-slate-200/90 p-16 shadow-xs text-center text-slate-400 text-xs"
+          class="ui-panel bg-white rounded-xl border border-slate-200/90 p-16 shadow-xs text-center text-slate-400 text-xs"
         >
           <PackageSearch class="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <p class="font-bold text-slate-700 text-sm">Pilih Pesanan untuk Melacak</p>
+          <p class="font-semibold text-slate-700 text-sm">Pilih Pesanan untuk Melacak</p>
           <p class="mt-1">Pilih salah satu pesanan pada daftar di sebelah kiri untuk melihat rincian progres lengkap.</p>
         </div>
       </div>
@@ -420,7 +424,7 @@
     >
       <form class="space-y-4 text-xs" @submit.prevent="submitReceiptConfirmation">
         <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 space-y-1">
-          <p class="font-bold flex items-center gap-1.5">
+          <p class="font-semibold flex items-center gap-1.5">
             <CheckCircle2 class="w-4 h-4 text-emerald-600 shrink-0" />
             <span>Konfirmasi untuk Pesanan: {{ selectedOrder?.orderNumber }}</span>
           </p>
@@ -483,7 +487,7 @@
           </button>
           <button
             type="submit"
-            class="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-lg shadow-xs cursor-pointer flex items-center gap-1.5"
+            class="px-5 py-2 bg-alpharo-600 text-white font-semibold rounded-lg shadow-xs cursor-pointer flex items-center gap-1.5 hover:bg-alpharo-700"
           >
             <CheckCircle2 class="w-4 h-4" />
             <span>Simpan Konfirmasi Penerimaan</span>
@@ -496,7 +500,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute } from '../../navigation';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import Modal from '../../components/common/Modal.vue';

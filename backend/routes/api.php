@@ -1,18 +1,32 @@
 <?php
 
-use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AccountController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DocumentTemplateController;
 use App\Http\Controllers\Api\OrderDocumentController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\PurchaseController;
+use App\Http\Controllers\Api\PurchaseProgressController;
 use App\Http\Controllers\Api\RegionController;
+use App\Http\Controllers\Api\SalesOrderController;
 use App\Http\Controllers\Api\SpjController;
 use App\Http\Controllers\Api\SupplierController;
 use Illuminate\Support\Facades\Route;
 
 // Public Auth Routes
 Route::post('/auth/login', [AuthController::class, 'login'])->name('api.auth.login');
+Route::post('/purchases/{code}/supplier-progress', [PurchaseProgressController::class, 'store'])->middleware('auth:sanctum');
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/orders', [SalesOrderController::class, 'index']);
+    Route::put('/orders/{number}', [SalesOrderController::class, 'update']);
+    Route::delete('/orders/{order}', [SalesOrderController::class, 'destroy']);
+    Route::post('/orders/{order}/submit', [SalesOrderController::class, 'submit']);
+    Route::post('/orders/{order}/stock-check', [SalesOrderController::class, 'stockCheck']);
+    Route::post('/orders/{order}/approve', [SalesOrderController::class, 'approve']);
+    Route::post('/orders/{order}/invoice', [SalesOrderController::class, 'invoice']);
+    Route::get('/orders/{order}/invoice/download', [SalesOrderController::class, 'downloadInvoice'])->name('api.orders.invoice.download');
+});
 
 // Products & Inventory Catalog
 Route::get('/products', [ProductController::class, 'index'])->name('api.products.index');

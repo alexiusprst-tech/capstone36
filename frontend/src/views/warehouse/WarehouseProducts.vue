@@ -8,19 +8,19 @@
             <Package class="w-6 h-6 stroke-[2.2]" />
           </div>
           <div>
-            <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Data Barang</h1>
+            <h1 class="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">Data Barang</h1>
           </div>
         </div>
 
         <!-- Top Right Actions matching the design -->
         <div class="flex items-center flex-wrap gap-2.5">
-          <!-- Import Excel Button -->
+          <!-- Import Excel Button (Secondary Style) -->
           <button
             type="button"
-            class="inline-flex items-center gap-2 px-3.5 py-2 bg-[#0e7490] hover:bg-[#155e75] active:bg-[#164e63] text-white font-medium rounded-lg text-xs shadow-xs transition-colors cursor-pointer"
+            class="inline-flex items-center gap-2 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 font-medium rounded-lg text-xs border border-slate-300 shadow-2xs transition-colors cursor-pointer"
             @click="openImportModal"
           >
-            <FileSpreadsheet class="w-4 h-4" />
+            <FileSpreadsheet class="w-4 h-4 text-emerald-600" />
             <span>Import Excel</span>
           </button>
 
@@ -32,7 +32,7 @@
           >
             <Tags class="w-4 h-4 text-slate-500" />
             <span>Kategori</span>
-            <span class="ml-1 px-1.5 py-0.2 bg-slate-100 text-slate-600 rounded text-[10px] font-semibold">{{ categoriesList.length }}</span>
+            <span class="ml-1 px-1.5 py-0.2 bg-slate-100 text-slate-600 rounded text-[11px] font-semibold">{{ categoriesList.length }}</span>
           </button>
 
           <!-- Satuan Button -->
@@ -43,31 +43,31 @@
           >
             <Flag class="w-4 h-4 text-slate-500" />
             <span>Satuan</span>
-            <span class="ml-1 px-1.5 py-0.2 bg-slate-100 text-slate-600 rounded text-[10px] font-semibold">{{ unitsList.length }}</span>
+            <span class="ml-1 px-1.5 py-0.2 bg-slate-100 text-slate-600 rounded text-[11px] font-semibold">{{ unitsList.length }}</span>
           </button>
 
-          <!-- Tambah Button -->
+          <!-- Tambah Button (Primary CTA) -->
           <button
             type="button"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-[#0284c7] hover:bg-[#0369a1] active:bg-[#075985] text-white font-semibold rounded-lg text-xs shadow-xs transition-colors cursor-pointer"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 active:bg-alpharo-800 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors cursor-pointer"
             @click="openAddModal"
           >
             <Plus class="w-4 h-4 stroke-[2.5]" />
-            <span>Tambah</span>
+            <span>Tambah Barang</span>
           </button>
         </div>
       </div>
     </template>
 
     <!-- SEARCH & FILTER CARD (Green top line accent matching image) -->
-    <div class="bg-white rounded-xl border border-slate-200/90 mb-5 shadow-2xs overflow-hidden">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 mb-5 shadow-2xs overflow-hidden">
       <!-- Top green accent border -->
-      <div class="h-1 bg-emerald-600 w-full"></div>
+      <div class="h-px bg-slate-200 w-full"></div>
 
       <div class="p-4 sm:p-5">
-        <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5 items-end" @submit.prevent="handleSearch">
+        <form class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,0.8fr)_auto] gap-3.5 items-end" @submit.prevent="handleSearch">
           <!-- Pencarian -->
-          <div class="lg:col-span-4">
+          <div class="min-w-0">
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">Pencarian</label>
             <div class="relative">
               <input
@@ -91,7 +91,7 @@
           </div>
 
           <!-- Kategori -->
-          <div class="lg:col-span-3">
+          <div class="min-w-0">
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kategori</label>
             <select
               v-model="selectedCategory"
@@ -106,7 +106,7 @@
           </div>
 
           <!-- Satuan -->
-          <div class="lg:col-span-2">
+          <div class="min-w-0">
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">Satuan</label>
             <select
               v-model="selectedUnit"
@@ -121,7 +121,7 @@
           </div>
 
           <!-- Status Barang Filter -->
-          <div class="lg:col-span-1">
+          <div class="min-w-0">
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">Status</label>
             <select
               v-model="selectedStatus"
@@ -137,11 +137,11 @@
           </div>
 
           <!-- Buttons Group -->
-          <div class="lg:col-span-2 flex items-center gap-2">
+          <div class="sm:col-span-2 xl:col-span-1 flex flex-wrap items-center justify-end gap-2">
             <!-- Cari Button -->
             <button
               type="submit"
-              class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#0284c7] hover:bg-[#0369a1] text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+              class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
             >
               <Search class="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Cari</span>
@@ -173,9 +173,9 @@
     </div>
 
     <!-- PRODUCTS TABLE CARD (Green top line accent matching image) -->
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden mb-5">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden mb-5">
       <!-- Top green accent border -->
-      <div class="h-1 bg-emerald-600 w-full"></div>
+      <div class="h-px bg-slate-200 w-full"></div>
 
       <!-- Loading State -->
       <div v-if="isLoading" class="p-12 text-center text-slate-500 flex flex-col items-center justify-center gap-3">
@@ -185,14 +185,14 @@
 
       <!-- Table Container -->
       <div v-else class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50/90 border-b border-slate-200 text-slate-700 font-semibold text-[11px] select-none">
               <!-- ID -->
               <th class="py-3 px-4 cursor-pointer hover:bg-slate-100 transition-colors whitespace-nowrap" @click="toggleSort('sku')">
                 <div class="flex items-center gap-1">
                   <span>ID</span>
-                  <span class="text-[10px] text-slate-400 font-mono">
+                  <span class="text-[11px] text-slate-400 font-mono">
                     {{ sortBy === 'sku' ? (sortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
                 </div>
@@ -202,7 +202,7 @@
               <th class="py-3 px-4 cursor-pointer hover:bg-slate-100 transition-colors" @click="toggleSort('name')">
                 <div class="flex items-center gap-1">
                   <span>Nama Barang</span>
-                  <span class="text-[10px] text-slate-400 font-mono">
+                  <span class="text-[11px] text-slate-400 font-mono">
                     {{ sortBy === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
                 </div>
@@ -212,7 +212,7 @@
               <th class="py-3 px-4 cursor-pointer hover:bg-slate-100 transition-colors" @click="toggleSort('category')">
                 <div class="flex items-center gap-1">
                   <span>Kategori</span>
-                  <span class="text-[10px] text-slate-400 font-mono">
+                  <span class="text-[11px] text-slate-400 font-mono">
                     {{ sortBy === 'category' ? (sortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
                 </div>
@@ -222,7 +222,7 @@
               <th class="py-3 px-4 cursor-pointer hover:bg-slate-100 transition-colors text-center" @click="toggleSort('unit')">
                 <div class="flex items-center justify-center gap-1">
                   <span>Satuan</span>
-                  <span class="text-[10px] text-slate-400 font-mono">
+                  <span class="text-[11px] text-slate-400 font-mono">
                     {{ sortBy === 'unit' ? (sortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
                 </div>
@@ -232,7 +232,7 @@
               <th class="py-3 px-4 cursor-pointer hover:bg-slate-100 transition-colors text-right" @click="toggleSort('stock')">
                 <div class="flex items-center justify-end gap-1">
                   <span>Stok</span>
-                  <span class="text-[10px] text-slate-400 font-mono">
+                  <span class="text-[11px] text-slate-400 font-mono">
                     {{ sortBy === 'stock' ? (sortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
                 </div>
@@ -242,7 +242,7 @@
               <th class="py-3 px-4 cursor-pointer hover:bg-slate-100 transition-colors text-right whitespace-nowrap" @click="toggleSort('last_buy_price')">
                 <div class="flex items-center justify-end gap-1">
                   <span>Harga Beli Terakhir</span>
-                  <span class="text-[10px] text-slate-400 font-mono">
+                  <span class="text-[11px] text-slate-400 font-mono">
                     {{ sortBy === 'last_buy_price' ? (sortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
                 </div>
@@ -252,7 +252,7 @@
               <th class="py-3 px-4 cursor-pointer hover:bg-slate-100 transition-colors text-right whitespace-nowrap" @click="toggleSort('hpp')">
                 <div class="flex items-center justify-end gap-1">
                   <span>HPP</span>
-                  <span class="text-[10px] text-slate-400 font-mono">
+                  <span class="text-[11px] text-slate-400 font-mono">
                     {{ sortBy === 'hpp' ? (sortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
                 </div>
@@ -262,7 +262,7 @@
               <th class="py-3 px-4 cursor-pointer hover:bg-slate-100 transition-colors text-right whitespace-nowrap" @click="toggleSort('sell_price')">
                 <div class="flex items-center justify-end gap-1">
                   <span>Harga Jual</span>
-                  <span class="text-[10px] text-slate-400 font-mono">
+                  <span class="text-[11px] text-slate-400 font-mono">
                     {{ sortBy === 'sell_price' ? (sortDir === 'asc' ? '▲' : '▼') : '↕' }}
                   </span>
                 </div>
@@ -282,7 +282,7 @@
 
           <tbody class="divide-y divide-slate-100">
             <tr v-if="paginatedProducts.length === 0">
-              <td colspan="10" class="py-12 text-center text-slate-500">
+              <td colspan="10" class="py-12 text-center text-slate-500"><div class="ui-empty-state">
                 <div class="flex flex-col items-center justify-center gap-2">
                   <Package class="w-8 h-8 text-slate-300" />
                   <span class="text-xs font-semibold text-slate-700">Tidak ada data barang yang sesuai dengan pencarian / filter.</span>
@@ -290,7 +290,7 @@
                     Coba ubah kata kunci pencarian atau klik tombol Reset.
                   </span>
                 </div>
-              </td>
+              </div></td>
             </tr>
 
             <tr
@@ -299,14 +299,14 @@
               class="hover:bg-slate-50/70 transition-colors group"
             >
               <!-- ID / SKU (blue bold text like image) -->
-              <td class="py-3 px-4 font-mono font-bold text-[#0284c7] whitespace-nowrap">
+              <td class="py-3 px-4 font-mono font-semibold text-[#0284c7] whitespace-nowrap">
                 {{ p.sku }}
               </td>
 
               <!-- Nama Barang -->
               <td class="py-3 px-4 text-slate-800 font-medium">
                 <div>{{ p.name }}</div>
-                <div v-if="p.description" class="text-[10px] text-slate-400 truncate max-w-xs mt-0.5" :title="p.description">
+                <div v-if="p.description" class="text-[11px] text-slate-400 truncate max-w-xs mt-0.5" :title="p.description">
                   {{ p.description }}
                 </div>
               </td>
@@ -322,7 +322,7 @@
               </td>
 
               <!-- Stok -->
-              <td class="py-3 px-4 text-right font-mono font-bold text-slate-800">
+              <td class="py-3 px-4 text-right font-mono font-semibold text-slate-800">
                 {{ (Number(p.stock) || 0).toLocaleString('id-ID') }}
               </td>
 
@@ -337,7 +337,7 @@
               </td>
 
               <!-- Harga Jual -->
-              <td class="py-3 px-4 text-right font-mono font-bold text-slate-800 whitespace-nowrap">
+              <td class="py-3 px-4 text-right font-mono font-semibold text-slate-800 whitespace-nowrap">
                 Rp {{ (Number(p.sell_price || p.price) || 0).toLocaleString('id-ID') }}
               </td>
 
@@ -345,7 +345,7 @@
               <td class="py-3 px-4 text-center whitespace-nowrap">
                 <span
                   :class="[
-                    'inline-block px-2 py-0.5 rounded text-[10px] font-semibold',
+                    'inline-block px-2 py-0.5 rounded text-[11px] font-semibold',
                     getStatusBadgeClass(p.status)
                   ]"
                 >
@@ -359,7 +359,7 @@
                   <!-- Edit Button (Yellow/Amber Gradient) -->
                   <button
                     type="button"
-                    class="w-7 h-7 inline-flex items-center justify-center bg-gradient-to-b from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 active:from-amber-600 active:to-amber-700 text-white rounded-lg transition-all shadow-2xs border border-amber-500/30 cursor-pointer"
+                    class="w-7 h-7 inline-flex items-center justify-center bg-linear-to-b from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 active:from-amber-600 active:to-amber-700 text-white rounded-lg transition-all shadow-2xs border border-amber-500/30 cursor-pointer"
                     title="Edit Data Barang"
                     @click="openEditModal(p)"
                   >
@@ -369,7 +369,7 @@
                   <!-- Delete Button (Red Gradient) -->
                   <button
                     type="button"
-                    class="w-7 h-7 inline-flex items-center justify-center bg-gradient-to-b from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:from-red-700 active:to-red-800 text-white rounded-lg transition-all shadow-2xs border border-red-700/30 cursor-pointer"
+                    class="w-7 h-7 inline-flex items-center justify-center bg-linear-to-b from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:from-red-700 active:to-red-800 text-white rounded-lg transition-all shadow-2xs border border-red-700/30 cursor-pointer"
                     title="Hapus Data Barang"
                     @click="confirmDelete(p)"
                   >
@@ -382,7 +382,7 @@
 
           <!-- TOTAL SUMMARY ROW (matching Total row in screenshot) -->
           <tfoot>
-            <tr class="bg-slate-50/70 border-t border-slate-200 font-bold text-slate-800 text-xs">
+            <tr class="bg-slate-50/70 border-t border-slate-200 font-semibold text-slate-800 text-xs">
               <td colspan="4" class="py-3 px-4 text-right pr-6">
                 Total
               </td>
@@ -399,9 +399,9 @@
       <div class="px-4 py-3.5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 bg-white">
         <!-- Display Info -->
         <div>
-          Menampilkan <span class="font-bold text-slate-800">{{ paginationInfo.from }}</span> -
-          <span class="font-bold text-slate-800">{{ paginationInfo.to }}</span> dari
-          <span class="font-bold text-slate-800">{{ totalItems.toLocaleString('id-ID') }}</span> data
+          Menampilkan <span class="font-semibold text-slate-800">{{ paginationInfo.from }}</span> -
+          <span class="font-semibold text-slate-800">{{ paginationInfo.to }}</span> dari
+          <span class="font-semibold text-slate-800">{{ totalItems.toLocaleString('id-ID') }}</span> data
           <span v-if="searchQuery" class="text-slate-400 ml-1">(difilter dari total data)</span>
         </div>
 
@@ -437,7 +437,7 @@
                 :class="[
                   'min-w-7 h-7 px-2 flex items-center justify-center rounded text-xs font-semibold transition-colors cursor-pointer',
                   currentPage === page
-                    ? 'bg-[#0284c7] text-white shadow-xs'
+                    ? 'bg-alpharo-600 text-white shadow-xs'
                     : 'text-slate-700 hover:bg-slate-100'
                 ]"
                 @click="goToPage(page)"
@@ -503,11 +503,11 @@
           <button
             type="button"
             class="flex items-center gap-2 text-left p-2 rounded-lg transition-colors cursor-pointer"
-            :class="importStep === 1 ? 'bg-sky-50 text-[#0284c7] font-bold' : importStep > 1 ? 'text-emerald-700 font-semibold' : 'text-slate-400'"
+            :class="importStep === 1 ? 'bg-sky-50 text-[#0284c7] font-semibold' : importStep > 1 ? 'text-emerald-700 font-semibold' : 'text-slate-400'"
             @click="importStep = 1"
           >
             <div
-              class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+              class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
               :class="importStep === 1 ? 'bg-[#0284c7] text-white' : importStep > 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'"
             >
               <Check v-if="importStep > 1" class="w-3.5 h-3.5 stroke-[3]" />
@@ -523,11 +523,11 @@
           <button
             type="button"
             class="flex items-center gap-2 text-left p-2 rounded-lg transition-colors cursor-pointer"
-            :class="importStep === 2 ? 'bg-sky-50 text-[#0284c7] font-bold' : importStep > 2 ? 'text-emerald-700 font-semibold' : 'text-slate-400'"
+            :class="importStep === 2 ? 'bg-sky-50 text-[#0284c7] font-semibold' : importStep > 2 ? 'text-emerald-700 font-semibold' : 'text-slate-400'"
             @click="importStep = 2"
           >
             <div
-              class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+              class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
               :class="importStep === 2 ? 'bg-[#0284c7] text-white' : importStep > 2 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'"
             >
               <Check v-if="importStep > 2" class="w-3.5 h-3.5 stroke-[3]" />
@@ -543,12 +543,12 @@
           <button
             type="button"
             class="flex items-center gap-2 text-left p-2 rounded-lg transition-colors cursor-pointer"
-            :class="importStep === 3 ? 'bg-sky-50 text-[#0284c7] font-bold' : importStep > 3 ? 'text-emerald-700 font-semibold' : 'text-slate-400'"
+            :class="importStep === 3 ? 'bg-sky-50 text-[#0284c7] font-semibold' : importStep > 3 ? 'text-emerald-700 font-semibold' : 'text-slate-400'"
             :disabled="parsedExcelData.length === 0"
             @click="parsedExcelData.length > 0 && (importStep = 3)"
           >
             <div
-              class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+              class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
               :class="importStep === 3 ? 'bg-[#0284c7] text-white' : importStep > 3 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'"
             >
               <Check v-if="importStep > 3" class="w-3.5 h-3.5 stroke-[3]" />
@@ -564,12 +564,12 @@
           <button
             type="button"
             class="flex items-center gap-2 text-left p-2 rounded-lg transition-colors cursor-pointer"
-            :class="importStep === 4 ? 'bg-sky-50 text-[#0284c7] font-bold' : 'text-slate-400'"
+            :class="importStep === 4 ? 'bg-sky-50 text-[#0284c7] font-semibold' : 'text-slate-400'"
             :disabled="parsedExcelData.length === 0"
             @click="parsedExcelData.length > 0 && (importStep = 4)"
           >
             <div
-              class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+              class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
               :class="importStep === 4 ? 'bg-[#0284c7] text-white' : 'bg-slate-200 text-slate-600'"
             >
               <span>4</span>
@@ -584,7 +584,7 @@
         <!-- =================== STEP 1: DOWNLOAD TEMPLATE =================== -->
         <div v-if="importStep === 1" class="space-y-4">
           <div class="bg-sky-50/80 border border-sky-200 rounded-xl p-4 text-sky-900 text-xs">
-            <h4 class="font-bold flex items-center gap-2 text-sm text-[#0369a1] mb-1">
+            <h4 class="font-semibold flex items-center gap-2 text-sm text-[#0369a1] mb-1">
               <FileDown class="w-4 h-4" />
               Format Template Resmi Import Data Barang
             </h4>
@@ -596,24 +596,24 @@
           <!-- Download Action Card -->
           <div class="max-w-xl mx-auto">
             <!-- Template Resmi / Berisi Contoh -->
-            <div class="p-5 border border-slate-200 rounded-xl bg-white shadow-2xs hover:border-[#0284c7] transition-all flex flex-col justify-between">
+            <div class="ui-panel p-5 border border-slate-200 rounded-xl bg-white shadow-2xs hover:border-[#0284c7] transition-all flex flex-col justify-between">
               <div>
                 <div class="flex items-center justify-between mb-3">
                   <span class="inline-flex p-2.5 bg-emerald-50 text-emerald-700 rounded-xl">
                     <FileSpreadsheet class="w-6 h-6" />
                   </span>
-                  <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">Template Resmi</span>
+                  <span class="text-xs font-semibold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">Template Resmi</span>
                 </div>
-                <h5 class="font-bold text-slate-900 text-base">File Template Excel Data Barang</h5>
+                <h5 class="font-semibold text-slate-900 text-base">File Template Excel Data Barang</h5>
                 <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  Download file template excel resmi (<code>data_barang_20261014_103611.xlsx</code>) yang berisi format susunan kolom data barang yang kompatibel dengan sistem.
+                  Download file template excel resmi (<code>data_barang_template.xlsx</code>) yang berisi format susunan kolom data barang yang kompatibel dengan sistem.
                 </p>
               </div>
 
               <div class="mt-5 pt-4 border-t border-slate-100">
                 <button
                   type="button"
-                  class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-lg text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                  class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
                   @click="downloadOfficialTemplate"
                 >
                   <Download class="w-4 h-4 stroke-[2.5]" />
@@ -648,7 +648,7 @@
                 <UploadCloud class="w-7 h-7 stroke-[2]" />
               </div>
               <div>
-                <p class="text-sm font-bold text-slate-800">Tarik & Lepas File Excel Anda Di Sini</p>
+                <p class="text-sm font-semibold text-slate-800">Tarik & Lepas File Excel Anda Di Sini</p>
                 <p class="text-xs text-slate-500 mt-1">atau klik untuk memilih file dari komputer (.xlsx, .xls, .csv)</p>
               </div>
               <div class="text-[11px] text-slate-400 font-mono">
@@ -660,8 +660,8 @@
           <!-- Quick Test Option: Load RKAS directly from server -->
           <div class="p-4 border border-emerald-200 bg-emerald-50/70 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
             <div>
-              <span class="font-bold text-emerald-900 block">Ingin langsung menguji dengan data lengkap?</span>
-              <span class="text-emerald-700">Muat otomatis 2.196 data barang dari file template <code>data_barang_20261014_103611.xlsx</code> tanpa perlu upload manual.</span>
+              <span class="font-semibold text-emerald-900 block">Ingin langsung menguji dengan data lengkap?</span>
+              <span class="text-emerald-700">Muat otomatis 2.196 data barang dari file template <code>data_barang_template.xlsx</code> tanpa perlu upload manual.</span>
             </div>
             <button
               type="button"
@@ -676,10 +676,10 @@
           <div v-if="uploadedFileName" class="p-3 bg-slate-100 rounded-lg flex items-center justify-between text-xs font-mono">
             <div class="flex items-center gap-2 text-slate-800 truncate">
               <FileSpreadsheet class="w-4 h-4 text-emerald-600" />
-              <span class="font-bold truncate">{{ uploadedFileName }}</span>
+              <span class="font-semibold truncate">{{ uploadedFileName }}</span>
               <span class="text-slate-500">({{ uploadedFileSize }})</span>
             </div>
-            <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-semibold text-[10px]">Terbaca</span>
+            <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-semibold text-[11px]">Terbaca</span>
           </div>
         </div>
 
@@ -689,26 +689,26 @@
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
               <div class="text-[11px] text-slate-500 uppercase font-semibold">Total Baris</div>
-              <div class="text-lg font-bold font-mono text-slate-900">{{ parsedExcelData.length.toLocaleString('id-ID') }}</div>
+              <div class="text-lg font-semibold font-mono text-slate-900">{{ parsedExcelData.length.toLocaleString('id-ID') }}</div>
             </div>
             <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
               <div class="text-[11px] text-emerald-700 uppercase font-semibold">Kategori Ditemukan</div>
-              <div class="text-lg font-bold font-mono text-emerald-800">{{ detectedCategoriesCount }}</div>
+              <div class="text-lg font-semibold font-mono text-emerald-800">{{ detectedCategoriesCount }}</div>
             </div>
             <div class="p-3 bg-sky-50 border border-sky-200 rounded-lg">
               <div class="text-[11px] text-sky-700 uppercase font-semibold">Satuan Ditemukan</div>
-              <div class="text-lg font-bold font-mono text-sky-800">{{ detectedUnitsCount }}</div>
+              <div class="text-lg font-semibold font-mono text-sky-800">{{ detectedUnitsCount }}</div>
             </div>
             <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg">
               <div class="text-[11px] text-amber-700 uppercase font-semibold">Duplikat ID Terdeteksi</div>
-              <div class="text-lg font-bold font-mono text-amber-800">{{ detectedDuplicatesCount }}</div>
+              <div class="text-lg font-semibold font-mono text-amber-800">{{ detectedDuplicatesCount }}</div>
             </div>
           </div>
 
           <!-- Duplicate Resolution Options -->
-          <div class="bg-white border border-slate-200 rounded-xl p-3.5 text-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="ui-panel bg-white border border-slate-200 rounded-xl p-3.5 text-xs flex flex-col sm:flex-row items-center justify-between gap-3">
             <div>
-              <span class="font-bold text-slate-800 block">Kebijakan Jika ID Barang Sudah Ada:</span>
+              <span class="font-semibold text-slate-800 block">Kebijakan Jika ID Barang Sudah Ada:</span>
               <span class="text-slate-500 text-[11px]">Tentukan tindakan bila SKU di Excel telah terdaftar pada database.</span>
             </div>
             <div class="flex items-center gap-3">
@@ -730,7 +730,7 @@
           <!-- Preview Table with internal search -->
           <div>
             <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-slate-800">
+              <span class="text-xs font-semibold text-slate-800">
                 Tampilan Data Excel ({{ filteredPreviewRows.length }} baris ditemukan):
               </span>
               <div class="relative w-56">
@@ -745,7 +745,7 @@
             </div>
 
             <div class="border border-slate-200 rounded-lg overflow-x-auto max-h-72">
-              <table class="w-full text-left text-xs border-collapse">
+              <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
                 <thead class="bg-slate-50 sticky top-0 border-b border-slate-200 text-slate-700 font-semibold text-[11px]">
                   <tr>
                     <th class="py-2 px-3">#</th>
@@ -760,14 +760,14 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                   <tr v-for="(row, idx) in filteredPreviewRows.slice(0, 15)" :key="idx" class="hover:bg-slate-50">
-                    <td class="py-2 px-3 text-slate-400 font-mono text-[10px]">{{ idx + 1 }}</td>
-                    <td class="py-2 px-3 font-mono font-bold text-[#0284c7]">{{ row.sku }}</td>
+                    <td class="py-2 px-3 text-slate-400 font-mono text-[11px]">{{ idx + 1 }}</td>
+                    <td class="py-2 px-3 font-mono font-semibold text-[#0284c7]">{{ row.sku }}</td>
                     <td class="py-2 px-3 font-medium text-slate-800">{{ row.name }}</td>
                     <td class="py-2 px-3 text-slate-600">{{ row.category }}</td>
                     <td class="py-2 px-3 text-slate-600 uppercase">{{ row.unit }}</td>
                     <td class="py-2 px-3 text-right font-mono">{{ row.stock }}</td>
                     <td class="py-2 px-3 text-right font-mono">Rp {{ (row.sell_price || row.price || 0).toLocaleString('id-ID') }}</td>
-                    <td class="py-2 px-3 text-center"><span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 text-slate-700">{{ row.status || 'Tersedia' }}</span></td>
+                    <td class="py-2 px-3 text-center"><span class="px-1.5 py-0.5 rounded text-[11px] bg-slate-100 text-slate-700">{{ row.status || 'Tersedia' }}</span></td>
                   </tr>
                 </tbody>
               </table>
@@ -780,28 +780,28 @@
           <!-- Validation Summary Badges -->
           <div class="grid grid-cols-3 gap-3">
             <div class="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900">
-              <div class="flex items-center gap-2 font-bold text-xs text-emerald-800 mb-1">
+              <div class="flex items-center gap-2 font-semibold text-xs text-emerald-800 mb-1">
                 <CheckCircle2 class="w-4 h-4 text-emerald-600" />
                 <span>Data Valid & Siap Impor</span>
               </div>
-              <div class="text-xl font-bold font-mono text-emerald-700">{{ validationStats.validCount.toLocaleString('id-ID') }} baris</div>
+              <div class="text-xl font-semibold font-mono text-emerald-700">{{ validationStats.validCount.toLocaleString('id-ID') }} baris</div>
             </div>
 
             <div class="p-3.5 rounded-xl border border-amber-200 bg-amber-50 text-amber-900">
-              <div class="flex items-center gap-2 font-bold text-xs text-amber-800 mb-1">
+              <div class="flex items-center gap-2 font-semibold text-xs text-amber-800 mb-1">
                 <AlertTriangle class="w-4 h-4 text-amber-600" />
                 <span>Peringatan / Duplikat SKU</span>
               </div>
-              <div class="text-xl font-bold font-mono text-amber-700">{{ validationStats.duplicateCount.toLocaleString('id-ID') }} baris</div>
-              <div class="text-[10px] text-amber-700 mt-0.5">Aksi: {{ duplicateMode === 'update' ? 'Diperbarui' : duplicateMode === 'skip' ? 'Dilewati' : 'Dibuat SKU baru' }}</div>
+              <div class="text-xl font-semibold font-mono text-amber-700">{{ validationStats.duplicateCount.toLocaleString('id-ID') }} baris</div>
+              <div class="text-[11px] text-amber-700 mt-0.5">Aksi: {{ duplicateMode === 'update' ? 'Diperbarui' : duplicateMode === 'skip' ? 'Dilewati' : 'Dibuat SKU baru' }}</div>
             </div>
 
             <div class="p-3.5 rounded-xl border border-red-200 bg-red-50 text-red-900">
-              <div class="flex items-center gap-2 font-bold text-xs text-red-800 mb-1">
+              <div class="flex items-center gap-2 font-semibold text-xs text-red-800 mb-1">
                 <AlertCircle class="w-4 h-4 text-red-600" />
                 <span>Data Tidak Valid (Error)</span>
               </div>
-              <div class="text-xl font-bold font-mono text-red-700">{{ validationStats.errorCount.toLocaleString('id-ID') }} baris</div>
+              <div class="text-xl font-semibold font-mono text-red-700">{{ validationStats.errorCount.toLocaleString('id-ID') }} baris</div>
             </div>
           </div>
 
@@ -822,7 +822,7 @@
               <button
                 type="button"
                 class="px-2.5 py-1 rounded text-xs font-semibold cursor-pointer"
-                :class="validationFilter === 'all' ? 'bg-[#0284c7] text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-100 border border-slate-200'"
+                :class="validationFilter === 'all' ? 'bg-alpharo-600 text-white shadow-2xs' : 'text-slate-600 hover:bg-slate-100 border border-slate-200'"
                 @click="validationFilter = 'all'"
               >
                 Semua ({{ validatedRows.length }})
@@ -862,7 +862,7 @@
                       row.validationStatus === 'valid' ? 'bg-emerald-500' : row.validationStatus === 'warning' ? 'bg-amber-500' : 'bg-red-500'
                     ]"
                   ></span>
-                  <span class="font-mono font-bold text-[#0284c7] text-[11px]">{{ row.sku }}</span>
+                  <span class="font-mono font-semibold text-[#0284c7] text-[11px]">{{ row.sku }}</span>
                   <span class="text-slate-800 font-medium">{{ row.name }}</span>
                   <span class="text-[11px] text-slate-400">({{ row.category }} • {{ row.unit }})</span>
                 </div>
@@ -870,19 +870,19 @@
                 <div class="flex items-center gap-2">
                   <span
                     v-if="row.validationStatus === 'valid'"
-                    class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800"
+                    class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800"
                   >
                     Siap Disimpan
                   </span>
                   <span
                     v-else-if="row.validationStatus === 'warning'"
-                    class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-800"
+                    class="px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-100 text-amber-800"
                   >
                     {{ row.validationMessage }}
                   </span>
                   <span
                     v-else
-                    class="px-2 py-0.5 rounded text-[10px] font-semibold bg-red-100 text-red-800"
+                    class="px-2 py-0.5 rounded text-[11px] font-semibold bg-red-100 text-red-800"
                   >
                     {{ row.validationMessage }}
                   </span>
@@ -893,7 +893,7 @@
 
           <!-- Progress bar when saving -->
           <div v-if="isSavingImport" class="p-4 bg-sky-50 border border-sky-200 rounded-xl text-center space-y-2">
-            <div class="flex items-center justify-center gap-2 text-xs font-bold text-[#0284c7]">
+            <div class="flex items-center justify-center gap-2 text-xs font-semibold text-[#0284c7]">
               <RefreshCw class="w-4 h-4 animate-spin" />
               <span>Menyimpan {{ validatedRows.length }} data barang ke sistem database...</span>
             </div>
@@ -930,7 +930,7 @@
             <button
               v-if="importStep === 1"
               type="button"
-              class="px-4 py-2 bg-[#0284c7] hover:bg-[#0369a1] text-white rounded-lg text-xs font-bold shadow-xs cursor-pointer"
+              class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white rounded-lg text-xs font-semibold shadow-xs cursor-pointer"
               @click="importStep = 2"
             >
               Lanjut ke Upload File
@@ -940,7 +940,7 @@
             <button
               v-if="importStep === 2"
               type="button"
-              class="px-4 py-2 bg-[#0284c7] hover:bg-[#0369a1] text-white rounded-lg text-xs font-bold shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white rounded-lg text-xs font-semibold shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="parsedExcelData.length === 0"
               @click="importStep = 3"
             >
@@ -951,7 +951,7 @@
             <button
               v-if="importStep === 3"
               type="button"
-              class="px-4 py-2 bg-[#0284c7] hover:bg-[#0369a1] text-white rounded-lg text-xs font-bold shadow-xs cursor-pointer"
+              class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white rounded-lg text-xs font-semibold shadow-xs cursor-pointer"
               @click="runValidationAndProceed"
             >
               Lanjut ke Validasi & Simpan
@@ -961,7 +961,7 @@
             <button
               v-if="importStep === 4"
               type="button"
-              class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs cursor-pointer flex items-center gap-2 disabled:opacity-50"
+              class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white rounded-lg text-xs font-semibold shadow-xs cursor-pointer flex items-center gap-2 disabled:opacity-50"
               :disabled="isSavingImport || validationStats.validCount === 0"
               @click="saveImportedData"
             >
@@ -1006,7 +1006,7 @@
 
         <!-- Add Category Form -->
         <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
-          <h4 class="text-xs font-bold text-slate-800 uppercase mb-2">Tambah Kategori Baru</h4>
+          <h4 class="text-xs font-semibold text-slate-800 uppercase mb-2">Tambah Kategori Baru</h4>
           <form class="flex items-center gap-2" @submit.prevent="createCategory">
             <input
               v-model="newCategoryName"
@@ -1017,7 +1017,7 @@
             />
             <button
               type="submit"
-              class="px-3.5 py-1.5 bg-[#0284c7] hover:bg-[#0369a1] text-white font-semibold rounded-lg text-xs cursor-pointer"
+              class="px-3.5 py-1.5 bg-alpharo-600 hover:bg-alpharo-700 text-white font-semibold rounded-lg text-xs cursor-pointer"
             >
               + Simpan Kategori
             </button>
@@ -1031,7 +1031,7 @@
             <span class="text-slate-500 font-normal">Menampilkan {{ filteredCategoriesWithCounts.length }} dari {{ categoriesList.length }} kategori</span>
           </div>
 
-          <table class="w-full text-left text-xs border-collapse">
+          <table class="ui-table w-full text-left text-xs border-collapse">
             <thead class="bg-slate-50/70 border-b border-slate-200 text-slate-700 font-semibold text-[11px]">
               <tr>
                 <th class="py-2.5 px-3">#</th>
@@ -1042,12 +1042,12 @@
             </thead>
             <tbody class="divide-y divide-slate-100 max-h-60 overflow-y-auto">
               <tr v-if="filteredCategoriesWithCounts.length === 0">
-                <td colspan="4" class="py-6 text-center text-slate-400">
+                <td colspan="4" class="py-6 text-center text-slate-400"><div class="ui-empty-state">
                   Tidak ada kategori yang cocok dengan "{{ searchCategoryQuery }}".
-                </td>
+                </div></td>
               </tr>
               <tr v-for="(cat, index) in filteredCategoriesWithCounts" :key="cat.name" class="hover:bg-slate-50">
-                <td class="py-2.5 px-3 text-slate-400 font-mono text-[10px]">{{ index + 1 }}</td>
+                <td class="py-2.5 px-3 text-slate-400 font-mono text-[11px]">{{ index + 1 }}</td>
                 <td class="py-2.5 px-3 font-semibold text-slate-800">
                   <input
                     v-if="editingCatName === cat.name"
@@ -1065,7 +1065,7 @@
                     <button
                       v-if="editingCatName === cat.name"
                       type="button"
-                      class="px-2 py-0.5 bg-emerald-600 text-white rounded text-[10px] font-bold cursor-pointer"
+                      class="px-2 py-0.5 bg-alpharo-600 text-white rounded text-[11px] font-semibold cursor-pointer"
                       @click="saveEditCategory(cat.name)"
                     >
                       Simpan
@@ -1139,7 +1139,7 @@
 
         <!-- Add Unit Form -->
         <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
-          <h4 class="text-xs font-bold text-slate-800 uppercase mb-2">Tambah Satuan Baru</h4>
+          <h4 class="text-xs font-semibold text-slate-800 uppercase mb-2">Tambah Satuan Baru</h4>
           <form class="flex items-center gap-2" @submit.prevent="createUnit">
             <input
               v-model="newUnitName"
@@ -1150,7 +1150,7 @@
             />
             <button
               type="submit"
-              class="px-3.5 py-1.5 bg-[#0284c7] hover:bg-[#0369a1] text-white font-semibold rounded-lg text-xs cursor-pointer"
+              class="px-3.5 py-1.5 bg-alpharo-600 hover:bg-alpharo-700 text-white font-semibold rounded-lg text-xs cursor-pointer"
             >
               + Simpan Satuan
             </button>
@@ -1164,7 +1164,7 @@
             <span class="text-slate-500 font-normal">Menampilkan {{ filteredUnitsWithCounts.length }} dari {{ unitsList.length }} satuan</span>
           </div>
 
-          <table class="w-full text-left text-xs border-collapse">
+          <table class="ui-table w-full text-left text-xs border-collapse">
             <thead class="bg-slate-50/70 border-b border-slate-200 text-slate-700 font-semibold text-[11px]">
               <tr>
                 <th class="py-2.5 px-3">#</th>
@@ -1175,12 +1175,12 @@
             </thead>
             <tbody class="divide-y divide-slate-100 max-h-60 overflow-y-auto">
               <tr v-if="filteredUnitsWithCounts.length === 0">
-                <td colspan="4" class="py-6 text-center text-slate-400">
+                <td colspan="4" class="py-6 text-center text-slate-400"><div class="ui-empty-state">
                   Tidak ada satuan yang cocok dengan "{{ searchUnitQuery }}".
-                </td>
+                </div></td>
               </tr>
               <tr v-for="(u, index) in filteredUnitsWithCounts" :key="u.name" class="hover:bg-slate-50">
-                <td class="py-2.5 px-3 text-slate-400 font-mono text-[10px]">{{ index + 1 }}</td>
+                <td class="py-2.5 px-3 text-slate-400 font-mono text-[11px]">{{ index + 1 }}</td>
                 <td class="py-2.5 px-3 font-semibold text-slate-800 uppercase">
                   <input
                     v-if="editingUnitName === u.name"
@@ -1198,7 +1198,7 @@
                     <button
                       v-if="editingUnitName === u.name"
                       type="button"
-                      class="px-2 py-0.5 bg-emerald-600 text-white rounded text-[10px] font-bold cursor-pointer"
+                      class="px-2 py-0.5 bg-alpharo-600 text-white rounded text-[11px] font-semibold cursor-pointer"
                       @click="saveEditUnit(u.name)"
                     >
                       Simpan
@@ -1348,7 +1348,7 @@
               v-model.number="prodForm.sell_price"
               type="number"
               min="0"
-              class="w-full px-3 py-2 border rounded-lg text-right font-mono font-bold text-slate-900"
+              class="w-full px-3 py-2 border rounded-lg text-right font-mono font-semibold text-slate-900"
             />
           </div>
           <div>
@@ -1382,7 +1382,7 @@
           </button>
           <button
             type="submit"
-            class="px-5 py-2 bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold rounded-lg shadow-xs cursor-pointer"
+            class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white font-semibold rounded-lg shadow-xs cursor-pointer"
           >
             Simpan Data Barang
           </button>
@@ -1404,7 +1404,7 @@
           Apakah Anda yakin ingin menghapus barang berikut dari katalog?
         </p>
         <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
-          <div class="font-mono font-bold text-red-900">{{ deletingProduct.sku }}</div>
+          <div class="font-mono font-semibold text-red-900">{{ deletingProduct.sku }}</div>
           <div class="font-semibold text-slate-800 text-sm mt-0.5">{{ deletingProduct.name }}</div>
           <div class="text-[11px] text-slate-500 mt-1">{{ deletingProduct.category }} • Satuan: {{ deletingProduct.unit }}</div>
         </div>
@@ -1421,7 +1421,7 @@
           </button>
           <button
             type="button"
-            class="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold cursor-pointer"
+            class="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold cursor-pointer"
             @click="executeDelete"
           >
             Hapus Permanen
@@ -1459,6 +1459,7 @@ import {
   Check,
   X,
   RefreshCw,
+  ClipboardList,
 } from 'lucide-vue-next';
 
 const toast = useToast();
@@ -1771,7 +1772,7 @@ const deleteCategory = async (catName, count) => {
     toast.error(`Kategori "${catName}" masih digunakan oleh ${count} barang.`);
     return;
   }
-  if (!confirm(`Hapus kategori "${catName}"?`)) return;
+  toast.info(`Menghapus kategori "${catName}"...`);
 
   categoriesList.value = categoriesList.value.filter((c) => c !== catName);
 
@@ -1850,7 +1851,7 @@ const deleteUnit = async (unitName, count) => {
     toast.error(`Satuan "${unitName}" masih digunakan oleh ${count} barang.`);
     return;
   }
-  if (!confirm(`Hapus satuan "${unitName}"?`)) return;
+  toast.info(`Menghapus satuan "${unitName}"...`);
 
   unitsList.value = unitsList.value.filter((item) => item !== unitName);
 
@@ -1997,7 +1998,19 @@ const openImportModal = () => {
 };
 
 const downloadOfficialTemplate = () => {
-  window.open('/templates/data_barang_template.xlsx', '_blank');
+  try {
+    toast.info('Menyiapkan file template data barang...');
+    const link = document.createElement('a');
+    link.href = '/templates/data_barang_template.xlsx';
+    link.setAttribute('download', 'data_barang_template.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Template data barang resmi berhasil didownload.');
+  } catch (err) {
+    console.error('Error downloading template:', err);
+    downloadBlankTemplate();
+  }
 };
 
 const downloadBlankTemplate = () => {
@@ -2012,31 +2025,37 @@ const downloadBlankTemplate = () => {
       'Harga Beli Terakhir',
       'HPP',
       'Harga Jual',
-      'Status',
+      'Tanggal Dibuat',
+      'Update Oleh',
+      'Tanggal Update',
     ],
     [
       'A00000002',
       'Laboratorium & Bahan Kimia',
-      'Abate 1% Granule Bubuk',
+      'Abate',
       'Sumber: Standar Pengadaan RKAS 2026',
       'KG',
-      0,
-      0,
-      0,
+      52,
+      79800,
+      83300,
       99725,
-      'Tersedia',
+      '2026-10-01 06:04:19',
+      'SYSTEM',
+      '2026-10-01 06:04:19',
     ],
     [
       'A00000003',
       'Elektronik, Komputer & Peralatan Listrik',
-      'Ac Split Spesifikasi : 2 Pk',
+      'Ac Split',
       'Sumber: Standar Pengadaan RKAS 2026',
       'UNIT',
-      0,
-      0,
-      0,
-      10943000,
-      'Tersedia',
+      5,
+      10079000,
+      10382500,
+      12143400,
+      '2026-10-01 06:04:19',
+      'SYSTEM',
+      '2026-10-01 06:04:19',
     ],
   ];
 
@@ -2047,14 +2066,16 @@ const downloadBlankTemplate = () => {
   ws['!cols'] = [
     { wch: 14 },
     { wch: 30 },
-    { wch: 40 },
     { wch: 35 },
+    { wch: 45 },
     { wch: 10 },
     { wch: 10 },
     { wch: 18 },
     { wch: 15 },
     { wch: 18 },
-    { wch: 12 },
+    { wch: 20 },
+    { wch: 14 },
+    { wch: 20 },
   ];
 
   XLSX.writeFile(wb, 'template_kosong_data_barang.xlsx');
@@ -2106,9 +2127,10 @@ const processExcelFile = (file) => {
       const descIdx = findColIdx(['deskripsi', 'keterangan', 'sumber', 'spesifikasi']);
       const unitIdx = findColIdx(['satuan', 'unit']);
       const stockIdx = findColIdx(['stok', 'stock', 'qty']);
-      const buyIdx = findColIdx(['harga beli', 'beli', 'beli terakhir']);
+      const buyIdx = findColIdx(['harga beli terakhir', 'harga beli', 'beli terakhir', 'beli']);
       const hppIdx = findColIdx(['hpp', 'harga pokok']);
-      const sellIdx = findColIdx(['harga jual', 'jual', 'harga', 'price']);
+      let sellIdx = findColIdx(['harga jual', 'harga_jual', 'jual']);
+      if (sellIdx === -1) sellIdx = findColIdx(['harga', 'price']);
       const statusIdx = findColIdx(['status']);
 
       const parsed = [];
@@ -2169,7 +2191,7 @@ const loadSampleRkasData = async () => {
     if (res.ok) {
       const json = await res.json();
       parsedExcelData.value = json.products;
-      uploadedFileName.value = 'data_barang_20261014_103611.xlsx';
+      uploadedFileName.value = 'data_barang_template.xlsx';
       uploadedFileSize.value = '186.9 KB';
       toast.success(`Berhasil memuat 2.196 data RKAS resmi.`);
       importStep.value = 3;

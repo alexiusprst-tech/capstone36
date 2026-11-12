@@ -1,6 +1,6 @@
 <template>
   <Teleport to="body">
-    <div class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none">
+    <div class="fixed bottom-4 right-4 left-4 sm:left-auto z-[70] flex flex-col gap-2 sm:max-w-sm pointer-events-none" aria-live="polite" aria-relevant="additions">
       <div
         v-for="toast in toastService.state.toasts"
         :key="toast.id"
@@ -18,6 +18,7 @@
         </div>
         <button
           type="button"
+          aria-label="Tutup notifikasi"
           class="text-slate-400 hover:text-slate-600 ml-2"
           @click="toastService.dismiss(toast.id)"
         >

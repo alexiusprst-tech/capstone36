@@ -4,7 +4,7 @@
       <span class="text-xs font-semibold uppercase tracking-wider text-slate-600">
         Kelengkapan Dokumen
       </span>
-      <span class="text-xs font-bold text-slate-800">
+      <span class="text-xs font-semibold text-slate-800">
         {{ completeCount }} / 4 Lengkap
       </span>
     </div>
@@ -34,7 +34,7 @@
           <span v-if="documents?.po?.status === 'Lengkap'">✓</span>
           <span v-else>○</span>
         </div>
-        <span class="text-[10px] text-slate-500 truncate mt-1">
+        <span class="text-[11px] text-slate-500 truncate mt-1">
           {{ documents?.po?.number || 'Belum Dibuat' }}
         </span>
       </div>
@@ -51,7 +51,7 @@
           <span v-if="documents?.suratJalan?.status === 'Lengkap'">✓</span>
           <span v-else>○</span>
         </div>
-        <span class="text-[10px] text-slate-500 truncate mt-1">
+        <span class="text-[11px] text-slate-500 truncate mt-1">
           {{ documents?.suratJalan?.number || 'Belum Dibuat' }}
         </span>
       </div>
@@ -68,7 +68,7 @@
           <span v-if="documents?.bast?.status === 'Lengkap'">✓</span>
           <span v-else>○</span>
         </div>
-        <span class="text-[10px] text-slate-500 truncate mt-1">
+        <span class="text-[11px] text-slate-500 truncate mt-1">
           {{ documents?.bast?.number || 'Belum Dibuat' }}
         </span>
       </div>
@@ -85,7 +85,7 @@
           <span v-if="documents?.faktur?.status === 'Lengkap'">✓</span>
           <span v-else>○</span>
         </div>
-        <span class="text-[10px] text-slate-500 truncate mt-1">
+        <span class="text-[11px] text-slate-500 truncate mt-1">
           {{ documents?.faktur?.number || 'Belum Dibuat' }}
         </span>
       </div>

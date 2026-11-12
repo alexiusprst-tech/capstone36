@@ -38,11 +38,18 @@ export const spjService = {
   },
 
   // Generate dokumen tunggal
-  async generateDocument(projectId, docKey, formData = {}) {
+  async generateDocument(projectId, docKey, formData = {}, format = 'docx') {
     const res = await api.post(`/spj/projects/${projectId}/documents/${docKey}/generate`, {
       form_data: formData,
+      format,
     });
     return res.data;
+  },
+
+  async downloadDocument(projectId, docKey, format = 'docx') {
+    return api.get(`/spj/projects/${encodeURIComponent(projectId)}/documents/${encodeURIComponent(docKey)}/download`, {
+      params: { format }, responseType: 'blob',
+    });
   },
 
   // Bulk generate dokumen terpilih

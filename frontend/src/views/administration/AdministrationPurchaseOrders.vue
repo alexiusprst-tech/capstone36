@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Purchase Order (PO) Proyek</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Purchase Order (PO) Proyek</h1>
           <p class="text-sm text-slate-500 mt-1">
             Pengelolaan surat pesanan resmi pengadaan material dan kontrak kerja.
           </p>
@@ -19,14 +19,14 @@
       </div>
     </template>
 
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
       <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs">
-        <span class="font-bold text-slate-900 uppercase">Daftar Purchase Order</span>
+        <span class="font-semibold text-slate-900 uppercase">Daftar Purchase Order</span>
         <span class="text-slate-500">{{ poList.length }} Berkas PO</span>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
               <th class="py-3 px-4">PO Number</th>
@@ -40,11 +40,11 @@
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr v-for="po in poList" :key="po.number" class="hover:bg-slate-50/70 transition-colors">
-              <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ po.number }}</td>
+              <td class="py-3.5 px-4 font-mono font-semibold text-slate-900">{{ po.number }}</td>
               <td class="py-3.5 px-4 font-mono text-slate-600">{{ po.orderNumber }}</td>
-              <td class="py-3.5 px-4 font-bold text-slate-800">{{ po.clientName }}</td>
+              <td class="py-3.5 px-4 font-semibold text-slate-800">{{ po.clientName }}</td>
               <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ po.date }}</td>
-              <td class="py-3.5 px-4 text-right font-mono font-bold text-slate-900">
+              <td class="py-3.5 px-4 text-right font-mono font-semibold text-slate-900">
                 Rp {{ Number(po.amount || 0).toLocaleString('id-ID') }}
               </td>
               <td class="py-3.5 px-4 text-center">
@@ -70,7 +70,7 @@
                   </button>
                   <button
                     type="button"
-                    class="px-2 py-1 bg-alpharo-500 hover:bg-alpharo-600 text-white rounded text-[11px] font-bold"
+                    class="px-2 py-1 bg-alpharo-500 hover:bg-alpharo-600 text-white rounded text-[11px] font-semibold"
                     @click="openDetail(po)"
                   >
                     Detail
@@ -92,7 +92,7 @@
     >
       <form class="space-y-4 text-xs" @submit.prevent="savePo">
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Pilih Order Disetujui</label>
+          <label class="block font-semibold text-slate-700 uppercase mb-1">Pilih Order Disetujui</label>
           <select v-model="newPo.orderId" required class="w-full px-3 py-2 border rounded-lg bg-white">
             <option value="" disabled>-- Pilih Order --</option>
             <option v-for="o in approvedOrders" :key="o.id" :value="o.id">
@@ -102,17 +102,17 @@
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Nomor PO Resmi</label>
+          <label class="block font-semibold text-slate-700 uppercase mb-1">Nomor PO Resmi</label>
           <input v-model="newPo.number" required placeholder="PO-2026-XXX" class="w-full px-3 py-2 border rounded-lg" />
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Tanggal Terbit</label>
+          <label class="block font-semibold text-slate-700 uppercase mb-1">Tanggal Terbit</label>
           <input v-model="newPo.date" type="date" required class="w-full px-3 py-2 border rounded-lg bg-white" />
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Upload Berkas Fisik (Opsional)</label>
+          <label class="block font-semibold text-slate-700 uppercase mb-1">Upload Berkas Fisik (Opsional)</label>
           <input type="file" class="w-full px-3 py-2 border rounded-lg bg-slate-50" />
         </div>
 
@@ -120,7 +120,7 @@
           <button type="button" class="px-3.5 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg" @click="createModalOpen = false">
             Batal
           </button>
-          <button type="submit" class="px-4 py-1.5 bg-alpharo-500 hover:bg-alpharo-600 text-white font-bold rounded-lg">
+          <button type="submit" class="px-4 py-1.5 bg-alpharo-500 hover:bg-alpharo-600 text-white font-semibold rounded-lg">
             Terbitkan PO
           </button>
         </div>
@@ -138,7 +138,7 @@
         <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
           <div class="flex justify-between">
             <span class="text-slate-500">Nomor PO:</span>
-            <span class="font-mono font-bold text-slate-900">{{ selectedPo.number }}</span>
+            <span class="font-mono font-semibold text-slate-900">{{ selectedPo.number }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-slate-500">Nomor Order:</span>
@@ -146,13 +146,13 @@
           </div>
           <div class="flex justify-between">
             <span class="text-slate-500">Rekanan Client:</span>
-            <span class="font-bold text-slate-900">{{ selectedPo.clientName }}</span>
+            <span class="font-semibold text-slate-900">{{ selectedPo.clientName }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-slate-500">Tanggal Terbit:</span>
             <span class="text-slate-900">{{ selectedPo.date }}</span>
           </div>
-          <div class="flex justify-between font-bold text-sm pt-2 border-t border-slate-200">
+          <div class="flex justify-between font-semibold text-sm pt-2 border-t border-slate-200">
             <span>Nilai Kontrak PO:</span>
             <span class="font-mono text-alpharo-600">Rp {{ Number(selectedPo?.amount || 0).toLocaleString('id-ID') }}</span>
           </div>

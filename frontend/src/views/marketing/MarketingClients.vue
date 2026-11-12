@@ -3,37 +3,37 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Data Client Rekanan</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Data Client Rekanan</h1>
           <p class="text-sm text-slate-500 mt-1">
             Database customer sekolah, instansi, dan pemegang kontrak proyek terintegrasi.
           </p>
         </div>
-        <router-link
-          to="/marketing/clients/create"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold rounded-lg text-sm shadow-xs transition-colors"
+        <Link
+          href="/marketing/clients/create"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-alpharo-700 hover:bg-alpharo-800 text-white font-semibold rounded-lg text-sm shadow-xs transition-colors"
         >
           <Plus class="w-4 h-4" />
           <span>Tambah Client Baru</span>
-        </router-link>
+        </Link>
       </div>
     </template>
 
     <!-- SEARCH & FILTER BAR -->
-    <div class="bg-white p-4 rounded-xl border border-slate-200/90 mb-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
+    <div class="ui-panel bg-white p-4 rounded-xl border border-slate-200/90 mb-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
       <div class="relative w-full sm:w-88">
         <Search class="w-4 h-4 text-slate-400 absolute left-3 top-3" />
         <input
           v-model="searchQuery"
           type="text"
           placeholder="Cari ID, nama customer, alamat, kontak, email..."
-          class="w-full pl-9 pr-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600 text-slate-800"
+          class="w-full pl-9 pr-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800"
         />
       </div>
 
       <div class="flex items-center gap-3 w-full sm:w-auto">
         <select
           v-model="cityFilter"
-          class="text-xs px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-600"
+          class="text-xs px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400"
         >
           <option value="">Semua Kota</option>
           <option v-for="c in availableCities" :key="c" :value="c">{{ c }}</option>
@@ -51,15 +51,15 @@
     </div>
 
     <!-- DATA TABLE CONTAINER WITH TOP GREEN ACCENT -->
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t-4 border-t-emerald-600">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden border-t border-t-slate-200">
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-700 font-semibold text-[11px] tracking-normal select-none">
               <th class="py-3 px-4 cursor-pointer hover:bg-slate-100/60" @click="sortBy('code')">
                 <div class="flex items-center gap-1">
                   <span>ID</span>
-                  <span class="text-[10px] text-slate-400">
+                  <span class="text-[11px] text-slate-400">
                     {{ sortCol === 'code' ? (sortAsc ? '▲' : '▼') : '▲' }}
                   </span>
                 </div>
@@ -67,7 +67,7 @@
               <th class="py-3 px-4 cursor-pointer hover:bg-slate-100/60" @click="sortBy('name')">
                 <div class="flex items-center gap-1">
                   <span>Nama Customer</span>
-                  <span class="text-[10px] text-slate-400">
+                  <span class="text-[11px] text-slate-400">
                     {{ sortCol === 'name' ? (sortAsc ? '▲' : '▼') : '⇅' }}
                   </span>
                 </div>
@@ -78,7 +78,7 @@
               <th class="py-3 px-4 cursor-pointer hover:bg-slate-100/60" @click="sortBy('city')">
                 <div class="flex items-center gap-1">
                   <span>Kota</span>
-                  <span class="text-[10px] text-slate-400">
+                  <span class="text-[11px] text-slate-400">
                     {{ sortCol === 'city' ? (sortAsc ? '▲' : '▼') : '⇅' }}
                   </span>
                 </div>
@@ -86,7 +86,7 @@
               <th class="py-3 px-4 cursor-pointer hover:bg-slate-100/60" @click="sortBy('contactPerson')">
                 <div class="flex items-center gap-1">
                   <span>Contact Person</span>
-                  <span class="text-[10px] text-slate-400">
+                  <span class="text-[11px] text-slate-400">
                     {{ sortCol === 'contactPerson' ? (sortAsc ? '▲' : '▼') : '⇅' }}
                   </span>
                 </div>
@@ -94,7 +94,7 @@
               <th class="py-3 px-4 cursor-pointer hover:bg-slate-100/60" @click="sortBy('phone')">
                 <div class="flex items-center gap-1">
                   <span>No HP</span>
-                  <span class="text-[10px] text-slate-400">
+                  <span class="text-[11px] text-slate-400">
                     {{ sortCol === 'phone' ? (sortAsc ? '▲' : '▼') : '⇅' }}
                   </span>
                 </div>
@@ -102,7 +102,7 @@
               <th class="py-3 px-4 cursor-pointer hover:bg-slate-100/60" @click="sortBy('email')">
                 <div class="flex items-center gap-1">
                   <span>Email</span>
-                  <span class="text-[10px] text-slate-400">
+                  <span class="text-[11px] text-slate-400">
                     {{ sortCol === 'email' ? (sortAsc ? '▲' : '▼') : '⇅' }}
                   </span>
                 </div>
@@ -119,7 +119,7 @@
               class="hover:bg-slate-50/70 transition-colors"
             >
               <!-- ID -->
-              <td class="py-3.5 px-4 font-bold text-[#1e40af] font-mono whitespace-nowrap">
+              <td class="py-3.5 px-4 font-semibold text-[#1e40af] font-mono whitespace-nowrap">
                 {{ client.code }}
               </td>
 
@@ -180,9 +180,9 @@
             </tr>
 
             <tr v-if="filteredClients.length === 0">
-              <td colspan="8" class="py-12 text-center text-slate-400">
+              <td colspan="8" class="py-12 text-center text-slate-400"><div class="ui-empty-state">
                 Tidak ada data customer yang cocok dengan pencarian.
-              </td>
+              </div></td>
             </tr>
           </tbody>
         </table>
@@ -281,7 +281,7 @@
       <div v-if="clientToDelete" class="space-y-4">
         <p class="text-xs text-slate-600">
           Apakah Anda yakin ingin menghapus data customer
-          <strong class="font-bold text-slate-900">{{ clientToDelete.code }} - {{ clientToDelete.name }}</strong>?
+          <strong class="font-semibold text-slate-900">{{ clientToDelete.code }} - {{ clientToDelete.name }}</strong>?
         </p>
 
         <div class="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 flex items-start gap-2">
@@ -299,7 +299,7 @@
           </button>
           <button
             type="button"
-            class="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-xs"
+            class="px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-xs"
             @click="executeDelete"
           >
             Ya, Hapus Customer
@@ -312,7 +312,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter } from '../../navigation';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import Modal from '../../components/common/Modal.vue';
 import { store, storeActions } from '../../stores/mockData';

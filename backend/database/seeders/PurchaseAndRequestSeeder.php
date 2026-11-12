@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\PurchaseTransaction;
 use App\Models\Supplier;
 use App\Models\WarehouseRequest;
 use Illuminate\Database\Seeder;
@@ -154,6 +155,173 @@ class PurchaseAndRequestSeeder extends Seeder
                     ],
                 ],
                 'notes' => 'Telah diverifikasi sesuai spesifikasi berkas SPJ proyek SMA Negeri 2 Bogor.',
+            ]
+        );
+
+        // Demo Purchase Transactions
+        PurchaseTransaction::updateOrCreate(
+            ['purchase_code' => 'PB20261014114148'],
+            [
+                'transaction_date' => '2026-10-14',
+                'invoice_number' => 'FAK-SNX-10012',
+                'project_id' => 'PR00001',
+                'project_name' => 'pengadaan komputer sekolah (SMA NEGRI 2 BOGOR)',
+                'default_supplier' => 'PT Synnex Metrodata Indonesia',
+                'subtotal' => 10000000,
+                'discount' => 0,
+                'total_price' => 10000000,
+                'payment_method' => 'Tunai',
+                'status' => 'DITERIMA_GUDANG',
+                'supplier_progress' => [
+                    'supplier_status' => 'Diterima Gudang (Lengkap & Sesuai)',
+                    'warehouse_arrived' => true,
+                    'delivery_info' => [
+                        'surat_jalan' => 'SJ/SNX/X/2026/088',
+                        'courier' => 'Armada Internal PT Synnex',
+                        'tracking_number' => 'TRK-SNX-8821',
+                        'dispatch_date' => '2026-10-15',
+                        'est_arrival' => '2026-10-16',
+                        'notes' => 'Barang telah diantar langsung dan diverifikasi lengkap oleh staf gudang CV Alpharo.',
+                    ],
+                ],
+                'progress_version' => 1,
+                'items' => [
+                    [
+                        'barang' => 'A00001770 - Pemeliharaan Komputer Note Book/ Laptop',
+                        'sku' => 'A00001770',
+                        'supplier' => 'PT Synnex Metrodata Indonesia',
+                        'qty' => 100,
+                        'harga_beli' => 100000,
+                        'diskon_percent' => 0,
+                        'diskon_nominal' => 0,
+                        'subtotal' => 10000000,
+                    ],
+                ],
+                'created_by' => 'Dewi Lestari (Finance)',
+            ]
+        );
+
+        PurchaseTransaction::updateOrCreate(
+            ['purchase_code' => 'PB20261028091522'],
+            [
+                'transaction_date' => '2026-10-28',
+                'invoice_number' => 'FAK-SNX-100234',
+                'project_id' => 'PR00002',
+                'project_name' => 'Pembangunan Fasilitas Workshop & Lab Vokasi',
+                'default_supplier' => 'PT Synnex Metrodata Indonesia',
+                'subtotal' => 25000000,
+                'discount' => 500000,
+                'total_price' => 24500000,
+                'payment_method' => 'Transfer Bank BCA',
+                'status' => 'DIPESAN',
+                'supplier_progress' => [
+                    'supplier_status' => 'Dikirim ke Gudang CV',
+                    'delivery_info' => [
+                        'surat_jalan' => 'SJ/SNX/X/2026/102',
+                        'courier' => 'JNE Trucking',
+                        'tracking_number' => 'JNET-298371928',
+                        'dispatch_date' => '2026-10-29',
+                        'est_arrival' => '2026-10-31',
+                        'shipping_status' => 'Kurir Mengambil Barang (Dispatched)',
+                        'current_location' => 'Hub Transit Logistik Cakung, Jakarta Timur',
+                        'last_updated' => '14:20 WIB',
+                        'notes' => 'Dikirim dalam 5 pallet kayu pelindung garansi resmi.',
+                        'milestones' => [
+                            [
+                                'id' => 1,
+                                'timestamp' => '29 Okt 2026 09:30 WIB',
+                                'status' => 'Pesanan Diberangkatkan dari Gudang Supplier',
+                                'location' => 'Gudang Utama PT Synnex Metrodata',
+                                'notes' => 'Surat Jalan SJ/SNX/X/2026/102 diterbitkan & segel utuh.',
+                                'updated_by' => 'PT Synnex Metrodata Indonesia',
+                            ],
+                            [
+                                'id' => 2,
+                                'timestamp' => '29 Okt 2026 14:20 WIB',
+                                'status' => 'Kurir Mengambil Barang dari Gudang Supplier',
+                                'location' => 'Hub Transit Logistik Cakung, Jakarta Timur',
+                                'notes' => 'Paket sedang disortir dan dimuat ke armada ekspedisi JNE Trucking tujuan gudang proyek CV Alpharo.',
+                                'updated_by' => 'JNE Trucking',
+                            ],
+                        ],
+                    ],
+                ],
+                'progress_version' => 1,
+                'items' => [
+                    [
+                        'barang' => 'PRD-SRV-01 - Server Tower Intel Xeon E-2324G',
+                        'sku' => 'PRD-SRV-01',
+                        'supplier' => 'PT Synnex Metrodata Indonesia',
+                        'qty' => 2,
+                        'harga_beli' => 12250000,
+                        'diskon_percent' => 0,
+                        'diskon_nominal' => 0,
+                        'subtotal' => 24500000,
+                    ],
+                ],
+                'created_by' => 'Dewi Lestari (Finance)',
+            ]
+        );
+
+        PurchaseTransaction::updateOrCreate(
+            ['purchase_code' => 'PB20261030132015'],
+            [
+                'transaction_date' => '2026-10-30',
+                'invoice_number' => 'FAK-SNX-101550',
+                'project_id' => 'PR00001',
+                'project_name' => 'pengadaan komputer sekolah (SMA NEGRI 2 BOGOR)',
+                'default_supplier' => 'PT Synnex Metrodata Indonesia',
+                'subtotal' => 18000000,
+                'discount' => 0,
+                'total_price' => 18000000,
+                'payment_method' => 'Transfer Bank BCA',
+                'status' => 'DIPESAN',
+                'supplier_progress' => ['supplier_status' => 'Menunggu Konfirmasi'],
+                'progress_version' => 1,
+                'items' => [
+                    [
+                        'barang' => 'PRD-LPT-02 - Laptop Asus ExpertBook B1 Core i5 16GB',
+                        'sku' => 'PRD-LPT-02',
+                        'supplier' => 'PT Synnex Metrodata Indonesia',
+                        'qty' => 2,
+                        'harga_beli' => 9000000,
+                        'diskon_percent' => 0,
+                        'diskon_nominal' => 0,
+                        'subtotal' => 18000000,
+                    ],
+                ],
+                'created_by' => 'Dewi Lestari (Finance)',
+            ]
+        );
+
+        PurchaseTransaction::updateOrCreate(
+            ['purchase_code' => 'PB20261030141018'],
+            [
+                'transaction_date' => '2026-10-30',
+                'invoice_number' => 'FAK-SBM-55421',
+                'project_id' => 'PR00004',
+                'project_name' => 'Renovasi Gedung Laboratorium Komputer',
+                'default_supplier' => 'CV Sumber Makmur Komputer',
+                'subtotal' => 8500000,
+                'discount' => 0,
+                'total_price' => 8500000,
+                'payment_method' => 'Transfer Bank Mandiri',
+                'status' => 'DIPESAN',
+                'supplier_progress' => ['supplier_status' => 'Menunggu Konfirmasi'],
+                'progress_version' => 1,
+                'items' => [
+                    [
+                        'barang' => 'PRD-SW-24 - Switch Gigabyte 24 Port Managed',
+                        'sku' => 'PRD-SW-24',
+                        'supplier' => 'CV Sumber Makmur Komputer',
+                        'qty' => 5,
+                        'harga_beli' => 1700000,
+                        'diskon_percent' => 0,
+                        'diskon_nominal' => 0,
+                        'subtotal' => 8500000,
+                    ],
+                ],
+                'created_by' => 'Dewi Lestari (Finance)',
             ]
         );
     }

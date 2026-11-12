@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Laporan Eksekutif & Analitik</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Laporan Eksekutif & Analitik</h1>
           <p class="text-sm text-slate-500 mt-1">
             Kompilasi laporan terintegrasi lintas divisi CV Alpharo Artha Jaya siap cetak & ekspor.
           </p>
@@ -37,7 +37,7 @@
         type="button"
         :class="[
           selectedCategory === cat
-            ? 'bg-alpharo-500 text-white font-bold shadow-xs'
+            ? 'bg-alpharo-500 text-white font-semibold shadow-xs'
             : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200',
           'px-4 py-2 rounded-xl text-xs whitespace-nowrap transition-all'
         ]"
@@ -48,7 +48,7 @@
     </div>
 
     <!-- FILTER BAR -->
-    <div class="bg-white p-4 rounded-xl border border-slate-200/90 mb-5 grid grid-cols-1 sm:grid-cols-4 gap-3 shadow-2xs text-xs">
+    <div class="ui-panel bg-white p-4 rounded-xl border border-slate-200/90 mb-5 grid grid-cols-1 sm:grid-cols-4 gap-3 shadow-2xs text-xs">
       <div>
         <label class="block font-semibold text-slate-600 mb-1">Cari Kata Kunci</label>
         <div class="relative">
@@ -82,14 +82,14 @@
     </div>
 
     <!-- DYNAMIC REPORT TABLE -->
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
       <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs">
-        <span class="font-bold text-slate-900 uppercase">Hasil Rekapitulasi: Laporan {{ selectedCategory }}</span>
+        <span class="font-semibold text-slate-900 uppercase">Hasil Rekapitulasi: Laporan {{ selectedCategory }}</span>
         <span class="text-slate-500">Menampilkan {{ reportData.length }} baris data</span>
       </div>
 
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
               <th v-for="col in tableColumns" :key="col.key" :class="[col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : '', 'py-3 px-4']">
@@ -101,7 +101,7 @@
             <tr v-for="(row, rIdx) in reportData" :key="rIdx" class="hover:bg-slate-50/70 transition-colors">
               <td v-for="col in tableColumns" :key="col.key" :class="[col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : '', 'py-3.5 px-4 font-medium']">
                 <StatusBadge v-if="col.isBadge" :status="row[col.key]" />
-                <span v-else-if="col.isCurrency" class="font-mono font-bold text-slate-900">
+                <span v-else-if="col.isCurrency" class="font-mono font-semibold text-slate-900">
                   Rp {{ (row[col.key] || 0).toLocaleString('id-ID') }}
                 </span>
                 <span v-else>{{ row[col.key] }}</span>
@@ -121,13 +121,15 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useRoute } from '../../navigation';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import { store } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
 import { Download, Printer, Search } from 'lucide-vue-next';
 
+const route = useRoute();
 const toast = useToast();
 
 const categories = [
@@ -135,14 +137,22 @@ const categories = [
   'Client',
   'Barang',
   'Fulfillment',
-  'Dokumen',
   'Invoice',
   'Pembayaran',
   'Piutang',
+  'Log Aktivitas',
 ];
 
 const selectedCategory = ref('Order');
 const searchQuery = ref('');
+
+onMounted(() => {
+  if (route.query.tab === 'activities' || route.query.cat === 'activities') {
+    selectedCategory.value = 'Log Aktivitas';
+  } else if (route.query.cat && categories.includes(route.query.cat)) {
+    selectedCategory.value = route.query.cat;
+  }
+});
 const clientFilter = ref('');
 const startDate = ref('2026-09-01');
 const endDate = ref('2026-10-31');
@@ -207,6 +217,15 @@ const tableColumns = computed(() => {
         { key: 'dueDate', label: 'Jatuh Tempo' },
         { key: 'status', label: 'Status', isBadge: true, align: 'center' },
       ];
+    case 'Log Aktivitas':
+      return [
+        { key: 'timestamp', label: 'Waktu' },
+        { key: 'user', label: 'Pengguna' },
+        { key: 'role', label: 'Peran' },
+        { key: 'action', label: 'Aktivitas / Operasi' },
+        { key: 'target', label: 'Objek / Target' },
+        { key: 'details', label: 'Keterangan Rinci' },
+      ];
     default: // Order
       return [
         { key: 'orderNumber', label: 'No. Order' },
@@ -234,6 +253,8 @@ const reportData = computed(() => {
       return store.payments;
     case 'Piutang':
       return store.invoices.filter((i) => i.remainingAmount > 0);
+    case 'Log Aktivitas':
+      return store.activityLogs || [];
     default:
       return store.orders;
   }

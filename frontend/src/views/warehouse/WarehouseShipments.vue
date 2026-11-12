@@ -3,7 +3,7 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Pengiriman Armada (Shipments)</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Pengiriman Armada (Shipments)</h1>
           <p class="text-sm text-slate-500 mt-1">
             Penjadwalan keberangkatan truk ekspedisi, pelacakan driver, dan konfirmasi barang tiba di lokasi proyek.
           </p>
@@ -27,7 +27,7 @@
         type="button"
         :class="[
           activeFilter === st
-            ? 'bg-alpharo-500 text-white font-bold shadow-xs'
+            ? 'bg-alpharo-500 text-white font-semibold shadow-xs'
             : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200',
           'px-4 py-2 rounded-xl text-xs whitespace-nowrap transition-all'
         ]"
@@ -38,9 +38,9 @@
     </div>
 
     <!-- SHIPMENTS TABLE -->
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
+    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
           <thead>
             <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
               <th class="py-3 px-4">No. Pengiriman</th>
@@ -55,18 +55,18 @@
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr v-for="s in filteredShipments" :key="s.id" class="hover:bg-slate-50/70 transition-colors">
-              <td class="py-3.5 px-4 font-mono font-bold text-slate-900">{{ s.shipmentNumber }}</td>
+              <td class="py-3.5 px-4 font-mono font-semibold text-slate-900">{{ s.shipmentNumber }}</td>
               <td class="py-3.5 px-4">
                 <span class="font-mono text-slate-700 font-medium block">{{ s.orderNumber }}</span>
                 <span
                   v-if="getOrderHold(s.orderNumber)"
-                  class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200 mt-0.5"
+                  class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-semibold bg-rose-100 text-rose-700 border border-rose-200 mt-0.5"
                   :title="getOrderHold(s.orderNumber)?.holdReason"
                 >
                   ⛔ Ditahan Direktur
                 </span>
               </td>
-              <td class="py-3.5 px-4 font-bold text-slate-800">{{ s.clientName }}</td>
+              <td class="py-3.5 px-4 font-semibold text-slate-800">{{ s.clientName }}</td>
               <td class="py-3.5 px-4 text-slate-600 truncate max-w-xs">{{ s.destination }}</td>
               <td class="py-3.5 px-4">
                 <div class="font-medium text-slate-900">{{ s.driverName }}</div>
@@ -81,7 +81,7 @@
                   <button
                     v-if="s.status === 'Sedang Dikirim'"
                     type="button"
-                    class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-xs"
+                    class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-semibold text-xs"
                     @click="confirmDelivered(s)"
                   >
                     Konfirmasi Tiba
@@ -105,29 +105,29 @@
     <Modal v-model="dispatchModalOpen" title="Berangkatkan Armada Pengiriman" subtitle="Buat jadwal keberangkatan armada & driver ke site proyek" size="md">
       <form class="space-y-4 text-xs" @submit.prevent="saveDispatch">
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Pilih Order Siap Kirim</label>
+          <label class="block font-semibold text-slate-700 uppercase mb-1">Pilih Order Siap Kirim</label>
           <select v-model="form.orderNumber" required class="w-full px-3 py-2 border rounded-lg bg-white" @change="onOrderSelect">
             <option v-for="o in allCandidateOrders" :key="o.orderNumber" :value="o.orderNumber" :disabled="o.isHold">
               {{ o.orderNumber }} - {{ o.clientName }} {{ o.isHold ? '(⛔ DITAHAN DIREKTUR: ' + o.holdReason + ')' : '' }}
             </option>
           </select>
-          <p v-if="selectedOrderObj?.isHold" class="text-[11px] text-rose-600 font-bold mt-1">
+          <p v-if="selectedOrderObj?.isHold" class="text-[11px] text-rose-600 font-semibold mt-1">
             ⚠️ Order ini sedang DITAHAN oleh Direktur. Pengiriman diblokir hingga tahanan dilepas.
           </p>
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Tujuan / Alamat Site Proyek</label>
+          <label class="block font-semibold text-slate-700 uppercase mb-1">Tujuan / Alamat Site Proyek</label>
           <input v-model="form.destination" required placeholder="Lokasi penerimaan barang..." class="w-full px-3 py-2 border rounded-lg" />
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Armada / Nopol Truk</label>
+            <label class="block font-semibold text-slate-700 uppercase mb-1">Armada / Nopol Truk</label>
             <input v-model="form.expedition" required placeholder="Armada Internal Truk N-8841-AA" class="w-full px-3 py-2 border rounded-lg" />
           </div>
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">Nama Driver & No. HP</label>
+            <label class="block font-semibold text-slate-700 uppercase mb-1">Nama Driver & No. HP</label>
             <input v-model="form.driverName" required placeholder="Sopir (0812-XXXX)" class="w-full px-3 py-2 border rounded-lg" />
           </div>
         </div>
@@ -139,7 +139,7 @@
             :disabled="selectedOrderObj?.isHold"
             :class="[
               selectedOrderObj?.isHold ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-alpharo-500 hover:bg-alpharo-600 text-white',
-              'px-4 py-1.5 font-bold rounded-lg transition-colors'
+              'px-4 py-1.5 font-semibold rounded-lg transition-colors'
             ]"
           >
             Konfirmasi Keberangkatan
@@ -197,11 +197,11 @@ const getOrderHold = (orderNumber) => {
 const openDispatchModal = () => {
   const first = readyOrders.value[0] || allCandidateOrders.value[0];
   form.value = {
-    orderNumber: first ? first.orderNumber : 'ORD-2026-001',
-    clientName: first ? first.clientName : 'Client',
-    destination: 'Site Proyek Konstruksi',
-    expedition: 'Truk Tronton CV Alpharo N-8841-AA',
-    driverName: 'Joko Purwanto (0812-7711-2233)',
+    orderNumber: first ? first.orderNumber : '',
+    clientName: first ? first.clientName : '',
+    destination: '',
+    expedition: 'Armada Internal CV Alpharo',
+    driverName: '',
   };
   dispatchModalOpen.value = true;
 };

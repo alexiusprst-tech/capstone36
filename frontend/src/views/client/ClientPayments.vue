@@ -3,9 +3,9 @@
     <template #header>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Status Pembayaran & Termin</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Status Pembayaran & Tagihan</h1>
           <p class="text-sm text-slate-500 mt-1">
-            Rincian invoice tagihan, jadwal termin, dan riwayat konfirmasi pembayaran instansi Anda dengan CV Alpharo Artha Jaya.
+            Rincian invoice tagihan dan riwayat konfirmasi pembayaran instansi Anda dengan CV Alpharo Artha Jaya.
           </p>
         </div>
         <div class="flex items-center gap-2">
@@ -22,26 +22,26 @@
     </template>
 
     <!-- BANK ACCOUNT & PAYMENT INSTRUCTIONS BANNER -->
-    <div class="bg-gradient-to-r from-blue-900 via-[#0B4DA2] to-blue-800 rounded-2xl p-5 text-white shadow-md mb-6">
+    <div class="bg-linear-to-r from-alpharo-900 via-alpharo-600 to-alpharo-800 rounded-2xl p-5 text-white shadow-md mb-6">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white uppercase tracking-wider mb-2">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/20 text-white uppercase tracking-wider mb-2">
             Rekening Resmi Perusahaan (Tunggal & Tetap)
           </span>
-          <h3 class="text-base font-bold text-white">Pembayaran Ditujukan Kepada: CV Alpharo Artha Jaya</h3>
-          <p class="text-xs text-blue-100 mt-0.5">
-            Gunakan nomor rekening resmi Bank DKI berikut untuk seluruh transaksi pembayaran pesanan dan termin instansi Anda.
+          <h3 class="text-base font-semibold text-white">Pembayaran Ditujukan Kepada: CV Alpharo Artha Jaya</h3>
+          <p class="text-xs text-alpharo-100 mt-0.5">
+            Gunakan nomor rekening resmi Bank BCA berikut untuk seluruh transaksi pembayaran pesanan dan tagihan instansi Anda.
           </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-          <div class="bg-white/10 backdrop-blur-xs rounded-xl p-4 border border-white/20 min-w-[260px] shadow-sm">
+          <div class="ui-panel bg-white/10 backdrop-blur-xs rounded-xl p-4 border border-white/20 min-w-[260px] shadow-sm">
             <div class="flex items-center justify-between gap-2 mb-1">
-              <p class="text-[10px] text-amber-300 font-bold uppercase tracking-wider">Bank BCA Jakarta</p>
-              <span class="text-[9px] font-bold bg-emerald-500/80 text-white px-2 py-0.5 rounded-full">Resmi Tetap</span>
+              <p class="text-[11px] text-amber-300 font-semibold uppercase tracking-wider">Bank BCA Jakarta</p>
+              <span class="text-[9px] font-semibold bg-emerald-500/80 text-white px-2 py-0.5 rounded-full">Resmi Tetap</span>
             </div>
-            <p class="font-mono text-lg font-extrabold text-white tracking-widest my-1 select-all">52323628813</p>
-            <p class="text-[11px] text-blue-100 font-semibold">a.n. CV ALPHARO ARTHA JAYA</p>
+            <p class="font-mono text-lg font-semibold text-white tracking-widest my-1 select-all">52323628813</p>
+            <p class="text-[11px] text-alpharo-100 font-semibold">a.n. CV ALPHARO ARTHA JAYA</p>
           </div>
         </div>
       </div>
@@ -64,7 +64,7 @@
           type="button"
           :class="[
             currentFilter === f.key
-              ? 'bg-slate-900 text-white font-bold'
+              ? 'bg-alpharo-600 text-white font-semibold'
               : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200',
             'px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-2xs transition-all'
           ]"
@@ -79,23 +79,23 @@
       </span>
     </div>
 
-    <!-- INVOICE CARDS WITH TERMIN DETAIL -->
+    <!-- INVOICE CARDS WITH PAYMENT DETAIL -->
     <div class="space-y-6">
       <div
         v-for="inv in filteredInvoices"
         :key="inv.id"
-        class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden"
+        class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden"
       >
         <!-- Header invoice card -->
         <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
           <div>
             <div class="flex items-center gap-2 mb-1">
-              <span class="font-mono font-bold text-slate-900 text-sm">{{ inv.invoiceNumber }}</span>
+              <span class="font-mono font-semibold text-slate-900 text-sm">{{ inv.invoiceNumber }}</span>
               <StatusBadge :status="inv.status" />
             </div>
             <p class="text-xs text-slate-600">
-              Order No: <span class="font-mono font-bold text-slate-800">{{ inv.orderNumber }}</span>
-              &bull; Skema: <span class="font-semibold text-slate-800">{{ inv.paymentType || 'Termin' }} ({{ inv.terminCount || 3 }} Termin)</span>
+              Order No: <span class="font-mono font-semibold text-slate-800">{{ inv.orderNumber }}</span>
+              &bull; Skema: <span class="font-semibold text-emerald-700">Pembayaran Penuh</span>
             </p>
             <p class="text-xs text-slate-400 mt-0.5">
               Tanggal Terbit: {{ inv.invoiceDate }} &bull; Batas Jatuh Tempo: {{ inv.dueDate }}
@@ -104,17 +104,27 @@
 
           <div class="flex items-center gap-4">
             <div class="text-left sm:text-right">
-              <p class="text-[10px] text-slate-400 uppercase font-semibold">Total Tagihan</p>
-              <p class="text-base font-bold text-slate-900 font-mono">Rp {{ (inv.totalAmount || 0).toLocaleString('id-ID') }}</p>
+              <p class="text-[11px] text-slate-400 uppercase font-semibold">Total Tagihan</p>
+              <p class="text-base font-semibold text-slate-900 font-mono">Rp {{ (inv.totalAmount || 0).toLocaleString('id-ID') }}</p>
               <p class="text-xs text-rose-600 font-semibold font-mono">
                 Sisa: Rp {{ (inv.remainingAmount || 0).toLocaleString('id-ID') }}
               </p>
             </div>
 
             <button
+              type="button"
+              class="px-3 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-semibold shadow-xs transition-colors shrink-0 flex items-center gap-1.5 cursor-pointer"
+              title="Unduh Invoice Resmi (PDF)"
+              @click="downloadClientInvoice(inv)"
+            >
+              <Download class="w-3.5 h-3.5" />
+              <span>Unduh Invoice</span>
+            </button>
+
+            <button
               v-if="inv.remainingAmount > 0"
               type="button"
-              class="px-3.5 py-2 bg-alpharo-500 hover:bg-alpharo-600 text-white rounded-lg text-xs font-bold shadow-xs transition-colors shrink-0 flex items-center gap-1.5"
+              class="px-3.5 py-2 bg-alpharo-500 hover:bg-alpharo-600 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors shrink-0 flex items-center gap-1.5"
               @click="openPaymentModal(inv)"
             >
               <CreditCard class="w-4 h-4" />
@@ -123,11 +133,11 @@
           </div>
         </div>
 
-        <!-- Termin schedule table -->
+        <!-- Status Pelunasan Tagihan -->
         <div class="p-5">
           <div class="flex items-center justify-between mb-3">
-            <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">
-              Jadwal & Riwayat Termin Pembayaran
+            <h4 class="text-xs font-semibold text-slate-900 uppercase tracking-wider">
+              Progres Pelunasan Tagihan
             </h4>
             <span class="text-xs text-slate-500">
               Progress: <strong class="text-emerald-600 font-mono">{{ paidPercentage(inv) }}% Lunas</strong>
@@ -142,63 +152,34 @@
             ></div>
           </div>
 
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
-                  <th class="py-2.5 px-3">Termin</th>
-                  <th class="py-2.5 px-3 text-right">Jumlah Tagihan</th>
-                  <th class="py-2.5 px-3">Batas Jatuh Tempo</th>
-                  <th class="py-2.5 px-3">Metode Bayar</th>
-                  <th class="py-2.5 px-3">Tanggal Pelunasan</th>
-                  <th class="py-2.5 px-3 text-center">Status</th>
-                  <th class="py-2.5 px-3 text-right">Aksi</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100">
-                <tr
-                  v-for="termin in (inv.termins || [])"
-                  :key="termin.termNumber"
-                  class="hover:bg-slate-50/60 transition-colors"
-                >
-                  <td class="py-3 px-3 font-bold text-slate-900">
-                    Termin Ke-{{ termin.termNumber }}
-                  </td>
-                  <td class="py-3 px-3 text-right font-mono font-semibold text-slate-900 whitespace-nowrap">
-                    Rp {{ (termin.amount || 0).toLocaleString('id-ID') }}
-                  </td>
-                  <td class="py-3 px-3 text-slate-700 whitespace-nowrap">{{ termin.dueDate }}</td>
-                  <td class="py-3 px-3 text-slate-600">{{ termin.method || '-' }}</td>
-                  <td class="py-3 px-3 text-slate-600 whitespace-nowrap">{{ termin.paidDate || '-' }}</td>
-                  <td class="py-3 px-3 text-center">
-                    <StatusBadge :status="termin.status" />
-                  </td>
-                  <td class="py-3 px-3 text-right whitespace-nowrap">
-                    <button
-                      v-if="termin.status !== 'Lunas'"
-                      type="button"
-                      class="text-alpharo-500 hover:text-alpharo-600 font-bold hover:underline"
-                      @click="openPaymentModal(inv, termin)"
-                    >
-                      Konfirmasi Bayar
-                    </button>
-                    <span v-else class="text-emerald-600 font-bold text-[11px] flex items-center justify-end gap-1">
-                      <CheckCircle2 class="w-3.5 h-3.5" /> Lunas
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+            <div class="space-y-1">
+              <span class="font-semibold text-slate-800">Status Kewajiban Tagihan</span>
+              <p class="text-slate-500">
+                {{ inv.remainingAmount <= 0 ? 'Seluruh kewajiban pembayaran invoice ini telah lunas 100%.' : 'Menunggu pelunasan pembayaran tagihan dari pihak rekanan.' }}
+              </p>
+            </div>
+            <button
+              v-if="inv.remainingAmount > 0"
+              type="button"
+              class="px-3.5 py-1.5 bg-alpharo-500 hover:bg-alpharo-600 text-white rounded-lg font-semibold shrink-0"
+              @click="openPaymentModal(inv)"
+            >
+              Konfirmasi Bayar
+            </button>
+            <span v-else class="text-emerald-600 font-semibold flex items-center gap-1 shrink-0">
+              <CheckCircle2 class="w-4 h-4" /> Lunas 100%
+            </span>
           </div>
         </div>
       </div>
 
       <div
         v-if="filteredInvoices.length === 0"
-        class="bg-white rounded-xl border border-slate-200/90 p-12 shadow-xs text-center text-slate-400 text-xs"
+        class="ui-panel bg-white rounded-xl border border-slate-200/90 p-12 shadow-xs text-center text-slate-400 text-xs"
       >
         <Receipt class="w-12 h-12 text-slate-300 mx-auto mb-3" />
-        <p class="font-bold text-slate-700 text-sm">Tidak ada invoice tagihan</p>
+        <p class="font-semibold text-slate-700 text-sm">Tidak ada invoice tagihan</p>
         <p class="mt-1">Belum ada invoice yang sesuai dengan kriteria filter Anda.</p>
       </div>
     </div>
@@ -225,31 +206,6 @@
           </select>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">Skema Pembayaran</label>
-            <select
-              v-model="paymentForm.paymentType"
-              class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white"
-            >
-              <option value="Termin">Pembayaran Termin</option>
-              <option value="Penuh">Pelunasan Penuh</option>
-            </select>
-          </div>
-
-          <div v-if="paymentForm.paymentType === 'Termin'">
-            <label class="block font-semibold text-slate-700 mb-1">Termin Ke</label>
-            <select
-              v-model="paymentForm.terminNumber"
-              class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white"
-            >
-              <option :value="1">Termin Ke-1</option>
-              <option :value="2">Termin Ke-2</option>
-              <option :value="3">Termin Ke-3</option>
-            </select>
-          </div>
-        </div>
-
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Nominal yang Ditransfer (Rp)</label>
           <input
@@ -258,7 +214,7 @@
             min="1000"
             required
             placeholder="Contoh: 15000000"
-            class="w-full px-3 py-2 rounded-lg border border-slate-300 font-mono font-bold"
+            class="w-full px-3 py-2 rounded-lg border border-slate-300 font-mono font-semibold"
           />
         </div>
 
@@ -298,41 +254,129 @@
           />
         </div>
 
+        <!-- UNGGAH BUKTI TRANSFER IDENTIK WAREHOUSE LAPOR KERUSAKAN (MAKS. 1 BERKAS) -->
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Unggah Bukti Transfer (File Foto/PDF)</label>
-          <div class="border-2 border-dashed border-slate-300 rounded-lg p-3 text-center bg-slate-50">
-            <UploadCloud class="w-6 h-6 text-slate-400 mx-auto mb-1" />
-            <p class="text-[11px] text-slate-600 font-medium">Struk_Transfer_SMA9.pdf (Simulasi Dokumen Terpilih)</p>
-            <p class="text-[10px] text-slate-400">Format: JPG, PNG, atau PDF max 5MB</p>
-          </div>
-        </div>
+          <label class="block font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+            <span>Unggah Bukti Transfer (File Foto/PDF) <span class="text-rose-500">*</span></span>
+            <span class="text-[11px] text-slate-400 font-normal">Maks. 1 berkas (Foto/PDF maks 10MB)</span>
+          </label>
 
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Catatan Tambahan (Opsional)</label>
-          <textarea
-            v-model="paymentForm.notes"
-            rows="2"
-            placeholder="Catatan dari bendahara sekolah..."
-            class="w-full px-3 py-2 rounded-lg border border-slate-300"
-          ></textarea>
+          <input
+            ref="proofFileInput"
+            type="file"
+            accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+            class="hidden"
+            @change="handleProofFileChange"
+          />
+
+          <!-- Media Thumbnails Grid (Persis Warehouse Lapor Kerusakan) -->
+          <div class="flex items-center gap-3 overflow-x-auto py-2">
+            <!-- Uploaded Items -->
+            <div
+              v-for="(item, idx) in proofMediaList"
+              :key="idx"
+              class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 shadow-sm shrink-0 group cursor-pointer"
+              @click="openMediaPreview(item)"
+            >
+              <img
+                v-if="item.type === 'image'"
+                :src="item.url"
+                :alt="item.name"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div v-else class="w-full h-full flex flex-col items-center justify-center bg-slate-800 p-2 text-white">
+                <FileText class="w-8 h-8 text-sky-400 mb-1" />
+                <span class="text-[10px] font-mono text-center truncate max-w-full px-1">{{ item.name }}</span>
+                <span class="text-[9px] text-slate-400 font-mono">{{ item.size }}</span>
+              </div>
+
+              <!-- Close / Delete Button -->
+              <button
+                type="button"
+                class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/60 hover:bg-rose-600 text-white flex items-center justify-center transition-colors shadow-xs cursor-pointer z-10"
+                title="Hapus berkas ini"
+                @click.stop="removeProofMedia(idx)"
+              >
+                <X class="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <!-- Upload Placeholder Box (Hanya muncul jika belum ada berkas terpilih) -->
+            <button
+              v-if="proofMediaList.length === 0"
+              type="button"
+              class="w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-dashed border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50/80 flex flex-col items-center justify-center gap-1.5 shrink-0 transition-colors cursor-pointer group"
+              @click="triggerProofFileInput"
+            >
+              <div class="w-8 h-8 rounded-full bg-slate-100 group-hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors">
+                <Camera class="w-4 h-4 stroke-[2]" />
+              </div>
+              <span class="text-xs font-semibold text-slate-700">Foto / PDF</span>
+            </button>
+          </div>
         </div>
 
         <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
           <button
             type="button"
-            class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold"
+            class="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold cursor-pointer"
             @click="showPaymentModal = false"
           >
             Batal
           </button>
           <button
             type="submit"
-            class="px-4 py-2 rounded-lg bg-alpharo-500 hover:bg-alpharo-600 text-white font-bold shadow-xs"
+            class="px-4 py-2 rounded-lg bg-alpharo-500 hover:bg-alpharo-600 text-white font-semibold shadow-xs cursor-pointer"
           >
             Kirim Konfirmasi
           </button>
         </div>
       </form>
+    </Modal>
+
+    <!-- MODAL PREVIEW BUKTI TRANSFER (FULL SIZE PERSIS WAREHOUSE) -->
+    <Modal
+      v-model="mediaPreviewModalOpen"
+      :title="activePreviewMedia?.name || 'Pratinjau Bukti Pembayaran'"
+      subtitle="Dokumen atau foto struk transfer yang dilampirkan"
+      size="xl"
+    >
+      <div v-if="activePreviewMedia" class="space-y-3">
+        <div class="w-full rounded-2xl overflow-hidden bg-black flex items-center justify-center max-h-[70vh]">
+          <img
+            v-if="activePreviewMedia.type === 'image'"
+            :src="activePreviewMedia.url"
+            :alt="activePreviewMedia.name"
+            class="w-full h-auto max-h-[70vh] object-contain"
+          />
+          <div v-else class="text-center py-12 text-white space-y-3">
+            <FileText class="w-16 h-16 text-sky-400 mx-auto" />
+            <p class="font-semibold text-base">{{ activePreviewMedia.name }}</p>
+            <p class="text-xs text-slate-400 font-mono">{{ activePreviewMedia.size }}</p>
+            <a
+              :href="activePreviewMedia.url"
+              target="_blank"
+              download="Bukti_Transfer.pdf"
+              class="inline-flex items-center gap-1.5 px-4 py-2 bg-alpharo-500 hover:bg-alpharo-600 text-white rounded-lg text-xs font-semibold cursor-pointer"
+            >
+              Buka / Unduh Berkas PDF
+            </a>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-200">
+          <div>
+            <span class="font-semibold text-slate-800">{{ activePreviewMedia.name }}</span>
+            <span class="ml-2 font-mono">({{ activePreviewMedia.size }})</span>
+          </div>
+          <button
+            type="button"
+            class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg cursor-pointer"
+            @click="mediaPreviewModalOpen = false"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
     </Modal>
   </AppLayout>
 </template>
@@ -344,12 +388,18 @@ import KpiCard from '../../components/common/KpiCard.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import Modal from '../../components/common/Modal.vue';
 import { store, storeActions } from '../../stores/mockData';
+import { orderError, orderWorkflow } from '../../services/orderWorkflow';
 import { useToast } from '../../services/toast';
 import {
   CreditCard,
   UploadCloud,
   CheckCircle2,
   Receipt,
+  Download,
+  FileText,
+  Trash2,
+  Camera,
+  X,
 } from 'lucide-vue-next';
 
 const toast = useToast();
@@ -361,6 +411,17 @@ const clientInvoices = computed(() => {
 });
 
 const currentFilter = ref('all');
+
+const downloadClientInvoice = async (inv) => {
+  if (!inv) return;
+  try {
+    toast.info(`Menyiapkan unduhan Invoice ${inv.invoiceNumber}...`);
+    await orderWorkflow.downloadInvoice(inv.orderNumber, false);
+    toast.success(`Invoice ${inv.invoiceNumber} berhasil diunduh.`);
+  } catch (error) {
+    toast.error('Gagal mengunduh invoice: ' + orderError(error));
+  }
+};
 
 const filterTabs = [
   { key: 'all', label: 'Semua Invoice' },
@@ -401,33 +462,88 @@ const paidPercentage = (inv) => {
 const showPaymentModal = ref(false);
 const paymentForm = ref({
   invoiceNumber: '',
-  paymentType: 'Termin',
-  terminNumber: 1,
   amount: 0,
   paymentMethod: 'Transfer BCA',
   paymentDate: new Date().toISOString().split('T')[0],
   referenceNumber: `TRF-${Math.floor(100000 + Math.random() * 900000)}`,
   notes: '',
-  proofFile: 'BUKTI_TRANSFER_SMA.pdf',
+  proofFile: '',
+  proofUrl: '',
 });
 
-const openPaymentModal = (inv = null, termin = null) => {
+const proofFileInput = ref(null);
+const proofMediaList = ref([]);
+const mediaPreviewModalOpen = ref(false);
+const activePreviewMedia = ref(null);
+
+const triggerProofFileInput = () => {
+  if (proofFileInput.value) proofFileInput.value.click();
+};
+
+const handleProofFileChange = (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  if (file.size > 10 * 1024 * 1024) {
+    toast.error(`Berkas ${file.name} melebihi batas 10MB.`);
+    e.target.value = '';
+    return;
+  }
+
+  const isImage = file.type.startsWith('image/');
+  const isPdf = file.type.includes('pdf') || file.name.toLowerCase().endsWith('.pdf');
+  if (!isImage && !isPdf) {
+    toast.error(`Format berkas ${file.name} tidak didukung. Harap pilih foto (JPG, PNG) atau dokumen PDF.`);
+    e.target.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (loadEvent) => {
+    const itemObj = {
+      name: file.name,
+      type: isImage ? 'image' : 'pdf',
+      url: loadEvent.target.result,
+      size: (file.size / 1024).toFixed(0) + ' KB',
+    };
+    // Batasi strictly hanya 1 berkas foto/PDF saja
+    proofMediaList.value = [itemObj];
+    paymentForm.value.proofFile = itemObj.name;
+    paymentForm.value.proofUrl = itemObj.url;
+    toast.success(`Berkas ${file.name} berhasil dilampirkan.`);
+  };
+  reader.readAsDataURL(file);
+
+  e.target.value = '';
+};
+
+const removeProofMedia = () => {
+  proofMediaList.value = [];
+  paymentForm.value.proofFile = '';
+  paymentForm.value.proofUrl = '';
+};
+
+const openMediaPreview = (item) => {
+  activePreviewMedia.value = item;
+  mediaPreviewModalOpen.value = true;
+};
+
+const openPaymentModal = (inv = null) => {
   const targetInv = inv || clientInvoices.value[0];
   if (!targetInv) {
     toast.error('Belum ada data invoice untuk dikonfirmasi.');
     return;
   }
 
-  paymentForm.value.invoiceNumber = targetInv.invoiceNumber;
-  if (termin) {
-    paymentForm.value.paymentType = 'Termin';
-    paymentForm.value.terminNumber = termin.termNumber;
-    paymentForm.value.amount = termin.amount || targetInv.remainingAmount;
-  } else {
-    paymentForm.value.amount = targetInv.remainingAmount || targetInv.totalAmount;
-    paymentForm.value.paymentType = targetInv.remainingAmount === targetInv.totalAmount ? 'Termin' : 'Penuh';
-  }
+  // Reset proof file state
+  proofMediaList.value = [];
+  mediaPreviewModalOpen.value = false;
+  activePreviewMedia.value = null;
+  paymentForm.value.proofFile = '';
+  paymentForm.value.proofUrl = '';
 
+  paymentForm.value.invoiceNumber = targetInv.invoiceNumber;
+  paymentForm.value.amount = targetInv.remainingAmount || targetInv.totalAmount;
   paymentForm.value.referenceNumber = `TRF-${Math.floor(100000 + Math.random() * 900000)}`;
   paymentForm.value.paymentDate = new Date().toISOString().split('T')[0];
   showPaymentModal.value = true;
@@ -447,17 +563,23 @@ const submitPaymentConfirmation = () => {
     return;
   }
 
+  if (!proofMediaList.value.length) {
+    toast.error('Harap unggah bukti transfer terlebih dahulu sebelum mengirim.');
+    return;
+  }
+
   // Call store action to record payment
   storeActions.recordPayment({
     invoiceId: inv.id,
+    invoiceNumber: inv.invoiceNumber,
     amount: paymentForm.value.amount,
     paymentDate: paymentForm.value.paymentDate,
     paymentMethod: paymentForm.value.paymentMethod,
     referenceNumber: paymentForm.value.referenceNumber,
-    paymentType: paymentForm.value.paymentType,
-    terminNumber: paymentForm.value.terminNumber,
+    paymentType: 'Pembayaran Tagihan',
     notes: paymentForm.value.notes,
-    proofFile: paymentForm.value.proofFile,
+    proofFile: proofMediaList.value[0]?.name || 'BUKTI_TRANSFER_SMA.pdf',
+    proofUrl: proofMediaList.value[0]?.url || null,
   });
 
   // Also add client confirmation notification to Finance
@@ -469,7 +591,7 @@ const submitPaymentConfirmation = () => {
     '/finance/payments'
   );
 
-  toast.success('Konfirmasi pembayaran berhasil dikirim ke bagian Keuangan Alpharo!');
+  toast.success('Konfirmasi pembayaran dan bukti transfer berhasil dikirim ke bagian Keuangan Alpharo!');
   showPaymentModal.value = false;
 };
 </script>

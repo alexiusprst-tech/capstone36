@@ -5,12 +5,12 @@
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div class="flex items-center gap-2">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-alpharo-50 text-alpharo-700">
               Role Administrasi
             </span>
             <span class="text-xs text-slate-400 font-medium">CV Alpharo Artha Jaya</span>
           </div>
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight mt-1">Dokumen SPJ (Surat Pertanggungjawaban)</h1>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight mt-1">Dokumen SPJ (Surat Pertanggungjawaban)</h1>
           <p class="text-sm text-slate-500">
             Pusat penyusunan, verifikasi kelengkapan lintas modul (Marketing, Direktur, Warehouse, Finance), dan penerbitan 15 dokumen SPJ resmi.
           </p>
@@ -22,7 +22,7 @@
             class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-lg text-xs border border-slate-300 shadow-2xs transition-colors cursor-pointer"
             @click="openProjectDataView"
           >
-            <FolderKanban class="w-4 h-4 text-emerald-600" />
+            <FolderKanban class="w-4 h-4 text-alpharo-600" />
             <span>Data Project</span>
           </button>
 
@@ -32,7 +32,7 @@
             :class="[
               'inline-flex items-center gap-1.5 px-4 py-2 font-semibold rounded-lg text-xs shadow-2xs transition-all',
               selectedDocKeys.length > 0
-                ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer'
+                ? 'bg-alpharo-600 hover:bg-alpharo-700 text-white cursor-pointer'
                 : 'bg-slate-200 text-slate-400 cursor-not-allowed'
             ]"
             @click="handleBulkGenerate"
@@ -44,7 +44,7 @@
           <!-- PROBIS TO-BE Tahap 11 & 12: Serahkan SPJ ke Gudang untuk Pengiriman -->
           <button
             type="button"
-            class="inline-flex items-center gap-1.5 px-3.5 py-2 font-semibold rounded-lg text-xs shadow-2xs transition-all bg-[#0e7490] hover:bg-[#155e75] active:bg-[#164e63] text-white cursor-pointer"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 font-semibold rounded-lg text-xs shadow-2xs transition-all border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 cursor-pointer"
             title="Selesaikan SPJ dan kirim notifikasi ke Gudang untuk persiapan pengiriman armada"
             @click="notifyWarehouseSpjReady"
           >
@@ -62,17 +62,17 @@
       <!-- TOP SECTION: PROJECT SELECTOR & QUICK SUMMARY -->
       <div class="mb-6 space-y-4">
         <!-- Project Selection & Quick Details Card -->
-        <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-2xs">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-2xs">
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
             <!-- Dropdown Project -->
             <div class="lg:col-span-5">
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                 Pilih Transaksi / Project Aktif
               </label>
               <div class="relative">
                 <select
-                  v-model="selectedProjectId"
-                  class="w-full pl-3 pr-10 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  v-model="selectedProjectId" :disabled="Boolean(isGeneratingKey)"
+                  class="w-full pl-3 pr-10 py-2.5 text-xs sm:text-sm font-semibold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-alpharo-400 focus:border-alpharo-400"
                   @change="handleProjectChange"
                 >
                   <option v-for="proj in projectsList" :key="proj.project_id" :value="proj.project_id">
@@ -83,28 +83,28 @@
             </div>
 
             <!-- Project Metadata Snippets -->
-            <div class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50/70 p-3 rounded-lg border border-slate-100 text-xs">
+            <div class="lg:col-span-7 grid min-w-0 grid-cols-2 gap-3 text-xs sm:grid-cols-4 lg:border-l lg:border-slate-100 lg:pl-4">
               <div>
                 <p class="text-slate-400 text-[11px] font-medium">Customer</p>
-                <p class="font-bold text-slate-800 truncate" :title="activeProject?.customer_name">
+                <p class="font-semibold text-slate-800 truncate" :title="activeProject?.customer_name">
                   {{ activeProject?.customer_name || '-' }}
                 </p>
               </div>
               <div>
                 <p class="text-slate-400 text-[11px] font-medium">Marketing</p>
-                <p class="font-bold text-slate-800 truncate">
+                <p class="font-semibold text-slate-800 truncate">
                   {{ activeProject?.marketing_name || '-' }}
                 </p>
               </div>
               <div>
                 <p class="text-slate-400 text-[11px] font-medium">Nilai Project / Pagu</p>
-                <p class="font-bold text-emerald-700 truncate">
+                <p class="font-semibold text-emerald-700 truncate">
                   {{ formatRupiah(activeProject?.project_value || activeProject?.budget_ceiling || 0) }}
                 </p>
               </div>
               <div>
                 <p class="text-slate-400 text-[11px] font-medium">Sumber Dana</p>
-                <p class="font-bold text-slate-800">
+                <p class="font-semibold text-slate-800">
                   {{ activeProject?.funding_source || '-' }} {{ activeProject?.fiscal_year ? `(${activeProject.fiscal_year})` : '' }}
                 </p>
               </div>
@@ -114,54 +114,54 @@
 
         <!-- METRICS STRIP -->
         <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-          <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-2.5 shadow-2xs min-w-0">
+          <div class="ui-panel bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-2.5 shadow-2xs min-w-0">
             <div class="p-2 rounded-lg bg-emerald-50 text-emerald-700 shrink-0">
               <ClipboardCheck class="w-5 h-5" />
             </div>
             <div class="min-w-0 flex-1">
               <p class="text-[11px] text-slate-400 font-medium truncate">Total Dokumen</p>
-              <p class="text-sm sm:text-base font-bold text-slate-800 truncate">{{ documentItems.length }} Dokumen</p>
+              <p class="text-sm sm:text-base font-semibold text-slate-800 truncate">{{ documentItems.length }} Dokumen</p>
             </div>
           </div>
 
-          <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-2.5 shadow-2xs min-w-0">
-            <div class="p-2 rounded-lg bg-teal-50 text-teal-700 shrink-0">
+          <div class="ui-panel bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-2.5 shadow-2xs min-w-0">
+            <div class="p-2 rounded-lg bg-emerald-50 text-emerald-700 shrink-0">
               <CheckCircle2 class="w-5 h-5" />
             </div>
             <div class="min-w-0 flex-1">
               <p class="text-[11px] text-slate-400 font-medium truncate">Data Siap (Lengkap)</p>
-              <p class="text-sm sm:text-base font-bold text-teal-700 truncate">{{ readyCount }} Dokumen</p>
+              <p class="text-sm sm:text-base font-semibold text-emerald-700 truncate">{{ readyCount }} Dokumen</p>
             </div>
           </div>
 
-          <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-2.5 shadow-2xs min-w-0">
+          <div class="ui-panel bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-2.5 shadow-2xs min-w-0">
             <div class="p-2 rounded-lg bg-amber-50 text-amber-700 shrink-0">
               <AlertTriangle class="w-5 h-5" />
             </div>
             <div class="min-w-0 flex-1">
               <p class="text-[11px] text-slate-400 font-medium truncate">Butuh Data Role</p>
-              <p class="text-sm sm:text-base font-bold text-amber-700 truncate">{{ incompleteCount }} Dokumen</p>
+              <p class="text-sm sm:text-base font-semibold text-amber-700 truncate">{{ incompleteCount }} Dokumen</p>
             </div>
           </div>
 
-          <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-2.5 shadow-2xs min-w-0">
-            <div class="p-2 rounded-lg bg-blue-50 text-blue-700 shrink-0">
+          <div class="ui-panel bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-2.5 shadow-2xs min-w-0">
+            <div class="p-2 rounded-lg bg-alpharo-50 text-alpharo-700 shrink-0">
               <Sparkles class="w-5 h-5" />
             </div>
             <div class="min-w-0 flex-1">
               <p class="text-[11px] text-slate-400 font-medium truncate">Sudah Terbit (Final)</p>
-              <p class="text-sm sm:text-base font-bold text-blue-700 truncate">{{ completedCount }} Dokumen</p>
+              <p class="text-sm sm:text-base font-semibold text-alpharo-700 truncate">{{ completedCount }} Dokumen</p>
             </div>
           </div>
 
-          <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-2.5 shadow-2xs min-w-0">
-            <div class="p-2 rounded-lg bg-purple-50 text-purple-700 shrink-0">
+          <div class="ui-panel bg-white p-3 rounded-xl border border-slate-200 flex items-center gap-2.5 shadow-2xs min-w-0">
+            <div class="p-2 rounded-lg bg-alpharo-50 text-alpharo-700 shrink-0">
               <CreditCard class="w-5 h-5" />
             </div>
             <div class="min-w-0 flex-1">
               <p class="text-[11px] text-slate-400 font-medium truncate">Status Keuangan</p>
               <p
-                class="font-bold text-purple-700 leading-tight truncate mt-0.5 text-xs sm:text-sm"
+                class="font-semibold text-alpharo-700 leading-tight truncate mt-0.5 text-xs sm:text-sm"
                 :title="formatFinanceStatusFull(activeProject?.finance_status)"
               >
                 {{ formatFinanceStatus(activeProject?.finance_status) }}
@@ -171,187 +171,73 @@
         </div>
       </div>
 
-      <!-- MAIN SECTION: 15 FIXED DOCUMENTS CHECKLIST -->
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs p-4 sm:p-6">
-        <!-- Checklist Toolbar -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
-          <div class="flex items-center gap-3">
-            <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
-              <input
-                type="checkbox"
-                :checked="isAllSelected"
-                :indeterminate.prop="isIndeterminate"
-                @change="toggleSelectAll"
-                class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300"
-              />
-              <span>Pilih Semua Dokumen ({{ selectedDocKeys.length }}/{{ documentItems.length }})</span>
-            </label>
-          </div>
-
-          <!-- Color Legend Guide -->
-          <div class="flex items-center gap-4 text-xs">
-            <span class="inline-flex items-center gap-1.5 text-emerald-800 font-medium">
-              <span class="w-2 h-2 rounded-full bg-emerald-600"></span> Siap Dibuat
-            </span>
-            <span class="inline-flex items-center gap-1.5 text-amber-700 font-medium">
-              <span class="w-2 h-2 rounded-full bg-amber-500"></span> Butuh Data Role
-            </span>
-            <span class="inline-flex items-center gap-1.5 text-blue-700 font-medium">
-              <span class="w-2 h-2 rounded-full bg-blue-500"></span> Sudah Digenerate
-            </span>
+      <!-- SPJ checklist: neutral rows with separate metadata, status and actions -->
+      <section aria-label="Dokumen SPJ" class="ui-panel min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-2xs sm:p-6">
+        <div class="flex min-w-0 flex-col gap-3 border-b border-slate-200 pb-4 lg:flex-row lg:items-center lg:justify-between">
+          <label class="inline-flex min-w-0 cursor-pointer items-start gap-2 text-xs font-semibold leading-relaxed text-slate-700">
+            <input type="checkbox" :checked="isAllSelected" :indeterminate.prop="isIndeterminate" @change="toggleSelectAll"
+              class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-slate-300 text-alpharo-600 focus:ring-alpharo-400" />
+            <span>Pilih Semua Dokumen ({{ selectedDocKeys.length }}/{{ documentItems.length }})</span>
+          </label>
+          <div aria-label="Keterangan status dokumen" class="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-slate-600">
+            <span class="inline-flex items-center gap-1.5"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-600"></span>Siap Dibuat</span>
+            <span class="inline-flex items-center gap-1.5"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500"></span>Butuh Data Role</span>
+            <span class="inline-flex items-center gap-1.5"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-alpharo-600"></span>Sudah Digenerate</span>
           </div>
         </div>
 
-        <!-- VERTICAL LIST OF 15 FIXED DOCUMENTS (SOFT GREEN PALETTE) -->
-        <div class="space-y-2.5">
-          <div
-            v-for="item in documentItems"
-            :key="item.doc_key"
-            :class="[
-              'border rounded-xl p-3 sm:p-4 transition-all flex flex-col md:flex-row md:items-center justify-between gap-3',
-              selectedDocKeys.includes(item.doc_key)
-                ? 'bg-emerald-100/80 border-emerald-300 shadow-xs'
-                : 'bg-emerald-50/70 hover:bg-emerald-100/50 border-emerald-200/80'
-            ]"
-          >
-            <!-- Left: Checkbox + Number + Icon + Name + Metadata -->
-            <div class="flex items-center gap-3 min-w-0">
-              <input
-                type="checkbox"
-                :value="item.doc_key"
-                v-model="selectedDocKeys"
-                class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-emerald-300 cursor-pointer shrink-0"
-              />
-
-              <!-- Sequence Badge (1..15) -->
-              <span class="w-6 h-6 rounded-full bg-emerald-200/90 text-emerald-900 text-xs font-bold flex items-center justify-center shrink-0">
-                {{ item.doc_order }}
-              </span>
-
-              <!-- Document Icon -->
-              <div class="p-2 rounded-lg bg-emerald-100 text-emerald-800 shrink-0">
-                <component :is="item.iconComponent" class="w-4 h-4" />
-              </div>
-
-              <!-- Title & Subtitle/Status info -->
-              <div class="min-w-0">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span class="font-bold text-sm text-emerald-950 truncate">
-                    {{ item.doc_name }}
-                  </span>
-
-                  <!-- Type Tag -->
-                  <span
-                    v-if="item.is_external"
-                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200"
-                  >
-                    Eksternal / Upload
-                  </span>
-                  <span
-                    v-else
-                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-200/70 text-emerald-800"
-                  >
-                    Otomatis Template
-                  </span>
-                </div>
-
-                <!-- Secondary Details: Number, Date, or Description -->
-                <div class="flex items-center gap-2 text-xs text-emerald-900/70 mt-0.5 flex-wrap">
-                  <span v-if="item.doc_number" class="font-mono font-medium">
-                    No: {{ item.doc_number }}
-                  </span>
-                  <span v-if="item.doc_date">
-                    • Tgl: {{ item.doc_date }}
-                  </span>
-                  <span v-if="!item.doc_number && !item.doc_date" class="italic text-emerald-800/60">
-                    {{ item.defaultDescription }}
-                  </span>
+        <ol aria-label="Daftar dokumen SPJ" class="min-w-0 divide-y divide-slate-200">
+          <li v-for="item in documentItems" :key="item.doc_key" :data-doc-key="item.doc_key" :aria-label="item.doc_name"
+            :class="['grid min-w-0 gap-3 py-4 transition-colors sm:gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-start',
+              selectedDocKeys.includes(item.doc_key) ? 'bg-alpharo-50/60' : 'hover:bg-slate-50/70']">
+            <div class="grid min-w-0 grid-cols-[1rem_1.25rem_minmax(0,1fr)] items-start gap-x-3">
+              <input type="checkbox" :value="item.doc_key" v-model="selectedDocKeys" :aria-label="'Pilih dokumen ' + item.doc_name"
+                class="mt-1 h-4 w-4 shrink-0 cursor-pointer rounded border-slate-300 text-alpharo-600 focus:ring-alpharo-400" />
+              <span class="pt-0.5 text-center font-mono text-xs leading-relaxed text-slate-400">{{ item.doc_order }}</span>
+              <div class="flex min-w-0 items-start gap-2">
+                <component :is="item.iconComponent" class="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+                <div class="min-w-0">
+                  <div class="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+                    <h3 class="min-w-0 wrap-anywhere text-sm font-semibold leading-relaxed text-slate-900">{{ item.doc_name }}</h3>
+                    <span class="text-[11px] leading-relaxed text-slate-500">{{ item.is_external ? 'Eksternal / Upload' : 'Otomatis Template' }}</span>
+                  </div>
+                  <div class="mt-1 flex min-w-0 flex-wrap gap-x-3 gap-y-1 text-[11px] leading-relaxed text-slate-500">
+                    <span v-if="item.doc_number" class="min-w-0 wrap-anywhere font-mono">No: {{ item.doc_number }}</span>
+                    <span v-if="item.doc_date">Tgl: {{ item.doc_date }}</span>
+                    <span v-if="!item.doc_number && !item.doc_date" class="min-w-0 wrap-anywhere">{{ item.defaultDescription }}</span>
+                  </div>
+                  <div class="mt-2 flex min-w-0 flex-wrap items-start gap-x-4 gap-y-1.5 text-[11px] leading-relaxed">
+                    <span v-if="item.is_data_complete" class="inline-flex min-w-0 items-start gap-1.5 text-emerald-700" title="Semua prasyarat data telah terpenuhi dari modul terkait">
+                      <CheckCircle2 class="mt-0.5 h-3.5 w-3.5 shrink-0" /><span>Siap Dibuat</span>
+                    </span>
+                    <span v-else class="inline-flex min-w-0 max-w-full items-start gap-1.5 text-amber-800" :title="getMissingTooltip(item.missing_requirements)">
+                      <AlertTriangle class="mt-0.5 h-3.5 w-3.5 shrink-0" /><span class="min-w-0 wrap-anywhere">{{ formatMissingSummary(item.missing_requirements) }}</span>
+                    </span>
+                    <span :class="['min-w-0 wrap-anywhere', getDocumentStatusClass(item.status)]"><span class="text-slate-500">Dokumen: </span>{{ formatStatusLabel(item.status) }}</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Right: Data Completeness Pill, Status Pill, and Actions -->
-            <div class="flex items-center gap-2.5 flex-wrap justify-end shrink-0 pl-11 md:pl-0">
-              <!-- Data Completeness Status Indicator -->
-              <div>
-                <span
-                  v-if="item.is_data_complete"
-                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-200 text-emerald-900"
-                  title="Semua prasyarat data telah terpenuhi dari modul terkait"
-                >
-                  <CheckCircle2 class="w-3 h-3 text-emerald-700" />
-                  <span>Siap Dibuat</span>
-                </span>
-                <span
-                  v-else
-                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-900 border border-amber-200"
-                  :title="getMissingTooltip(item.missing_requirements)"
-                >
-                  <AlertTriangle class="w-3 h-3 text-amber-600" />
-                  <span>{{ formatMissingSummary(item.missing_requirements) }}</span>
-                </span>
-              </div>
-
-              <!-- Document Status Badge -->
-              <span
-                :class="[
-                  'px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider',
-                  getStatusBadgeClass(item.status)
-                ]"
-              >
-                {{ formatStatusLabel(item.status) }}
-              </span>
-
-              <!-- Actions Buttons -->
-              <div class="flex items-center gap-1.5">
-                <!-- Edit / Open Form button (Opens Dedicated Subview) -->
-                <button
-                  type="button"
-                  class="px-2.5 py-1.5 bg-white hover:bg-slate-50 text-emerald-900 text-xs font-semibold rounded-lg border border-emerald-300 shadow-2xs transition-colors flex items-center gap-1 cursor-pointer"
-                  @click="openDocumentForm(item)"
-                >
-                  <Eye class="w-3.5 h-3.5 text-emerald-700" />
-                  <span>Buka Form</span>
-                </button>
-
-                <!-- Generate / Download Word button -->
-                <button
-                  type="button"
-                  :disabled="isGeneratingKey === item.doc_key"
-                  class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-2xs transition-colors flex items-center gap-1 cursor-pointer disabled:bg-slate-300"
-                  @click="handleSingleGenerate(item)"
-                >
-                  <Sparkles v-if="isGeneratingKey !== item.doc_key" class="w-3.5 h-3.5" />
-                  <RotateCcw v-else class="w-3.5 h-3.5 animate-spin" />
-                  <span>{{ item.file_path ? 'Unduh Word' : 'Generate' }}</span>
-                </button>
-
-                <!-- External Upload Button for photos/external files -->
-                <button
-                  v-if="item.is_external || item.doc_key === 'bukti_foto'"
-                  type="button"
-                  class="px-2.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-lg shadow-2xs transition-colors flex items-center gap-1 cursor-pointer"
-                  @click="openUploadExternalModal(item)"
-                  title="Unggah berkas eksternal atau bukti foto"
-                >
-                  <Upload class="w-3.5 h-3.5" />
-                  <span>Upload</span>
-                </button>
-
-                <!-- PDF Preview Button -->
-                <button
-                  type="button"
-                  class="p-1.5 text-rose-700 hover:bg-rose-50 rounded-lg border border-rose-200 transition-colors cursor-pointer"
-                  title="Pratinjau / Cetak PDF"
-                  @click="openPdfPreview(item)"
-                >
-                  <Printer class="w-3.5 h-3.5" />
-                </button>
-              </div>
+            <div role="group" :aria-label="'Aksi ' + item.doc_name" class="grid min-w-0 grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center xl:justify-end">
+              <button type="button" class="inline-flex min-h-9 min-w-0 items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-semibold leading-4 text-slate-700 transition-colors hover:bg-slate-50" @click="openDocumentForm(item)">
+                <Eye class="h-3.5 w-3.5 shrink-0" /><span>Buka Form</span>
+              </button>
+              <button type="button" :disabled="Boolean(isGeneratingKey)" class="inline-flex min-h-9 min-w-0 items-center justify-center gap-1.5 rounded-lg border border-alpharo-600 bg-alpharo-600 px-2.5 py-2 text-xs font-semibold leading-4 text-white transition-colors hover:border-alpharo-700 hover:bg-alpharo-700 disabled:cursor-wait disabled:border-slate-300 disabled:bg-slate-300" @click="handleSingleGenerate(item)">
+                <Sparkles v-if="isGeneratingKey !== item.doc_key" class="h-3.5 w-3.5 shrink-0" /><RotateCcw v-else class="h-3.5 w-3.5 shrink-0 animate-spin" />
+                <span>{{ item.file_path ? 'Unduh Word' : 'Generate' }}</span>
+              </button>
+              <button v-if="item.is_external || item.doc_key === 'bukti_foto'" type="button" class="inline-flex min-h-9 min-w-0 items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-semibold leading-4 text-slate-700 transition-colors hover:bg-slate-50" @click="openUploadExternalModal(item)" title="Unggah berkas eksternal atau bukti foto">
+                <Upload class="h-3.5 w-3.5 shrink-0" /><span>Upload</span>
+              </button>
+              <button v-if="item.source_file_path" type="button" class="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 px-2.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50" @click="downloadWithFeedback(item.doc_key, 'original')">Berkas Upload</button>
+              <button type="button" :class="{ 'col-span-2 sm:col-span-1': !item.is_external && item.doc_key !== 'bukti_foto' }" class="inline-flex min-h-9 min-w-0 items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-semibold leading-4 text-slate-700 transition-colors hover:bg-slate-50" title="Pratinjau / Cetak PDF" @click="openPdfPreview(item)">
+                <Printer class="h-3.5 w-3.5 shrink-0" /><span>PDF / Cetak</span>
+              </button>
             </div>
-          </div>
-        </div>
-      </div>
+          </li>
+        </ol>
+      </section>
     </div>
 
     <!-- ========================================================================= -->
@@ -362,7 +248,7 @@
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div class="flex items-center gap-2">
           <Receipt class="w-6 h-6 text-emerald-600" />
-          <h2 class="text-xl font-bold text-slate-900">Edit Faktur</h2>
+          <h2 class="text-xl font-semibold text-slate-900">Edit Faktur</h2>
         </div>
         <button
           type="button"
@@ -375,9 +261,9 @@
       </div>
 
       <!-- CARD 1: Header Faktur -->
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t-4 border-t-emerald-600">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t border-t-slate-200">
         <div class="p-4 sm:p-5">
-          <div class="flex items-center gap-2 mb-4 text-slate-800 font-bold text-sm">
+          <div class="flex items-center gap-2 mb-4 text-slate-800 font-semibold text-sm">
             <Info class="w-4 h-4 text-emerald-600" />
             <span>Header Faktur</span>
           </div>
@@ -396,14 +282,14 @@
               <input
                 type="text"
                 v-model="fakturForm.doc_date"
-                class="w-full px-3 py-2 text-xs sm:text-sm font-semibold text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                class="w-full px-3 py-2 text-xs sm:text-sm font-semibold text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-alpharo-400"
               />
             </div>
             <div>
               <label class="block text-xs font-medium text-slate-600 mb-1">Jenis Harga</label>
               <select
                 v-model="fakturForm.jenis_harga"
-                class="w-full px-3 py-2 text-xs sm:text-sm font-semibold text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                class="w-full px-3 py-2 text-xs sm:text-sm font-semibold text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-alpharo-400"
               >
                 <option value="Harga Nett">Harga Nett</option>
                 <option value="Harga Bruto">Harga Bruto</option>
@@ -413,7 +299,7 @@
               <label class="block text-xs font-medium text-slate-600 mb-1">Project *</label>
               <select
                 v-model="fakturForm.project_id"
-                class="w-full px-3 py-2 text-xs sm:text-sm font-semibold text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                class="w-full px-3 py-2 text-xs sm:text-sm font-semibold text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-alpharo-400"
               >
                 <option :value="activeProject?.project_id">
                   {{ activeProject?.project_id }} - {{ activeProject?.project_name }} ({{ activeProject?.customer_name }})
@@ -425,10 +311,10 @@
       </div>
 
       <!-- CARD 2: Detail Barang -->
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t-4 border-t-emerald-600">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t border-t-slate-200">
         <div class="p-4 sm:p-5">
           <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2 text-slate-800 font-bold text-sm">
+            <div class="flex items-center gap-2 text-slate-800 font-semibold text-sm">
               <FolderKanban class="w-4 h-4 text-emerald-600" />
               <span>Detail Barang</span>
             </div>
@@ -443,8 +329,8 @@
           </div>
 
           <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left">
-              <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+            <table class="ui-table w-full text-xs text-left">
+              <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
                 <tr>
                   <th class="py-2.5 px-3">Barang</th>
                   <th class="py-2.5 px-3 w-28 text-center">Jumlah</th>
@@ -463,7 +349,7 @@
                         placeholder="Pilih / input nama barang"
                         class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded font-medium text-slate-900"
                       />
-                      <button type="button" class="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded border border-blue-200 cursor-pointer">
+                      <button type="button" class="p-1.5 bg-alpharo-50 hover:bg-alpharo-100 text-alpharo-600 rounded border border-alpharo-200 cursor-pointer">
                         <Search class="w-3.5 h-3.5" />
                       </button>
                       <button type="button" class="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded border border-emerald-200 cursor-pointer">
@@ -489,7 +375,7 @@
                       class="w-full text-right px-2 py-1.5 bg-slate-50 border border-slate-300 rounded font-semibold text-slate-900"
                     />
                   </td>
-                  <td class="py-2.5 px-3 text-right font-bold text-slate-800">
+                  <td class="py-2.5 px-3 text-right font-semibold text-slate-800">
                     {{ formatRupiah(it.subtotal || (it.quantity * it.price) || 0) }}
                   </td>
                   <td class="py-2.5 px-3 text-center">
@@ -509,9 +395,9 @@
       </div>
 
       <!-- CARD 3: Total dan Pembayaran -->
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t-4 border-t-emerald-600">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t border-t-slate-200">
         <div class="p-4 sm:p-5">
-          <div class="flex items-center gap-2 mb-4 text-slate-800 font-bold text-sm">
+          <div class="flex items-center gap-2 mb-4 text-slate-800 font-semibold text-sm">
             <Calculator class="w-4 h-4 text-emerald-600" />
             <span>Total dan Pembayaran</span>
           </div>
@@ -520,33 +406,33 @@
             <div class="w-full sm:w-96 space-y-2 text-xs">
               <div class="flex items-center justify-between py-1">
                 <span class="text-slate-500 font-medium">Jumlah Harga:</span>
-                <span class="font-bold text-slate-800 text-sm">{{ formatRupiah(fakturForm.subtotal) }}</span>
+                <span class="font-semibold text-slate-800 text-sm">{{ formatRupiah(fakturForm.subtotal) }}</span>
               </div>
 
               <div class="flex items-center justify-between py-1">
                 <span class="text-slate-500 font-medium">PPN:</span>
                 <div class="flex items-center gap-2">
                   <span class="px-2 py-0.5 rounded bg-slate-100 font-mono text-[11px] font-semibold text-slate-600 border border-slate-200">11,00 %</span>
-                  <span class="font-bold text-slate-800">{{ formatRupiah(fakturForm.ppn) }}</span>
+                  <span class="font-semibold text-slate-800">{{ formatRupiah(fakturForm.ppn) }}</span>
                 </div>
               </div>
 
               <div class="flex items-center justify-between py-1 border-t border-slate-200">
-                <span class="text-slate-700 font-bold">Total Harga:</span>
-                <span class="font-bold text-slate-900 text-sm">{{ formatRupiah(fakturForm.total_harga) }}</span>
+                <span class="text-slate-700 font-semibold">Total Harga:</span>
+                <span class="font-semibold text-slate-900 text-sm">{{ formatRupiah(fakturForm.total_harga) }}</span>
               </div>
 
               <div class="flex items-center justify-between py-1">
                 <span class="text-rose-600 font-medium">PPh:</span>
                 <div class="flex items-center gap-2">
                   <span class="px-2 py-0.5 rounded bg-rose-50 font-mono text-[11px] font-semibold text-rose-700 border border-rose-200">1,50 %</span>
-                  <span class="font-bold text-rose-700">- {{ formatRupiah(fakturForm.pph) }}</span>
+                  <span class="font-semibold text-rose-700">- {{ formatRupiah(fakturForm.pph) }}</span>
                 </div>
               </div>
 
               <div class="flex items-center justify-between py-2 border-t-2 border-slate-300 bg-emerald-50/70 p-2 rounded">
-                <span class="text-emerald-950 font-extrabold text-sm">Nilai Setelah PPh:</span>
-                <span class="font-extrabold text-emerald-900 text-base">{{ formatRupiah(fakturForm.nilai_setelah_pph) }}</span>
+                <span class="text-emerald-950 font-semibold text-sm">Nilai Setelah PPh:</span>
+                <span class="font-semibold text-emerald-900 text-base">{{ formatRupiah(fakturForm.nilai_setelah_pph) }}</span>
               </div>
             </div>
           </div>
@@ -557,8 +443,8 @@
       <div class="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
         <button
           type="button"
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
-          @click="handleSaveAndGenerate('faktur', 'word')"
+          class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+          :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('faktur', 'word')"
         >
           <Sparkles class="w-4 h-4" />
           <span>Cetak Faktur Word</span>
@@ -566,8 +452,8 @@
 
         <button
           type="button"
-          class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
-          @click="handleSaveAndGenerate('faktur', 'pdf')"
+          class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+          :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('faktur', 'pdf')"
         >
           <Printer class="w-4 h-4" />
           <span>Cetak Faktur PDF</span>
@@ -575,7 +461,7 @@
 
         <button
           type="button"
-          class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold rounded-lg shadow-2xs cursor-pointer transition-colors"
+          class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg shadow-2xs cursor-pointer transition-colors"
           @click="goBackToList"
         >
           Batal
@@ -583,7 +469,7 @@
 
         <button
           type="button"
-          class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+          class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
           @click="saveFakturDocument"
         >
           <CheckCircle2 class="w-4 h-4" />
@@ -600,12 +486,12 @@
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div class="flex items-center gap-2">
           <CreditCard class="w-6 h-6 text-emerald-600" />
-          <h2 class="text-xl font-bold text-slate-900">Edit Pembayaran Kuitansi</h2>
+          <h2 class="text-xl font-semibold text-slate-900">Edit Pembayaran Kuitansi</h2>
         </div>
         <div class="flex items-center gap-2">
           <button
             type="button"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-purple-300 bg-purple-50 hover:bg-purple-100 text-purple-800 font-semibold text-xs transition-colors cursor-pointer"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-alpharo-300 bg-alpharo-50 hover:bg-alpharo-100 text-alpharo-800 font-semibold text-xs transition-colors cursor-pointer"
             @click="currentView = 'riwayat_kuitansi'"
           >
             <Clock class="w-3.5 h-3.5" />
@@ -625,8 +511,8 @@
       <!-- 2 COLUMN LAYOUT -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <!-- LEFT CARD: Detail Faktur -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t-4 border-t-emerald-600 p-5 space-y-4">
-          <div class="flex items-center gap-2 text-slate-800 font-bold text-sm mb-1">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t border-t-slate-200 p-5 space-y-4">
+          <div class="flex items-center gap-2 text-slate-800 font-semibold text-sm mb-1">
             <Info class="w-4 h-4 text-emerald-600" />
             <span>Detail Faktur</span>
           </div>
@@ -657,7 +543,7 @@
               type="text"
               readonly
               :value="formatRupiah(fakturForm?.nilai_setelah_pph || 10950000)"
-              class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-xs font-bold text-slate-900 text-right"
+              class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 text-right"
             />
           </div>
 
@@ -667,14 +553,14 @@
               type="text"
               readonly
               value="Rp 0"
-              class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-xs font-extrabold text-rose-600 text-right"
+              class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-xs font-semibold text-rose-600 text-right"
             />
           </div>
         </div>
 
         <!-- RIGHT CARD: Input Pembayaran -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t-4 border-t-emerald-600 p-5 space-y-3.5">
-          <div class="flex items-center gap-2 text-slate-800 font-bold text-sm mb-1">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t border-t-slate-200 p-5 space-y-3.5">
+          <div class="flex items-center gap-2 text-slate-800 font-semibold text-sm mb-1">
             <CreditCard class="w-4 h-4 text-emerald-600" />
             <span>Input Pembayaran</span>
           </div>
@@ -714,7 +600,7 @@
             <input
               type="text"
               v-model="kuitansiForm.jumlah"
-              class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-900 text-right"
+              class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 text-right"
             />
             <p class="text-[11px] text-slate-500 mt-0.5">Maksimal: {{ formatRupiah(fakturForm?.nilai_setelah_pph || 10950000) }}</p>
           </div>
@@ -752,7 +638,7 @@
       <div class="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
         <button
           type="button"
-          class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold rounded-lg shadow-2xs cursor-pointer transition-colors"
+          class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg shadow-2xs cursor-pointer transition-colors"
           @click="goBackToList"
         >
           Batal
@@ -760,7 +646,7 @@
 
         <button
           type="button"
-          class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+          class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
           @click="saveKuitansiDocument"
         >
           <CheckCircle2 class="w-4 h-4" />
@@ -769,8 +655,8 @@
 
         <button
           type="button"
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
-          @click="handleSaveAndGenerate('kuitansi', 'word')"
+          class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+          :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('kuitansi', 'word')"
         >
           <Sparkles class="w-4 h-4" />
           <span>Cetak Kuitansi Word</span>
@@ -778,8 +664,8 @@
 
         <button
           type="button"
-          class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
-          @click="handleSaveAndGenerate('kuitansi', 'pdf')"
+          class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+          :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('kuitansi', 'pdf')"
         >
           <Printer class="w-4 h-4" />
           <span>Cetak Kuitansi PDF</span>
@@ -796,7 +682,7 @@
         <div>
           <div class="flex items-center gap-2">
             <Clock class="w-6 h-6 text-emerald-600" />
-            <h2 class="text-xl font-bold text-slate-900">Riwayat Kuitansi</h2>
+            <h2 class="text-xl font-semibold text-slate-900">Riwayat Kuitansi</h2>
           </div>
           <p class="text-xs text-slate-500 mt-0.5">
             {{ fakturForm?.doc_number || 'IV20261006143815' }} - {{ activeProject?.project_name || 'pengadaan komputer sekolah' }}
@@ -815,55 +701,55 @@
       <!-- 2 TOP CARDS: Detail Faktur & Ringkasan Pembayaran -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <!-- Detail Faktur -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs p-5 border-t-4 border-t-emerald-600 space-y-2 text-xs">
-          <div class="flex items-center gap-2 text-slate-800 font-bold text-sm mb-2">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs p-5 border-t border-t-slate-200 space-y-2 text-xs">
+          <div class="flex items-center gap-2 text-slate-800 font-semibold text-sm mb-2">
             <Info class="w-4 h-4 text-emerald-600" />
             <span>Detail Faktur</span>
           </div>
           <div class="flex justify-between py-1 border-b border-slate-100">
             <span class="text-slate-500">Customer:</span>
-            <span class="font-bold text-slate-800">{{ activeProject?.customer_name }}</span>
+            <span class="font-semibold text-slate-800">{{ activeProject?.customer_name }}</span>
           </div>
           <div class="flex justify-between py-1 border-b border-slate-100">
             <span class="text-slate-500">Tagihan:</span>
-            <span class="font-bold text-slate-800">{{ formatRupiah(10950000) }}</span>
+            <span class="font-semibold text-slate-800">{{ formatRupiah(10950000) }}</span>
           </div>
           <div class="flex justify-between py-1 border-b border-slate-100">
             <span class="text-slate-500">Dibayar:</span>
-            <span class="font-bold text-slate-800">{{ formatRupiah(10950000) }}</span>
+            <span class="font-semibold text-slate-800">{{ formatRupiah(10950000) }}</span>
           </div>
           <div class="flex justify-between py-1">
             <span class="text-slate-500">Sisa Piutang:</span>
-            <span class="font-extrabold text-rose-600">Rp 0</span>
+            <span class="font-semibold text-rose-600">Rp 0</span>
           </div>
         </div>
 
         <!-- Ringkasan Pembayaran -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs p-5 border-t-4 border-t-emerald-600 space-y-2 text-xs">
-          <div class="flex items-center gap-2 text-slate-800 font-bold text-sm mb-2">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs p-5 border-t border-t-slate-200 space-y-2 text-xs">
+          <div class="flex items-center gap-2 text-slate-800 font-semibold text-sm mb-2">
             <CreditCard class="w-4 h-4 text-emerald-600" />
             <span>Ringkasan Pembayaran</span>
           </div>
           <div class="flex justify-between py-1 border-b border-slate-100">
             <span class="text-slate-500">Jumlah Bayar:</span>
-            <span class="font-bold text-slate-800">1 transaksi</span>
+            <span class="font-semibold text-slate-800">1 transaksi</span>
           </div>
           <div class="flex justify-between py-1 border-b border-slate-100">
             <span class="text-slate-500">Total Bayar:</span>
-            <span class="font-bold text-slate-800">{{ formatRupiah(10950000) }}</span>
+            <span class="font-semibold text-slate-800">{{ formatRupiah(10950000) }}</span>
           </div>
           <div class="flex justify-between items-center py-1">
             <span class="text-slate-500">Status:</span>
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Lunas</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Lunas</span>
           </div>
         </div>
       </div>
 
       <!-- TABLE TRANSAKSI -->
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full text-xs text-left">
-            <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+          <table class="ui-table-wide ui-table w-full text-xs text-left">
+            <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
               <tr>
                 <th class="py-2.5 px-3 w-10 text-center">#</th>
                 <th class="py-2.5 px-3">No Transaksi</th>
@@ -876,11 +762,11 @@
             </thead>
             <tbody class="divide-y divide-slate-100">
               <tr class="hover:bg-slate-50/50">
-                <td class="py-3 px-3 text-center font-bold text-slate-600">1</td>
-                <td class="py-3 px-3 font-mono font-bold text-slate-800">{{ kuitansiForm?.doc_number || 'PI20261006143924' }}</td>
+                <td class="py-3 px-3 text-center font-semibold text-slate-600">1</td>
+                <td class="py-3 px-3 font-mono font-semibold text-slate-800">{{ kuitansiForm?.doc_number || 'PI20261006143924' }}</td>
                 <td class="py-3 px-3 font-medium text-slate-700">2026-10-06</td>
                 <td class="py-3 px-3 font-medium text-slate-700">{{ kuitansiForm?.metode || 'Tunai' }}</td>
-                <td class="py-3 px-3 font-bold text-slate-900">{{ formatRupiah(10950000) }}</td>
+                <td class="py-3 px-3 font-semibold text-slate-900">{{ formatRupiah(10950000) }}</td>
                 <td class="py-3 px-3 text-center font-semibold text-slate-500">su</td>
                 <td class="py-3 px-3 text-center">
                   <div class="flex items-center justify-center gap-1.5">
@@ -901,9 +787,9 @@
                     </button>
                     <button
                       type="button"
-                      class="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded shadow-2xs cursor-pointer"
+                      class="p-1.5 bg-alpharo-600 hover:bg-alpharo-700 text-white rounded shadow-2xs cursor-pointer"
                       title="Cetak Kuitansi Word"
-                      @click="handleSaveAndGenerate('kuitansi', 'word')"
+                      :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('kuitansi', 'word')"
                     >
                       <Sparkles class="w-3.5 h-3.5" />
                     </button>
@@ -911,7 +797,7 @@
                       type="button"
                       class="p-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded shadow-2xs cursor-pointer"
                       title="Cetak Kuitansi PDF"
-                      @click="handleSaveAndGenerate('kuitansi', 'pdf')"
+                      :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('kuitansi', 'pdf')"
                     >
                       <Printer class="w-3.5 h-3.5" />
                     </button>
@@ -933,7 +819,7 @@
         <div>
           <div class="flex items-center gap-2">
             <Camera class="w-6 h-6 text-emerald-600" />
-            <h2 class="text-xl font-bold text-slate-900">Lampiran Dokumentasi & Bukti Foto</h2>
+            <h2 class="text-xl font-semibold text-slate-900">Lampiran Dokumentasi & Bukti Foto</h2>
           </div>
           <p class="text-xs text-slate-500 mt-0.5">
             Disesuaikan dengan format Lampiran-Dokumentasi-TEMPLATE.docx (CV ALPHARO ARTHA JAYA)
@@ -950,7 +836,7 @@
       </div>
 
       <!-- CARD 1: Header Project & Lokasi -->
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t-4 border-t-emerald-600 p-5">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t border-t-slate-200 p-5">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
           <div>
             <label class="block font-medium text-slate-600 mb-1">Nama Pekerjaan</label>
@@ -991,8 +877,8 @@
       </div>
 
       <!-- CARD 2: Slot Foto Sesuai Template Word (Grid 3 Foto) -->
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t-4 border-t-emerald-600 p-5">
-        <div class="flex items-center gap-2 text-slate-800 font-bold text-sm mb-4">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t border-t-slate-200 p-5">
+        <div class="flex items-center gap-2 text-slate-800 font-semibold text-sm mb-4">
           <Camera class="w-4 h-4 text-emerald-600" />
           <span>Dokumentasi Foto Pekerjaan (Sesuai Template Dokumen)</span>
         </div>
@@ -1005,16 +891,19 @@
           >
             <div>
               <div class="h-44 bg-slate-200 rounded-lg border-2 border-dashed border-slate-300 flex flex-col items-center justify-center p-3 text-center mb-3">
-                <Camera class="w-10 h-10 text-slate-400 mb-2" />
-                <p class="text-xs font-semibold text-slate-600">{{ photo.title }}</p>
-                <p class="text-[10px] text-slate-400 mt-1">Klik unggah gambar atau ganti berkas</p>
+                <img v-if="photo.data_url" :src="photo.data_url" :alt="photo.title" class="h-full w-full object-contain" />
+                <template v-else>
+                  <Camera class="w-10 h-10 text-slate-400 mb-2" />
+                  <p class="text-xs font-semibold text-slate-600">{{ photo.title }}</p>
+                  <p class="text-[11px] text-slate-400 mt-1">Unggah JPG/PNG maksimal 3 MB</p>
+                </template>
               </div>
 
               <div class="space-y-2">
                 <input
                   type="text"
                   v-model="photo.title"
-                  class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded text-xs font-bold text-slate-900"
+                  class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded text-xs font-semibold text-slate-900"
                   placeholder="Judul Foto"
                 />
                 <textarea
@@ -1029,10 +918,14 @@
             <div class="pt-3 border-t border-slate-200 flex items-center justify-between mt-3">
               <input
                 type="file"
+                accept="image/jpeg,image/png"
+                :aria-label="'Unggah ' + photo.title"
+                @change="setDocumentationPhoto($event, photo)"
                 class="text-[11px] text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-emerald-100 file:text-emerald-800 hover:file:bg-emerald-200"
               />
               <button
                 type="button"
+                @click="photo.data_url = ''"
                 class="text-rose-600 hover:text-rose-800 text-xs font-semibold"
               >
                 Reset
@@ -1046,8 +939,8 @@
       <div class="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
         <button
           type="button"
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
-          @click="handleSaveAndGenerate('bukti_foto', 'word')"
+          class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+          :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('bukti_foto', 'word')"
         >
           <Sparkles class="w-4 h-4" />
           <span>Cetak Bukti Foto Word</span>
@@ -1055,8 +948,8 @@
 
         <button
           type="button"
-          class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
-          @click="handleSaveAndGenerate('bukti_foto', 'pdf')"
+          class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+          :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('bukti_foto', 'pdf')"
         >
           <Printer class="w-4 h-4" />
           <span>Cetak Bukti Foto PDF</span>
@@ -1064,7 +957,7 @@
 
         <button
           type="button"
-          class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold rounded-lg shadow-2xs cursor-pointer transition-colors"
+          class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg shadow-2xs cursor-pointer transition-colors"
           @click="goBackToList"
         >
           Batal
@@ -1072,7 +965,7 @@
 
         <button
           type="button"
-          class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
+          class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors"
           @click="saveBuktiFotoDocument"
         >
           <CheckCircle2 class="w-4 h-4" />
@@ -1088,7 +981,7 @@
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div class="flex items-center gap-2">
           <FolderKanban class="w-6 h-6 text-emerald-600" />
-          <h2 class="text-xl font-bold text-slate-900">Tambah / Edit Cover Project SPJ</h2>
+          <h2 class="text-xl font-semibold text-slate-900">Tambah / Edit Cover Project SPJ</h2>
         </div>
         <button
           type="button"
@@ -1100,8 +993,8 @@
         </button>
       </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t-4 border-t-emerald-600 p-5 space-y-4">
-        <div class="flex items-center gap-2 text-slate-800 font-bold text-sm mb-2">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t border-t-slate-200 p-5 space-y-4">
+        <div class="flex items-center gap-2 text-slate-800 font-semibold text-sm mb-2">
           <Info class="w-4 h-4 text-emerald-600" />
           <span>Informasi Sampul Laporan Pertanggungjawaban (SPJ)</span>
         </div>
@@ -1139,7 +1032,7 @@
           </div>
           <div>
             <label class="block font-medium text-slate-600 mb-1">Total Nilai Kontrak / SPJ</label>
-            <input type="number" v-model.number="coverProjectForm.total_value" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg font-bold text-emerald-800" />
+            <input type="number" v-model.number="coverProjectForm.total_value" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg font-semibold text-emerald-800" />
           </div>
         </div>
 
@@ -1150,14 +1043,14 @@
       </div>
 
       <div class="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
-        <button type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" @click="handleSaveAndGenerate('cover_project', 'word')">
+        <button type="button" class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('cover_project', 'word')">
           <Sparkles class="w-4 h-4" /><span>Cetak Cover Word</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" @click="handleSaveAndGenerate('cover_project', 'pdf')">
+        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('cover_project', 'pdf')">
           <Printer class="w-4 h-4" /><span>Cetak Cover PDF</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-bold rounded-lg cursor-pointer" @click="goBackToList">Batal</button>
-        <button type="button" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" @click="saveCoverProjectDocument">
+        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg cursor-pointer" @click="goBackToList">Batal</button>
+        <button type="button" class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" @click="saveCoverProjectDocument">
           <CheckCircle2 class="w-4 h-4" /><span>Simpan</span>
         </button>
       </div>
@@ -1170,7 +1063,7 @@
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div class="flex items-center gap-2">
           <ClipboardCheck class="w-6 h-6 text-emerald-600" />
-          <h2 class="text-xl font-bold text-slate-900">Tambah / Edit Dokumen Perencanaan</h2>
+          <h2 class="text-xl font-semibold text-slate-900">Tambah / Edit Dokumen Perencanaan</h2>
         </div>
         <button
           type="button"
@@ -1182,7 +1075,7 @@
         </button>
       </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t-4 border-t-emerald-600 p-5 space-y-4">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t border-t-slate-200 p-5 space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
           <div>
             <label class="block font-medium text-slate-600 mb-1">Nomor Surat Perencanaan</label>
@@ -1212,12 +1105,12 @@
         <!-- Tabel Spesifikasi Barang (Editable Admin) -->
         <div class="pt-2 space-y-2">
           <div class="flex items-center justify-between">
-            <p class="font-bold text-slate-800 flex items-center gap-1.5">
+            <p class="font-semibold text-slate-800 flex items-center gap-1.5">
               <span>Rincian Spesifikasi & Estimasi Biaya</span>
             </p>
             <button
               type="button"
-              class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer transition-colors"
+              class="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold leading-4 text-emerald-700 transition-colors hover:bg-emerald-100 cursor-pointer"
               @click="addPerencanaanItem"
             >
               <Plus class="w-3.5 h-3.5" />
@@ -1226,8 +1119,8 @@
           </div>
 
           <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left border border-slate-200 border-collapse">
-              <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+            <table class="ui-table-wide ui-table w-full text-xs text-left border border-slate-200 border-collapse">
+              <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
                 <tr>
                   <th class="p-2 w-10 text-center">No</th>
                   <th class="p-2">Komponen / Spesifikasi Barang</th>
@@ -1246,7 +1139,7 @@
                       type="text"
                       v-model="it.item_name"
                       placeholder="Nama spesifikasi barang"
-                      class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded font-medium text-slate-900 focus:ring-1 focus:ring-emerald-500"
+                      class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded font-medium text-slate-900 focus:ring-1 focus:ring-alpharo-400"
                     />
                   </td>
                   <td class="p-2 text-center">
@@ -1254,7 +1147,7 @@
                       type="number"
                       v-model.number="it.quantity"
                       min="1"
-                      class="w-20 px-2 py-1.5 text-center bg-white border border-slate-300 rounded font-bold text-slate-900"
+                      class="w-20 px-2 py-1.5 text-center bg-white border border-slate-300 rounded font-semibold text-slate-900"
                     />
                   </td>
                   <td class="p-2 text-center">
@@ -1273,7 +1166,7 @@
                       class="w-32 px-2 py-1.5 text-right bg-white border border-slate-300 rounded font-semibold text-slate-900"
                     />
                   </td>
-                  <td class="p-2 text-right font-bold text-emerald-800">
+                  <td class="p-2 text-right font-semibold text-emerald-800">
                     {{ formatRupiah((it.quantity || 0) * (it.price || 0)) }}
                   </td>
                   <td class="p-2 text-center">
@@ -1288,7 +1181,7 @@
                   </td>
                 </tr>
               </tbody>
-              <tfoot class="bg-slate-50 font-bold border-t border-slate-200">
+              <tfoot class="bg-slate-50 font-semibold border-t border-slate-200">
                 <tr>
                   <td colspan="5" class="p-2.5 text-right">TOTAL ESTIMASI PERENCANAAN:</td>
                   <td class="p-2.5 text-right font-black text-emerald-900 text-sm">
@@ -1302,14 +1195,14 @@
         </div></div>
 
       <div class="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
-        <button type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" @click="handleSaveAndGenerate('perencanaan', 'word')">
+        <button type="button" class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('perencanaan', 'word')">
           <Sparkles class="w-4 h-4" /><span>Cetak Perencanaan Word</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" @click="handleSaveAndGenerate('perencanaan', 'pdf')">
+        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('perencanaan', 'pdf')">
           <Printer class="w-4 h-4" /><span>Cetak Perencanaan PDF</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-bold rounded-lg cursor-pointer" @click="goBackToList">Batal</button>
-        <button type="button" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" @click="savePerencanaanDocument">
+        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg cursor-pointer" @click="goBackToList">Batal</button>
+        <button type="button" class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" @click="savePerencanaanDocument">
           <CheckCircle2 class="w-4 h-4" /><span>Simpan</span>
         </button>
       </div>
@@ -1321,7 +1214,7 @@
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div class="flex items-center gap-2">
           <Calculator class="w-6 h-6 text-emerald-600" />
-          <h2 class="text-xl font-bold text-slate-900">Tambah / Edit HPS</h2>
+          <h2 class="text-xl font-semibold text-slate-900">Tambah / Edit HPS</h2>
         </div>
         <button
           type="button"
@@ -1333,7 +1226,7 @@
         </button>
       </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t-4 border-t-emerald-600 p-5 space-y-4">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t border-t-slate-200 p-5 space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
           <div>
             <label class="block font-medium text-slate-600 mb-1">Nomor HPS</label>
@@ -1356,12 +1249,12 @@
         <!-- Tabel HPS (Editable Admin) -->
         <div class="pt-2 space-y-2">
           <div class="flex items-center justify-between">
-            <p class="font-bold text-slate-800 flex items-center gap-1.5">
+            <p class="font-semibold text-slate-800 flex items-center gap-1.5">
               <span>Rincian Harga Perkiraan Sendiri (HPS)</span>
             </p>
             <button
               type="button"
-              class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer transition-colors"
+              class="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold leading-4 text-emerald-700 transition-colors hover:bg-emerald-100 cursor-pointer"
               @click="addHpsItem"
             >
               <Plus class="w-3.5 h-3.5" />
@@ -1370,8 +1263,8 @@
           </div>
 
           <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left border border-slate-200 border-collapse">
-              <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+            <table class="ui-table-wide ui-table w-full text-xs text-left border border-slate-200 border-collapse">
+              <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
                 <tr>
                   <th class="p-2 w-10 text-center">No</th>
                   <th class="p-2">Komponen / Uraian Barang</th>
@@ -1390,7 +1283,7 @@
                       type="text"
                       v-model="it.item_name"
                       placeholder="Nama uraian barang"
-                      class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded font-medium text-slate-900 focus:ring-1 focus:ring-emerald-500"
+                      class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded font-medium text-slate-900 focus:ring-1 focus:ring-alpharo-400"
                     />
                   </td>
                   <td class="p-2 text-center">
@@ -1398,7 +1291,7 @@
                       type="number"
                       v-model.number="it.quantity"
                       min="1"
-                      class="w-20 px-2 py-1.5 text-center bg-white border border-slate-300 rounded font-bold text-slate-900"
+                      class="w-20 px-2 py-1.5 text-center bg-white border border-slate-300 rounded font-semibold text-slate-900"
                     />
                   </td>
                   <td class="p-2 text-center">
@@ -1417,7 +1310,7 @@
                       class="w-32 px-2.5 py-1.5 text-right bg-white border border-slate-300 rounded font-semibold text-slate-900"
                     />
                   </td>
-                  <td class="p-2 text-right font-bold text-emerald-800">
+                  <td class="p-2 text-right font-semibold text-emerald-800">
                     {{ formatRupiah((it.quantity || 0) * (it.price || 0)) }}
                   </td>
                   <td class="p-2 text-center">
@@ -1432,7 +1325,7 @@
                   </td>
                 </tr>
               </tbody>
-              <tfoot class="bg-slate-50 font-bold border-t border-slate-200">
+              <tfoot class="bg-slate-50 font-semibold border-t border-slate-200">
                 <tr>
                   <td colspan="5" class="p-2.5 text-right">TOTAL NILAI HPS:</td>
                   <td class="p-2.5 text-right font-black text-emerald-900 text-sm">
@@ -1447,14 +1340,14 @@
       </div>
 
       <div class="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
-        <button type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5" @click="handleSaveAndGenerate('hps', 'word')">
+        <button type="button" class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('hps', 'word')">
           <Sparkles class="w-4 h-4" /><span>Cetak HPS Word</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5" @click="handleSaveAndGenerate('hps', 'pdf')">
+        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('hps', 'pdf')">
           <Printer class="w-4 h-4" /><span>Cetak HPS PDF</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-bold rounded-lg" @click="goBackToList">Batal</button>
-        <button type="button" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg" @click="saveHpsDocument">Simpan</button>
+        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg" @click="goBackToList">Batal</button>
+        <button type="button" class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg" @click="saveHpsDocument">Simpan</button>
       </div>
     </div>
 
@@ -1465,7 +1358,7 @@
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div class="flex items-center gap-2">
           <Mail class="w-6 h-6 text-emerald-600" />
-          <h2 class="text-xl font-bold text-slate-900">Tambah / Edit Surat Permintaan Penawaran Harga (SPPH)</h2>
+          <h2 class="text-xl font-semibold text-slate-900">Tambah / Edit Surat Permintaan Penawaran Harga (SPPH)</h2>
         </div>
         <button
           type="button"
@@ -1477,7 +1370,7 @@
         </button>
       </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t-4 border-t-emerald-600 p-5 space-y-4 text-xs">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden border-t border-t-slate-200 p-5 space-y-4 text-xs">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label class="block font-medium text-slate-600 mb-1">Nomor Surat SPPH</label>
@@ -1506,12 +1399,12 @@
         <!-- Tabel SPPH (Editable Admin) -->
         <div class="pt-2 space-y-2">
           <div class="flex items-center justify-between">
-            <p class="font-bold text-slate-800 flex items-center gap-1.5">
+            <p class="font-semibold text-slate-800 flex items-center gap-1.5">
               <span>Daftar Barang yang Diminta Penawaran</span>
             </p>
             <button
               type="button"
-              class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer transition-colors"
+              class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer transition-colors"
               @click="addSpphItem"
             >
               <Plus class="w-3.5 h-3.5" />
@@ -1520,8 +1413,8 @@
           </div>
 
           <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left border border-slate-200 border-collapse">
-              <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+            <table class="ui-table w-full text-xs text-left border border-slate-200 border-collapse">
+              <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
                 <tr>
                   <th class="p-2 w-10 text-center">No</th>
                   <th class="p-2">Daftar Barang yang Diminta</th>
@@ -1538,7 +1431,7 @@
                       type="text"
                       v-model="it.item_name"
                       placeholder="Nama barang / spesifikasi"
-                      class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded font-medium text-slate-900 focus:ring-1 focus:ring-emerald-500"
+                      class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded font-medium text-slate-900 focus:ring-1 focus:ring-alpharo-400"
                     />
                   </td>
                   <td class="p-2 text-center">
@@ -1546,7 +1439,7 @@
                       type="number"
                       v-model.number="it.quantity"
                       min="1"
-                      class="w-24 px-2 py-1.5 text-center bg-white border border-slate-300 rounded font-bold text-slate-900"
+                      class="w-24 px-2 py-1.5 text-center bg-white border border-slate-300 rounded font-semibold text-slate-900"
                     />
                   </td>
                   <td class="p-2 text-center">
@@ -1575,14 +1468,14 @@
       </div>
 
       <div class="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
-        <button type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" @click="handleSaveAndGenerate('spph', 'word')">
+        <button type="button" class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('spph', 'word')">
           <Sparkles class="w-4 h-4" /><span>Cetak SPPH Word</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" @click="handleSaveAndGenerate('spph', 'pdf')">
+        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('spph', 'pdf')">
           <Printer class="w-4 h-4" /><span>Cetak SPPH PDF</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-bold rounded-lg cursor-pointer" @click="goBackToList">Batal</button>
-        <button type="button" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" @click="saveSpphDocument">
+        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg cursor-pointer" @click="goBackToList">Batal</button>
+        <button type="button" class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer" @click="saveSpphDocument">
           <CheckCircle2 class="w-4 h-4" /><span>Simpan</span>
         </button>
       </div>
@@ -1594,14 +1487,14 @@
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div class="flex items-center gap-2">
           <Send class="w-6 h-6 text-emerald-600" />
-          <h2 class="text-xl font-bold text-slate-900">Edit Penawaran</h2>
+          <h2 class="text-xl font-semibold text-slate-900">Edit Penawaran</h2>
         </div>
         <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold text-xs cursor-pointer" @click="goBackToList">
           <ArrowLeft class="w-3.5 h-3.5" /><span>Kembali</span>
         </button>
       </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs border-t-4 border-t-emerald-600 p-5 space-y-4 text-xs">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs border-t border-t-slate-200 p-5 space-y-4 text-xs">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block font-medium text-slate-600 mb-1">Nomor Surat Penawaran</label>
@@ -1619,14 +1512,14 @@
       </div>
 
       <div class="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
-        <button type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5" @click="handleSaveAndGenerate('penawaran', 'word')">
+        <button type="button" class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('penawaran', 'word')">
           <Sparkles class="w-4 h-4" /><span>Cetak Penawaran Word</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5" @click="handleSaveAndGenerate('penawaran', 'pdf')">
+        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('penawaran', 'pdf')">
           <Printer class="w-4 h-4" /><span>Cetak Penawaran PDF</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-bold rounded-lg" @click="goBackToList">Batal</button>
-        <button type="button" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg" @click="savePenawaranDocument">Simpan</button>
+        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg" @click="goBackToList">Batal</button>
+        <button type="button" class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg" @click="savePenawaranDocument">Simpan</button>
       </div>
     </div>
 
@@ -1637,14 +1530,14 @@
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div class="flex items-center gap-2">
           <MessageSquare class="w-6 h-6 text-emerald-600" />
-          <h2 class="text-xl font-bold text-slate-900">Edit Klarifikasi Negosiasi</h2>
+          <h2 class="text-xl font-semibold text-slate-900">Edit Klarifikasi Negosiasi</h2>
         </div>
         <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold text-xs cursor-pointer" @click="goBackToList">
           <ArrowLeft class="w-3.5 h-3.5" /><span>Kembali</span>
         </button>
       </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs border-t-4 border-t-emerald-600 p-5 space-y-4 text-xs">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs border-t border-t-slate-200 p-5 space-y-4 text-xs">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label class="block font-medium text-slate-600 mb-1">Nomor Undangan/Nego</label>
@@ -1656,13 +1549,13 @@
           </div>
           <div>
             <label class="block font-medium text-slate-600 mb-1">Hasil Negosiasi</label>
-            <input type="text" v-model="negoForm.nego_result" class="w-full px-3 py-2 bg-emerald-50 border border-emerald-300 rounded-lg font-bold text-emerald-800" />
+            <input type="text" v-model="negoForm.nego_result" class="w-full px-3 py-2 bg-emerald-50 border border-emerald-300 rounded-lg font-semibold text-emerald-800" />
           </div>
         </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full text-xs text-left">
-            <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+          <table class="ui-table w-full text-xs text-left">
+            <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
               <tr>
                 <th class="py-2 px-3">Komponen</th>
                 <th class="py-2 px-3 w-20 text-center">Vol</th>
@@ -1674,12 +1567,12 @@
             <tbody class="divide-y divide-slate-100">
               <tr v-for="(it, idx) in (negoForm.items || [])" :key="idx">
                 <td class="py-2.5 px-3 font-medium text-slate-800">{{ it.item_name }}</td>
-                <td class="py-2.5 px-3 text-center font-bold">{{ it.quantity }}</td>
+                <td class="py-2.5 px-3 text-center font-semibold">{{ it.quantity }}</td>
                 <td class="py-2.5 px-3 text-right line-through text-slate-400">{{ formatRupiah(it.original_price) }}</td>
-                <td class="py-2.5 px-3 text-right font-bold text-emerald-700">
+                <td class="py-2.5 px-3 text-right font-semibold text-emerald-700">
                   <input type="number" v-model.number="it.nego_price" class="w-28 text-right px-2 py-1 bg-white border border-slate-300 rounded font-semibold text-slate-900" />
                 </td>
-                <td class="py-2.5 px-3 text-right font-bold text-emerald-900">{{ formatRupiah(it.quantity * it.nego_price) }}</td>
+                <td class="py-2.5 px-3 text-right font-semibold text-emerald-900">{{ formatRupiah(it.quantity * it.nego_price) }}</td>
               </tr>
             </tbody>
           </table>
@@ -1687,14 +1580,14 @@
       </div>
 
       <div class="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
-        <button type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5" @click="handleSaveAndGenerate('klarifikasi_nego', 'word')">
+        <button type="button" class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('klarifikasi_nego', 'word')">
           <Sparkles class="w-4 h-4" /><span>Cetak Nego Word</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5" @click="handleSaveAndGenerate('klarifikasi_nego', 'pdf')">
+        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('klarifikasi_nego', 'pdf')">
           <Printer class="w-4 h-4" /><span>Cetak Nego PDF</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-bold rounded-lg" @click="goBackToList">Batal</button>
-        <button type="button" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg" @click="saveNegoDocument">Simpan</button>
+        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg" @click="goBackToList">Batal</button>
+        <button type="button" class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg" @click="saveNegoDocument">Simpan</button>
       </div>
     </div>
 
@@ -1705,14 +1598,14 @@
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div class="flex items-center gap-2">
           <Inbox class="w-6 h-6 text-emerald-600" />
-          <h2 class="text-xl font-bold text-slate-900">Edit Permintaan Penawaran / Surat Pesanan</h2>
+          <h2 class="text-xl font-semibold text-slate-900">Edit Permintaan Penawaran / Surat Pesanan</h2>
         </div>
         <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold text-xs cursor-pointer" @click="goBackToList">
           <ArrowLeft class="w-3.5 h-3.5" /><span>Kembali</span>
         </button>
       </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs border-t-4 border-t-emerald-600 p-5 space-y-4 text-xs">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs border-t border-t-slate-200 p-5 space-y-4 text-xs">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block font-medium text-slate-600 mb-1">Nomor Surat Pesanan</label>
@@ -1730,14 +1623,14 @@
       </div>
 
       <div class="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
-        <button type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5" @click="handleSaveAndGenerate('permintaan_penawaran', 'word')">
+        <button type="button" class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('permintaan_penawaran', 'word')">
           <Sparkles class="w-4 h-4" /><span>Cetak Pesanan Word</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5" @click="handleSaveAndGenerate('permintaan_penawaran', 'pdf')">
+        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('permintaan_penawaran', 'pdf')">
           <Printer class="w-4 h-4" /><span>Cetak Pesanan PDF</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-bold rounded-lg" @click="goBackToList">Batal</button>
-        <button type="button" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg" @click="saveSuratPesananDocument">Simpan</button>
+        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg" @click="goBackToList">Batal</button>
+        <button type="button" class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg" @click="saveSuratPesananDocument">Simpan</button>
       </div>
     </div>
 
@@ -1748,14 +1641,14 @@
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div class="flex items-center gap-2">
           <Briefcase class="w-6 h-6 text-emerald-600" />
-          <h2 class="text-xl font-bold text-slate-900">Edit Surat Perintah Kerja (SPK)</h2>
+          <h2 class="text-xl font-semibold text-slate-900">Edit Surat Perintah Kerja (SPK)</h2>
         </div>
         <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold text-xs cursor-pointer" @click="goBackToList">
           <ArrowLeft class="w-3.5 h-3.5" /><span>Kembali</span>
         </button>
       </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs border-t-4 border-t-emerald-600 p-5 space-y-4 text-xs">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs border-t border-t-slate-200 p-5 space-y-4 text-xs">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label class="block font-medium text-slate-600 mb-1">Nomor SPK</label>
@@ -1777,14 +1670,14 @@
       </div>
 
       <div class="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
-        <button type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5" @click="handleSaveAndGenerate('spk', 'word')">
+        <button type="button" class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('spk', 'word')">
           <Sparkles class="w-4 h-4" /><span>Cetak SPK Word</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5" @click="handleSaveAndGenerate('spk', 'pdf')">
+        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('spk', 'pdf')">
           <Printer class="w-4 h-4" /><span>Cetak SPK PDF</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-bold rounded-lg" @click="goBackToList">Batal</button>
-        <button type="button" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg" @click="saveSpkDocument">Simpan</button>
+        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg" @click="goBackToList">Batal</button>
+        <button type="button" class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg" @click="saveSpkDocument">Simpan</button>
       </div>
     </div>
 
@@ -1795,14 +1688,14 @@
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div class="flex items-center gap-2">
           <SearchCheck class="w-6 h-6 text-emerald-600" />
-          <h2 class="text-xl font-bold text-slate-900">Edit Hasil Pemeriksaan</h2>
+          <h2 class="text-xl font-semibold text-slate-900">Edit Hasil Pemeriksaan</h2>
         </div>
         <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold text-xs cursor-pointer" @click="goBackToList">
           <ArrowLeft class="w-3.5 h-3.5" /><span>Kembali</span>
         </button>
       </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs border-t-4 border-t-emerald-600 p-5 space-y-4 text-xs">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs border-t border-t-slate-200 p-5 space-y-4 text-xs">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label class="block font-medium text-slate-600 mb-1">Nomor Berita Acara</label>
@@ -1814,7 +1707,7 @@
           </div>
           <div>
             <label class="block font-medium text-slate-600 mb-1">Kondisi Hasil</label>
-            <input type="text" v-model="hasilPemeriksaanForm.hasil_pemeriksaan" class="w-full px-3 py-2 bg-emerald-50 border border-emerald-300 rounded-lg font-bold text-emerald-800" />
+            <input type="text" v-model="hasilPemeriksaanForm.hasil_pemeriksaan" class="w-full px-3 py-2 bg-emerald-50 border border-emerald-300 rounded-lg font-semibold text-emerald-800" />
           </div>
         </div>
         <div>
@@ -1824,14 +1717,14 @@
       </div>
 
       <div class="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
-        <button type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5" @click="handleSaveAndGenerate('hasil_pemeriksaan', 'word')">
+        <button type="button" class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('hasil_pemeriksaan', 'word')">
           <Sparkles class="w-4 h-4" /><span>Cetak HP Word</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5" @click="handleSaveAndGenerate('hasil_pemeriksaan', 'pdf')">
+        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('hasil_pemeriksaan', 'pdf')">
           <Printer class="w-4 h-4" /><span>Cetak HP PDF</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-bold rounded-lg" @click="goBackToList">Batal</button>
-        <button type="button" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg" @click="saveHasilPemeriksaanDocument">Simpan</button>
+        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg" @click="goBackToList">Batal</button>
+        <button type="button" class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg" @click="saveHasilPemeriksaanDocument">Simpan</button>
       </div>
     </div>
 
@@ -1842,14 +1735,14 @@
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div class="flex items-center gap-2">
           <GraduationCap class="w-6 h-6 text-emerald-600" />
-          <h2 class="text-xl font-bold text-slate-900">Edit Berita Acara Serah Terima (BAST)</h2>
+          <h2 class="text-xl font-semibold text-slate-900">Edit Berita Acara Serah Terima (BAST)</h2>
         </div>
         <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold text-xs cursor-pointer" @click="goBackToList">
           <ArrowLeft class="w-3.5 h-3.5" /><span>Kembali</span>
         </button>
       </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs border-t-4 border-t-emerald-600 p-5 space-y-4 text-xs">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs border-t border-t-slate-200 p-5 space-y-4 text-xs">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block font-medium text-slate-600 mb-1">Nomor BAST</label>
@@ -1867,14 +1760,14 @@
       </div>
 
       <div class="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
-        <button type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5" @click="handleSaveAndGenerate('bast_sekolah', 'word')">
+        <button type="button" class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate(activeDocItem?.doc_key || 'bast_sekolah', 'word')">
           <Sparkles class="w-4 h-4" /><span>Cetak BAST Word</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5" @click="handleSaveAndGenerate('bast_sekolah', 'pdf')">
+        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate(activeDocItem?.doc_key || 'bast_sekolah', 'pdf')">
           <Printer class="w-4 h-4" /><span>Cetak BAST PDF</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-bold rounded-lg" @click="goBackToList">Batal</button>
-        <button type="button" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg" @click="saveBastDocument">Simpan</button>
+        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg" @click="goBackToList">Batal</button>
+        <button type="button" class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg" @click="saveBastDocument">Simpan</button>
       </div>
     </div>
 
@@ -1885,14 +1778,14 @@
       <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div class="flex items-center gap-2">
           <Truck class="w-6 h-6 text-emerald-600" />
-          <h2 class="text-xl font-bold text-slate-900">Edit Surat Jalan</h2>
+          <h2 class="text-xl font-semibold text-slate-900">Edit Surat Jalan</h2>
         </div>
         <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 font-semibold text-xs cursor-pointer" @click="goBackToList">
           <ArrowLeft class="w-3.5 h-3.5" /><span>Kembali</span>
         </button>
       </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs border-t-4 border-t-emerald-600 p-5 space-y-4 text-xs">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs border-t border-t-slate-200 p-5 space-y-4 text-xs">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
           <div>
             <label class="block font-medium text-slate-600 mb-1">Nomor Surat Jalan</label>
@@ -1919,12 +1812,12 @@
         <!-- Tabel Surat Jalan (Editable Admin) -->
         <div class="pt-2 space-y-2">
           <div class="flex items-center justify-between">
-            <p class="font-bold text-slate-800 flex items-center gap-1.5">
+            <p class="font-semibold text-slate-800 flex items-center gap-1.5">
               <span>Daftar Barang yang Dikirim</span>
             </p>
             <button
               type="button"
-              class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer transition-colors"
+              class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer transition-colors"
               @click="addSuratJalanItem"
             >
               <Plus class="w-3.5 h-3.5" />
@@ -1933,8 +1826,8 @@
           </div>
 
           <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left border border-slate-200 border-collapse">
-              <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+            <table class="ui-table w-full text-xs text-left border border-slate-200 border-collapse">
+              <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
                 <tr>
                   <th class="p-2 w-10 text-center">No</th>
                   <th class="p-2">Kode & Nama Barang</th>
@@ -1951,7 +1844,7 @@
                       type="text"
                       v-model="it.code"
                       placeholder="Nama / kode barang"
-                      class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded font-medium text-slate-900 focus:ring-1 focus:ring-emerald-500"
+                      class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded font-medium text-slate-900 focus:ring-1 focus:ring-alpharo-400"
                     />
                   </td>
                   <td class="p-2 text-center">
@@ -1966,7 +1859,7 @@
                       type="number"
                       v-model.number="it.qty_sent"
                       min="1"
-                      class="w-24 px-2 py-1.5 text-center bg-white border border-slate-300 rounded font-bold text-emerald-800"
+                      class="w-24 px-2 py-1.5 text-center bg-white border border-slate-300 rounded font-semibold text-emerald-800"
                     />
                   </td>
                   <td class="p-2 text-center">
@@ -1987,14 +1880,14 @@
       </div>
 
       <div class="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
-        <button type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5" @click="handleSaveAndGenerate('surat_jalan', 'word')">
+        <button type="button" class="px-4 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('surat_jalan', 'word')">
           <Sparkles class="w-4 h-4" /><span>Cetak SJ Word</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5" @click="handleSaveAndGenerate('surat_jalan', 'pdf')">
+        <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5" :disabled="Boolean(isGeneratingKey)" @click="handleSaveAndGenerate('surat_jalan', 'pdf')">
           <Printer class="w-4 h-4" /><span>Cetak SJ PDF</span>
         </button>
-        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-bold rounded-lg" @click="goBackToList">Batal</button>
-        <button type="button" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg" @click="saveSuratJalanDocument">Simpan</button>
+        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg" @click="goBackToList">Batal</button>
+        <button type="button" class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg" @click="saveSuratJalanDocument">Simpan</button>
       </div>
     </div>
 
@@ -2006,7 +1899,7 @@
         <div class="flex items-center gap-2">
           <FolderKanban class="w-6 h-6 text-emerald-600" />
           <div>
-            <h2 class="text-xl font-bold text-slate-900">Data Project (Editable Lintas Modul)</h2>
+            <h2 class="text-xl font-semibold text-slate-900">Data Project (Editable Lintas Modul)</h2>
             <p class="text-xs text-slate-500">Administrasi memiliki hak penuh mengedit data proyek, anggaran, penanggung jawab, logistik, dan daftar barang.</p>
           </div>
         </div>
@@ -2018,8 +1911,8 @@
       <!-- 4 KUADRAN FORM + LOGISTIK/KEUANGAN -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-xs">
         <!-- Kuadran 1: Data Identitas Project -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs border-t-4 border-t-emerald-600 p-4 space-y-3">
-          <p class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs border-t border-t-slate-200 p-4 space-y-3">
+          <p class="font-semibold text-sm text-slate-800 flex items-center gap-1.5">
             <Info class="w-4 h-4 text-emerald-600" />
             <span>1. Identitas Project</span>
           </p>
@@ -2029,11 +1922,11 @@
           </div>
           <div>
             <label class="block text-slate-600 mb-1">Nama Project *</label>
-            <input type="text" v-model="projectForm.project_name" class="w-full px-3 py-2 bg-white border border-slate-300 rounded font-semibold text-slate-900 focus:ring-2 focus:ring-emerald-500" />
+            <input type="text" v-model="projectForm.project_name" class="w-full px-3 py-2 bg-white border border-slate-300 rounded font-semibold text-slate-900 focus:ring-2 focus:ring-alpharo-400" />
           </div>
           <div>
-            <label class="block text-slate-600 mb-1">Customer / Klien Sekolah *</label>
-            <input type="text" v-model="projectForm.customer_name" class="w-full px-3 py-2 bg-white border border-slate-300 rounded font-semibold text-slate-900 focus:ring-2 focus:ring-emerald-500" />
+            <label for="spj-project-customer" class="block text-slate-600 mb-1">Customer / Klien Sekolah *</label>
+            <input id="spj-project-customer" type="text" v-model="projectForm.customer_name" @change="changeProjectCustomer" class="w-full px-3 py-2 bg-white border border-slate-300 rounded font-semibold text-slate-900 focus:ring-2 focus:ring-alpharo-400" />
           </div>
           <div>
             <label class="block text-slate-600 mb-1">Petugas Marketing</label>
@@ -2042,8 +1935,8 @@
         </div>
 
         <!-- Kuadran 2: Pengadaan & Anggaran -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs border-t-4 border-t-emerald-600 p-4 space-y-3">
-          <p class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs border-t border-t-slate-200 p-4 space-y-3">
+          <p class="font-semibold text-sm text-slate-800 flex items-center gap-1.5">
             <Calculator class="w-4 h-4 text-emerald-600" />
             <span>2. Pengadaan & Anggaran</span>
           </p>
@@ -2063,7 +1956,7 @@
           </div>
           <div>
             <label class="block text-slate-600 mb-1">Pagu Anggaran (Rp)</label>
-            <input type="number" v-model.number="projectForm.budget_ceiling" class="w-full px-3 py-2 bg-white border border-slate-300 rounded font-bold text-emerald-800" />
+            <input type="number" v-model.number="projectForm.budget_ceiling" class="w-full px-3 py-2 bg-white border border-slate-300 rounded font-semibold text-emerald-800" />
           </div>
           <div>
             <label class="block text-slate-600 mb-1">Kode Rekening Anggaran</label>
@@ -2072,18 +1965,18 @@
         </div>
 
         <!-- Kuadran 3: Nilai Transaksi & Jadwal -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs border-t-4 border-t-emerald-600 p-4 space-y-3">
-          <p class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs border-t border-t-slate-200 p-4 space-y-3">
+          <p class="font-semibold text-sm text-slate-800 flex items-center gap-1.5">
             <Calendar class="w-4 h-4 text-emerald-600" />
             <span>3. Nilai & Jadwal</span>
           </p>
           <div>
             <label class="block text-slate-600 mb-1">Nilai Project Kontrak (Rp)</label>
-            <input type="number" v-model.number="projectForm.project_value" class="w-full px-3 py-2 bg-white border border-slate-300 rounded font-bold text-slate-900" />
+            <input type="number" v-model.number="projectForm.project_value" class="w-full px-3 py-2 bg-white border border-slate-300 rounded font-semibold text-slate-900" />
           </div>
           <div>
             <label class="block text-slate-600 mb-1">Nilai Invoice / Tagihan (Rp)</label>
-            <input type="number" v-model.number="projectForm.invoice_value" class="w-full px-3 py-2 bg-white border border-slate-300 rounded font-bold text-slate-900" />
+            <input type="number" v-model.number="projectForm.invoice_value" class="w-full px-3 py-2 bg-white border border-slate-300 rounded font-semibold text-slate-900" />
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
@@ -2098,8 +1991,8 @@
         </div>
 
         <!-- Kuadran 4: Penanggung Jawab Customer (Sekolah / PPK) -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs border-t-4 border-t-emerald-600 p-4 space-y-3">
-          <p class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs border-t border-t-slate-200 p-4 space-y-3">
+          <p class="font-semibold text-sm text-slate-800 flex items-center gap-1.5">
             <GraduationCap class="w-4 h-4 text-emerald-600" />
             <span>4. Penanggung Jawab Klien</span>
           </p>
@@ -2122,8 +2015,8 @@
         </div>
 
         <!-- Kuadran 5: Status Logistik (Warehouse) & Keuangan (Finance) -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs border-t-4 border-t-emerald-600 p-4 space-y-3 lg:col-span-2">
-          <p class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+        <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs border-t border-t-slate-200 p-4 space-y-3 lg:col-span-2">
+          <p class="font-semibold text-sm text-slate-800 flex items-center gap-1.5">
             <Truck class="w-4 h-4 text-emerald-600" />
             <span>5. Integrasi Gudang & Keuangan (Override oleh Admin)</span>
           </p>
@@ -2138,7 +2031,7 @@
             </div>
             <div>
               <label class="block text-slate-600 mb-1">Status Pengiriman Gudang</label>
-              <select v-model="projectForm.warehouse_status" class="w-full px-3 py-2 bg-white border border-slate-300 rounded font-bold text-emerald-800">
+              <select v-model="projectForm.warehouse_status" class="w-full px-3 py-2 bg-white border border-slate-300 rounded font-semibold text-emerald-800">
                 <option value="TERKIRIM">TERKIRIM (Lengkap Diterima)</option>
                 <option value="DALAM_PERJALANAN">DALAM PERJALANAN</option>
                 <option value="PROSES">DALAM PROSES PACKING</option>
@@ -2147,7 +2040,7 @@
             </div>
             <div>
               <label class="block text-slate-600 mb-1">Status Pembayaran Keuangan</label>
-              <select v-model="projectForm.finance_status" class="w-full px-3 py-2 bg-white border border-slate-300 rounded font-bold text-purple-800">
+              <select v-model="projectForm.finance_status" class="w-full px-3 py-2 bg-white border border-slate-300 rounded font-semibold text-alpharo-800">
                 <option value="LUNAS">LUNAS</option>
                 <option value="MENUNGGU_PEMBAYARAN">MENUNGGU PEMBAYARAN</option>
                 <option value="BELUM_LUNAS">BELUM LUNAS</option>
@@ -2158,11 +2051,34 @@
         </div>
       </div>
 
+      <section aria-label="Kop Surat Instansi" class="ui-panel space-y-4 rounded-xl border border-slate-200 bg-white p-4 text-xs sm:p-5">
+        <div>
+          <h3 class="text-sm font-semibold text-slate-800">Kop Surat Instansi</h3>
+          <p class="mt-1 text-xs leading-relaxed text-slate-500">Mengikuti sekolah asal pesanan. Lengkapi sekali untuk dipakai pada seluruh dokumen yang diterbitkan sekolah dalam proyek ini.</p>
+        </div>
+        <div class="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2">
+          <div v-for="field in letterheadFields" :key="field.key" :class="field.key === 'letterheadAddress' ? 'md:col-span-2' : ''">
+            <label :for="'spj-kop-' + field.key" class="mb-1 block font-medium text-slate-600">{{ field.label }}</label>
+            <textarea v-if="field.key === 'letterheadAddress'" :id="'spj-kop-' + field.key" v-model="projectForm.metadata.customer_profile[field.key]" rows="2" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-900"></textarea>
+            <input v-else :id="'spj-kop-' + field.key" v-model="projectForm.metadata.customer_profile[field.key]" type="text" :placeholder="field.placeholder || ''" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-900" />
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4">
+          <img v-if="projectForm.metadata.customer_profile.logoDataUrl" :src="projectForm.metadata.customer_profile.logoDataUrl" alt="Logo instansi untuk kop surat" class="h-16 w-16 object-contain" />
+          <div class="min-w-0">
+            <label for="spj-kop-logo" class="mb-1 block font-medium text-slate-600">Logo Instansi / Daerah</label>
+            <input id="spj-kop-logo" type="file" accept="image/png,image/jpeg" @change="setLetterheadLogo" class="w-full max-w-sm text-xs text-slate-600" />
+            <p class="mt-1 text-[11px] text-slate-500">JPG/PNG, maksimal 1 MB. Gunakan logo resmi yang sesuai dengan instansi.</p>
+          </div>
+          <button v-if="projectForm.metadata.customer_profile.logoDataUrl" type="button" class="text-xs font-semibold text-rose-600" @click="projectForm.metadata.customer_profile.logoDataUrl = ''">Hapus Logo</button>
+        </div>
+      </section>
+
       <!-- KUADRAN 6: TABEL EDITOR DAFTAR BARANG / PEKERJAAN -->
-      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs border-t-4 border-t-emerald-600 p-4 sm:p-5 space-y-3 text-xs">
+      <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-2xs border-t border-t-slate-200 p-4 sm:p-5 space-y-3 text-xs">
         <div class="flex items-center justify-between">
           <div>
-            <p class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+            <p class="font-semibold text-sm text-slate-800 flex items-center gap-1.5">
               <ClipboardCheck class="w-4 h-4 text-emerald-600" />
               <span>Daftar Rincian Barang / Komponen Transaksi</span>
             </p>
@@ -2170,7 +2086,7 @@
           </div>
           <button
             type="button"
-            class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer transition-colors"
+            class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer transition-colors"
             @click="addProjectItem"
           >
             <Plus class="w-3.5 h-3.5" />
@@ -2179,8 +2095,8 @@
         </div>
 
         <div class="overflow-x-auto pt-2">
-          <table class="w-full text-left border border-slate-200 border-collapse">
-            <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+          <table class="ui-table-wide ui-table w-full text-left border border-slate-200 border-collapse">
+            <thead class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
               <tr>
                 <th class="p-2 w-10 text-center">No</th>
                 <th class="p-2">Nama Komponen / Rincian Barang</th>
@@ -2199,7 +2115,7 @@
                     type="text"
                     v-model="it.item_name"
                     placeholder="Nama barang / spesifikasi"
-                    class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded font-medium text-slate-900 focus:ring-1 focus:ring-emerald-500"
+                    class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded font-medium text-slate-900 focus:ring-1 focus:ring-alpharo-400"
                   />
                 </td>
                 <td class="p-2 text-center">
@@ -2207,7 +2123,7 @@
                     type="number"
                     v-model.number="it.quantity"
                     min="1"
-                    class="w-20 px-2 py-1.5 text-center bg-white border border-slate-300 rounded font-bold text-slate-900"
+                    class="w-20 px-2 py-1.5 text-center bg-white border border-slate-300 rounded font-semibold text-slate-900"
                   />
                 </td>
                 <td class="p-2 text-center">
@@ -2226,7 +2142,7 @@
                     class="w-32 px-2.5 py-1.5 text-right bg-white border border-slate-300 rounded font-semibold text-slate-900"
                   />
                 </td>
-                <td class="p-2 text-right font-bold text-emerald-800">
+                <td class="p-2 text-right font-semibold text-emerald-800">
                   {{ formatRupiah((it.quantity || 0) * (it.price || 0)) }}
                 </td>
                 <td class="p-2 text-center">
@@ -2241,7 +2157,7 @@
                 </td>
               </tr>
             </tbody>
-            <tfoot class="bg-slate-50 font-bold border-t border-slate-200">
+            <tfoot class="bg-slate-50 font-semibold border-t border-slate-200">
               <tr>
                 <td colspan="5" class="p-2.5 text-right">TOTAL NILAI KOMPONEN:</td>
                 <td class="p-2.5 text-right font-black text-emerald-900 text-sm">
@@ -2256,688 +2172,30 @@
 
       <!-- ACTION BUTTONS -->
       <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200">
-        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-bold rounded-lg shadow-2xs hover:bg-slate-50 cursor-pointer transition-colors" @click="goBackToList">Batal</button>
-        <button type="button" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors" @click="saveProjectData">
+        <button type="button" class="px-4 py-2 bg-white text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg shadow-2xs hover:bg-slate-50 cursor-pointer transition-colors" @click="goBackToList">Batal</button>
+        <button type="button" class="px-5 py-2 bg-alpharo-600 hover:bg-alpharo-700 text-white text-xs font-semibold rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-colors" @click="saveProjectData">
           <CheckCircle2 class="w-4 h-4" />
           <span>Simpan Data Project</span>
         </button>
       </div>
     </div>
 <!-- ========================================================================= -->
-    <!-- MODAL PRATINJAU / CETAK PDF CETAK RESMI SESUAI REAL DATA                  -->
-    <!-- ========================================================================= -->
-        <Modal
-      :show="showPdfModal"
-      :title="`Pratinjau Cetak Real: ${pdfDocItem?.doc_name || 'Dokumen SPJ'}`"
-      max-width="4xl"
-      @close="showPdfModal = false"
-    >
-      <div id="printable-area" class="bg-white p-6 sm:p-10 text-slate-900 font-sans print:p-0">
-        <!-- KHUSUS COVER PROJECT: DESAIN KHUSUS SAMPUL RESMI SPJ -->
-        <div v-if="pdfDocItem?.doc_key === 'cover_project'" class="py-10 px-8 border-4 border-double border-slate-900 text-center space-y-6">
-          <div class="border-b-2 border-slate-900 pb-3">
-            <h2 class="text-xl font-extrabold tracking-wider text-slate-900 uppercase">CV ALPHARO ARTHA JAYA</h2>
-            <p class="text-xs font-semibold text-slate-600 uppercase tracking-wide">General Contractor & Supplier</p>
-            <p class="text-[11px] text-slate-500 mt-0.5">Ruko Cibubur Indah Blok B No. 6 Jl. Lapangan Tembak Cibubur - Jakarta Timur</p>
-          </div>
-
-          <div class="py-4 space-y-2">
-            <h1 class="text-2xl sm:text-3xl font-black tracking-widest text-slate-900 uppercase">
-              LAPORAN PERTANGGUNGJAWABAN (SPJ)
-            </h1>
-            <p class="text-sm font-bold tracking-wider text-emerald-800 uppercase">
-              PENGADAAN BARANG DAN JASA PEMERINTAH
-            </p>
-            <div class="h-1 bg-slate-900 w-36 mx-auto my-3"></div>
-          </div>
-
-          <div class="py-4 space-y-4 text-left max-w-xl mx-auto bg-slate-50/80 p-5 rounded-lg border border-slate-200 text-xs">
-            <div class="grid grid-cols-3 gap-2">
-              <span class="font-bold text-slate-500 uppercase">Pekerjaan:</span>
-              <span class="col-span-2 font-extrabold text-slate-900 text-sm uppercase">{{ activeProject?.project_name }}</span>
-            </div>
-            <div class="grid grid-cols-3 gap-2">
-              <span class="font-bold text-slate-500 uppercase">Kegiatan:</span>
-              <span class="col-span-2 font-bold text-slate-800 uppercase">{{ activeProject?.activity_name || activeProject?.project_name }}</span>
-            </div>
-            <div class="grid grid-cols-3 gap-2">
-              <span class="font-bold text-slate-500 uppercase">Instansi Penerima:</span>
-              <span class="col-span-2 font-extrabold text-slate-900 uppercase">{{ activeProject?.customer_name }}</span>
-            </div>
-            <div class="grid grid-cols-3 gap-2">
-              <span class="font-bold text-slate-500 uppercase">Sumber Dana:</span>
-              <span class="col-span-2 font-bold text-slate-800 uppercase">{{ activeProject?.funding_source }} (TAHUN ANGGARAN {{ activeProject?.fiscal_year || '2026' }})</span>
-            </div>
-            <div class="grid grid-cols-3 gap-2">
-              <span class="font-bold text-slate-500 uppercase">Total Nilai Kontrak:</span>
-              <span class="col-span-2 font-black text-emerald-800 text-base font-mono">{{ formatRupiah(activeProject?.project_value || activeProject?.budget_ceiling || 0) }}</span>
-            </div>
-            <div class="grid grid-cols-3 gap-2">
-              <span class="font-bold text-slate-500 uppercase">Nomor Berkas:</span>
-              <span class="col-span-2 font-mono font-bold text-slate-800">{{ pdfDocItem?.doc_number || coverProjectForm?.doc_number }}</span>
-            </div>
-          </div>
-
-          <div class="pt-6 border-t-2 border-slate-900 flex justify-between items-center text-xs text-left">
-            <div>
-              <p class="font-bold text-slate-900">CV ALPHARO ARTHA JAYA</p>
-              <p class="text-[11px] text-slate-500">Jakarta Timur, Indonesia</p>
-            </div>
-            <div class="text-right">
-              <p class="text-slate-500">Tanggal Terbit:</p>
-              <p class="font-bold text-slate-900">{{ pdfDocItem?.doc_date || coverProjectForm?.doc_date }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- DOKUMEN LAINNYA: KOP SURAT STANDAR RESMI -->
-        <div v-else>
-          <!-- KOP SURAT RESMI CV ALPHARO ARTHA JAYA -->
-          <div class="border-b-2 border-slate-900 pb-3 mb-6 flex items-center justify-between">
-            <div>
-              <h2 class="text-xl font-extrabold tracking-wider text-slate-900 uppercase">CV ALPHARO ARTHA JAYA</h2>
-              <p class="text-xs font-semibold text-slate-600 uppercase tracking-wide">General Contractor & Supplier</p>
-              <p class="text-[11px] text-slate-500 mt-0.5">Ruko Cibubur Indah Blok B No. 6 Jl. Lapangan Tembak Cibubur - Jakarta Timur | Kode Pos: 13720</p>
-              <p class="text-[10px] text-slate-500">Telp: 0821 9455 5127 | Email: alpharoarthajaya@gmail.com | NPWP: 62.137.251.5-009.000</p>
-            </div>
-            <div class="text-right">
-              <span class="inline-block px-3 py-1 bg-emerald-100 text-emerald-900 font-bold text-xs rounded border border-emerald-300">
-                DOKUMEN RESMI
-              </span>
-            </div>
-          </div>
-
-          <!-- JUDUL DOKUMEN -->
-          <div class="text-center mb-6">
-            <h3 class="text-lg font-extrabold uppercase tracking-wide text-slate-900 underline">
-              {{ pdfDocItem?.doc_name }}
-            </h3>
-            <p class="text-xs text-slate-600 mt-1 font-mono">
-              Nomor: {{ pdfDocItem?.doc_number || '001/AAJ/SPJ/X/2026' }}
-            </p>
-            <p class="text-[11px] text-slate-500">
-              Tanggal Terbit: {{ pdfDocItem?.doc_date || '06/10/2026' }}
-            </p>
-          </div>
-
-          <!-- KONTEN SPESIFIK: PERENCANAAN -->
-          <div v-if="pdfDocItem?.doc_key === 'perencanaan'" class="space-y-4 mb-4 text-xs">
-            <div class="p-3 bg-slate-50 rounded border border-slate-200 grid grid-cols-2 gap-2 text-slate-700">
-              <div><strong>Kegiatan:</strong> {{ perencanaanForm.activity_name || activeProject?.activity_name || activeProject?.project_name }}</div>
-              <div><strong>Sumber Dana:</strong> {{ perencanaanForm.funding_source || activeProject?.funding_source }} (TA {{ perencanaanForm.fiscal_year || activeProject?.fiscal_year || '2026' }})</div>
-              <div><strong>Waktu Pelaksanaan:</strong> {{ perencanaanForm.waktu_pelaksanaan }}</div>
-              <div><strong>Penerima Manfaat:</strong> {{ activeProject?.customer_name }}</div>
-            </div>
-            <p class="text-slate-700 leading-relaxed">
-              Berikut adalah rincian teknis dan spesifikasi pengadaan barang yang direncanakan untuk kegiatan tersebut di atas:
-            </p>
-            <table class="w-full text-left border border-slate-300 border-collapse">
-              <thead class="bg-slate-100 text-slate-800 font-bold">
-                <tr>
-                  <th class="p-2 border border-slate-300 w-10 text-center">No</th>
-                  <th class="p-2 border border-slate-300">Komponen / Spesifikasi Barang</th>
-                  <th class="p-2 border border-slate-300 w-16 text-center">Vol</th>
-                  <th class="p-2 border border-slate-300 w-16 text-center">Satuan</th>
-                  <th class="p-2 border border-slate-300 text-right">Harga Satuan</th>
-                  <th class="p-2 border border-slate-300 text-right">Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(it, idx) in getEffectiveItems('perencanaan')" :key="idx" class="border-b border-slate-200">
-                  <td class="p-2 border border-slate-300 text-center">{{ idx + 1 }}</td>
-                  <td class="p-2 border border-slate-300 font-medium">{{ it.item_name }}</td>
-                  <td class="p-2 border border-slate-300 text-center font-bold">{{ it.quantity }}</td>
-                  <td class="p-2 border border-slate-300 text-center">{{ it.unit }}</td>
-                  <td class="p-2 border border-slate-300 text-right">{{ formatNumber(it.price) }}</td>
-                  <td class="p-2 border border-slate-300 text-right font-bold">{{ formatRupiah(it.subtotal) }}</td>
-                </tr>
-                <tr class="bg-slate-50 font-bold border-t border-slate-300">
-                  <td colspan="5" class="p-2 text-right border border-slate-300">Jumlah:</td>
-                  <td class="p-2 text-right border border-slate-300">{{ formatRupiah(getEffectiveDocTotals('perencanaan').subtotal) }}</td>
-                </tr>
-                <tr class="bg-slate-50 font-bold">
-                  <td colspan="5" class="p-2 text-right border border-slate-300">PPN (11%):</td>
-                  <td class="p-2 text-right border border-slate-300">{{ formatRupiah(getEffectiveDocTotals('perencanaan').ppn) }}</td>
-                </tr>
-                <tr class="bg-emerald-100 font-extrabold text-emerald-950">
-                  <td colspan="5" class="p-2 text-right border border-slate-300">TOTAL:</td>
-                  <td class="p-2 text-right border border-slate-300">{{ formatRupiah(getEffectiveDocTotals('perencanaan').total) }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="p-2.5 bg-slate-50 rounded border border-slate-200 text-xs">
-              <p class="font-bold text-slate-800">Terbilang: <span class="italic text-slate-900">{{ formatTerbilang(getEffectiveDocTotals('perencanaan').total) }}</span></p>
-            </div>
-          </div>
-
-          <!-- KONTEN SPESIFIK: HPS -->
-          <div v-else-if="pdfDocItem?.doc_key === 'hps'" class="space-y-4 mb-4 text-xs">
-            <div class="p-3 bg-slate-50 rounded border border-slate-200 grid grid-cols-2 gap-2 text-slate-700">
-              <div><strong>Kegiatan:</strong> {{ hpsForm.activity_name || activeProject?.activity_name || activeProject?.project_name }}</div>
-              <div><strong>Sumber Dana:</strong> {{ hpsForm.funding_source || activeProject?.funding_source }}</div>
-              <div><strong>Instansi:</strong> {{ activeProject?.customer_name }}</div>
-              <div><strong>Tahun Anggaran:</strong> {{ activeProject?.fiscal_year || '2026' }}</div>
-            </div>
-            <p class="text-slate-700 leading-relaxed">
-              Daftar Harga Perkiraan Sendiri (HPS) yang ditetapkan untuk pelaksanaan pengadaan barang/jasa:
-            </p>
-            <table class="w-full text-left border border-slate-300 border-collapse">
-              <thead class="bg-slate-100 text-slate-800 font-bold">
-                <tr>
-                  <th class="p-2 border border-slate-300 w-10 text-center">No</th>
-                  <th class="p-2 border border-slate-300">Komponen / Uraian Barang</th>
-                  <th class="p-2 border border-slate-300 w-16 text-center">Vol</th>
-                  <th class="p-2 border border-slate-300 w-16 text-center">Satuan</th>
-                  <th class="p-2 border border-slate-300 text-right">Harga Satuan (Rp)</th>
-                  <th class="p-2 border border-slate-300 text-right">Jumlah (Rp)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(it, idx) in getEffectiveItems('hps')" :key="idx" class="border-b border-slate-200">
-                  <td class="p-2 border border-slate-300 text-center">{{ idx + 1 }}</td>
-                  <td class="p-2 border border-slate-300 font-medium">{{ it.item_name }}</td>
-                  <td class="p-2 border border-slate-300 text-center font-bold">{{ it.quantity }}</td>
-                  <td class="p-2 border border-slate-300 text-center">{{ it.unit }}</td>
-                  <td class="p-2 border border-slate-300 text-right">{{ formatNumber(it.price) }}</td>
-                  <td class="p-2 border border-slate-300 text-right font-bold">{{ formatRupiah(it.subtotal) }}</td>
-                </tr>
-                <tr class="bg-slate-50 font-bold border-t border-slate-300">
-                  <td colspan="5" class="p-2 text-right border border-slate-300">TOTAL NILAI HPS:</td>
-                  <td class="p-2 text-right border border-slate-300 font-extrabold text-emerald-900">{{ formatRupiah(getEffectiveDocTotals('hps').subtotal) }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="p-2.5 bg-slate-50 rounded border border-slate-200 text-xs">
-              <p class="font-bold text-slate-800">Terbilang: <span class="italic text-slate-900">{{ formatTerbilang(getEffectiveDocTotals('hps').subtotal) }}</span></p>
-            </div>
-          </div>
-
-          <!-- KONTEN SPESIFIK: SPPH -->
-          <div v-else-if="pdfDocItem?.doc_key === 'spph'" class="space-y-4 mb-4 text-xs">
-            <div class="flex justify-between items-start">
-              <div>
-                <p class="font-bold text-slate-800">Kepada Yth:</p>
-                <p class="font-bold text-slate-900">Direktur CV ALPHARO ARTHA JAYA</p>
-                <p class="text-slate-600">Ruko Cibubur Indah Blok B No. 6, Jakarta Timur</p>
-              </div>
-              <div class="text-right">
-                <p>Batas Penawaran: <strong>{{ spphForm.batas_akhir_penawaran || '05/10/2026' }}</strong></p>
-                <p>Paket: <strong>{{ spphForm.pekerjaan || activeProject?.project_name }}</strong></p>
-              </div>
-            </div>
-            <p class="text-slate-700 leading-relaxed">
-              {{ spphForm.content || 'Sehubungan dengan kebutuhan kegiatan pengadaan barang/jasa, dengan ini kami meminta penawaran harga resmi untuk rincian pekerjaan sebagai berikut:' }}
-            </p>
-            <table class="w-full text-left border border-slate-300 border-collapse">
-              <thead class="bg-slate-100 text-slate-800 font-bold">
-                <tr>
-                  <th class="p-2 border border-slate-300 w-10 text-center">No</th>
-                  <th class="p-2 border border-slate-300">Rincian Barang yang Diminta</th>
-                  <th class="p-2 border border-slate-300 w-20 text-center">Volume</th>
-                  <th class="p-2 border border-slate-300 w-20 text-center">Satuan</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(it, idx) in getEffectiveItems('spph')" :key="idx" class="border-b border-slate-200">
-                  <td class="p-2 border border-slate-300 text-center">{{ idx + 1 }}</td>
-                  <td class="p-2 border border-slate-300 font-medium">{{ it.item_name }}</td>
-                  <td class="p-2 border border-slate-300 text-center font-bold">{{ it.quantity }}</td>
-                  <td class="p-2 border border-slate-300 text-center">{{ it.unit }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- KONTEN SPESIFIK: PENAWARAN -->
-          <div v-else-if="pdfDocItem?.doc_key === 'penawaran'" class="space-y-4 mb-4 text-xs">
-            <div class="flex justify-between items-start">
-              <div>
-                <p class="font-bold text-slate-800">Kepada Yth:</p>
-                <p class="font-bold text-slate-900">{{ activeProject?.customer_name }}</p>
-                <p class="text-slate-600">Pejabat Pembuat Komitmen / Panitia Pengadaan</p>
-              </div>
-              <div class="text-right">
-                <p>Perihal: <strong>Penawaran Harga Pengadaan Barang</strong></p>
-                <p class="text-slate-500">Tanggal: <strong>{{ pdfDocItem?.doc_date || penawaranForm.doc_date }}</strong></p>
-              </div>
-            </div>
-            <p class="text-slate-700 leading-relaxed">
-              {{ penawaranForm.content || 'Bersama ini kami mengajukan penawaran harga untuk pelaksanaan pengadaan barang dengan rincian sebagai berikut:' }}
-            </p>
-            <table class="w-full text-left border border-slate-300 border-collapse">
-              <thead class="bg-slate-100 text-slate-800 font-bold">
-                <tr>
-                  <th class="p-2 border border-slate-300 w-10 text-center">No</th>
-                  <th class="p-2 border border-slate-300">Nama Barang</th>
-                  <th class="p-2 border border-slate-300 w-16 text-center">Vol</th>
-                  <th class="p-2 border border-slate-300 w-16 text-center">Sat</th>
-                  <th class="p-2 border border-slate-300 text-right">Harga Penawaran</th>
-                  <th class="p-2 border border-slate-300 text-right">Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(it, idx) in getEffectiveItems('penawaran')" :key="idx" class="border-b border-slate-200">
-                  <td class="p-2 border border-slate-300 text-center">{{ idx + 1 }}</td>
-                  <td class="p-2 border border-slate-300 font-medium">{{ it.item_name }}</td>
-                  <td class="p-2 border border-slate-300 text-center font-bold">{{ it.quantity }}</td>
-                  <td class="p-2 border border-slate-300 text-center">{{ it.unit }}</td>
-                  <td class="p-2 border border-slate-300 text-right">{{ formatNumber(it.price) }}</td>
-                  <td class="p-2 border border-slate-300 text-right font-bold">{{ formatRupiah(it.subtotal) }}</td>
-                </tr>
-                <tr class="bg-slate-50 font-bold border-t border-slate-300">
-                  <td colspan="5" class="p-2 text-right border border-slate-300">Subtotal Penawaran:</td>
-                  <td class="p-2 text-right border border-slate-300 font-bold">{{ formatRupiah(getEffectiveDocTotals('penawaran').subtotal) }}</td>
-                </tr>
-                <tr class="bg-slate-50 font-bold">
-                  <td colspan="5" class="p-2 text-right border border-slate-300">PPN (11%):</td>
-                  <td class="p-2 text-right border border-slate-300 font-bold">{{ formatRupiah(getEffectiveDocTotals('penawaran').ppn) }}</td>
-                </tr>
-                <tr class="bg-emerald-100 font-extrabold text-emerald-950">
-                  <td colspan="5" class="p-2 text-right border border-slate-300">TOTAL PENAWARAN:</td>
-                  <td class="p-2 text-right border border-slate-300 font-black">{{ formatRupiah(getEffectiveDocTotals('penawaran').total) }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="p-2.5 bg-slate-50 rounded border border-slate-200 text-xs">
-              <p class="font-bold text-slate-800">Terbilang: <span class="italic text-slate-900">{{ formatTerbilang(getEffectiveDocTotals('penawaran').total) }}</span></p>
-            </div>
-          </div>
-
-          <!-- KONTEN SPESIFIK: KLARIFIKASI / NEGO -->
-          <div v-else-if="pdfDocItem?.doc_key === 'klarifikasi_nego'" class="space-y-4 mb-4 text-xs">
-            <p class="text-slate-700 leading-relaxed">
-              Pada hari ini telah dilakukan klarifikasi teknis dan negosiasi harga antara pihak sekolah dan CV ALPHARO ARTHA JAYA dengan hasil: <strong>{{ negoForm.nego_result || 'Sepakat' }}</strong>.
-            </p>
-            <table class="w-full text-left border border-slate-300 border-collapse">
-              <thead class="bg-slate-100 text-slate-800 font-bold">
-                <tr>
-                  <th class="p-2 border border-slate-300 w-10 text-center">No</th>
-                  <th class="p-2 border border-slate-300">Komponen</th>
-                  <th class="p-2 border border-slate-300 w-16 text-center">Vol</th>
-                  <th class="p-2 border border-slate-300 text-right">Harga Awal</th>
-                  <th class="p-2 border border-slate-300 text-right">Harga Negosiasi</th>
-                  <th class="p-2 border border-slate-300 text-right">Total Nego</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(it, idx) in getEffectiveItems('klarifikasi_nego')" :key="idx" class="border-b border-slate-200">
-                  <td class="p-2 border border-slate-300 text-center">{{ idx + 1 }}</td>
-                  <td class="p-2 border border-slate-300 font-medium">{{ it.item_name }}</td>
-                  <td class="p-2 border border-slate-300 text-center font-bold">{{ it.quantity }}</td>
-                  <td class="p-2 border border-slate-300 text-right line-through text-slate-400">{{ formatRupiah(it.price) }}</td>
-                  <td class="p-2 border border-slate-300 text-right font-bold text-emerald-700">{{ formatRupiah(it.nego_price) }}</td>
-                  <td class="p-2 border border-slate-300 text-right font-extrabold text-slate-900">{{ formatRupiah(it.subtotal_nego) }}</td>
-                </tr>
-                <tr class="bg-slate-50 font-bold border-t border-slate-300">
-                  <td colspan="5" class="p-2 text-right border border-slate-300">Total Negosiasi:</td>
-                  <td class="p-2 text-right border border-slate-300 font-bold">{{ formatRupiah(getEffectiveDocTotals('klarifikasi_nego').subtotalNego) }}</td>
-                </tr>
-                <tr class="bg-slate-50 font-bold">
-                  <td colspan="5" class="p-2 text-right border border-slate-300">PPN (11%):</td>
-                  <td class="p-2 text-right border border-slate-300 font-bold">{{ formatRupiah(getEffectiveDocTotals('klarifikasi_nego').ppnNego) }}</td>
-                </tr>
-                <tr class="bg-slate-50 font-bold">
-                  <td colspan="5" class="p-2 text-right border border-slate-300 text-rose-700">PPh (1,5%):</td>
-                  <td class="p-2 text-right border border-slate-300 text-rose-700">- {{ formatRupiah(getEffectiveDocTotals('klarifikasi_nego').pphNego) }}</td>
-                </tr>
-                <tr class="bg-emerald-100 font-extrabold text-emerald-950 text-sm">
-                  <td colspan="5" class="p-2.5 text-right border border-slate-300">Nilai Bersih Disepakati:</td>
-                  <td class="p-2.5 text-right border border-slate-300">{{ formatRupiah(getEffectiveDocTotals('klarifikasi_nego').nettoNego) }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="p-2.5 bg-slate-50 rounded border border-slate-200 text-xs">
-              <p class="font-bold text-slate-800">Terbilang: <span class="italic text-slate-900">{{ formatTerbilang(getEffectiveDocTotals('klarifikasi_nego').nettoNego) }}</span></p>
-            </div>
-          </div>
-
-          <!-- KONTEN SPESIFIK: PERMINTAAN PENAWARAN (SURAT PESANAN) -->
-          <div v-else-if="pdfDocItem?.doc_key === 'permintaan_penawaran'" class="space-y-4 mb-4 text-xs">
-            <div class="flex justify-between items-start">
-              <div>
-                <p class="font-bold text-slate-800">Kepada Yth:</p>
-                <p class="font-bold text-slate-900">Direktur CV ALPHARO ARTHA JAYA</p>
-                <p class="text-slate-600">Ruko Cibubur Indah Blok B No. 6, Jakarta Timur</p>
-              </div>
-              <div class="text-right">
-                <p>Paket: <strong>{{ activeProject?.project_name }}</strong></p>
-                <p>Sumber Dana: <strong>{{ activeProject?.funding_source }}</strong></p>
-              </div>
-            </div>
-            <p class="text-slate-700 leading-relaxed">
-              {{ suratPesananForm.content || 'Sehubungan dengan hasil kesepakatan negosiasi harga, dengan ini kami mengajukan permintaan pembelian/pemesanan langsung barang dengan rincian berikut:' }}
-            </p>
-            <table class="w-full text-left border border-slate-300 border-collapse">
-              <thead class="bg-slate-100 text-slate-800 font-bold">
-                <tr>
-                  <th class="p-2 border border-slate-300 w-10 text-center">No</th>
-                  <th class="p-2 border border-slate-300">Uraian Barang</th>
-                  <th class="p-2 border border-slate-300 w-16 text-center">Vol</th>
-                  <th class="p-2 border border-slate-300 w-16 text-center">Satuan</th>
-                  <th class="p-2 border border-slate-300 text-right">Harga Sepakat</th>
-                  <th class="p-2 border border-slate-300 text-right">Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(it, idx) in getEffectiveItems('permintaan_penawaran')" :key="idx" class="border-b border-slate-200">
-                  <td class="p-2 border border-slate-300 text-center">{{ idx + 1 }}</td>
-                  <td class="p-2 border border-slate-300 font-medium">{{ it.item_name }}</td>
-                  <td class="p-2 border border-slate-300 text-center font-bold">{{ it.quantity }}</td>
-                  <td class="p-2 border border-slate-300 text-center">{{ it.unit }}</td>
-                  <td class="p-2 border border-slate-300 text-right">{{ formatNumber(it.nego_price) }}</td>
-                  <td class="p-2 border border-slate-300 text-right font-bold">{{ formatRupiah(it.subtotal_nego) }}</td>
-                </tr>
-                <tr class="bg-slate-50 font-bold border-t border-slate-300">
-                  <td colspan="5" class="p-2 text-right border border-slate-300">TOTAL PEMESANAN:</td>
-                  <td class="p-2 text-right border border-slate-300 font-extrabold text-emerald-900">{{ formatRupiah(getEffectiveDocTotals('permintaan_penawaran').subtotalNego) }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="p-2.5 bg-slate-50 rounded border border-slate-200 text-xs">
-              <p class="font-bold text-slate-800">Terbilang: <span class="italic text-slate-900">{{ formatTerbilang(getEffectiveDocTotals('permintaan_penawaran').subtotalNego) }}</span></p>
-            </div>
-          </div>
-
-          <!-- KONTEN SPESIFIK: SPK -->
-          <div v-else-if="pdfDocItem?.doc_key === 'spk'" class="space-y-4 mb-4 text-xs">
-            <div class="p-3 bg-slate-50 rounded border border-slate-200 grid grid-cols-2 gap-2 text-slate-700">
-              <div><strong>Paket Pekerjaan:</strong> {{ spkForm.paket_pekerjaan || activeProject?.project_name }}</div>
-              <div><strong>Satuan Pendidikan:</strong> {{ activeProject?.customer_name }}</div>
-              <div><strong>Instruksi:</strong> {{ spkForm.instruksi_penyedia || 'Pelaksanaan pekerjaan sesuai spesifikasi teknis dan rincian kuantitas.' }}</div>
-              <div><strong>Waktu:</strong> 04 Oktober 2026 s/d 18 Oktober 2026</div>
-            </div>
-            <table class="w-full text-left border border-slate-300 border-collapse">
-              <thead class="bg-slate-100 text-slate-800 font-bold">
-                <tr>
-                  <th class="p-2 border border-slate-300 w-10 text-center">No</th>
-                  <th class="p-2 border border-slate-300">Uraian Pekerjaan / Barang</th>
-                  <th class="p-2 border border-slate-300 w-16 text-center">Vol</th>
-                  <th class="p-2 border border-slate-300 w-16 text-center">Sat</th>
-                  <th class="p-2 border border-slate-300 text-right">Harga Satuan</th>
-                  <th class="p-2 border border-slate-300 text-right">Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(it, idx) in getEffectiveItems('spk')" :key="idx" class="border-b border-slate-200">
-                  <td class="p-2 border border-slate-300 text-center">{{ idx + 1 }}</td>
-                  <td class="p-2 border border-slate-300 font-medium">{{ it.item_name }}</td>
-                  <td class="p-2 border border-slate-300 text-center font-bold">{{ it.quantity }}</td>
-                  <td class="p-2 border border-slate-300 text-center">{{ it.unit }}</td>
-                  <td class="p-2 border border-slate-300 text-right">{{ formatNumber(it.price) }}</td>
-                  <td class="p-2 border border-slate-300 text-right font-bold">{{ formatRupiah(it.subtotal) }}</td>
-                </tr>
-                <tr class="bg-slate-50 font-bold border-t border-slate-300">
-                  <td colspan="5" class="p-2 text-right border border-slate-300">Jumlah Total:</td>
-                  <td class="p-2 text-right border border-slate-300 font-bold">{{ formatRupiah(getEffectiveDocTotals('spk').subtotal) }}</td>
-                </tr>
-                <tr class="bg-slate-50 font-bold">
-                  <td colspan="5" class="p-2 text-right border border-slate-300">PPN (11%):</td>
-                  <td class="p-2 text-right border border-slate-300 font-bold">{{ formatRupiah(getEffectiveDocTotals('spk').ppn) }}</td>
-                </tr>
-                <tr class="bg-slate-50 font-bold">
-                  <td colspan="5" class="p-2 text-right border border-slate-300 text-rose-700">PPh (1,5%):</td>
-                  <td class="p-2 text-right border border-slate-300 text-rose-700">- {{ formatRupiah(getEffectiveDocTotals('spk').pph) }}</td>
-                </tr>
-                <tr class="bg-emerald-100 font-extrabold text-emerald-950 text-sm">
-                  <td colspan="5" class="p-2.5 text-right border border-slate-300">Total Pembayaran (Netto):</td>
-                  <td class="p-2.5 text-right border border-slate-300">{{ formatRupiah(getEffectiveDocTotals('spk').netto) }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="p-2.5 bg-slate-50 rounded border border-slate-200 text-xs">
-              <p class="font-bold text-slate-800">Terbilang: <span class="italic text-slate-900">{{ formatTerbilang(getEffectiveDocTotals('spk').netto) }}</span></p>
-            </div>
-          </div>
-
-          <!-- KONTEN SPESIFIK: HASIL PEMERIKSAAN -->
-          <div v-else-if="pdfDocItem?.doc_key === 'hasil_pemeriksaan'" class="space-y-4 mb-4 text-xs">
-            <div class="p-3 bg-slate-50 rounded border border-slate-200 text-slate-700 leading-relaxed">
-              <p>Tim Pemeriksa Barang telah melakukan pemeriksaan kuantitas dan uji fungsi terhadap barang yang diserahkan oleh <strong>CV ALPHARO ARTHA JAYA</strong> untuk kegiatan <strong>{{ activeProject?.project_name }}</strong> di <strong>{{ activeProject?.customer_name }}</strong>.</p>
-              <p class="mt-1">Hasil Pemeriksaan: <strong>{{ hasilPemeriksaanForm.hasil_pemeriksaan || 'Baik dan Lengkap' }}</strong>.</p>
-              <p v-if="hasilPemeriksaanForm.catatan" class="text-slate-600 mt-0.5">Catatan: {{ hasilPemeriksaanForm.catatan }}</p>
-            </div>
-            <table class="w-full text-left border border-slate-300 border-collapse">
-              <thead class="bg-slate-100 text-slate-800 font-bold">
-                <tr>
-                  <th class="p-2 border border-slate-300 w-10 text-center">No</th>
-                  <th class="p-2 border border-slate-300">Komponen / Jenis Barang</th>
-                  <th class="p-2 border border-slate-300 w-20 text-center">Volume</th>
-                  <th class="p-2 border border-slate-300 w-20 text-center">Satuan</th>
-                  <th class="p-2 border border-slate-300 text-center">Hasil Uji Fungsi & Fisik</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(it, idx) in getEffectiveItems('hasil_pemeriksaan')" :key="idx" class="border-b border-slate-200">
-                  <td class="p-2 border border-slate-300 text-center">{{ idx + 1 }}</td>
-                  <td class="p-2 border border-slate-300 font-medium">{{ it.item_name }}</td>
-                  <td class="p-2 border border-slate-300 text-center font-bold">{{ it.quantity }}</td>
-                  <td class="p-2 border border-slate-300 text-center">{{ it.unit }}</td>
-                  <td class="p-2 border border-slate-300 text-center font-bold text-emerald-700">100% Kondisi Baru & Berfungsi Normal</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- KONTEN SPESIFIK: SURAT JALAN -->
-          <div v-else-if="pdfDocItem?.doc_key === 'surat_jalan'" class="space-y-4 mb-4 text-xs">
-            <div class="grid grid-cols-2 gap-4 p-3 bg-slate-50 border border-slate-200 rounded">
-              <div>
-                <p><strong>Alamat Tujuan:</strong> {{ activeProject?.customer_name }}</p>
-                <p><strong>Penerima:</strong> {{ activeProject?.pic_name || 'Kepala Sekolah' }}</p>
-              </div>
-              <div class="text-right">
-                <p><strong>Kendaraan:</strong> {{ suratJalanForm.kendaraan || 'Mobil Box Engkel' }}</p>
-                <p><strong>No. Polisi:</strong> {{ suratJalanForm.no_kendaraan || activeProject?.warehouse_data?.vehicle_plate || 'B 9812 AAJ' }}</p>
-                <p><strong>Pengemudi / Supir:</strong> {{ suratJalanForm.nama_supir || activeProject?.warehouse_data?.driver_name || 'Agus Santoso' }}</p>
-              </div>
-            </div>
-            <table class="w-full text-left border border-slate-300 border-collapse">
-              <thead class="bg-slate-100 text-slate-800 font-bold">
-                <tr>
-                  <th class="p-2 border border-slate-300 w-10 text-center">No</th>
-                  <th class="p-2 border border-slate-300">Deskripsi Barang Dikirim</th>
-                  <th class="p-2 border border-slate-300 w-24 text-center">Qty Kirim</th>
-                  <th class="p-2 border border-slate-300 w-28 text-center">Status Barang</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(it, idx) in getEffectiveItems('surat_jalan')" :key="idx" class="border-b border-slate-200">
-                  <td class="p-2 border border-slate-300 text-center">{{ idx + 1 }}</td>
-                  <td class="p-2 border border-slate-300 font-medium">{{ it.item_name }}</td>
-                  <td class="p-2 border border-slate-300 text-center font-bold text-emerald-800">{{ it.quantity }} {{ it.unit }}</td>
-                  <td class="p-2 border border-slate-300 text-center font-semibold text-slate-600">Kondisi Baru</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- KONTEN SPESIFIK: FAKTUR -->
-          <div v-else-if="pdfDocItem?.doc_key === 'faktur'" class="space-y-4 mb-4 text-xs">
-            <div class="flex justify-between items-start">
-              <div>
-                <p class="font-bold text-slate-800">Kepada Yth:</p>
-                <p class="font-extrabold text-slate-900 text-sm">{{ activeProject?.customer_name }}</p>
-                <p class="text-slate-600">Jl. Pengadilan No. 4, Kota Bogor</p>
-              </div>
-              <div class="text-right">
-                <p class="text-slate-500">Tanggal Faktur: <strong class="text-slate-900">{{ fakturForm.doc_date }}</strong></p>
-                <p class="text-slate-500">Jenis Harga: <strong class="text-slate-900">{{ fakturForm.jenis_harga }}</strong></p>
-              </div>
-            </div>
-
-            <!-- Tabel Barang Faktur -->
-            <table class="w-full text-left border border-slate-300 border-collapse">
-              <thead class="bg-slate-100 text-slate-800 font-bold">
-                <tr>
-                  <th class="p-2 border border-slate-300 w-10 text-center">No</th>
-                  <th class="p-2 border border-slate-300">Komponen</th>
-                  <th class="p-2 border border-slate-300 w-16 text-center">Vol</th>
-                  <th class="p-2 border border-slate-300 w-16 text-center">Satuan</th>
-                  <th class="p-2 border border-slate-300 text-right">Harga Satuan</th>
-                  <th class="p-2 border border-slate-300 text-right">Netto</th>
-                  <th class="p-2 border border-slate-300 text-right">PPN (11%)</th>
-                  <th class="p-2 border border-slate-300 text-right">Bruto</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(it, idx) in getEffectiveItems('faktur')" :key="idx" class="border-b border-slate-200">
-                  <td class="p-2 border border-slate-300 text-center">{{ idx + 1 }}</td>
-                  <td class="p-2 border border-slate-300 font-medium">{{ it.item_name }}</td>
-                  <td class="p-2 border border-slate-300 text-center font-bold">{{ it.quantity }}</td>
-                  <td class="p-2 border border-slate-300 text-center">{{ it.unit }}</td>
-                  <td class="p-2 border border-slate-300 text-right">{{ formatNumber(it.price) }}</td>
-                  <td class="p-2 border border-slate-300 text-right font-bold">{{ formatRupiah(it.subtotal) }}</td>
-                  <td class="p-2 border border-slate-300 text-right">{{ formatRupiah(Math.round(it.subtotal * 0.11)) }}</td>
-                  <td class="p-2 border border-slate-300 text-right font-bold">{{ formatRupiah(Math.round(it.subtotal * 1.11)) }}</td>
-                </tr>
-                <tr class="bg-slate-50 font-bold border-t border-slate-300">
-                  <td colspan="5" class="p-2 text-right border border-slate-300">TOTAL:</td>
-                  <td class="p-2 text-right border border-slate-300 font-bold">{{ formatRupiah(fakturForm.subtotal || getEffectiveDocTotals('faktur').subtotal) }}</td>
-                  <td class="p-2 text-right border border-slate-300 font-bold">{{ formatRupiah(fakturForm.ppn || getEffectiveDocTotals('faktur').ppn) }}</td>
-                  <td class="p-2 text-right border border-slate-300 font-extrabold text-slate-900">{{ formatRupiah(fakturForm.total_harga || getEffectiveDocTotals('faktur').total) }}</td>
-                </tr>
-                <tr class="bg-slate-50 font-bold">
-                  <td colspan="7" class="p-2 text-right border border-slate-300 text-rose-700">PPh (1,50 %):</td>
-                  <td class="p-2 text-right border border-slate-300 text-rose-700">- {{ formatRupiah(fakturForm.pph || getEffectiveDocTotals('faktur').pph) }}</td>
-                </tr>
-                <tr class="bg-emerald-100 font-extrabold text-emerald-950 text-sm">
-                  <td colspan="7" class="p-2.5 text-right border border-slate-300">Nilai Bersih Setelah PPh:</td>
-                  <td class="p-2.5 text-right border border-slate-300">{{ formatRupiah(fakturForm.nilai_setelah_pph || getEffectiveDocTotals('faktur').netto) }}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div class="p-3 bg-slate-50 rounded border border-slate-200">
-              <p class="font-bold text-slate-800">Terbilang : <em>{{ formatTerbilang(fakturForm.nilai_setelah_pph || getEffectiveDocTotals('faktur').netto) }}</em></p>
-              <div class="mt-2 text-[11px] text-slate-600">
-                <p>Pembayaran dapat ditransfer melalui rekening:</p>
-                <p class="font-semibold text-slate-800">Bank BCA JAKARTA | No. Rek: 52323628813 | A.n: CV ALPHARO ARTHA JAYA</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- KONTEN SPESIFIK: KUITANSI -->
-          <div v-else-if="pdfDocItem?.doc_key === 'kuitansi'" class="space-y-4 mb-4 p-5 border-2 border-slate-400 rounded-lg bg-emerald-50/20 text-xs">
-            <div class="grid grid-cols-4 gap-3">
-              <span class="font-bold text-slate-600">Sudah Terima Dari:</span>
-              <span class="col-span-3 font-extrabold text-slate-900 text-sm">{{ activeProject?.customer_name }}</span>
-              <span class="font-bold text-slate-600">Banyaknya Uang:</span>
-              <span class="col-span-3 font-serif italic font-bold text-emerald-950 text-sm"># {{ formatTerbilang(kuitansiForm.jumlah ? Number(String(kuitansiForm.jumlah).replace(/\./g, '')) : getEffectiveDocTotals('kuitansi').nettoNego) }} #</span>
-              <span class="font-bold text-slate-600">Untuk Pembayaran:</span>
-              <span class="col-span-3 text-slate-900 font-medium">Pembayaran {{ activeProject?.project_name }} ({{ activeProject?.customer_name }}) sesuai Faktur Nomor {{ fakturForm?.doc_number || 'IV20261006143815' }}</span>
-            </div>
-
-            <div class="pt-4 border-t border-slate-300 flex items-center justify-between">
-              <div class="px-5 py-2.5 bg-emerald-200/80 border-2 border-emerald-400 rounded-lg font-extrabold text-lg text-emerald-950 font-mono">
-                Rp. {{ formatNumber(kuitansiForm.jumlah ? Number(String(kuitansiForm.jumlah).replace(/\./g, '')) : getEffectiveDocTotals('kuitansi').nettoNego) }},-
-              </div>
-              <span class="text-xs text-slate-500 font-semibold">Status: LUNAS ({{ kuitansiForm.metode || 'Tunai/Transfer' }})</span>
-            </div>
-          </div>
-
-          <!-- KONTEN SPESIFIK: BUKTI FOTO -->
-          <div v-else-if="pdfDocItem?.doc_key === 'bukti_foto'" class="space-y-4 mb-4 text-xs">
-            <p class="font-bold text-slate-800">
-              Pekerjaan: {{ activeProject?.project_name }} ({{ activeProject?.customer_name }}) — Tahap {{ buktiFotoForm?.tahap }}
-            </p>
-            <div class="grid grid-cols-3 gap-4">
-              <div v-for="photo in buktiFotoForm.photos" :key="photo.id" class="border border-slate-300 rounded p-2 text-center bg-slate-50">
-                <div class="h-32 bg-slate-200 rounded flex items-center justify-center mb-2 border border-dashed border-slate-300">
-                  <Camera class="w-8 h-8 text-slate-400" />
-                </div>
-                <p class="font-bold text-[11px] text-slate-900">{{ photo.title }}</p>
-                <p class="text-[10px] text-slate-600 mt-1 leading-tight">{{ photo.desc }}</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- KONTEN UMUM: BAST SEKOLAH, BAST COMPANY, DLL -->
-          <div v-else class="mb-4 text-xs">
-            <div v-if="pdfDocItem?.doc_key === 'bast_sekolah' || pdfDocItem?.doc_key === 'bast_company'" class="mb-3 text-slate-700 leading-relaxed">
-              Berdasarkan hasil pemeriksaan fisik pekerjaan, bersama ini Pihak Penyedia menyerahkan hasil pekerjaan pengadaan kepada Pihak Sekolah/Instansi dalam kondisi 100% lengkap, baru, dan berfungsi baik.
-            </div>
-
-            <table class="w-full text-left border border-slate-300 border-collapse">
-              <thead class="bg-emerald-900 text-white font-semibold">
-                <tr>
-                  <th class="p-2 border border-slate-300 w-10 text-center">No</th>
-                  <th class="p-2 border border-slate-300">Rincian Barang / Pekerjaan</th>
-                  <th class="p-2 border border-slate-300 w-16 text-center">Vol</th>
-                  <th class="p-2 border border-slate-300 w-16 text-center">Satuan</th>
-                  <th class="p-2 border border-slate-300 text-right">Harga Satuan</th>
-                  <th class="p-2 border border-slate-300 text-right">Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(it, idx) in getEffectiveItems(pdfDocItem?.doc_key)" :key="idx" class="border-b border-slate-200">
-                  <td class="p-2 border border-slate-300 text-center">{{ idx + 1 }}</td>
-                  <td class="p-2 border border-slate-300 font-medium">{{ it.item_name }}</td>
-                  <td class="p-2 border border-slate-300 text-center font-bold">{{ it.quantity }}</td>
-                  <td class="p-2 border border-slate-300 text-center">{{ it.unit }}</td>
-                  <td class="p-2 border border-slate-300 text-right">{{ formatNumber(it.price) }}</td>
-                  <td class="p-2 border border-slate-300 text-right font-bold">{{ formatRupiah(it.subtotal) }}</td>
-                </tr>
-                <tr class="bg-slate-50 font-bold border-t border-slate-300">
-                  <td colspan="5" class="p-2 text-right border border-slate-300">Jumlah:</td>
-                  <td class="p-2 text-right border border-slate-300">{{ formatRupiah(getEffectiveDocTotals(pdfDocItem?.doc_key).subtotal) }}</td>
-                </tr>
-                <tr class="bg-slate-50 font-bold">
-                  <td colspan="5" class="p-2 text-right border border-slate-300">PPN (11%):</td>
-                  <td class="p-2 text-right border border-slate-300">{{ formatRupiah(getEffectiveDocTotals(pdfDocItem?.doc_key).ppn) }}</td>
-                </tr>
-                <tr class="bg-emerald-100 font-extrabold text-emerald-950">
-                  <td colspan="5" class="p-2 text-right border border-slate-300">TOTAL:</td>
-                  <td class="p-2 text-right border border-slate-300">{{ formatRupiah(getEffectiveDocTotals(pdfDocItem?.doc_key).total) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- TANDA TANGAN DUA PIHAK -->
-          <div class="grid grid-cols-2 gap-8 text-center mt-6 pt-4 border-t border-slate-200 text-xs">
-            <div>
-              <p class="font-medium text-slate-700">Pihak Pertama (Customer)</p>
-              <p class="font-bold text-slate-800">{{ activeProject?.customer_name }}</p>
-              <div class="h-16"></div>
-              <p class="font-bold underline text-slate-900">{{ activeProject?.pic_name || 'Endang, M.Pd.' }}</p>
-              <p class="text-[11px] text-slate-500">{{ activeProject?.pic_title || 'Kepala Sekolah' }} NIP. {{ activeProject?.pic_nip || '00001' }}</p>
-            </div>
-            <div>
-              <p class="font-medium text-slate-700">Pihak Kedua (Penyedia)</p>
-              <p class="font-bold text-slate-800">CV ALPHARO ARTHA JAYA</p>
-              <div class="h-16"></div>
-              <p class="font-bold underline text-slate-900">Franklin Janwar</p>
-              <p class="text-[11px] text-slate-500">Direktur</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <!-- Canonical server PDF preview: same saved data as the Word document. -->
+    <Modal v-model="showPdfModal" :title="`Pratinjau PDF: ${pdfDocItem?.doc_name || 'Dokumen SPJ'}`" size="xl">
+      <p v-if="isPdfLoading" role="status" class="py-12 text-center text-sm text-slate-500">Menyiapkan PDF dari data dokumen...</p>
+      <iframe v-else-if="pdfPreviewUrl" ref="pdfPreviewFrame" :src="pdfPreviewUrl" :title="`PDF ${pdfDocItem?.doc_name || 'Dokumen SPJ'}`" class="h-[65vh] w-full rounded-lg border border-slate-200"></iframe>
       <template #footer>
-        <button
-          type="button"
-          class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
-          @click="showPdfModal = false"
-        >
-          Tutup
-        </button>
-        <button
-          type="button"
-          class="px-4 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer"
-          @click="printDocument"
-        >
-          <Printer class="w-4 h-4" />
-          <span>Cetak Dokumen Ini</span>
-        </button>
+        <button type="button" class="rounded-lg px-4 py-2 text-xs text-slate-600 hover:bg-slate-100" @click="showPdfModal = false">Tutup</button>
+        <button type="button" :disabled="isPdfLoading || !pdfPreviewUrl" class="rounded-lg bg-alpharo-600 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50" @click="downloadWithFeedback(pdfDocItem.doc_key, 'pdf')">Unduh PDF</button>
+        <button type="button" :disabled="isPdfLoading || !pdfPreviewUrl" class="rounded-lg border border-slate-300 px-4 py-2 text-xs text-slate-700 disabled:opacity-50" @click="printDocument">Cetak</button>
       </template>
     </Modal>
 
     <!-- UPLOAD MODAL UNTUK BERKAS EKSTERNAL -->
     <Modal
-      :show="showUploadModal"
+      v-model="showUploadModal"
       :title="`Unggah Berkas Eksternal: ${uploadDocItem?.doc_name || ''}`"
-      max-width="md"
-      @close="showUploadModal = false"
+      size="md"
     >
       <div class="space-y-4 text-xs">
         <div>
@@ -2951,7 +2209,7 @@
       </div>
       <template #footer>
         <button type="button" class="px-3 py-1.5 text-xs text-slate-600" @click="showUploadModal = false">Batal</button>
-        <button type="button" :disabled="!selectedUploadFile || isUploading" class="px-4 py-1.5 text-xs bg-purple-600 text-white font-bold rounded-lg" @click="submitUploadExternal">
+        <button type="button" :disabled="!selectedUploadFile || isUploading" class="px-4 py-1.5 text-xs bg-alpharo-600 text-white font-bold rounded-lg" @click="submitUploadExternal">
           {{ isUploading ? 'Mengunggah...' : 'Unggah' }}
         </button>
       </template>
@@ -2960,12 +2218,41 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, shallowRef } from 'vue';
+import { onBeforeUnmount, ref, computed, onMounted, shallowRef, watch } from 'vue';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import Modal from '../../components/common/Modal.vue';
 import { useToast } from '../../services/toast';
 import spjService from '../../services/spjService';
 import { store, storeActions } from '../../stores/mockData';
+import { customerProfile, findProjectCustomer, expandSchoolName } from '../../services/customerProfile';
+
+const letterheadFields = [
+  { key: 'orgFullName', label: 'Nama Resmi Sekolah / Instansi', placeholder: 'Contoh: SEKOLAH MENENGAH ATAS NEGERI 2 BOGOR' },
+  { key: 'province', label: 'Provinsi' },
+  { key: 'governmentName', label: 'Nama Pemerintah / Yayasan', placeholder: 'Otomatis dari provinsi jika belum diisi' },
+  { key: 'educationOffice', label: 'Dinas / Unit Organisasi', placeholder: 'DINAS PENDIDIKAN' },
+  { key: 'letterheadAddress', label: 'Alamat Kop Surat' },
+  { key: 'orgPhone', label: 'Telepon Instansi' },
+  { key: 'fax', label: 'Faksimile' },
+  { key: 'website', label: 'Laman / Website' },
+  { key: 'email', label: 'Surel / Email' },
+  { key: 'postalCode', label: 'Kode Pos' },
+];
+
+function projectWithLetterhead(project) {
+  const profile = customerProfile(project.metadata?.customer_profile || project.customer_profile || {});
+  profile.name ||= project.customer_name || '';
+  profile.orgFullName = expandSchoolName(profile.orgFullName || project.customer_name || '');
+  return { ...project, metadata: { ...project.metadata, customer_profile: profile } };
+}
+
+function changeProjectCustomer() {
+  const client = findProjectCustomer(projectForm.value, store.clients);
+  projectForm.value.customer_code = client?.code || '';
+  const prof = customerProfile(client || { name: projectForm.value.customer_name, orgFullName: projectForm.value.customer_name });
+  prof.orgFullName = expandSchoolName(prof.orgFullName || projectForm.value.customer_name || '');
+  projectForm.value.metadata.customer_profile = prof;
+}
 
 // Lucide Icons
 import {
@@ -3024,6 +2311,11 @@ const showUploadModal = ref(false);
 const activeDocItem = ref(null);
 const uploadDocItem = ref(null);
 const pdfDocItem = ref(null);
+const isPdfLoading = ref(false);
+const pdfPreviewUrl = ref('');
+const pdfPreviewFrame = ref(null);
+watch(showPdfModal, open => { if (!open) releasePdfPreview(); });
+onBeforeUnmount(releasePdfPreview);
 const selectedUploadFile = ref(null);
 const uploadMeta = ref({ doc_number: '', doc_date: '', notes: '' });
 
@@ -3089,7 +2381,7 @@ const buktiFotoForm = ref({
   doc_number: 'DOK-001/AAJ/X/2026',
   doc_date: '01/10/2026',
   project_name: 'pengadaan komputer sekolah',
-  customer_name: 'SMA NEGRI 2 BOGOR',
+  customer_name: 'SEKOLAH MENENGAH ATAS NEGERI 2 BOGOR',
   lokasi: 'Lab Komputer SMAN 2 BOGOR',
   tahap: 'Serah Terima',
   photos: [
@@ -3163,6 +2455,11 @@ async function loadProjectData(projectId) {
   try {
     const res = await spjService.getDocuments(projectId);
     if (res.success) {
+      const client = findProjectCustomer(res.project, store.clients);
+      if (client && !Object.hasOwn(res.project.metadata || {}, 'customer_profile') && !Object.keys(res.project.customer_profile || {}).length) {
+        const saved = await spjService.updateProject(projectId, { customer_code: client.code, metadata: { customer_profile: customerProfile(client) } });
+        res.project = saved.data;
+      }
       activeProject.value = res.project;
       documentItems.value = (res.data || []).map((d) => ({
         ...d,
@@ -3208,7 +2505,7 @@ function initDocumentForms() {
   const p = activeProject.value;
   if (!p) return;
 
-  projectForm.value = { ...p };
+  projectForm.value = projectWithLetterhead(p);
 
   // Cover Project
   const cpDoc = getDocumentByKey('cover_project');
@@ -3282,7 +2579,7 @@ function initDocumentForms() {
       : normalizeItems(p.items || []).map(it => ({
           ...it,
           original_price: it.price,
-          nego_price: it.price_nego || Math.round(it.price * 0.95),
+          nego_price: it.price_nego ?? it.price,
         })),
   };
 
@@ -3421,7 +2718,7 @@ function goBackToList() {
 function openProjectDataView() {
   const p = activeProject.value || {};
   projectForm.value = {
-    ...JSON.parse(JSON.stringify(p)),
+    ...projectWithLetterhead(JSON.parse(JSON.stringify(p))),
     warehouse_data: p.warehouse_data ? { ...p.warehouse_data } : { driver_name: '', vehicle_plate: '' },
     finance_data: p.finance_data ? { ...p.finance_data } : {},
     items: Array.isArray(p.items) && p.items.length > 0
@@ -3529,6 +2826,11 @@ function openDocumentForm(item) {
       break;
     case 'bast_sekolah':
     case 'bast_company':
+      bastForm.value = {
+        doc_number: item.doc_number || item.form_data?.doc_number || '',
+        doc_date: item.doc_date || item.form_data?.doc_date || '',
+        content: item.form_data?.content ?? item.form_data?.isi_bast ?? `Pekerjaan ${activeProject.value?.project_name || ''} diserahterimakan dari penyedia kepada ${activeProject.value?.customer_name || 'penerima'} sesuai hasil pemeriksaan.`,
+      };
       currentView.value = 'edit_bast';
       break;
     case 'surat_jalan':
@@ -3584,22 +2886,24 @@ async function saveCoverProjectDocument(notify = true) {
     }
   } catch (err) {
     console.error(err);
+    if (!notify) throw err;
     if (notify) toast.error('Gagal menyimpan dokumen Cover Project.');
   }
 }
 
 async function savePerencanaanDocument(notify = true) {
+  const form = JSON.parse(JSON.stringify(perencanaanForm.value));
   try {
     const res = await spjService.updateDocument(selectedProjectId.value, 'perencanaan', {
-      doc_number: perencanaanForm.value.doc_number,
-      doc_date: perencanaanForm.value.doc_date,
-      form_data: perencanaanForm.value,
+      doc_number: form.doc_number,
+      doc_date: form.doc_date,
+      form_data: form,
     });
     // Sinkronkan rincian barang & anggaran yang diedit ke master proyek
     await spjService.updateProject(selectedProjectId.value, {
-      items: perencanaanForm.value.items,
-      activity_name: perencanaanForm.value.activity_name,
-      funding_source: perencanaanForm.value.funding_source,
+      items: form.items,
+      activity_name: form.activity_name,
+      funding_source: form.funding_source,
     });
     if (res.success && notify) {
       toast.success('Dokumen Perencanaan & rincian barang berhasil disimpan.');
@@ -3608,6 +2912,7 @@ async function savePerencanaanDocument(notify = true) {
     }
   } catch (err) {
     console.error(err);
+    if (!notify) throw err;
     if (notify) toast.error('Gagal menyimpan dokumen Perencanaan.');
   }
 }
@@ -3619,9 +2924,6 @@ async function saveSpphDocument(notify = true) {
       doc_date: spphForm.value.doc_date,
       form_data: spphForm.value,
     });
-    await spjService.updateProject(selectedProjectId.value, {
-      items: spphForm.value.items,
-    });
     if (res.success && notify) {
       toast.success('Dokumen SPPH berhasil disimpan.');
       currentView.value = 'list';
@@ -3629,13 +2931,17 @@ async function saveSpphDocument(notify = true) {
     }
   } catch (err) {
     console.error(err);
+    if (!notify) throw err;
     if (notify) toast.error('Gagal menyimpan dokumen SPPH.');
   }
 }
 
 async function saveProjectData() {
   try {
-    const res = await spjService.updateProject(selectedProjectId.value, projectForm.value);
+    if (projectForm.value.metadata?.customer_profile?.orgFullName) {
+      projectForm.value.metadata.customer_profile.orgFullName = expandSchoolName(projectForm.value.metadata.customer_profile.orgFullName);
+    }
+    const res = await spjService.updateProject(selectedProjectId.value, { ...projectForm.value, metadata: { customer_profile: projectForm.value.metadata.customer_profile } });
     if (res.success) {
       toast.success('Data proyek berhasil diperbarui.');
       currentView.value = 'list';
@@ -3645,6 +2951,26 @@ async function saveProjectData() {
     console.error(err);
     toast.error('Gagal menyimpan data proyek.');
   }
+}
+
+async function setLetterheadLogo(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  try {
+    if (!['image/jpeg', 'image/png'].includes(file.type) || file.size > 1024 * 1024) throw new Error('Gunakan logo JPG/PNG maksimal 1 MB.');
+    const url = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    const image = new Image();
+    image.src = url;
+    await image.decode();
+    if (image.naturalWidth * image.naturalHeight > 4000000) throw new Error('Resolusi logo maksimal 4 megapiksel.');
+    projectForm.value.metadata.customer_profile.logoDataUrl = url;
+  } catch (error) { toast.error(error.message || 'Logo gagal dibaca. Pilih ulang berkas.'); }
+  finally { event.target.value = ''; }
 }
 
 async function saveFakturDocument(notify = true) {
@@ -3666,6 +2992,7 @@ async function saveFakturDocument(notify = true) {
     }
   } catch (err) {
     console.error(err);
+    if (!notify) throw err;
     if (notify) toast.error('Gagal menyimpan dokumen Faktur.');
   }
 }
@@ -3690,6 +3017,7 @@ async function saveKuitansiDocument(notify = true) {
     }
   } catch (err) {
     console.error(err);
+    if (!notify) throw err;
     if (notify) toast.error('Gagal menyimpan dokumen Kuitansi.');
   }
 }
@@ -3708,22 +3036,43 @@ async function saveBuktiFotoDocument(notify = true) {
     }
   } catch (err) {
     console.error(err);
+    if (!notify) throw err;
     if (notify) toast.error('Gagal menyimpan Lampiran Bukti Foto.');
   }
 }
 
+async function setDocumentationPhoto(event, photo) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  if (!['image/jpeg', 'image/png'].includes(file.type) || file.size > 3 * 1024 * 1024) {
+    toast.error('Gunakan foto JPG/PNG maksimal 3 MB.');
+    event.target.value = '';
+    return;
+  }
+  try {
+    photo.data_url = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  } catch { toast.error('Foto gagal dibaca. Pilih ulang berkas.'); }
+  finally { event.target.value = ''; }
+}
+
 async function saveHpsDocument(notify = true) {
+  const form = JSON.parse(JSON.stringify(hpsForm.value));
   try {
     const res = await spjService.updateDocument(selectedProjectId.value, 'hps', {
-      doc_number: hpsForm.value.doc_number,
-      doc_date: hpsForm.value.doc_date,
-      form_data: hpsForm.value,
+      doc_number: form.doc_number,
+      doc_date: form.doc_date,
+      form_data: form,
     });
     // Sinkronkan rincian barang & estimasi harga ke master proyek
     await spjService.updateProject(selectedProjectId.value, {
-      items: hpsForm.value.items,
-      activity_name: hpsForm.value.activity_name,
-      funding_source: hpsForm.value.funding_source,
+      items: form.items,
+      activity_name: form.activity_name,
+      funding_source: form.funding_source,
     });
     if (res.success && notify) {
       toast.success('Dokumen HPS & rincian harga berhasil disimpan.');
@@ -3732,6 +3081,7 @@ async function saveHpsDocument(notify = true) {
     }
   } catch (err) {
     console.error(err);
+    if (!notify) throw err;
     if (notify) toast.error('Gagal menyimpan dokumen HPS.');
   }
 }
@@ -3750,6 +3100,7 @@ async function savePenawaranDocument(notify = true) {
     }
   } catch (err) {
     console.error(err);
+    if (!notify) throw err;
     if (notify) toast.error('Gagal menyimpan dokumen Penawaran.');
   }
 }
@@ -3768,6 +3119,7 @@ async function saveNegoDocument(notify = true) {
     }
   } catch (err) {
     console.error(err);
+    if (!notify) throw err;
     if (notify) toast.error('Gagal menyimpan dokumen Klarifikasi/Nego.');
   }
 }
@@ -3786,6 +3138,7 @@ async function saveSuratPesananDocument(notify = true) {
     }
   } catch (err) {
     console.error(err);
+    if (!notify) throw err;
     if (notify) toast.error('Gagal menyimpan Surat Pesanan.');
   }
 }
@@ -3804,6 +3157,7 @@ async function saveSpkDocument(notify = true) {
     }
   } catch (err) {
     console.error(err);
+    if (!notify) throw err;
     if (notify) toast.error('Gagal menyimpan dokumen SPK.');
   }
 }
@@ -3822,13 +3176,15 @@ async function saveHasilPemeriksaanDocument(notify = true) {
     }
   } catch (err) {
     console.error(err);
+    if (!notify) throw err;
     if (notify) toast.error('Gagal menyimpan Hasil Pemeriksaan.');
   }
 }
 
 async function saveBastDocument(notify = true) {
   try {
-    const res = await spjService.updateDocument(selectedProjectId.value, 'bast_sekolah', {
+    const docKey = activeDocItem.value?.doc_key === 'bast_company' ? 'bast_company' : 'bast_sekolah';
+    const res = await spjService.updateDocument(selectedProjectId.value, docKey, {
       doc_number: bastForm.value.doc_number,
       doc_date: bastForm.value.doc_date,
       form_data: bastForm.value,
@@ -3840,22 +3196,25 @@ async function saveBastDocument(notify = true) {
     }
   } catch (err) {
     console.error(err);
+    if (!notify) throw err;
     if (notify) toast.error('Gagal menyimpan dokumen BAST.');
   }
 }
 
 async function saveSuratJalanDocument(notify = true) {
+  const form = JSON.parse(JSON.stringify(suratJalanForm.value));
   try {
     const res = await spjService.updateDocument(selectedProjectId.value, 'surat_jalan', {
-      doc_number: suratJalanForm.value.doc_number,
-      doc_date: suratJalanForm.value.doc_date,
-      form_data: suratJalanForm.value,
+      doc_number: form.doc_number,
+      doc_date: form.doc_date,
+      form_data: form,
     });
     // Sync warehouse driver and vehicle plate to project
     await spjService.updateProject(selectedProjectId.value, {
       warehouse_data: {
-        driver_name: suratJalanForm.value.nama_supir,
-        vehicle_plate: suratJalanForm.value.no_kendaraan,
+        ...activeProject.value?.warehouse_data,
+        driver_name: form.nama_supir,
+        vehicle_plate: form.no_kendaraan,
       },
     });
     if (res.success && notify) {
@@ -3865,56 +3224,47 @@ async function saveSuratJalanDocument(notify = true) {
     }
   } catch (err) {
     console.error(err);
+    if (!notify) throw err;
     if (notify) toast.error('Gagal menyimpan dokumen Surat Jalan.');
   }
 }
 
 // Integrated Save and Generate Handler
 async function handleSaveAndGenerate(docKey, format) {
-  if (docKey === 'cover_project') await saveCoverProjectDocument(false);
-  else if (docKey === 'perencanaan') await savePerencanaanDocument(false);
-  else if (docKey === 'spph') await saveSpphDocument(false);
-  else if (docKey === 'faktur') await saveFakturDocument(false);
-  else if (docKey === 'kuitansi') await saveKuitansiDocument(false);
-  else if (docKey === 'bukti_foto') await saveBuktiFotoDocument(false);
-  else if (docKey === 'hps') await saveHpsDocument(false);
-  else if (docKey === 'penawaran') await savePenawaranDocument(false);
-  else if (docKey === 'klarifikasi_nego') await saveNegoDocument(false);
-  else if (docKey === 'permintaan_penawaran') await saveSuratPesananDocument(false);
-  else if (docKey === 'spk') await saveSpkDocument(false);
-  else if (docKey === 'hasil_pemeriksaan') await saveHasilPemeriksaanDocument(false);
-  else if (docKey === 'bast_sekolah' || docKey === 'bast_company') await saveBastDocument(false);
-  else if (docKey === 'surat_jalan') await saveSuratJalanDocument(false);
-
-  const docItem = getDocumentByKey(docKey);
-  const formDataToSend = getFormDataForDoc(docKey);
-
-  if (format === 'word') {
-    if (docItem) await handleSingleGenerate(docItem, formDataToSend);
-  } else if (format === 'pdf') {
-    if (docItem) openPdfPreview(docItem);
-  }
+  if (isGeneratingKey.value) return;
+  const projectId = selectedProjectId.value;
+  const formData = JSON.parse(JSON.stringify(getFormDataForDoc(docKey)));
+  isGeneratingKey.value = docKey;
+  try {
+    const saveHandlers = {
+      cover_project: saveCoverProjectDocument, perencanaan: savePerencanaanDocument,
+      spph: saveSpphDocument, faktur: saveFakturDocument, kuitansi: saveKuitansiDocument,
+      bukti_foto: saveBuktiFotoDocument, hps: saveHpsDocument, penawaran: savePenawaranDocument,
+      klarifikasi_nego: saveNegoDocument, permintaan_penawaran: saveSuratPesananDocument,
+      spk: saveSpkDocument, hasil_pemeriksaan: saveHasilPemeriksaanDocument,
+      bast_sekolah: saveBastDocument, bast_company: saveBastDocument, surat_jalan: saveSuratJalanDocument,
+    };
+    await saveHandlers[docKey]?.(false);
+    const fileFormat = format === 'pdf' ? 'pdf' : 'docx';
+    await spjService.generateDocument(projectId, docKey, formData, fileFormat);
+    await downloadActiveDocFile(docKey, fileFormat, projectId);
+    await loadProjectData(projectId);
+    toast.success(`Dokumen ${fileFormat === 'pdf' ? 'PDF' : 'Word'} berhasil dibuat dari data tersimpan.`);
+  } catch (error) { toast.error(await documentError(error)); }
+  finally { isGeneratingKey.value = null; }
 }
 
-// Single & Bulk Generation
 async function handleSingleGenerate(item, overrideData = null) {
+  if (isGeneratingKey.value) return;
+  const projectId = selectedProjectId.value;
   isGeneratingKey.value = item.doc_key;
   try {
-    const dataToSend = overrideData || getFormDataForDoc(item.doc_key) || {};
-    const res = await spjService.generateDocument(selectedProjectId.value, item.doc_key, dataToSend);
-    if (res.success) {
-      toast.success(`Dokumen ${item.doc_name} berhasil digenerate!`);
-      await loadProjectData(selectedProjectId.value);
-
-      // Unduh file Word hasil
-      downloadActiveDocFile(item.doc_key);
-    }
-  } catch (err) {
-    console.error(err);
-    toast.error(`Gagal menghasilkan dokumen ${item.doc_name}.`);
-  } finally {
-    isGeneratingKey.value = null;
-  }
+    await spjService.generateDocument(projectId, item.doc_key, overrideData || item.form_data || {});
+    await downloadActiveDocFile(item.doc_key, 'docx', projectId);
+    await loadProjectData(projectId);
+    toast.success(`Dokumen ${item.doc_name} berhasil dibuat.`);
+  } catch (error) { toast.error(await documentError(error)); }
+  finally { isGeneratingKey.value = null; }
 }
 
 async function handleBulkGenerate() {
@@ -3924,22 +3274,25 @@ async function handleBulkGenerate() {
   try {
     const res = await spjService.bulkGenerate(selectedProjectId.value, selectedDocKeys.value);
     if (res.success) {
-      toast.success(res.message);
+      const generatedCount = res.data?.success_count || 0;
+      if (res.data?.failed_count) toast.error(res.message);
+      else toast.success(res.message);
       await loadProjectData(selectedProjectId.value);
+      if (!generatedCount) return;
 
       // PROBIS TO-BE Tahap 11: Dokumen SPJ di-generate
       const pName = activeProject.value?.title || activeProject.value?.name || selectedProjectId.value;
       storeActions.addNotification(
         'WAREHOUSE',
         'Dokumen SPJ Siap Diunduh / Dikirim',
-        `Administrasi telah men-generate ${selectedDocKeys.value.length} dokumen SPJ untuk proyek "${pName}". Persiapkan barang & armada pengiriman.`,
+        `Administrasi telah men-generate ${generatedCount} dokumen SPJ untuk proyek "${pName}". Persiapkan barang & armada pengiriman.`,
         'document',
         '/warehouse/shipments'
       );
       storeActions.addNotification(
         'MARKETING',
         'Penyusunan SPJ Berjalan',
-        `Dokumen SPJ proyek "${pName}" (${selectedDocKeys.value.length} dokumen) telah di-generate oleh Administrasi.`,
+        `Dokumen SPJ proyek "${pName}" (${generatedCount} dokumen) telah di-generate oleh Administrasi.`,
         'document',
         '/marketing/orders'
       );
@@ -3972,9 +3325,31 @@ function notifyWarehouseSpjReady() {
   toast.success('Pemberitahuan telah dikirimkan ke Gudang untuk persiapan pengiriman barang & SPJ.');
 }
 
-function downloadActiveDocFile(docKey) {
-  const url = spjService.getDownloadUrl(selectedProjectId.value, docKey);
-  window.open(url, '_blank');
+async function documentError(error) {
+  let data = error.response?.data;
+  if (data instanceof Blob) {
+    try { data = JSON.parse(await data.text()); } catch { data = null; }
+  }
+  return data?.errors ? Object.values(data.errors).flat().join(' ') : data?.message || error.message || 'Dokumen gagal dibuat. Periksa data dan coba lagi.';
+}
+
+async function downloadActiveDocFile(docKey, format = 'docx', projectId = selectedProjectId.value) {
+  const response = await spjService.downloadDocument(projectId, docKey, format);
+  const disposition = response.headers['content-disposition'] || '';
+  const match = disposition.match(/filename="?([^";]+)"?/i);
+  const url = URL.createObjectURL(response.data);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = match ? match[1] : `${docKey}_${projectId}.${format}`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function downloadWithFeedback(docKey, format) {
+  try { await downloadActiveDocFile(docKey, format); }
+  catch (error) { toast.error(await documentError(error)); }
 }
 
 // Upload External
@@ -4015,118 +3390,29 @@ async function submitUploadExternal() {
 }
 
 // PDF Print Preview
-function openPdfPreview(item) {
-  if (!item) return;
+async function openPdfPreview(item) {
+  if (!item || isPdfLoading.value) return;
   pdfDocItem.value = item;
   showPdfModal.value = true;
+  isPdfLoading.value = true;
+  releasePdfPreview();
+  try {
+    const response = await spjService.downloadDocument(selectedProjectId.value, item.doc_key, 'pdf');
+    if (showPdfModal.value) pdfPreviewUrl.value = URL.createObjectURL(response.data);
+  } catch (error) {
+    showPdfModal.value = false;
+    toast.error(await documentError(error));
+  } finally { isPdfLoading.value = false; }
+}
+
+function releasePdfPreview() {
+  if (pdfPreviewUrl.value) URL.revokeObjectURL(pdfPreviewUrl.value);
+  pdfPreviewUrl.value = '';
 }
 
 function printDocument() {
-  const printable = document.getElementById('printable-area');
-  if (!printable) {
-    window.print();
-    return;
-  }
-
-  // Buat iframe terisolasi agar cetak PDF / Printer sangat bersih, pas A4 portrait, tanpa terpotong modal/background
-  const existingFrame = document.getElementById('spj-print-frame');
-  if (existingFrame) existingFrame.remove();
-
-  const iframe = document.createElement('iframe');
-  iframe.id = 'spj-print-frame';
-  iframe.style.position = 'fixed';
-  iframe.style.right = '0';
-  iframe.style.bottom = '0';
-  iframe.style.width = '0';
-  iframe.style.height = '0';
-  iframe.style.border = '0';
-  document.body.appendChild(iframe);
-
-  const doc = iframe.contentWindow.document;
-  doc.open();
-  doc.write(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>${pdfDocItem.value?.doc_name || 'Dokumen SPJ'} - CV Alpharo Artha Jaya</title>
-        <style>
-          @page {
-            size: A4 portrait;
-            margin: 15mm 15mm 15mm 15mm;
-          }
-          * {
-            box-sizing: border-box;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          body {
-            font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
-            color: #0f172a;
-            margin: 0;
-            padding: 0;
-            font-size: 11px;
-            line-height: 1.45;
-            background: #ffffff;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 8px;
-            margin-bottom: 8px;
-          }
-          th, td {
-            border: 1px solid #64748b;
-            padding: 5px 8px;
-            font-size: 10.5px;
-          }
-          th {
-            background-color: #f1f5f9 !important;
-            font-weight: bold;
-          }
-          .text-center { text-align: center; }
-          .text-right { text-align: right; }
-          .font-bold { font-weight: bold; }
-          .font-extrabold { font-weight: 800; }
-          .uppercase { text-transform: uppercase; }
-          .underline { text-decoration: underline; }
-          .border-b-2 { border-bottom: 2px solid #0f172a; }
-          .border-t-2 { border-top: 2px solid #0f172a; }
-          .border-4 { border: 4px double #0f172a; }
-          .bg-emerald-100 { background-color: #d1fae5 !important; }
-          .bg-slate-50 { background-color: #f8fafc !important; }
-          .grid { display: grid; }
-          .grid-cols-2 { display: flex; justify-content: space-between; }
-          .grid-cols-3 { display: flex; justify-content: space-between; gap: 10px; }
-          .grid-cols-3 > div { flex: 1; }
-          .signatures {
-            margin-top: 30px;
-            display: flex;
-            justify-content: space-between;
-            page-break-inside: avoid;
-          }
-          .sig-box {
-            width: 45%;
-            text-align: center;
-          }
-          .sig-space {
-            height: 55px;
-          }
-        </style>
-      </head>
-      <body>
-        ${printable.innerHTML}
-      </body>
-    </html>
-  `);
-  doc.close();
-
-  iframe.contentWindow.focus();
-  setTimeout(() => {
-    iframe.contentWindow.print();
-    setTimeout(() => {
-      iframe.remove();
-    }, 1500);
-  }, 300);
+  try { pdfPreviewFrame.value?.contentWindow?.print(); }
+  catch { toast.info('Gunakan Unduh PDF untuk menyimpan atau mencetak dokumen.'); }
 }
 
 // Helpers
@@ -4138,29 +3424,25 @@ function calculateItemsTotal(items = []) {
 
 function formatMissingSummary(missing = []) {
   if (!missing || missing.length === 0) return 'Data Lengkap';
-  const roles = [...new Set(missing.map((m) => m.role))];
+  const roles = [...new Set(missing.map((m) => typeof m === 'string' ? m.split(':')[0] : m.role).filter(Boolean))];
   return `Butuh: ${roles.join(', ')}`;
 }
 
 function getMissingTooltip(missing = []) {
   if (!missing || missing.length === 0) return 'Semua data lengkap';
-  return missing.map((m) => `[${m.role}] ${m.label}`).join(' | ');
+  return missing.map((m) => typeof m === 'string' ? m : `[${m.role}] ${m.label}`).join(' | ');
 }
 
-function getStatusBadgeClass(status) {
+function getDocumentStatusClass(status) {
   switch (status) {
     case 'FINAL':
-      return 'bg-emerald-600 text-white shadow-2xs';
-    case 'DRAFT':
-      return 'bg-blue-100 text-blue-800 border border-blue-200';
+      return 'text-alpharo-700';
     case 'MENUNGGU_PERSETUJUAN':
-      return 'bg-amber-100 text-amber-800 border border-amber-200';
+      return 'text-amber-800';
     case 'PERLU_REVISI':
-      return 'bg-rose-100 text-rose-800 border border-rose-200';
-    case 'DOKUMEN_EKSTERNAL':
-      return 'bg-purple-100 text-purple-800 border border-purple-200';
+      return 'text-rose-700';
     default:
-      return 'bg-slate-100 text-slate-700 border border-slate-300';
+      return 'text-slate-600';
   }
 }
 
