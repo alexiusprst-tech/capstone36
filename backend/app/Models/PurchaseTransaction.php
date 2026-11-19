@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -56,6 +57,8 @@ class PurchaseTransaction extends Model
         'supplier_progress',
         'progress_version',
         'progress_history',
+        'supplier_id',
+        'pending_followup',
     ];
 
     /**
@@ -69,7 +72,30 @@ class PurchaseTransaction extends Model
         'subtotal' => 'decimal:2',
         'discount' => 'decimal:2',
         'total_price' => 'decimal:2',
+        'pending_followup' => 'boolean',
     ];
+
+    public function receipts(): HasMany
+    {
+        return $this->hasMany(PurchaseReceipt::class)->with('lines')->orderBy('id');
+    }
+
+    public function receiptSummary(): array
+    {
+        $lines = $this->receipts->flatMap(fn ($receipt) => $receipt->lines);
+
+        return collect($this->items ?? [])->values()->map(function ($item, $index) use ($lines) {
+            $received = $lines->where('line_index', $index);
+            $accepted = (int) $received->sum('accepted_qty');
+            $rejected = (int) $received->sum('rejected_qty');
+            $remaining = max(0, (int) $item['qty'] - $accepted);
+
+            return ['line_index' => $index, 'sku' => $item['sku'] ?? null, 'name' => $item['barang'] ?? $item['name'] ?? '',
+                'unit' => $item['unit'] ?? 'UNIT', 'expected_qty' => (int) $item['qty'],
+                'accepted_qty' => $accepted, 'rejected_qty' => $rejected, 'remaining_qty' => $remaining,
+                'accepted' => $accepted, 'rejected' => $rejected, 'remaining' => $remaining];
+        })->all();
+    }
 
     public function toArray(): array
     {
@@ -78,6 +104,7 @@ class PurchaseTransaction extends Model
         unset($data['supplier_progress']);
 
         return [...$data, ...$progress,
+            'receipts' => $this->receipts->toArray(), 'receipt_summary' => $this->receiptSummary(),
             'supplier_status' => $this->status === 'DITERIMA_GUDANG' ? 'Diterima Gudang (Lengkap & Sesuai)' : ($progress['supplier_status'] ?? 'Menunggu Konfirmasi'),
             'progress_persisted' => $this->supplier_progress !== null || $this->status === 'DITERIMA_GUDANG',
         ];

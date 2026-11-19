@@ -23,7 +23,7 @@ class SpjIntegratedTest extends TestCase
         $this->seed(DocumentTemplateSeeder::class);
         $this->seed(SpjProjectSeeder::class);
 
-        $this->user = User::factory()->create();
+        $this->user = User::factory()->create(['role' => 'ADMINISTRASI']);
         Sanctum::actingAs($this->user);
     }
 

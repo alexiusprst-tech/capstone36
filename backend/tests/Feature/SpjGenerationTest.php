@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Customer;
 use App\Models\Product;
 use App\Models\SpjDocument;
 use App\Models\SpjProject;
@@ -385,6 +386,7 @@ class SpjGenerationTest extends TestCase
     public function test_school_profile_is_persisted_from_order_and_visible_to_administration_without_browser_client_data(): void
     {
         Sanctum::actingAs(User::factory()->create(['role' => 'MARKETING']));
+        Customer::factory()->create(['id' => 22, 'code' => 'CS-B', 'name' => 'Sekolah B']);
         Product::create(['sku' => 'KOP-ITEM', 'name' => 'Gelas', 'category' => 'Peralatan', 'unit' => 'Buah', 'stock' => 10]);
         $details = ['projectId' => 'KOP-NEW', 'projectName' => 'Pengadaan Sekolah B', 'clientName' => 'Sekolah B', 'clientId' => 22,
             'customerProfile' => ['code' => 'CS-B', 'name' => 'Sekolah B', 'orgFullName' => 'SMA Negeri Contoh B', 'province' => 'JAWA TENGAH', 'letterheadAddress' => 'Jalan Sekolah B', 'orgPhone' => '024-123456']];
@@ -407,6 +409,7 @@ class SpjGenerationTest extends TestCase
         $this->putJson('/api/orders/ORD-KOP-NEW', $payload)->assertOk();
         $otherPayload = $payload;
         $otherPayload['version'] = 0;
+        $otherPayload['details']['clientId'] = Customer::factory()->create(['name' => 'Sekolah C', 'code' => 'CS-C'])->id;
         $otherPayload['details']['clientName'] = 'Sekolah C';
         $otherPayload['details']['customerProfile'] = ['code' => 'CS-C', 'name' => 'Sekolah C', 'orgFullName' => 'SMA Negeri Contoh C'];
         $this->putJson('/api/orders/ORD-KOP-OTHER', $otherPayload)->assertConflict();

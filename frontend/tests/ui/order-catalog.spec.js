@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { signIn } from './helpers/session';
+import { customerFixture } from './helpers/customer-fixtures';
 
 test('Marketing can identify legacy catalog lines and explicitly update items, units and quotation prices', async ({ page }) => {
   await signIn(page, 'MARKETING');
@@ -17,9 +18,10 @@ test('Marketing can identify legacy catalog lines and explicitly update items, u
   await page.route('**/api/**', route => {
     const request = route.request();
     const path = new URL(request.url()).pathname;
+    if (path === '/api/customers') return route.fulfill({ json: { data: [customerFixture] } });
     if (request.method() === 'PUT') {
       const payload = request.postDataJSON();
-      expect(payload.details.customerProfile).toMatchObject({ code: 'CS00001', orgFullName: 'SMA Negeri 9 Jakarta', province: 'DKI JAKARTA' });
+      expect(payload.details.customerProfile).toMatchObject({ code: 'CS00001', orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 9 JAKARTA', province: 'DKI JAKARTA' });
       expect(payload.items[0]).toMatchObject({ sku: 'A00000714', name: 'Granit 60 x 60', unit: 'M', qty: 1, price: 100000 });
       order = { ...order, ...payload.details, items: payload.items, version: 2,
         stockReadiness: { status: 'Siap Diajukan', items: [{ ...payload.items[0], catalogFound: true, required: 1, allocated: 1, shortage: 0 }] } };
@@ -31,7 +33,7 @@ test('Marketing can identify legacy catalog lines and explicitly update items, u
   await page.goto('/marketing/orders');
   const row = page.getByRole('row').filter({ hasText: order.orderNumber });
   await expect(row).toContainText('Perbarui barang katalog');
-  await row.getByRole('button', { name: 'Ajukan', exact: true }).click();
+  await row.getByRole('button', { name: /^Ajukan(?: ke| persetujuan|$)/i }).click();
   await expect(page.getByText('Barang belum terdaftar: Granit Tile Lama. Pilih ulang di Edit Order.', { exact: true })).toBeVisible();
   await row.getByRole('link', { name: 'Perbarui Barang', exact: true }).click();
   await expect(page.getByText('Barang ini belum terdaftar di katalog gudang. Pilih ulang barang yang sesuai dan periksa satuannya.', { exact: true })).toBeVisible();
@@ -59,6 +61,7 @@ test('product search covers a large catalog without changing the selection until
   let writes = 0;
   await page.route('**/api/**', route => {
     if (route.request().method() !== 'GET') writes++;
+    if (new URL(route.request().url()).pathname === '/api/customers') return route.fulfill({ json: { data: [customerFixture] } });
     return route.fulfill({ json: { data: new URL(route.request().url()).pathname === '/api/products' ? products : [order] } });
   });
   await page.goto('/marketing/orders/server-search/edit');

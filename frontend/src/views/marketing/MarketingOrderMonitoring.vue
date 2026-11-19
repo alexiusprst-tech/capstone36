@@ -318,8 +318,6 @@ const statusTabs = [
 
 const getCount = (val) => {
   const valid = store.orders.filter((o) => {
-    if (o.orderNumber === 'ORD-2026-007' || o.orderNumber === 'ORD-2026-008') return false;
-    if (o.date && String(o.date).startsWith('2026-10')) return false;
     return true;
   });
   if (val === 'Semua') return valid.length;
@@ -329,8 +327,6 @@ const getCount = (val) => {
 const filteredOrders = computed(() => {
   return store.orders
     .filter((o) => {
-      if (o.orderNumber === 'ORD-2026-007' || o.orderNumber === 'ORD-2026-008') return false;
-      if (o.date && String(o.date).startsWith('2026-10')) return false;
       if (activeTab.value === 'Semua') return true;
       return o.status === activeTab.value;
     })

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Customer;
 use App\Models\DocumentTemplate;
 use App\Models\Product;
 use App\Models\SalesOrder;
@@ -21,6 +22,9 @@ class SalesOrderApiTest extends TestCase
 
     private function loginAsRole(string $role): User
     {
+        if (! Customer::whereKey(1)->exists()) {
+            Customer::factory()->create(['id' => 1]);
+        }
         $user = User::factory()->create(['role' => $role]);
         Sanctum::actingAs($user);
 
@@ -110,7 +114,7 @@ class SalesOrderApiTest extends TestCase
         $this->loginAsRole('MARKETING');
         Product::create(['sku' => 'A00000714', 'name' => 'Granit 60 x 60', 'category' => 'Bangunan', 'unit' => 'M', 'stock' => 100, 'sell_price' => 0]);
         Product::create(['sku' => 'A00001678', 'name' => 'Pasir Pasang', 'category' => 'Bangunan', 'unit' => 'M3', 'stock' => 100, 'sell_price' => 0]);
-        $details = ['clientName' => 'Customer Uji', 'projectName' => 'Pengadaan Material'];
+        $details = ['clientId' => 1, 'clientName' => 'Customer Uji', 'projectName' => 'Pengadaan Material'];
         $legacy = [
             ['sku' => 'MAT-007', 'name' => 'Granit Tile 60x60 Polished Glazed', 'unit' => 'Dus', 'qty' => 1, 'price' => 215000],
             ['sku' => 'MAT-004', 'name' => 'Pasir Pasang Ekstra Bangunan', 'unit' => 'M3', 'qty' => 1, 'price' => 320000],
@@ -130,7 +134,7 @@ class SalesOrderApiTest extends TestCase
     {
         $this->loginAsRole('MARKETING');
         Product::create(['sku' => 'A00000714', 'name' => 'Granit 60 x 60', 'category' => 'Bangunan', 'unit' => 'M', 'stock' => 100, 'sell_price' => 0]);
-        $details = ['clientName' => 'Customer Uji', 'projectName' => 'Pengadaan Material'];
+        $details = ['clientId' => 1, 'clientName' => 'Customer Uji', 'projectName' => 'Pengadaan Material'];
         $legacy = [['sku' => 'MAT-007', 'name' => 'Granit Tile Lama', 'unit' => 'Dus', 'qty' => 1, 'price' => 215000]];
         $saved = $this->putJson('/api/orders/ORD-CATALOG', ['version' => 0, 'details' => $details, 'items' => $legacy])->assertOk()->json('data');
         $selected = [['sku' => 'A00000714', 'name' => 'Granit 60 x 60', 'unit' => 'M', 'qty' => 2, 'price' => 100000]];

@@ -16,6 +16,7 @@ class SpjLetterhead
         foreach (self::FIELDS as $field) {
             $rules[$prefix.'.'.$field] = ['nullable', 'string', 'max:'.($field === 'logoDataUrl' ? 1400000 : ($field === 'address' || $field === 'letterheadAddress' ? 2000 : 255))];
         }
+        array_unshift($rules[$prefix.'.logoDataUrl'], 'bail');
         $rules[$prefix.'.logoDataUrl'][] = function ($attribute, $value, $fail) {
             if ($value && ! self::validLogo($value)) {
                 $fail('Gunakan logo JPG/PNG maksimal 1 MB dan resolusi maksimal 4 megapiksel.');

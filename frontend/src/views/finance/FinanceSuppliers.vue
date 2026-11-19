@@ -38,6 +38,11 @@
       </div>
     </template>
 
+    <div v-if="supplierLoadError" role="alert" class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      <p>Data supplier belum dapat dimuat dari server. Periksa koneksi sebelum menggunakan data ini.</p>
+      <button type="button" class="mt-2 underline font-semibold" @click="loadSuppliers">Muat ulang supplier</button>
+    </div>
+
     <!-- PROBIS TO-BE CONTEXT BANNER (Collapsible) -->
     <div
       v-if="showProbisInfo"
@@ -428,10 +433,10 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <!-- Kode Supplier -->
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="supplier-code">
               ID / Kode Supplier <span class="text-rose-500">*</span>
             </label>
-            <input
+            <input id="supplier-code"
               v-model="supplierForm.code"
               type="text"
               placeholder="Contoh: SUP00001"
@@ -442,8 +447,8 @@
 
           <!-- Status -->
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Status Keaktifan</label>
-            <select
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="supplier-status">Status Keaktifan</label>
+            <select id="supplier-status"
               v-model="supplierForm.status"
               class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[#0284c7] bg-white cursor-pointer"
             >
@@ -454,10 +459,10 @@
 
           <!-- Nama Supplier -->
           <div class="sm:col-span-2">
-            <label class="block text-xs font-semibold text-slate-700 mb-1">
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="supplier-name">
               Nama Supplier / Perusahaan <span class="text-rose-500">*</span>
             </label>
-            <input
+            <input id="supplier-name"
               v-model="supplierForm.name"
               type="text"
               placeholder="Contoh: PT Synnex Metrodata Indonesia"
@@ -468,8 +473,8 @@
 
           <!-- Contact Person -->
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Contact Person (PIC)</label>
-            <input
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="supplier-contactPerson">Contact Person (PIC)</label>
+            <input id="supplier-contactPerson"
               v-model="supplierForm.contactPerson"
               type="text"
               placeholder="Contoh: Hendra Gunawan (Sales)"
@@ -479,8 +484,8 @@
 
           <!-- No HP / Telepon -->
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">No HP / Telepon / WhatsApp</label>
-            <input
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="supplier-phone">No HP / Telepon / WhatsApp</label>
+            <input id="supplier-phone"
               v-model="supplierForm.phone"
               type="text"
               placeholder="Contoh: 021-29345800 / 081298765432"
@@ -490,8 +495,8 @@
 
           <!-- Email -->
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Email</label>
-            <input
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="supplier-email">Email</label>
+            <input id="supplier-email"
               v-model="supplierForm.email"
               type="email"
               placeholder="Contoh: sales@synnexmetrodata.com"
@@ -501,8 +506,8 @@
 
           <!-- NPWP -->
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">NPWP Supplier</label>
-            <input
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="supplier-npwp">NPWP Supplier</label>
+            <input id="supplier-npwp"
               v-model="supplierForm.npwp"
               type="text"
               placeholder="Contoh: 01.345.678.9-031.000"
@@ -512,8 +517,8 @@
 
           <!-- Rekening Bank (Finance Payment Info) -->
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Bank</label>
-            <input
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="supplier-bankName">Nama Bank</label>
+            <input id="supplier-bankName"
               v-model="supplierForm.bankName"
               type="text"
               placeholder="Contoh: BCA / Mandiri / BNI"
@@ -522,8 +527,8 @@
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor Rekening</label>
-            <input
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="supplier-bankAccountNumber">Nomor Rekening</label>
+            <input id="supplier-bankAccountNumber"
               v-model="supplierForm.bankAccountNumber"
               type="text"
               placeholder="Contoh: 5001239841"
@@ -532,8 +537,8 @@
           </div>
 
           <div class="sm:col-span-2">
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Atas Nama Rekening</label>
-            <input
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="supplier-bankAccountName">Atas Nama Rekening</label>
+            <input id="supplier-bankAccountName"
               v-model="supplierForm.bankAccountName"
               type="text"
               placeholder="Contoh: PT Synnex Metrodata Indonesia"
@@ -543,8 +548,8 @@
 
           <!-- Alamat -->
           <div class="sm:col-span-2">
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat Kantor / Gudang</label>
-            <textarea
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="supplier-address">Alamat Kantor / Gudang</label>
+            <textarea id="supplier-address"
               v-model="supplierForm.address"
               rows="2"
               placeholder="Alamat lengkap supplier..."
@@ -554,8 +559,8 @@
 
           <!-- Catatan / Spesialisasi Produk -->
           <div class="sm:col-span-2">
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Catatan / Spesialisasi Pengadaan</label>
-            <textarea
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="supplier-notes">Catatan / Spesialisasi Pengadaan</label>
+            <textarea id="supplier-notes"
               v-model="supplierForm.notes"
               rows="2"
               placeholder="Catatan barang/layanan, kontak darurat, atau ketentuan retur barang..."
@@ -575,6 +580,7 @@
           </button>
           <button
             type="submit"
+            :disabled="supplierSaving"
             class="px-5 py-2 text-xs font-semibold bg-alpharo-600 hover:bg-alpharo-700 text-white rounded-lg shadow-xs transition-colors cursor-pointer"
           >
             {{ isEditing ? 'Simpan Perubahan' : 'Simpan Supplier' }}
@@ -769,6 +775,7 @@ import Modal from '../../components/common/Modal.vue';
 import { store, storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
 import api from '../../services/api';
+import { orderError } from '../../services/orderWorkflow';
 import * as XLSX from 'xlsx';
 import {
   Truck,
@@ -830,11 +837,12 @@ const supplierForm = ref({
 });
 
 // Helper: load suppliers from API or store
+const supplierLoadError = ref(false);
 const loadSuppliers = async () => {
   isLoading.value = true;
   try {
     const res = await api.get('/suppliers?per_page=all');
-    if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
+    if (res.data?.success && Array.isArray(res.data.data)) {
       suppliersList.value = res.data.data.map((s) => ({
         id: s.id,
         code: s.code,
@@ -852,16 +860,13 @@ const loadSuppliers = async () => {
       }));
       // Sync to store
       store.suppliers = [...suppliersList.value];
+      supplierLoadError.value = false;
     } else {
       throw new Error('API returned empty supplier list');
     }
   } catch (err) {
-    // Fallback to store.suppliers
-    if (Array.isArray(store.suppliers) && store.suppliers.length > 0) {
-      suppliersList.value = [...store.suppliers];
-    } else {
-      suppliersList.value = [];
-    }
+    supplierLoadError.value = true;
+    suppliersList.value = [];
   } finally {
     isLoading.value = false;
   }
@@ -1053,7 +1058,9 @@ const confirmDelete = (sup) => {
 };
 
 // Save Supplier (Create or Update)
+const supplierSaving = ref(false);
 const saveSupplier = async () => {
+  if (supplierSaving.value) return;
   if (!supplierForm.value.name.trim()) {
     toast.error('Nama Supplier wajib diisi.');
     return;
@@ -1074,29 +1081,20 @@ const saveSupplier = async () => {
     notes: supplierForm.value.notes,
   };
 
+  supplierSaving.value = true;
   try {
-    if (isEditing.value && supplierForm.value.id) {
-      // API Update
-      await api.put(`/suppliers/${supplierForm.value.id}`, payload).catch(() => {});
-      // Store Update
-      storeActions.updateSupplier(supplierForm.value.id, {
-        ...supplierForm.value,
-      });
-      toast.success(`Data supplier ${supplierForm.value.name} berhasil diperbarui.`);
+    if (isEditing.value) {
+      await api.put('/suppliers/' + encodeURIComponent(supplierForm.value.id || supplierForm.value.code), payload);
     } else {
-      // API Create
-      await api.post('/suppliers', payload).catch(() => {});
-      // Store Add
-      storeActions.addSupplier({
-        ...supplierForm.value,
-      });
-      toast.success(`Supplier baru ${supplierForm.value.name} berhasil ditambahkan.`);
+      await api.post('/suppliers', payload);
     }
-    supplierModalOpen.value = false;
     await loadSuppliers();
-  } catch (e) {
-    console.error('Error saving supplier:', e);
-    toast.error('Terjadi kesalahan saat menyimpan data supplier.');
+    toast.success('Data supplier berhasil disimpan ke server.');
+    supplierModalOpen.value = false;
+  } catch (error) {
+    toast.error(orderError(error));
+  } finally {
+    supplierSaving.value = false;
   }
 };
 
@@ -1105,9 +1103,9 @@ const executeDelete = async () => {
   if (!deletingSupplier.value) return;
   const target = deletingSupplier.value;
   try {
-    if (target.id) {
-      await api.delete(`/suppliers/${target.id}`).catch(() => {});
-    }
+    const identifier = target.id || target.code;
+    if (!identifier) throw new Error('Identitas supplier tidak tersedia. Muat ulang data dari server.');
+    await api.delete('/suppliers/' + encodeURIComponent(identifier));
     storeActions.deleteSupplier(target.id || target.code);
     toast.success(`Supplier ${target.name} berhasil dihapus.`);
     deleteModalOpen.value = false;
@@ -1115,7 +1113,7 @@ const executeDelete = async () => {
     await loadSuppliers();
   } catch (e) {
     console.error('Error deleting supplier:', e);
-    toast.error('Gagal menghapus supplier.');
+    toast.error(orderError(e));
   }
 };
 

@@ -858,7 +858,7 @@
             <p class="font-semibold text-slate-800">Alokasi stok: {{ selectedOrder.stockReadiness.status }}</p>
             <p v-for="item in selectedOrder.stockReadiness.items" :key="item.sku" class="break-words">
               <template v-if="item.catalogFound === false">{{ stockItemName(item, selectedOrder) }} — belum terdaftar di katalog gudang. Pilih ulang di Edit Order.</template>
-              <template v-else>{{ stockItemName(item, selectedOrder) }} — teralokasi {{ item.allocated }}/{{ item.required }}, kurang {{ item.shortage }} {{ item.unit || '' }}.</template>
+              <template v-else>{{ stockItemName(item, selectedOrder) }} — teralokasi {{ item.allocated }}/{{ item.required }}, kurang {{ item.shortage }} {{ item.unit || '' }}. Dalam pengadaan {{ item.pendingProcurementQty || 0 }}, belum diajukan {{ item.unrequestedShortage || 0 }} {{ item.unit || '' }}.</template>
             </p>
           </div>
           <div v-if="selectedOrder.notes || selectedOrder.supportingDocument" class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2 mt-2 shadow-2xs">
@@ -871,6 +871,20 @@
             </div>
           </div>
         </div>
+
+        <section aria-label="Pengadaan Terkait Pesanan" class="space-y-3">
+          <h4 class="font-semibold uppercase tracking-wider text-slate-600">Pengadaan Terkait Pesanan</h4>
+          <p v-if="!selectedOrder.procurement?.length" class="rounded-lg border border-dashed p-3 text-xs text-slate-500">Belum ada pengajuan kebutuhan untuk pesanan ini.</p>
+          <article v-for="request in selectedOrder.procurement || []" :key="request.id || request.request_code" class="min-w-0 space-y-2 break-words rounded-lg border border-slate-200 bg-white p-3">
+            <div class="flex flex-wrap justify-between gap-2"><h5 class="font-semibold text-slate-900">{{ request.request_code }}</h5><span class="rounded bg-slate-100 px-2 py-1 text-[11px] font-semibold">{{ procurementStatus(request.status) }}</span></div>
+            <p class="text-xs text-slate-600">Diajukan {{ request.request_date }} oleh {{ request.requested_by }}</p>
+            <p v-if="request.purchase_code" class="text-xs font-medium text-slate-700">Purchase Order: {{ request.purchase_code }}</p>
+            <p v-if="request.requirements_changed && request.status !== 'DIBATALKAN'" class="rounded bg-amber-50 p-2 text-xs text-amber-800">Kebutuhan pesanan berubah. Warehouse perlu memeriksa dan menyesuaikan pengajuan.</p>
+            <ul class="space-y-1 text-xs text-slate-600"><li v-for="(item, index) in request.items || []" :key="`${item.sku}-${index}`">{{ item.sku }} — {{ item.name }}: {{ item.qty }} {{ item.unit }}</li></ul>
+          </article>
+        </section>
+
+        <OrderAuditTrail :timeline="selectedOrder.timeline || []" />
 
         <!-- SECTION 3: MONITORING KELENGKAPAN DOKUMEN -->
         <div>
@@ -901,7 +915,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useRoute } from '../../navigation';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
@@ -910,6 +924,7 @@ import Drawer from '../../components/common/Drawer.vue';
 import ConfirmationDialog from '../../components/common/ConfirmationDialog.vue';
 import DocumentChecklist from '../../components/common/DocumentChecklist.vue';
 import Timeline from '../../components/common/Timeline.vue';
+import OrderAuditTrail from '../../components/common/OrderAuditTrail.vue';
 import { store, storeActions, orderSync } from '../../stores/mockData';
 import { orderError } from '../../services/orderWorkflow';
 import api from '../../services/api';
@@ -948,6 +963,13 @@ const detailDrawerOpen = ref(false);
 const deleteConfirmOpen = ref(false);
 
 const selectedOrder = ref(null);
+const procurementStatus = status => ({ MENUNGGU_FINANCE: 'Menunggu Finance', DIPROSES_PEMBELIAN: 'Dalam pengadaan', DITERIMA_SEBAGIAN: 'Diterima sebagian', PERLU_TINDAK_LANJUT: 'Perlu tindak lanjut', SELESAI: 'Selesai', DIBATALKAN: 'Dibatalkan' })[status] || status;
+watch(() => store.orders, orders => {
+  if (!detailDrawerOpen.value || !selectedOrder.value?.serverManaged) return;
+  const current = orders.find(order => order.orderNumber === selectedOrder.value.orderNumber);
+  if (current) selectedOrder.value = current;
+  else { detailDrawerOpen.value = false; selectedOrder.value = null; }
+});
 const orderToDelete = ref(null);
 const submitConfirmOpen = ref(false);
 const orderToSubmit = ref(null);
@@ -978,8 +1000,6 @@ onMounted(async () => {
 
 const totalOrdersCount = computed(() => {
   return store.orders.filter((o) => {
-    if (o.orderNumber === 'ORD-2026-007' || o.orderNumber === 'ORD-2026-008') return false;
-    if (o.date && String(o.date).startsWith('2026-10')) return false;
     return true;
   }).length;
 });
@@ -987,8 +1007,6 @@ const totalOrdersCount = computed(() => {
 const pendingClientOrders = computed(() => {
   return store.orders
     .filter((o) => {
-      if (o.orderNumber === 'ORD-2026-007' || o.orderNumber === 'ORD-2026-008') return false;
-      if (o.date && String(o.date).startsWith('2026-10')) return false;
       return o.status === 'Diajukan Client';
     })
     .slice()
@@ -1004,8 +1022,6 @@ const pendingClientOrders = computed(() => {
 
 const getStatusCount = (status) => {
   return store.orders.filter((o) => {
-    if (o.orderNumber === 'ORD-2026-007' || o.orderNumber === 'ORD-2026-008') return false;
-    if (o.date && String(o.date).startsWith('2026-10')) return false;
     return o.status === status;
   }).length;
 };
@@ -1013,8 +1029,6 @@ const getStatusCount = (status) => {
 const filteredOrders = computed(() => {
   return store.orders
     .filter((o) => {
-      if (o.orderNumber === 'ORD-2026-007' || o.orderNumber === 'ORD-2026-008') return false;
-      if (o.date && String(o.date).startsWith('2026-10')) return false;
 
       const q = searchQuery.value.toLowerCase();
       const matchSearch =

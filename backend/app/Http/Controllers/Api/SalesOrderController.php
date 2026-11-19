@@ -3,17 +3,28 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
+use App\Models\Product;
+use App\Models\PurchaseTransaction;
 use App\Models\SalesOrder;
+use App\Models\WarehouseRequest;
+use App\Services\InventoryTransaction;
+use App\Services\OrderProcurement;
 use App\Services\SalesOrderInventory;
 use App\Services\SpjLetterhead;
 use App\Services\SpjProjectFromOrder;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\File;
 use Illuminate\Validation\Rule;
 
 class SalesOrderController extends Controller
 {
+    private array $procurement = [];
+
     private const APPROVAL_LIMIT = 5_000_000;
 
     public function __construct(private SalesOrderInventory $inventory) {}
@@ -27,6 +38,7 @@ class SalesOrderController extends Controller
             ->orderByDesc('id')
             ->get();
         $summaries = $this->inventory->summaries($orders);
+        $this->procurement = app(OrderProcurement::class)->summaries($orders->pluck('id')->all());
 
         return response()->json(['data' => $orders->map(fn ($order) => $this->present($order, $summaries[$order->id]))]);
     }
@@ -41,7 +53,7 @@ class SalesOrderController extends Controller
             'details' => ['required', 'array'],
             'details.clientName' => ['required', 'string', 'max:255'],
             'details.projectName' => ['required', 'string', 'max:255'],
-            'details.clientId' => ['nullable', 'integer', 'min:1'],
+            'details.clientId' => ['required', 'integer', 'exists:customers,id'],
             'details.projectId' => ['nullable', 'string', 'max:80'],
             'details.description' => ['nullable', 'string', 'max:5000'],
             'details.notes' => ['nullable', 'string', 'max:5000'],
@@ -71,9 +83,10 @@ class SalesOrderController extends Controller
             'items.*.unit' => ['required', 'string', 'max:50'],
             'items.*.specs' => ['nullable', 'string', 'max:5000'],
             'items.*.qty' => ['required', 'integer', 'min:1', 'max:1000000'],
-            'items.*.price' => ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:1000000000'],
+            'items.*.price' => ['required', 'numeric', 'decimal:0,2', 'min:0', 'max:1000000000'],
         ]);
-        $order = DB::transaction(function () use ($request, $number, $data) {
+        $order = InventoryTransaction::run(function () use ($request, $number, $data) {
+            $customer = Customer::whereKey($data['details']['clientId'])->lockForUpdate()->firstOrFail();
             // The unique order number also prevents duplicate inserts from separate browsers.
             $order = SalesOrder::firstOrCreate(['order_number' => $number], [
                 'created_by' => $request->user()->id, 'details' => [], 'items' => [],
@@ -82,13 +95,26 @@ class SalesOrderController extends Controller
             $order = SalesOrder::whereKey($order->id)->lockForUpdate()->firstOrFail();
             abort_unless($order->status === 'Draft', 409, 'Rincian pesanan terkunci setelah diajukan.');
             abort_if(! empty($order->history) && $data['version'] !== $order->version, 409, 'Data pesanan berubah. Muat ulang sebelum menyimpan.');
-            $items = collect($data['items'])->map(fn ($item) => [
-                'sku' => $item['sku'], 'name' => $item['name'], 'unit' => $item['unit'],
-                'specs' => $item['specs'] ?? '',
-                'qty' => (int) $item['qty'], 'price' => (float) $item['price'],
-                'total' => (int) $item['qty'] * (int) round($item['price'] * 100) / 100,
-            ])->all();
+            $before = ['details' => $order->details, 'items' => $order->items, 'subtotal' => $order->subtotal, 'tax' => $order->tax, 'grandTotal' => $order->grand_total];
+            $catalog = Product::whereIn('sku', array_column($data['items'], 'sku'))->get()->keyBy(fn ($product) => strtolower($product->sku));
+            $items = collect($data['items'])->map(function ($item) use ($catalog) {
+                $product = $catalog->get(strtolower($item['sku']));
+                abort_if($product && strcasecmp($product->unit, $item['unit']) !== 0, 422, 'Satuan pesanan harus mengikuti master barang.');
+
+                return [
+                    'sku' => $product?->sku ?? $item['sku'], 'name' => $product?->name ?? $item['name'], 'unit' => $product?->unit ?? $item['unit'],
+                    'specs' => $item['specs'] ?? '',
+                    'qty' => (int) $item['qty'], 'price' => (float) $item['price'],
+                    'total' => (int) $item['qty'] * (int) round($item['price'] * 100) / 100,
+                ];
+            })->all();
             $subtotalCents = 0;
+            if (WarehouseRequest::itemsHash($order->items) !== WarehouseRequest::itemsHash($items)) {
+                $requests = WarehouseRequest::where('sales_order_id', $order->id)->pluck('id');
+                abort_if(PurchaseTransaction::whereIn('warehouse_request_id', $requests)
+                    ->whereNotIn('status', ['DITERIMA_GUDANG', 'DIBATALKAN', 'CANCELLED'])->exists(), 409,
+                    'Barang atau jumlah belum dapat diubah selama PO terkait masih berjalan. Harga dan informasi pesanan tetap dapat diperbarui.');
+            }
             foreach ($items as $item) {
                 $subtotalCents += $item['qty'] * (int) round($item['price'] * 100);
                 abort_if($subtotalCents > 100_000_000_000_000, 422, 'Nilai pesanan melebihi batas sistem.');
@@ -101,12 +127,23 @@ class SalesOrderController extends Controller
                 'penanggungJawabJabatan', 'penanggungJawabNip', 'kotaTandaTangan', 'docNumbers', 'customerProfile',
             ])->all();
             $order->items = $items;
+            $order->customer_id = $customer->id;
+            $details = $order->details;
+            $details['clientId'] = $customer->id;
+            $details['clientName'] = $customer->name;
+            $details['customerProfile'] = [...collect($customer->present())->only(SpjLetterhead::FIELDS)->all(), ...($data['details']['customerProfile'] ?? []), 'code' => $customer->code, 'name' => $customer->name];
+            $order->details = $details;
             // Calculate in cents, then round the final amount once to whole rupiah.
             $order->subtotal = intdiv($subtotalCents + 50, 100);
             $order->grand_total = intdiv($subtotalCents * 111 + 5000, 10000);
             $order->tax = $order->grand_total - $order->subtotal;
             $this->inventory->allocate($order);
             $this->record($order, $request, 'Draft Disimpan', 'Rincian pesanan disimpan oleh Marketing.');
+            $history = $order->history;
+            $history[array_key_last($history)]['before'] = $before;
+            $history[array_key_last($history)]['after'] = ['details' => $order->details, 'items' => $order->items, 'subtotal' => $order->subtotal, 'tax' => $order->tax, 'grandTotal' => $order->grand_total];
+            $order->history = $history;
+            $order->save();
             app(SpjProjectFromOrder::class)->sync($order);
 
             return $order;
@@ -118,11 +155,13 @@ class SalesOrderController extends Controller
     public function destroy(Request $request, SalesOrder $order): JsonResponse
     {
         $this->allow($request, ['MARKETING']);
-        DB::transaction(function () use ($order) {
+        InventoryTransaction::run(function () use ($order) {
             $order = SalesOrder::whereKey($order->id)->lockForUpdate()->firstOrFail();
             abort_unless($order->status === 'Draft', 409, 'Pesanan yang telah diajukan tidak dapat dihapus.');
+            abort_if(WarehouseRequest::where('sales_order_id', $order->id)->exists(), 409, 'Pesanan memiliki riwayat pengadaan dan tidak dapat dihapus.');
             $this->inventory->release($order);
             $order->delete();
+            $this->inventory->reallocateDrafts();
         });
 
         return response()->json(['success' => true]);
@@ -200,7 +239,7 @@ class SalesOrderController extends Controller
         });
     }
 
-    public function downloadInvoice(Request $request, string $order): \Illuminate\Http\Response
+    public function downloadInvoice(Request $request, string $order): Response
     {
         $this->allow($request, ['FINANCE', 'MARKETING', 'DIREKTUR', 'ADMINISTRASI', 'CLIENT']);
         $salesOrder = SalesOrder::where('order_number', $order)
@@ -211,9 +250,8 @@ class SalesOrderController extends Controller
 
         if (strtoupper((string) $request->user()?->role) === 'CLIENT') {
             $clientId = $salesOrder->details['clientId'] ?? null;
-            if ($clientId && $request->user()?->client_id) {
-                abort_unless((int) $clientId === (int) $request->user()->client_id, 403, 'Akses invoice tidak diizinkan.');
-            }
+            abort_unless($clientId && $request->user()?->client_id
+                && (int) $clientId === (int) $request->user()->client_id, 403, 'Akses invoice tidak diizinkan.');
         }
 
         $invoice = $salesOrder->invoice;
@@ -221,9 +259,9 @@ class SalesOrderController extends Controller
         $items = $salesOrder->items ?? [];
 
         $cache = storage_path('framework/cache/pdf');
-        \Illuminate\Support\Facades\File::ensureDirectoryExists($cache);
+        File::ensureDirectoryExists($cache);
 
-        $options = new \Dompdf\Options([
+        $options = new Options([
             'isRemoteEnabled' => false,
             'isHtml5ParserEnabled' => true,
             'defaultFont' => 'Helvetica',
@@ -232,7 +270,7 @@ class SalesOrderController extends Controller
             'fontDir' => $cache,
             'chroot' => [base_path(), storage_path()],
         ]);
-        $dompdf = new \Dompdf\Dompdf($options);
+        $dompdf = new Dompdf($options);
         $dompdf->setPaper('A4', 'portrait');
 
         $html = view('pdf.invoice', [
@@ -256,7 +294,7 @@ class SalesOrderController extends Controller
 
     private function transition(SalesOrder $order, callable $change): JsonResponse
     {
-        $order = DB::transaction(function () use ($order, $change) {
+        $order = InventoryTransaction::run(function () use ($order, $change) {
             $locked = SalesOrder::whereKey($order->id)->lockForUpdate()->firstOrFail();
             $change($locked);
 
@@ -284,15 +322,27 @@ class SalesOrderController extends Controller
 
     private function present(SalesOrder $order, ?array $stock = null): array
     {
+        $stock ??= $this->inventory->summaries(collect([$order]))[$order->id];
+        $procurement = $this->procurement[$order->id] ?? app(OrderProcurement::class)->summaries([$order->id])[$order->id];
+        $pending = $procurement['pending'];
+        foreach ($stock['items'] as &$item) {
+            $item['pendingProcurementQty'] = (int) ($pending[$item['sku']] ?? 0);
+            $item['unrequestedShortage'] = max(0, $item['shortage'] - $item['pendingProcurementQty']);
+        }
+        unset($item);
+        $stock['ready'] = $stock['status'] === 'Siap Diajukan';
+
         return [...$order->details,
-            'id' => 'server-'.$order->id, 'serverManaged' => true, 'version' => $order->version,
+            'clientId' => $order->customer_id,
+            'id' => 'server-'.$order->id, 'serverId' => $order->id, 'serverManaged' => true, 'version' => $order->version,
             'orderNumber' => $order->order_number, 'status' => $order->status, 'items' => $order->items,
             'subtotal' => $order->subtotal, 'tax' => $order->tax, 'grandTotal' => $order->grand_total,
             'createdById' => $order->created_by, 'submittedById' => $order->submitted_by,
             'submittedAt' => $order->submitted_at?->toIso8601String(),
             'approvedById' => $order->approved_by, 'approvalDate' => $order->approved_at?->toIso8601String(),
             'approvedBy' => collect($order->history)->last(fn ($event) => $event['stage'] === 'Disetujui Direktur')['user'] ?? null,
-            'stockReadiness' => $stock ?? $this->inventory->summaries(collect([$order]))[$order->id],
+            'stockReadiness' => $stock,
+            'procurement' => $procurement['requests'],
             'approvalNotes' => $order->approval_notes, 'timeline' => $order->history, 'invoice' => $order->invoice,
         ];
     }

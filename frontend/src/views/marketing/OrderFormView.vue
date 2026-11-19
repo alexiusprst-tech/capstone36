@@ -22,6 +22,10 @@
       </div>
     </template>
 
+    <div v-if="clientSync.error" role="alert" class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+      <p>{{ clientSync.error }}</p>
+      <button type="button" class="mt-2 underline font-semibold" @click="storeActions.loadClients()">Muat ulang customer</button>
+    </div>
     <form class="space-y-6 max-w-7xl mx-auto pb-12" @submit.prevent="handleSubmit">
       <!-- BANNER JIKA MERINCI DARI PENGAJUAN KLIEN -->
       <div
@@ -64,8 +68,8 @@
           
           <div class="p-5 space-y-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">ID Project</label>
-              <input
+              <label for="order-draft-1" class="block text-xs font-semibold text-slate-700 mb-1.5">ID Project</label>
+              <input id="order-draft-1"
                 :value="displayProjectId"
                 type="text"
                 disabled
@@ -75,10 +79,10 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label for="order-draft-2" class="block text-xs font-semibold text-slate-700 mb-1.5">
                 Nama Project <span class="text-rose-500">*</span>
               </label>
-              <input
+              <input id="order-draft-2"
                 v-model="form.projectName"
                 type="text"
                 required
@@ -88,8 +92,8 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Deskripsi</label>
-              <textarea
+              <label for="order-draft-3" class="block text-xs font-semibold text-slate-700 mb-1.5">Deskripsi</label>
+              <textarea id="order-draft-3"
                 v-model="form.description"
                 rows="3"
                 placeholder="Deskripsi ruang lingkup project..."
@@ -98,11 +102,11 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label for="order-draft-4" class="block text-xs font-semibold text-slate-700 mb-1.5">
                 Customer <span class="text-rose-500">*</span>
               </label>
               <div class="flex items-center gap-2">
-                <select
+                <select id="order-draft-4"
                   v-model="form.customerId"
                   required
                   class="flex-1 px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400"
@@ -128,9 +132,8 @@
               <label class="block text-xs font-semibold text-slate-700 mb-1.5">
                 Marketing <span class="text-rose-500">*</span>
               </label>
-              <select
+              <select id="order-marketingName"
                 v-model="form.marketingName"
-                required
                 class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400"
               >
                 <option value="" disabled>Pilih Marketing</option>
@@ -139,10 +142,10 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label for="order-draft-5" class="block text-xs font-semibold text-slate-700 mb-1.5">
                 Company <span class="text-rose-500">*</span>
               </label>
-              <input
+              <input id="order-draft-5"
                 type="text"
                 v-model="form.company"
                 readonly
@@ -162,8 +165,8 @@
           
           <div class="p-5 space-y-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Kegiatan</label>
-              <input
+              <label for="order-draft-6" class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Kegiatan</label>
+              <input id="order-draft-6"
                 v-model="form.namaKegiatan"
                 type="text"
                 class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800"
@@ -171,8 +174,8 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Rincian Kegiatan</label>
-              <input
+              <label for="order-draft-7" class="block text-xs font-semibold text-slate-700 mb-1.5">Rincian Kegiatan</label>
+              <input id="order-draft-7"
                 v-model="form.rincianKegiatan"
                 type="text"
                 class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800"
@@ -180,8 +183,8 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kode Rekening</label>
-              <input
+              <label for="order-draft-8" class="block text-xs font-semibold text-slate-700 mb-1.5">Kode Rekening</label>
+              <input id="order-draft-8"
                 type="text"
                 value="52323628813 (Bank BCA Jakarta - a.n. CV ALPHARO ARTHA JAYA)"
                 disabled
@@ -192,8 +195,8 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Tahun Anggaran</label>
-                <input
+                <label for="order-draft-9" class="block text-xs font-semibold text-slate-700 mb-1.5">Tahun Anggaran</label>
+                <input id="order-draft-9"
                   v-model="form.tahunAnggaran"
                   type="text"
                   placeholder="2026"
@@ -202,8 +205,8 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Sumber Dana</label>
-                <select
+                <label for="order-draft-10" class="block text-xs font-semibold text-slate-700 mb-1.5">Sumber Dana</label>
+                <select id="order-draft-10"
                   v-model="form.sumberDana"
                   class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400"
                 >
@@ -217,8 +220,8 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kategori Barang/Jasa</label>
-              <select
+              <label for="order-draft-11" class="block text-xs font-semibold text-slate-700 mb-1.5">Kategori Barang/Jasa</label>
+              <select id="order-draft-11"
                 v-model="form.kategori"
                 class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400"
               >
@@ -230,8 +233,8 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Pagu Anggaran</label>
-              <input
+              <label for="order-draft-12" class="block text-xs font-semibold text-slate-700 mb-1.5">Pagu Anggaran</label>
+              <input id="order-draft-12"
                 v-model.number="form.paguAnggaran"
                 type="number"
                 min="0"
@@ -250,32 +253,30 @@
           
           <div class="p-5 space-y-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label for="order-draft-13" class="block text-xs font-semibold text-slate-700 mb-1.5">
                 Tgl Mulai <span class="text-rose-500">*</span>
               </label>
-              <input
+              <input id="order-draft-13"
                 v-model="form.tglMulai"
                 type="date"
-                required
                 class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label for="order-draft-14" class="block text-xs font-semibold text-slate-700 mb-1.5">
                 Estimasi Tgl Selesai <span class="text-rose-500">*</span>
               </label>
-              <input
+              <input id="order-draft-14"
                 v-model="form.estimasiSelesai"
                 type="date"
-                required
                 class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400 text-slate-800"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nilai Project (termasuk PPN 11%)</label>
-              <input
+              <label for="order-draft-15" class="block text-xs font-semibold text-slate-700 mb-1.5">Nilai Project (termasuk PPN 11%)</label>
+              <input id="order-draft-15"
                 :value="calculatedGrandTotal" readonly
                 type="number"
                 min="0"
@@ -286,8 +287,8 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nilai Invoice</label>
-                <input
+                <label for="order-draft-16" class="block text-xs font-semibold text-slate-700 mb-1.5">Nilai Invoice</label>
+                <input id="order-draft-16"
                   :value="form.nilaiInvoice"
                   type="number"
                   disabled
@@ -297,8 +298,8 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Invoice Dibayar</label>
-                <input
+                <label for="order-draft-17" class="block text-xs font-semibold text-slate-700 mb-1.5">Invoice Dibayar</label>
+                <input id="order-draft-17"
                   :value="form.invoiceDibayar"
                   type="number"
                   disabled
@@ -319,19 +320,18 @@
           
           <div class="p-5 space-y-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Penanggung Jawab <span class="text-rose-500">*</span></label>
-              <input
+              <label for="order-draft-18" class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Penanggung Jawab <span class="text-rose-500">*</span></label>
+              <input id="order-draft-18"
                 v-model="form.penanggungJawabNama"
                 type="text"
-                required
                 placeholder="Contoh: Bpk. Supri, M.Pd."
                 class="w-full px-3.5 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-400/30 focus:border-alpharo-400"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Jabatan Penanggung Jawab</label>
-              <input
+              <label for="order-draft-19" class="block text-xs font-semibold text-slate-700 mb-1.5">Jabatan Penanggung Jawab</label>
+              <input id="order-draft-19"
                 v-model="form.penanggungJawabJabatan"
                 type="text"
                 placeholder="Contoh: Kepala Sekolah / Kuasa Pengguna Anggaran"
@@ -340,8 +340,8 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">NIP Penanggung Jawab</label>
-              <input
+              <label for="order-draft-20" class="block text-xs font-semibold text-slate-700 mb-1.5">NIP Penanggung Jawab</label>
+              <input id="order-draft-20"
                 v-model="form.penanggungJawabNip"
                 type="text"
                 placeholder="Contoh: 19720815 199803 1 004"
@@ -350,8 +350,8 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kota Tanda Tangan</label>
-              <input
+              <label for="order-draft-21" class="block text-xs font-semibold text-slate-700 mb-1.5">Kota Tanda Tangan</label>
+              <input id="order-draft-21"
                 v-model="form.kotaTandaTangan"
                 type="text"
                 placeholder="Contoh: Jakarta Timur"
@@ -372,8 +372,8 @@
         <div class="p-5 space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Penawaran</label>
-              <input
+              <label for="order-draft-22" class="block text-xs font-semibold text-slate-700 mb-1.5">Penawaran</label>
+              <input id="order-draft-22"
                 v-model="form.docNumbers.penawaran"
                 type="text"
                 placeholder="001/SPH/AAJ/X/2026"
@@ -382,8 +382,8 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Surat Jalan</label>
-              <input
+              <label for="order-draft-23" class="block text-xs font-semibold text-slate-700 mb-1.5">Surat Jalan</label>
+              <input id="order-draft-23"
                 v-model="form.docNumbers.suratJalan"
                 type="text"
                 placeholder="001/SJ/AAJ/X/2026"
@@ -392,8 +392,8 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Faktur</label>
-              <input
+              <label for="order-draft-24" class="block text-xs font-semibold text-slate-700 mb-1.5">Faktur</label>
+              <input id="order-draft-24"
                 v-model="form.docNumbers.faktur"
                 type="text"
                 placeholder="001/FP/AAJ/X/2026"
@@ -402,8 +402,8 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kuitansi</label>
-              <input
+              <label for="order-draft-25" class="block text-xs font-semibold text-slate-700 mb-1.5">Kuitansi</label>
+              <input id="order-draft-25"
                 v-model="form.docNumbers.kuitansi"
                 type="text"
                 placeholder="001/KW/AAJ/X/2026"
@@ -505,7 +505,7 @@
                   <td class="block min-w-0 py-2 sm:table-cell sm:px-3 sm:py-2.5">
                     <span class="mb-1 block text-[11px] font-medium text-slate-500 sm:hidden">Harga Satuan (Rp)</span>
                     <input
-                      v-model.number="it.price" step="0.01" min="0.01"
+                      v-model.number="it.price" step="0.01" min="0"
                       :aria-label="`Harga barang ${idx + 1}`"
                       type="number"
                       class="w-full px-2.5 py-1.5 text-xs rounded border border-slate-300 text-right font-mono"
@@ -586,7 +586,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from '../../navigation';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import CustomerFormModal from '../../components/common/CustomerFormModal.vue';
-import { store, storeActions, orderSync } from '../../stores/mockData';
+import { store, storeActions, orderSync, clientSync } from '../../stores/mockData';
 import { orderError } from '../../services/orderWorkflow';
 import api from '../../services/api';
 import SearchableSelect from '../../components/common/SearchableSelect.vue';
@@ -704,7 +704,7 @@ const onCustomerChange = () => {
     if (client.contactPerson) {
       form.value.penanggungJawabNama = client.contactPerson;
       form.value.penanggungJawabJabatan = 'Kepala Sekolah / Kuasa Pengguna Anggaran';
-      form.value.penanggungJawabNip = '19750101 200212 1 005';
+      form.value.penanggungJawabNip = '';
     }
   }
 };
@@ -756,7 +756,7 @@ const onCustomerCreated = (newClient) => {
 };
 
 const initForm = async () => {
-  await storeActions.loadOrders();
+  await Promise.all([storeActions.loadClients(), storeActions.loadOrders()]);
   try {
     const projRes = await api.get('/spj/projects');
     if (Array.isArray(projRes.data?.data)) {
@@ -837,19 +837,6 @@ const initForm = async () => {
       form.value.description = fromOrder.notes || `Pengajuan kebutuhan dari rekanan ${fromOrder.clientName}`;
       form.value.customerId = fromOrder.clientId || '';
 
-      // Fallback: match by client name if clientId wasn't directly found
-      if (!form.value.customerId && fromOrder.clientName) {
-        const foundClient = store.clients.find(
-          (c) =>
-            c.name.toLowerCase() === fromOrder.clientName.toLowerCase() ||
-            c.name.toLowerCase().includes(fromOrder.clientName.toLowerCase()) ||
-            fromOrder.clientName.toLowerCase().includes(c.name.toLowerCase())
-        );
-        if (foundClient) {
-          form.value.customerId = foundClient.id;
-        }
-      }
-
       form.value.marketingName = fromOrder.marketingName || store.currentUser?.name || 'Budi Hartono, S.T.';
       form.value.company = 'CV Alpharo Artha Jaya';
       form.value.namaKegiatan = fromOrder.projectName || '';
@@ -869,7 +856,7 @@ const initForm = async () => {
       if (fromOrder.contactPerson) {
         form.value.penanggungJawabNama = fromOrder.contactPerson;
         form.value.penanggungJawabJabatan = 'Kepala Sekolah / Kuasa Pengguna Anggaran';
-        form.value.penanggungJawabNip = '19750101 200212 1 005';
+        form.value.penanggungJawabNip = '';
       }
     }
   } else {
@@ -898,7 +885,7 @@ const handleSubmit = async () => {
   const client = store.clients.find((c) => c.id === Number(form.value.customerId)) || { name: 'Customer' };
 
   // Final items from form
-  if (!form.value.items.length || form.value.items.some(item => !item.sku || !item.name || !(Number(item.qty) > 0) || !(Number(item.price) > 0))) {
+  if (!form.value.items.length || form.value.items.some(item => !item.sku || !item.name || !(Number(item.qty) > 0) || !Number.isFinite(Number(item.price)) || Number(item.price) < 0)) {
     toast.error('Lengkapi barang, jumlah, dan harga pesanan terlebih dahulu.');
     return;
   }

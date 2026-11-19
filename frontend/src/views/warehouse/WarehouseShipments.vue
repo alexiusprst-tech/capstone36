@@ -11,7 +11,7 @@
         <button
           type="button"
           class="inline-flex items-center gap-2 px-4 py-2 bg-alpharo-500 hover:bg-alpharo-600 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors"
-          @click="openDispatchModal"
+          disabled aria-describedby="shipment-availability" @click="openDispatchModal"
         >
           <Truck class="w-4 h-4" />
           <span>Berangkatkan Pengiriman Baru</span>
@@ -19,6 +19,9 @@
       </div>
     </template>
 
+    <p id="shipment-availability" role="note" class="mb-5 px-4 py-3 text-sm text-amber-800 bg-amber-50 border-l-4 border-amber-400">
+      Pengiriman belum aktif. Pembayaran lunas dan SPJ siap harus diverifikasi di server sebelum barang diberangkatkan.
+    </p>
     <!-- STATUS TABS -->
     <div class="flex items-center gap-2 overflow-x-auto pb-2 mb-5">
       <button
@@ -54,6 +57,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
+            <tr v-if="!filteredShipments.length"><td colspan="8" class="py-10 px-4 text-center text-slate-500">Belum ada pengiriman {{ activeFilter === 'Semua' ? 'tercatat' : 'dengan status ' + activeFilter }}.</td></tr>
             <tr v-for="s in filteredShipments" :key="s.id" class="hover:bg-slate-50/70 transition-colors">
               <td class="py-3.5 px-4 font-mono font-semibold text-slate-900">{{ s.shipmentNumber }}</td>
               <td class="py-3.5 px-4">
@@ -82,7 +86,7 @@
                     v-if="s.status === 'Sedang Dikirim'"
                     type="button"
                     class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-semibold text-xs"
-                    @click="confirmDelivered(s)"
+                    disabled title="Konfirmasi penerimaan belum terhubung ke server" @click="confirmDelivered(s)"
                   >
                     Konfirmasi Tiba
                   </button>
@@ -147,6 +151,13 @@
         </div>
       </form>
     </Modal>
+    <Drawer v-model="detailOpen" title="Detail Pengiriman" :subtitle="selectedShipment?.shipmentNumber || ''">
+      <dl v-if="selectedShipment" class="space-y-4 text-sm">
+        <div v-for="(label, field) in { orderNumber: 'Nomor pesanan', clientName: 'Penerima', destination: 'Alamat tujuan', expedition: 'Kurir / Armada', driverName: 'Pengemudi', departureDate: 'Waktu berangkat', status: 'Status', notes: 'Catatan' }" :key="field">
+          <dt class="text-slate-500">{{ label }}</dt><dd class="mt-1 text-slate-900 break-words">{{ selectedShipment[field] || 'Belum dicatat' }}</dd>
+        </div>
+      </dl>
+    </Drawer>
   </AppLayout>
 </template>
 
@@ -155,6 +166,7 @@ import { ref, computed } from 'vue';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
 import Modal from '../../components/common/Modal.vue';
+import Drawer from '../../components/common/Drawer.vue';
 import { store, storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
 import { Truck } from 'lucide-vue-next';
@@ -162,6 +174,8 @@ import { Truck } from 'lucide-vue-next';
 const toast = useToast();
 
 const activeFilter = ref('Semua');
+const detailOpen = ref(false);
+const selectedShipment = ref(null);
 const dispatchModalOpen = ref(false);
 
 const form = ref({
@@ -220,17 +234,18 @@ const saveDispatch = () => {
     return;
   }
 
-  storeActions.createShipment(form.value);
+  try { storeActions.createShipment(form.value); } catch (error) { toast.error(error.message); return; }
   toast.success(`Pengiriman untuk ${form.value.orderNumber} berhasil diberangkatkan.`);
   dispatchModalOpen.value = false;
 };
 
 const confirmDelivered = (s) => {
-  storeActions.updateShipmentStatus(s.id, 'Selesai');
+  try { storeActions.updateShipmentStatus(s.id, 'Selesai'); } catch (error) { toast.error(error.message); return; }
   toast.success(`Pengiriman ${s.shipmentNumber} dikonfirmasi telah selesai tiba di lokasi!`);
 };
 
 const openDetail = (s) => {
-  toast.info(`Detail pengiriman ${s.shipmentNumber} dibuka.`);
+  selectedShipment.value = s;
+  detailOpen.value = true;
 };
 </script>

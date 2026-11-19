@@ -58,6 +58,10 @@
         </div>
       </div>
     </template>
+    <p v-if="catalogOffline" role="alert" class="mb-5 px-4 py-3 text-sm text-amber-800 bg-amber-50 border-l-4 border-amber-400">
+      Katalog server gagal dimuat. Data contoh ditampilkan untuk referensi; perubahan dinonaktifkan agar stok tidak tercatat keliru.
+      <button type="button" class="ml-2 underline font-semibold" :disabled="isLoading" @click="initializeCatalog">Muat ulang katalog</button>
+    </p>
 
     <!-- SEARCH & FILTER CARD (Green top line accent matching image) -->
     <div class="ui-panel bg-white rounded-xl border border-slate-200/90 mb-5 shadow-2xs overflow-hidden">
@@ -68,7 +72,7 @@
         <form class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,0.8fr)_auto] gap-3.5 items-end" @submit.prevent="handleSearch">
           <!-- Pencarian -->
           <div class="min-w-0">
-            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Pencarian</label>
+            <label for="warehouse-product-1" class="block text-xs font-semibold text-slate-700 mb-1.5">Pencarian</label>
             <div class="relative">
               <input
                 v-model="searchQuery"
@@ -93,7 +97,7 @@
           <!-- Kategori -->
           <div class="min-w-0">
             <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kategori</label>
-            <select
+            <select id="warehouse-product-1"
               v-model="selectedCategory"
               class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-[#0284c7] text-slate-700 cursor-pointer"
               @change="onFilterChange"
@@ -107,8 +111,8 @@
 
           <!-- Satuan -->
           <div class="min-w-0">
-            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Satuan</label>
-            <select
+            <label for="warehouse-product-2" class="block text-xs font-semibold text-slate-700 mb-1.5">Satuan</label>
+            <select id="warehouse-product-2"
               v-model="selectedUnit"
               class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-[#0284c7] text-slate-700 cursor-pointer"
               @change="onFilterChange"
@@ -122,8 +126,8 @@
 
           <!-- Status Barang Filter -->
           <div class="min-w-0">
-            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Status</label>
-            <select
+            <label for="warehouse-product-3" class="block text-xs font-semibold text-slate-700 mb-1.5">Status</label>
+            <select id="warehouse-product-3"
               v-model="selectedStatus"
               class="w-full px-2.5 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-hidden focus:ring-2 focus:ring-[#0284c7] text-slate-700 cursor-pointer"
               @change="onFilterChange"
@@ -370,7 +374,7 @@
                   <button
                     type="button"
                     class="w-7 h-7 inline-flex items-center justify-center bg-linear-to-b from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:from-red-700 active:to-red-800 text-white rounded-lg transition-all shadow-2xs border border-red-700/30 cursor-pointer"
-                    title="Hapus Data Barang"
+                    title="Arsipkan Data Barang"
                     @click="confirmDelete(p)"
                   >
                     <Trash2 class="w-3.5 h-3.5 stroke-[2.2]" />
@@ -712,7 +716,7 @@
               <span class="text-slate-500 text-[11px]">Tentukan tindakan bila SKU di Excel telah terdaftar pada database.</span>
             </div>
             <div class="flex items-center gap-3">
-              <label class="inline-flex items-center gap-1.5 cursor-pointer">
+              <label for="warehouse-product-4" class="inline-flex items-center gap-1.5 cursor-pointer">
                 <input v-model="duplicateMode" type="radio" value="update" class="text-[#0284c7]" />
                 <span>Perbarui Data (Update)</span>
               </label>
@@ -1251,9 +1255,10 @@
       <form class="space-y-4 text-xs" @submit.prevent="saveProduct">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">ID / SKU Barang</label>
-            <input
+            <label for="warehouse-product-4" class="block font-semibold text-slate-700 mb-1">ID / SKU Barang</label>
+            <input id="warehouse-product-4"
               v-model="prodForm.sku"
+              :readonly="!!editingProduct"
               required
               placeholder="Contoh: A00000002 atau BRG-001"
               class="w-full px-3 py-2 border rounded-lg font-mono"
@@ -1261,19 +1266,19 @@
           </div>
 
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Status Barang</label>
-            <select v-model="prodForm.status" class="w-full px-3 py-2 border rounded-lg bg-white cursor-pointer">
+            <label for="warehouse-product-5" class="block font-semibold text-slate-700 mb-1">Status Barang</label>
+            <select id="warehouse-product-5" :value="Number(prodForm.stock) <= 0 ? 'Habis' : Number(prodForm.stock) <= Number(prodForm.min_stock) ? 'Menipis' : 'Tersedia'" disabled class="w-full px-3 py-2 border rounded-lg bg-slate-50 text-slate-700">
               <option value="Tersedia">Tersedia</option>
               <option value="Menipis">Menipis</option>
               <option value="Habis">Habis</option>
-              <option value="Nonaktif">Nonaktif</option>
             </select>
+            <p class="mt-1 text-[11px] text-slate-500">Status dihitung dari stok fisik dan batas minimum.</p>
           </div>
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Nama Barang / Material</label>
-          <input
+          <label for="warehouse-product-6" class="block font-semibold text-slate-700 mb-1">Nama Barang / Material</label>
+          <input id="warehouse-product-6"
             v-model="prodForm.name"
             required
             placeholder="Nama lengkap barang spesifik"
@@ -1283,8 +1288,8 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Kategori</label>
-            <input
+            <label for="warehouse-product-7" class="block font-semibold text-slate-700 mb-1">Kategori</label>
+            <input id="warehouse-product-7"
               v-model="prodForm.category"
               list="cat-datalist"
               required
@@ -1297,8 +1302,8 @@
           </div>
 
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Satuan</label>
-            <input
+            <label for="warehouse-product-8" class="block font-semibold text-slate-700 mb-1">Satuan</label>
+            <input id="warehouse-product-8"
               v-model="prodForm.unit"
               list="unit-datalist"
               required
@@ -1313,8 +1318,8 @@
 
         <div class="grid grid-cols-3 gap-3">
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Stok Persediaan</label>
-            <input
+            <label for="warehouse-product-9" class="block font-semibold text-slate-700 mb-1">Stok Persediaan</label>
+            <input id="warehouse-product-9"
               v-model.number="prodForm.stock"
               type="number"
               min="0"
@@ -1322,8 +1327,8 @@
             />
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Harga Beli Terakhir (Rp)</label>
-            <input
+            <label for="warehouse-product-10" class="block font-semibold text-slate-700 mb-1">Harga Beli Terakhir (Rp)</label>
+            <input id="warehouse-product-10"
               v-model.number="prodForm.last_buy_price"
               type="number"
               min="0"
@@ -1331,8 +1336,8 @@
             />
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">HPP (Rp)</label>
-            <input
+            <label for="warehouse-product-11" class="block font-semibold text-slate-700 mb-1">HPP (Rp)</label>
+            <input id="warehouse-product-11"
               v-model.number="prodForm.hpp"
               type="number"
               min="0"
@@ -1343,8 +1348,8 @@
 
         <div class="grid grid-cols-2 gap-3.5">
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Harga Jual (Rp)</label>
-            <input
+            <label for="warehouse-product-12" class="block font-semibold text-slate-700 mb-1">Harga Jual (Rp)</label>
+            <input id="warehouse-product-12"
               v-model.number="prodForm.sell_price"
               type="number"
               min="0"
@@ -1352,8 +1357,8 @@
             />
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Batas Minimum Stok</label>
-            <input
+            <label for="warehouse-product-13" class="block font-semibold text-slate-700 mb-1">Batas Minimum Stok</label>
+            <input id="warehouse-product-13"
               v-model.number="prodForm.min_stock"
               type="number"
               min="0"
@@ -1363,8 +1368,8 @@
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Deskripsi / Sumber RKAS</label>
-          <textarea
+          <label for="warehouse-product-14" class="block font-semibold text-slate-700 mb-1">Deskripsi / Sumber RKAS</label>
+          <textarea id="warehouse-product-14"
             v-model="prodForm.description"
             rows="2"
             placeholder="Catatan tambahan, spesifikasi atau info sumber"
@@ -1395,13 +1400,13 @@
     <!-- ======================================================== -->
     <Modal
       v-model="deleteModalOpen"
-      title="Konfirmasi Hapus Barang"
-      subtitle="Tindakan ini tidak dapat dibatalkan"
+      title="Konfirmasi Arsipkan Barang"
+      subtitle="Riwayat stok tetap tersimpan"
       size="sm"
     >
       <div v-if="deletingProduct" class="space-y-3 text-xs">
         <p class="text-slate-600">
-          Apakah Anda yakin ingin menghapus barang berikut dari katalog?
+          Arsipkan barang berikut dari katalog aktif? Stok dan riwayatnya tetap tersimpan.
         </p>
         <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
           <div class="font-mono font-semibold text-red-900">{{ deletingProduct.sku }}</div>
@@ -1424,7 +1429,7 @@
             class="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold cursor-pointer"
             @click="executeDelete"
           >
-            Hapus Permanen
+            Arsipkan Barang
           </button>
         </div>
       </template>
@@ -1466,6 +1471,17 @@ const toast = useToast();
 
 // Main In-Memory Catalog State (holds all items for instant reactive filtering)
 const isLoading = ref(false);
+const catalogOffline = ref(false);
+const catalogBusy = ref(false);
+const catalogError = error => Object.values(error.response?.data?.errors || {}).flat().join(' ') || error.response?.data?.message || error.message || 'Perubahan belum tersimpan di server.';
+async function saveCatalog(change) {
+  if (catalogBusy.value) return false;
+  if (catalogOffline.value) { toast.error('Katalog contoh hanya dapat dibaca. Muat ulang data server sebelum menyimpan perubahan.'); return false; }
+  catalogBusy.value = true;
+  try { await change(); return true; }
+  catch (error) { toast.error(catalogError(error)); return false; }
+  finally { catalogBusy.value = false; }
+}
 const allCatalogProducts = ref([]);
 
 // Filters
@@ -1710,18 +1726,10 @@ const filteredUnitsWithCounts = computed(() => {
 // Category Actions
 const createCategory = async () => {
   const name = newCategoryName.value.trim();
-  if (!name) return;
-  if (!categoriesList.value.includes(name)) {
-    categoriesList.value.push(name);
-    categoriesList.value.sort();
-  }
-  try {
-    await api.post('/products/categories', { name });
-  } catch (e) {
-    console.warn('API error saving category:', e);
-  }
-  toast.success(`Kategori "${name}" berhasil ditambahkan.`);
+  if (!name || !await saveCatalog(() => api.post('/products/categories', { name }))) return;
+  categoriesList.value = [...new Set([...categoriesList.value, name])].sort();
   newCategoryName.value = '';
+  toast.success('Kategori berhasil disimpan di server.');
 };
 
 const startEditCategory = (catName) => {
@@ -1730,80 +1738,38 @@ const startEditCategory = (catName) => {
 };
 
 const saveEditCategory = async (oldName) => {
-  const newName = editCatInput.value.trim();
-  if (!newName || newName === oldName) {
-    editingCatName.value = null;
-    return;
-  }
-
-  // Update in category list
-  const idx = categoriesList.value.indexOf(oldName);
-  if (idx !== -1) categoriesList.value[idx] = newName;
-  categoriesList.value.sort();
-
-  // Update in all products in memory
-  allCatalogProducts.value.forEach((p) => {
-    if (p.category === oldName) p.category = newName;
+  const name = editCatInput.value.trim();
+  if (!name || name === oldName) { editingCatName.value = null; return; }
+  const ok = await saveCatalog(async () => {
+    const { data } = await api.get('/products/categories');
+    const record = data.data.find(item => item.name === oldName);
+    if (!record) throw new Error('Kategori belum tersimpan di server. Muat ulang katalog.');
+    await api.put('/products/categories/' + record.id, { name });
   });
-
-  // Sync to store
-  if (Array.isArray(store.products)) {
-    store.products.forEach((p) => {
-      if (p.category === oldName) p.category = newName;
-    });
-  }
-
-  try {
-    const res = await api.get('/products/categories');
-    const cat = res.data?.data?.find((c) => c.name === oldName);
-    if (cat?.id) {
-      await api.put(`/products/categories/${cat.id}`, { name: newName });
-    }
-  } catch (e) {
-    console.warn('API update error:', e);
-  }
-
-  editingCatName.value = null;
-  toast.success(`Kategori diperbarui menjadi "${newName}".`);
+  if (!ok) return;
+  await initializeCatalog(); editingCatName.value = null;
+  toast.success('Kategori berhasil diperbarui di server.');
 };
 
-const deleteCategory = async (catName, count) => {
-  if (count > 0) {
-    toast.error(`Kategori "${catName}" masih digunakan oleh ${count} barang.`);
-    return;
-  }
-  toast.info(`Menghapus kategori "${catName}"...`);
-
-  categoriesList.value = categoriesList.value.filter((c) => c !== catName);
-
-  try {
-    const res = await api.get('/products/categories');
-    const cat = res.data?.data?.find((c) => c.name === catName);
-    if (cat?.id) {
-      await api.delete(`/products/categories/${cat.id}`);
-    }
-  } catch (e) {
-    console.warn('API delete error:', e);
-  }
-
-  toast.success(`Kategori "${catName}" berhasil dihapus.`);
+const deleteCategory = async (name, count) => {
+  if (count > 0) { toast.error('Kategori masih digunakan oleh barang.'); return; }
+  const ok = await saveCatalog(async () => {
+    const { data } = await api.get('/products/categories');
+    const record = data.data.find(item => item.name === name);
+    if (!record) throw new Error('Kategori tidak ditemukan di server.');
+    await api.delete('/products/categories/' + record.id);
+  });
+  if (!ok) return;
+  categoriesList.value = categoriesList.value.filter(item => item !== name);
+  toast.success('Kategori berhasil dihapus di server.');
 };
 
 // Unit Actions
 const createUnit = async () => {
   const name = newUnitName.value.trim().toUpperCase();
-  if (!name) return;
-  if (!unitsList.value.includes(name)) {
-    unitsList.value.push(name);
-    unitsList.value.sort();
-  }
-  try {
-    await api.post('/products/units', { name });
-  } catch (e) {
-    console.warn('API unit error:', e);
-  }
-  toast.success(`Satuan "${name}" berhasil ditambahkan.`);
-  newUnitName.value = '';
+  if (!name || !await saveCatalog(() => api.post('/products/units', { name }))) return;
+  unitsList.value = [...new Set([...unitsList.value, name])].sort();
+  newUnitName.value = ''; toast.success('Satuan berhasil disimpan di server.');
 };
 
 const startEditUnit = (unitName) => {
@@ -1812,60 +1778,30 @@ const startEditUnit = (unitName) => {
 };
 
 const saveEditUnit = async (oldName) => {
-  const newName = editUnitInput.value.trim().toUpperCase();
-  if (!newName || newName === oldName) {
-    editingUnitName.value = null;
-    return;
-  }
-
-  const idx = unitsList.value.indexOf(oldName);
-  if (idx !== -1) unitsList.value[idx] = newName;
-  unitsList.value.sort();
-
-  allCatalogProducts.value.forEach((p) => {
-    if (p.unit === oldName) p.unit = newName;
+  const name = editUnitInput.value.trim().toUpperCase();
+  if (!name || name === oldName) { editingUnitName.value = null; return; }
+  const ok = await saveCatalog(async () => {
+    const { data } = await api.get('/products/units');
+    const record = data.data.find(item => item.name === oldName);
+    if (!record) throw new Error('Satuan belum tersimpan di server.');
+    await api.put('/products/units/' + record.id, { name });
   });
-
-  if (Array.isArray(store.products)) {
-    store.products.forEach((p) => {
-      if (p.unit === oldName) p.unit = newName;
-    });
-  }
-
-  try {
-    const res = await api.get('/products/units');
-    const u = res.data?.data?.find((item) => item.name === oldName);
-    if (u?.id) {
-      await api.put(`/products/units/${u.id}`, { name: newName });
-    }
-  } catch (e) {
-    console.warn('API unit update error:', e);
-  }
-
-  editingUnitName.value = null;
-  toast.success(`Satuan diperbarui menjadi "${newName}".`);
+  if (!ok) return;
+  await initializeCatalog(); editingUnitName.value = null;
+  toast.success('Satuan berhasil diperbarui di server.');
 };
 
-const deleteUnit = async (unitName, count) => {
-  if (count > 0) {
-    toast.error(`Satuan "${unitName}" masih digunakan oleh ${count} barang.`);
-    return;
-  }
-  toast.info(`Menghapus satuan "${unitName}"...`);
-
-  unitsList.value = unitsList.value.filter((item) => item !== unitName);
-
-  try {
-    const res = await api.get('/products/units');
-    const u = res.data?.data?.find((item) => item.name === unitName);
-    if (u?.id) {
-      await api.delete(`/products/units/${u.id}`);
-    }
-  } catch (e) {
-    console.warn('API unit delete error:', e);
-  }
-
-  toast.success(`Satuan "${unitName}" berhasil dihapus.`);
+const deleteUnit = async (name, count) => {
+  if (count > 0) { toast.error('Satuan masih digunakan oleh barang.'); return; }
+  const ok = await saveCatalog(async () => {
+    const { data } = await api.get('/products/units');
+    const record = data.data.find(item => item.name === name);
+    if (!record) throw new Error('Satuan tidak ditemukan di server.');
+    await api.delete('/products/units/' + record.id);
+  });
+  if (!ok) return;
+  unitsList.value = unitsList.value.filter(item => item !== name);
+  toast.success('Satuan berhasil dihapus di server.');
 };
 
 // ========================================================
@@ -1908,51 +1844,16 @@ const openEditModal = (p) => {
 };
 
 const saveProduct = async () => {
-  const formVal = { ...prodForm.value };
-
-  // Update in memory list
-  if (editingProduct.value) {
-    const target = allCatalogProducts.value.find((p) => p.sku === editingProduct.value.sku);
-    if (target) Object.assign(target, formVal);
-
-    if (Array.isArray(store.products)) {
-      const local = store.products.find((p) => p.sku === editingProduct.value.sku);
-      if (local) Object.assign(local, formVal);
-    }
-
-    try {
-      if (editingProduct.value.id) {
-        await api.put(`/products/${editingProduct.value.id}`, formVal);
-      }
-    } catch (e) {
-      console.warn('API update product error:', e);
-    }
-    toast.success(`Data barang ${formVal.sku} berhasil diperbarui.`);
-  } else {
-    allCatalogProducts.value.unshift({ id: Date.now(), ...formVal });
-    if (Array.isArray(store.products)) {
-      store.products.unshift({ id: Date.now(), ...formVal });
-    }
-
-    try {
-      await api.post('/products', formVal);
-    } catch (e) {
-      console.warn('API create product error:', e);
-    }
-    toast.success(`Barang baru ${formVal.sku} berhasil ditambahkan.`);
-  }
-
-  // Update category and unit lists if new
-  if (formVal.category && !categoriesList.value.includes(formVal.category)) {
-    categoriesList.value.push(formVal.category);
-    categoriesList.value.sort();
-  }
-  if (formVal.unit && !unitsList.value.includes(formVal.unit)) {
-    unitsList.value.push(formVal.unit);
-    unitsList.value.sort();
-  }
-
-  productModalOpen.value = false;
+  const payload = { ...prodForm.value };
+  const ok = await saveCatalog(async () => {
+    if (editingProduct.value) {
+      if (!editingProduct.value.id) throw new Error('Barang belum tersimpan di server. Muat ulang katalog.');
+      await api.put('/products/' + editingProduct.value.id, payload);
+    } else await api.post('/products', payload);
+  });
+  if (!ok) return;
+  await initializeCatalog(); productModalOpen.value = false;
+  toast.success('Data barang berhasil disimpan di server.');
 };
 
 const confirmDelete = (p) => {
@@ -1961,25 +1862,15 @@ const confirmDelete = (p) => {
 };
 
 const executeDelete = async () => {
-  if (!deletingProduct.value) return;
-  const sku = deletingProduct.value.sku;
-
-  allCatalogProducts.value = allCatalogProducts.value.filter((p) => p.sku !== sku);
-  if (Array.isArray(store.products)) {
-    store.products = store.products.filter((p) => p.sku !== sku);
-  }
-
-  try {
-    if (deletingProduct.value.id) {
-      await api.delete(`/products/${deletingProduct.value.id}`);
-    }
-  } catch (e) {
-    console.warn('API delete error:', e);
-  }
-
-  deleteModalOpen.value = false;
-  deletingProduct.value = null;
-  toast.success(`Barang ${sku} berhasil dihapus.`);
+  const product = deletingProduct.value;
+  if (!product) return;
+  const ok = await saveCatalog(async () => {
+    if (!product.id) throw new Error('Barang belum tersimpan di server. Muat ulang katalog.');
+    await api.delete('/products/' + product.id);
+  });
+  if (!ok) return;
+  await initializeCatalog(); deleteModalOpen.value = false; deletingProduct.value = null;
+  toast.success('Barang berhasil diarsipkan di server.');
 };
 
 // ========================================================
@@ -2313,60 +2204,19 @@ const filteredValidatedRows = computed(() => {
 
 // Save Imported Data
 const saveImportedData = async () => {
+  if (isSavingImport.value) return;
+  const items = validatedRows.value.filter(item => item.validationStatus !== 'error');
+  if (!items.length) { toast.error('Tidak ada baris valid untuk disimpan.'); return; }
   isSavingImport.value = true;
-  const validItems = validatedRows.value.filter((r) => r.validationStatus !== 'error');
-
-  // Immediately apply to in-memory catalog
-  const existingMap = new Map(allCatalogProducts.value.map((p) => [p.sku, p]));
-  let newCount = 0;
-  let updateCount = 0;
-
-  validItems.forEach((item, idx) => {
-    let finalSku = item.sku;
-    if (existingMap.has(finalSku)) {
-      if (duplicateMode.value === 'skip') return;
-      if (duplicateMode.value === 'auto_id') {
-        finalSku = `BRG-${Date.now()}-${idx}`;
-        allCatalogProducts.value.unshift({ id: Date.now() + idx, ...item, sku: finalSku });
-        newCount++;
-        return;
-      }
-      const existing = existingMap.get(finalSku);
-      Object.assign(existing, item);
-      updateCount++;
-    } else {
-      allCatalogProducts.value.unshift({ id: Date.now() + idx, ...item });
-      newCount++;
-    }
-
-    if (item.category && !categoriesList.value.includes(item.category)) {
-      categoriesList.value.push(item.category);
-    }
-    if (item.unit && !unitsList.value.includes(item.unit)) {
-      unitsList.value.push(item.unit);
-    }
+  let message = '';
+  const ok = await saveCatalog(async () => {
+    const { data } = await api.post('/products/import', { items, duplicate_mode: duplicateMode.value });
+    message = data.message;
   });
-
-  categoriesList.value.sort();
-  unitsList.value.sort();
-
-  // Also sync to store
-  store.products = [...allCatalogProducts.value];
-
-  // Try API import in background
-  try {
-    await api.post('/products/import', {
-      items: validItems,
-      duplicate_mode: duplicateMode.value,
-    });
-  } catch (err) {
-    console.warn('API import background error:', err);
-  }
-
   isSavingImport.value = false;
-  importModalOpen.value = false;
-  currentPage.value = 1;
-  toast.success(`Berhasil mengimpor ${newCount + updateCount} data barang (${newCount} baru, ${updateCount} diperbarui).`);
+  if (!ok) return;
+  await initializeCatalog(); importModalOpen.value = false; currentPage.value = 1;
+  toast.success(message || 'Impor berhasil disimpan di server.');
 };
 
 // Export to Excel
@@ -2415,74 +2265,24 @@ const exportToExcel = () => {
 // Initialize Catalog Data (Real-time synchronization with store.products)
 const initializeCatalog = async () => {
   isLoading.value = true;
-
-  // Helper: Merge catalog items without overwriting live stock of existing products
-  const mergeCatalogItems = (items) => {
-    if (!Array.isArray(store.products)) {
-      store.products = [];
-    }
-    const seenMap = new Map();
-    store.products.forEach((p) => {
-      if (p.sku) seenMap.set(p.sku.toLowerCase(), true);
-      if (p.name) seenMap.set(p.name.toLowerCase(), true);
-    });
-
-    items.forEach((item) => {
-      const skuKey = item.sku ? item.sku.toLowerCase() : '';
-      const nameKey = item.name ? item.name.toLowerCase() : '';
-      if (!seenMap.has(skuKey) && !seenMap.has(nameKey)) {
-        store.products.push({
-          id: item.id || Date.now() + Math.random(),
-          sku: item.sku || 'PRD-' + Math.floor(1000 + Math.random() * 9000),
-          name: item.name,
-          category: item.category || 'Umum',
-          unit: item.unit || 'UNIT',
-          stock: Number(item.stock) || 0,
-          minStock: item.min_stock || item.minStock || 10,
-          price: Number(item.sell_price || item.price || 0),
-          last_buy_price: Number(item.last_buy_price || 0),
-          hpp: Number(item.hpp || 0),
-          sell_price: Number(item.sell_price || item.price || 0),
-          status: (Number(item.stock) || 0) > 10 ? 'Tersedia' : ((Number(item.stock) || 0) > 0 ? 'Menipis' : 'Habis'),
-          location: item.location || 'Gudang Utama',
-          description: item.description || '',
-        });
-        if (skuKey) seenMap.set(skuKey, true);
-        if (nameKey) seenMap.set(nameKey, true);
-      }
-    });
-  };
-
   try {
-    // 1. Fetch fresh database catalog from backend API
-    const res = await api.get('/products?per_page=5000');
-    if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
-      mergeCatalogItems(res.data.data);
-    } else {
-      throw new Error('API products empty');
-    }
-  } catch (err) {
-    // 2. Fallback to pre-seeded JSON file
+    const { data } = await api.get('/products?per_page=5000');
+    if (!data.success || !Array.isArray(data.data)) throw new Error('Respons katalog tidak valid.');
+    store.products = data.data.map(item => ({ ...item, price: Number(item.sell_price ?? item.price ?? 0), minStock: item.min_stock ?? item.minStock ?? 10 }));
+    catalogOffline.value = false;
+  } catch (error) {
+    catalogOffline.value = true;
     try {
-      const seedRes = await fetch('/data/products_seed.json');
-      if (seedRes.ok) {
-        const seedJson = await seedRes.json();
-        mergeCatalogItems(seedJson.products || []);
+      const response = await fetch('/data/products_seed.json');
+      if (response.ok) {
+        const seed = await response.json();
+        store.products = (seed.products || []).map(item => ({ ...item, price: Number(item.sell_price ?? item.price ?? 0), minStock: item.min_stock ?? item.minStock ?? 10 }));
       }
-    } catch (e2) {}
+    } catch { /* Retain the last visible snapshot, explicitly marked read-only. */ }
   } finally {
-    // 3. Keep allCatalogProducts strictly synced with store.products
     allCatalogProducts.value = [...store.products];
-
-    // Extract unique categories & units
-    const cats = new Set();
-    const units = new Set();
-    allCatalogProducts.value.forEach((p) => {
-      if (p.category) cats.add(p.category);
-      if (p.unit) units.add(p.unit);
-    });
-    categoriesList.value = Array.from(cats).sort();
-    unitsList.value = Array.from(units).sort();
+    categoriesList.value = [...new Set(store.products.map(item => item.category).filter(Boolean))].sort();
+    unitsList.value = [...new Set(store.products.map(item => item.unit).filter(Boolean))].sort();
     isLoading.value = false;
   }
 };
@@ -2491,7 +2291,7 @@ const initializeCatalog = async () => {
 watch(
   () => store.products,
   (newProds) => {
-    if (Array.isArray(newProds) && newProds.length > 0) {
+    if (Array.isArray(newProds)) {
       allCatalogProducts.value = [...newProds];
     }
   },

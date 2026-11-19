@@ -311,8 +311,6 @@ const countStatus = (s) => store.orders.filter((o) => o.status === s).length;
 const filteredOrders = computed(() => {
   return store.orders
     .filter((o) => {
-      if (o.orderNumber === 'ORD-2026-007' || o.orderNumber === 'ORD-2026-008') return false;
-      if (o.date && String(o.date).startsWith('2026-10')) return false;
       const q = searchQuery.value.toLowerCase();
       const matchSearch =
         !q ||

@@ -308,9 +308,9 @@ const overdueCount = computed(() => store.invoices.filter((i) => i.status === 'J
 const partialCount = computed(() => store.invoices.filter((i) => i.status === 'Sebagian' || i.status === 'Sebagian / Termin').length);
 const paidCount = computed(() => store.invoices.filter((i) => i.status === 'Lunas').length);
 
-const totalInvoiceValue = computed(() => store.invoices.reduce((sum, i) => sum + i.totalAmount, 0));
-const totalPaymentValue = computed(() => store.payments.reduce((sum, p) => sum + p.amount, 0));
-const totalReceivableValue = computed(() => store.invoices.reduce((sum, i) => sum + i.remainingAmount, 0));
+const totalInvoiceValue = computed(() => store.invoices.reduce((sum, i) => sum + Number(i.totalAmount || 0), 0));
+const totalPaymentValue = computed(() => store.payments.reduce((sum, p) => sum + Number(p.amount || 0), 0));
+const totalReceivableValue = computed(() => store.invoices.reduce((sum, i) => sum + Number(i.remainingAmount || 0), 0));
 
 const pendingWarehouseRequests = computed(() => {
   return (store.warehouseRequests || []).filter(

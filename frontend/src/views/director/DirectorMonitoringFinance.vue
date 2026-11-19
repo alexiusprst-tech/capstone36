@@ -130,8 +130,8 @@ const overdueCount = computed(() => store.invoices.filter((i) => i.status === 'J
 const partialCount = computed(() => store.invoices.filter((i) => i.status === 'Sebagian' || i.status === 'Sebagian / Termin').length);
 const paidCount = computed(() => store.invoices.filter((i) => i.status === 'Lunas').length);
 
-const totalInvoiceSum = computed(() => store.invoices.reduce((sum, i) => sum + i.totalAmount, 0));
-const totalReceivable = computed(() => store.invoices.reduce((sum, i) => sum + i.remainingAmount, 0));
+const totalInvoiceSum = computed(() => store.invoices.reduce((sum, i) => sum + Number(i.totalAmount || 0), 0));
+const totalReceivable = computed(() => store.invoices.reduce((sum, i) => sum + Number(i.remainingAmount || 0), 0));
 
 const openInspect = (inv) => {
   selectedInvoice.value = inv;

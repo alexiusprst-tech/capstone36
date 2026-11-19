@@ -2242,7 +2242,7 @@ const letterheadFields = [
 function projectWithLetterhead(project) {
   const profile = customerProfile(project.metadata?.customer_profile || project.customer_profile || {});
   profile.name ||= project.customer_name || '';
-  profile.orgFullName = expandSchoolName(profile.orgFullName || project.customer_name || '');
+  profile.orgFullName ||= expandSchoolName(project.customer_name || '');
   return { ...project, metadata: { ...project.metadata, customer_profile: profile } };
 }
 
@@ -2250,7 +2250,7 @@ function changeProjectCustomer() {
   const client = findProjectCustomer(projectForm.value, store.clients);
   projectForm.value.customer_code = client?.code || '';
   const prof = customerProfile(client || { name: projectForm.value.customer_name, orgFullName: projectForm.value.customer_name });
-  prof.orgFullName = expandSchoolName(prof.orgFullName || projectForm.value.customer_name || '');
+  prof.orgFullName ||= expandSchoolName(projectForm.value.customer_name || '');
   projectForm.value.metadata.customer_profile = prof;
 }
 
@@ -2938,9 +2938,6 @@ async function saveSpphDocument(notify = true) {
 
 async function saveProjectData() {
   try {
-    if (projectForm.value.metadata?.customer_profile?.orgFullName) {
-      projectForm.value.metadata.customer_profile.orgFullName = expandSchoolName(projectForm.value.metadata.customer_profile.orgFullName);
-    }
     const res = await spjService.updateProject(selectedProjectId.value, { ...projectForm.value, metadata: { customer_profile: projectForm.value.metadata.customer_profile } });
     if (res.success) {
       toast.success('Data proyek berhasil diperbarui.');

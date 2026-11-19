@@ -17,6 +17,8 @@ foreach (['MARKETING', 'DIREKTUR', 'ADMINISTRASI', 'WAREHOUSE', 'FINANCE', 'CLIE
     ]);
 }
 
+App\Models\Product::create(['sku' => 'SP1-CUSTOMER-ITEM', 'name' => 'Barang Uji Sprint 1', 'category' => 'QA', 'unit' => 'PCS', 'stock' => 20, 'sell_price' => 1000]);
+
 // Explicit live suites keep their real API tokens while navigating with an
 // isolated web session that represents the same role and supplier email.
 foreach (['T22_LIVE_CONTEXT', 'PO_LIVE_CONTEXT'] as $variable) {

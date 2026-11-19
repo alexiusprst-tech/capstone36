@@ -6,6 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductUnit;
+use App\Models\PurchaseTransaction;
+use App\Models\WarehouseRequest;
+use App\Services\InventoryTransaction;
+use App\Services\SalesOrderInventory;
+use App\Services\StockLedger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -113,24 +118,33 @@ class ProductController extends Controller
             'category' => 'required|string|max:150',
             'unit' => 'required|string|max:50',
             'description' => 'nullable|string',
-            'stock' => 'nullable|integer|min:0',
-            'min_stock' => 'nullable|integer|min:0',
-            'last_buy_price' => 'nullable|numeric|min:0',
-            'hpp' => 'nullable|numeric|min:0',
-            'sell_price' => 'nullable|numeric|min:0',
+            'stock' => 'nullable|integer|min:0|max:1000000000',
+            'min_stock' => 'nullable|integer|min:0|max:1000000000',
+            'last_buy_price' => 'nullable|numeric|decimal:0,2|min:0|max:1000000000000',
+            'hpp' => 'nullable|numeric|decimal:0,2|min:0|max:1000000000000',
+            'sell_price' => 'nullable|numeric|decimal:0,2|min:0|max:1000000000000',
             'status' => 'nullable|string|max:30',
         ]);
 
-        // Auto create category and unit if new
-        ProductCategory::firstOrCreate(['name' => $validated['category']]);
-        ProductUnit::firstOrCreate(['name' => $validated['unit']]);
-
         $validated['stock'] = $validated['stock'] ?? 0;
-        $validated['status'] = $validated['status'] ?? ($validated['stock'] > 0 ? 'Tersedia' : 'Habis');
+        $validated['min_stock'] = $validated['min_stock'] ?? 10;
+        foreach (['last_buy_price', 'hpp', 'sell_price'] as $price) {
+            $validated[$price] = $validated[$price] ?? 0;
+        }
+        $validated['status'] = Product::stockStatus($validated['stock'], $validated['min_stock']);
         $validated['created_by'] = auth()->user()->name ?? 'Pengguna';
         $validated['updated_by'] = auth()->user()->name ?? 'Pengguna';
 
-        $product = Product::create($validated);
+        $product = InventoryTransaction::run(function () use ($validated) {
+            abort_if(Product::withTrashed()->where('sku', $validated['sku'])->exists(), 409, 'SKU sudah digunakan. Muat ulang katalog sebelum menambah barang.');
+            ProductCategory::firstOrCreate(['name' => $validated['category']]);
+            ProductUnit::firstOrCreate(['name' => $validated['unit']]);
+            $product = Product::create($validated);
+            StockLedger::record($product, 0, $product->stock, auth()->user(), 'OPENING', 'product', (string) $product->id, 'Saldo awal barang.');
+            app(SalesOrderInventory::class)->reallocateDrafts();
+
+            return $product;
+        });
 
         return response()->json([
             'success' => true,
@@ -165,20 +179,41 @@ class ProductController extends Controller
             'category' => 'required|string|max:150',
             'unit' => 'required|string|max:50',
             'description' => 'nullable|string',
-            'stock' => 'nullable|integer|min:0',
-            'min_stock' => 'nullable|integer|min:0',
-            'last_buy_price' => 'nullable|numeric|min:0',
-            'hpp' => 'nullable|numeric|min:0',
-            'sell_price' => 'nullable|numeric|min:0',
+            'stock' => 'sometimes|integer|min:0|max:1000000000',
+            'min_stock' => 'sometimes|integer|min:0|max:1000000000',
+            'last_buy_price' => 'nullable|numeric|decimal:0,2|min:0|max:1000000000000',
+            'hpp' => 'nullable|numeric|decimal:0,2|min:0|max:1000000000000',
+            'sell_price' => 'nullable|numeric|decimal:0,2|min:0|max:1000000000000',
             'status' => 'nullable|string|max:30',
+            'adjustment_reason' => 'nullable|string|max:1000',
         ]);
 
-        ProductCategory::firstOrCreate(['name' => $validated['category']]);
-        ProductUnit::firstOrCreate(['name' => $validated['unit']]);
-
         $validated['updated_by'] = auth()->user()->name ?? 'Pengguna';
+        foreach (['last_buy_price', 'hpp', 'sell_price'] as $price) {
+            if (array_key_exists($price, $validated) && $validated[$price] === null) {
+                $validated[$price] = 0;
+            }
+        }
+        $reason = $validated['adjustment_reason'] ?? 'Perubahan stok melalui pengelolaan barang.';
+        unset($validated['adjustment_reason']);
 
-        $product->update($validated);
+        InventoryTransaction::run(function () use ($product, $validated, $reason) {
+            $locked = Product::whereKey($product->id)->lockForUpdate()->firstOrFail();
+            $allocated = (int) DB::table('sales_order_allocations')->where('product_id', $locked->id)->sum('qty');
+            abort_if(($validated['stock'] ?? $locked->stock) < $allocated, 409, 'Stok fisik tidak boleh kurang dari alokasi aktif.');
+            abort_if($validated['sku'] !== $locked->sku, 409, 'SKU permanen setelah barang disimpan dan tidak dapat diubah.');
+            abort_if($validated['unit'] !== $locked->unit && ($allocated > 0 || $this->hasOpenProcurement($locked->sku)), 409, 'Satuan barang tidak dapat diubah selama ada alokasi atau pengadaan aktif.');
+            ProductCategory::firstOrCreate(['name' => $validated['category']]);
+            ProductUnit::firstOrCreate(['name' => $validated['unit']]);
+            $before = $locked->stock;
+            $validated['status'] = Product::stockStatus($validated['stock'] ?? $locked->stock, $validated['min_stock'] ?? $locked->min_stock);
+            $locked->update($validated);
+            if ($before !== $locked->stock) {
+                StockLedger::record($locked, $before, $locked->stock, auth()->user(), 'ADJUSTMENT', 'product', (string) $locked->id, $reason);
+                app(SalesOrderInventory::class)->reallocateDrafts();
+            }
+        });
+        $product->refresh();
 
         return response()->json([
             'success' => true,
@@ -194,12 +229,32 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
         $sku = $product->sku;
-        $product->delete();
+        InventoryTransaction::run(function () use ($product) {
+            $locked = Product::whereKey($product->id)->lockForUpdate()->firstOrFail();
+            abort_if(DB::table('sales_order_allocations')->where('product_id', $locked->id)->exists(), 409, 'Barang sedang dialokasikan ke pesanan dan tidak dapat dihapus.');
+            abort_if($this->hasOpenProcurement($locked->sku), 409, 'Barang masih digunakan pengadaan aktif dan tidak dapat diarsipkan.');
+            $locked->delete();
+        });
 
         return response()->json([
             'success' => true,
-            'message' => "Barang {$sku} berhasil dihapus.",
+            'message' => "Barang {$sku} berhasil diarsipkan. Riwayat stok tetap tersimpan.",
         ]);
+    }
+
+    public function restore(int $id): JsonResponse
+    {
+        $product = InventoryTransaction::run(function () use ($id) {
+            $product = Product::onlyTrashed()->whereKey($id)->lockForUpdate()->firstOrFail();
+            ProductCategory::firstOrCreate(['name' => $product->category]);
+            ProductUnit::firstOrCreate(['name' => $product->unit]);
+            $product->restore();
+            app(SalesOrderInventory::class)->reallocateDrafts();
+
+            return $product;
+        });
+
+        return response()->json(['success' => true, 'message' => 'Barang berhasil dipulihkan.', 'data' => $product]);
     }
 
     /**
@@ -384,11 +439,15 @@ class ProductController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $unit->update($validated);
-
-        if ($oldName !== $validated['name']) {
-            Product::where('unit', $oldName)->update(['unit' => $validated['name']]);
-        }
+        InventoryTransaction::run(function () use ($unit, $oldName, $validated) {
+            if ($oldName !== $validated['name']) {
+                foreach (Product::where('unit', $oldName)->orderBy('id')->lockForUpdate()->get() as $product) {
+                    abort_if(DB::table('sales_order_allocations')->where('product_id', $product->id)->exists() || $this->hasOpenProcurement($product->sku), 409, 'Satuan barang tidak dapat diubah selama ada alokasi atau pengadaan aktif.');
+                }
+                Product::where('unit', $oldName)->update(['unit' => $validated['name']]);
+            }
+            $unit->update($validated);
+        });
 
         return response()->json([
             'success' => true,
@@ -426,10 +485,17 @@ class ProductController extends Controller
     public function import(Request $request): JsonResponse
     {
         $request->validate([
-            'items' => 'required|array',
-            'items.*.name' => 'required|string',
-            'items.*.category' => 'required|string',
-            'items.*.unit' => 'required|string',
+            'items' => 'required|array|min:1|max:10000',
+            'items.*.sku' => 'nullable|string|max:50',
+            'items.*.stock' => 'nullable|integer|min:0|max:1000000000',
+            'items.*.min_stock' => 'nullable|integer|min:0|max:1000000000',
+            'items.*.last_buy_price' => 'nullable|numeric|decimal:0,2|min:0|max:1000000000000',
+            'items.*.hpp' => 'nullable|numeric|decimal:0,2|min:0|max:1000000000000',
+            'items.*.sell_price' => 'nullable|numeric|decimal:0,2|min:0|max:1000000000000',
+            'items.*.price' => 'nullable|numeric|decimal:0,2|min:0|max:1000000000000',
+            'items.*.name' => 'required|string|max:255',
+            'items.*.category' => 'required|string|max:150',
+            'items.*.unit' => 'required|string|max:50',
             'duplicate_mode' => 'nullable|string|in:update,skip,auto_id',
         ]);
 
@@ -442,7 +508,9 @@ class ProductController extends Controller
         $skipped = 0;
         $now = now();
 
-        DB::transaction(function () use ($items, $duplicateMode, $user, $now, &$imported, &$updated, &$skipped) {
+        InventoryTransaction::run(function () use ($items, $duplicateMode, $user, $now, &$imported, &$updated, &$skipped) {
+            // A deadlock retry must not carry counts from a rolled-back attempt.
+            $imported = $updated = $skipped = 0;
             // Collect unique categories and units
             $categories = [];
             $units = [];
@@ -467,7 +535,11 @@ class ProductController extends Controller
             }
 
             // Existing SKUs
-            $existingSkus = Product::pluck('id', 'sku')->all();
+            $lockedProducts = Product::withTrashed()->orderBy('id')->lockForUpdate()->get();
+            $existingSkus = $lockedProducts->pluck('id', 'sku')->all();
+            // MySQL's SKU unique index is case insensitive. Resolve the saved SKU before guards/upsert.
+            $canonicalSkus = $lockedProducts->mapWithKeys(fn ($product) => [mb_strtolower($product->sku) => $product->sku])->all();
+            $allocations = DB::table('sales_order_allocations')->groupBy('product_id')->selectRaw('product_id, SUM(qty) as qty')->pluck('qty', 'product_id');
 
             $upsertRows = [];
 
@@ -482,13 +554,24 @@ class ProductController extends Controller
                 $hpp = (float) ($item['hpp'] ?? 0);
                 $sellPrice = (float) ($item['sell_price'] ?? $item['price'] ?? 0);
                 $description = $item['description'] ?? null;
-                $status = $item['status'] ?? ($stock > 0 ? 'Tersedia' : 'Habis');
+                $status = Product::stockStatus($stock, $minStock);
 
                 if (! $sku) {
-                    $sku = 'BRG-'.str_pad((string) (count($existingSkus) + $idx + 1), 6, '0', STR_PAD_LEFT);
+                    $sequence = count($existingSkus) + $idx + 1;
+                    do {
+                        $sku = 'BRG-'.str_pad((string) $sequence++, 6, '0', STR_PAD_LEFT);
+                    } while (isset($existingSkus[$sku]));
                 }
 
+                $sku = $canonicalSkus[mb_strtolower($sku)] ?? $sku;
+
                 $isExisting = isset($existingSkus[$sku]);
+                if ($isExisting && $duplicateMode === 'update') {
+                    $existing = $lockedProducts->firstWhere('sku', $sku);
+                    abort_if($existing?->trashed(), 409, 'SKU '.$sku.' telah diarsipkan. Pulihkan barang sebelum mengimpor ulang.');
+                    abort_if($stock < ($allocations[$existingSkus[$sku]] ?? 0), 409, 'Stok impor tidak boleh kurang dari alokasi aktif untuk '.$sku.'.');
+                    abort_if($existing && $existing->unit !== $unit && (($allocations[$existing->id] ?? 0) > 0 || $this->hasOpenProcurement($sku)), 409, 'Satuan barang tidak dapat diubah selama ada alokasi atau pengadaan aktif.');
+                }
 
                 if ($isExisting && $duplicateMode === 'skip') {
                     $skipped++;
@@ -505,10 +588,11 @@ class ProductController extends Controller
                     $updated++;
                 } else {
                     $imported++;
-                    $existingSkus[$sku] = true;
+                    $existingSkus[$sku] = 0;
+                    $canonicalSkus[mb_strtolower($sku)] = $sku;
                 }
 
-                $upsertRows[] = [
+                $upsertRows[$sku] = [
                     'sku' => $sku,
                     'name' => $name,
                     'category' => $category,
@@ -528,12 +612,20 @@ class ProductController extends Controller
             }
 
             if (! empty($upsertRows)) {
-                foreach (array_chunk($upsertRows, 400) as $chunk) {
+                foreach (array_chunk(array_values($upsertRows), 400) as $chunk) {
                     Product::upsert($chunk, ['sku'], [
                         'name', 'category', 'unit', 'description', 'stock', 'min_stock',
                         'last_buy_price', 'hpp', 'sell_price', 'status', 'updated_by', 'updated_at',
                     ]);
                 }
+                $oldBySku = $lockedProducts->keyBy('sku');
+                foreach (Product::whereIn('sku', array_keys($upsertRows))->get() as $product) {
+                    $old = $oldBySku->get($product->sku);
+                    if (! $old || $old->stock !== $product->stock) {
+                        StockLedger::record($product, $old?->stock ?? 0, $product->stock, auth()->user(), $old ? 'ADJUSTMENT' : 'OPENING', 'import', null, 'Impor katalog barang.');
+                    }
+                }
+                app(SalesOrderInventory::class)->reallocateDrafts();
             }
         });
 
@@ -547,6 +639,22 @@ class ProductController extends Controller
                 'total' => $imported + $updated,
             ],
         ]);
+    }
+
+    private function hasOpenProcurement(string $sku): bool
+    {
+        foreach (PurchaseTransaction::whereNotIn('status', ['DITERIMA_GUDANG', 'DIBATALKAN'])->get(['items']) as $purchase) {
+            if (collect($purchase->items)->contains(fn ($item) => ($item['sku'] ?? null) === $sku)) {
+                return true;
+            }
+        }
+        foreach (WarehouseRequest::whereNotIn('status', ['SELESAI', 'DIBATALKAN'])->get(['items']) as $request) {
+            if (collect($request->items)->contains(fn ($item) => ($item['sku'] ?? null) === $sku)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

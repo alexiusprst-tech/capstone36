@@ -1,3 +1,5 @@
+> Pembaruan 19 November 2026: kontrak Sprint 1 yang telah diintegrasikan dan diuji ada pada [SPRINT1_PROGRESS.md](SPRINT1_PROGRESS.md). Bagian berikut mencakup spesifikasi awal dan rencana modul lain; gunakan kontrak Sprint 1 tersebut jika terdapat perbedaan implementasi, status, atau rumus.
+
 # Business Rules & System Governance
 ## CV. Alphate Artha Jaya — Aturan Bisnis & Kontrol Operasional
 

@@ -60,7 +60,7 @@
         <form class="space-y-4 max-w-md text-xs" @submit.prevent="updatePassword">
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Kata Sandi Saat Ini</label>
-            <input type="password" value="password123" disabled class="w-full px-3 py-2 border rounded-lg bg-slate-100 text-slate-500" />
+            <input type="password" value="" placeholder="Kata sandi tidak ditampilkan" disabled class="w-full px-3 py-2 border rounded-lg bg-slate-100 text-slate-500" />
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Kata Sandi Baru</label>
@@ -139,7 +139,7 @@ const currentPermissions = computed(() => {
 
 const updatePassword = () => {
   if (newPassword.value) {
-    toast.success('Kata sandi berhasil diperbarui.');
+    toast.info('Perubahan kata sandi belum tersedia. Hubungi administrator; kata sandi Anda belum diubah.');
     newPassword.value = '';
   }
 };

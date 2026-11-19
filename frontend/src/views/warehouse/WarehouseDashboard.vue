@@ -253,7 +253,6 @@ import {
 
 const toast = useToast();
 
-const totalStockUnits = computed(() => store.products.reduce((sum, p) => sum + (p.unit === 'M3' ? 0 : p.stock), 0));
 const availableCount = computed(() => store.products.filter((p) => p.status === 'Tersedia').length);
 const oosCount = computed(() => store.products.filter((p) => p.status === 'Tidak Tersedia').length);
 const fulfillProcessCount = computed(() => store.warehouseFulfillments.filter((f) => f.status === 'Diproses').length);

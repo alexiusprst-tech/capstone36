@@ -121,7 +121,8 @@ class SpjService
                 break;
 
             case 'kuitansi':
-                if (($project->finance_status ?? '') !== 'LUNAS' && empty($project->invoice_paid)) {
+                $due = $project->invoice_value > 0 ? $project->invoice_value : $project->project_value;
+                if (($project->finance_status ?? '') !== 'LUNAS' || $due <= 0 || $project->invoice_paid < $due) {
                     $missing[] = 'Finance: Pembayaran belum terkonfirmasi/diterima untuk penerbitan Kuitansi';
                 }
                 break;

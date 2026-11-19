@@ -3,16 +3,20 @@
 namespace Tests\Feature;
 
 use App\Models\Product;
-use App\Models\WarehouseRequest;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
+use Tests\Support\ProcurementFixture;
 use Tests\TestCase;
 
 class PurchaseApiTest extends TestCase
 {
+    use ProcurementFixture;
     use RefreshDatabase;
 
     public function test_can_list_and_create_suppliers(): void
     {
+        Sanctum::actingAs(User::factory()->create(['role' => 'FINANCE']));
         $response = $this->postJson('/api/suppliers', [
             'name' => 'PT Mitra Komputer Jaya',
             'phone' => '021-1234567',
@@ -31,7 +35,12 @@ class PurchaseApiTest extends TestCase
 
     public function test_can_create_and_list_warehouse_request(): void
     {
+        Sanctum::actingAs(User::factory()->create(['role' => 'WAREHOUSE']));
+        $fixture = $this->linkedRequest([['sku' => 'A00001770', 'name' => 'Barang uji', 'qty' => 100, 'unit' => 'UNIT']]);
+        $orderId = $fixture->sales_order_id;
+        $fixture->delete();
         $response = $this->postJson('/api/warehouse/requests', [
+            'sales_order_id' => $orderId,
             'project_id' => 'PR00001',
             'project_name' => 'pengadaan komputer sekolah (SMA NEGRI 2 BOGOR)',
             'purpose' => 'Kebutuhan pengadaan 100 komputer lab sekolah',
@@ -59,6 +68,7 @@ class PurchaseApiTest extends TestCase
 
     public function test_purchase_receipt_updates_request_and_stock_exactly_once(): void
     {
+        Sanctum::actingAs(User::factory()->create(['role' => 'FINANCE']));
         $prod = Product::create([
             'sku' => 'A00001770',
             'name' => 'Pemeliharaan Komputer Note Book/ Laptop',
@@ -71,26 +81,7 @@ class PurchaseApiTest extends TestCase
             'status' => 'Habis',
         ]);
 
-        $req = WarehouseRequest::create([
-            'request_code' => 'REQ-2026-001',
-            'request_date' => '2026-10-14',
-            'project_id' => 'PR00001',
-            'project_name' => 'pengadaan komputer sekolah (SMA NEGRI 2 BOGOR)',
-            'purpose' => 'Kebutuhan 100 komputer',
-            'requested_by' => 'Agus Santoso',
-            'status' => 'MENUNGGU_FINANCE',
-            'total_est_cost' => 10000000,
-            'items' => [
-                [
-                    'sku' => 'A00001770',
-                    'name' => 'Pemeliharaan Komputer Note Book/ Laptop',
-                    'qty' => 100,
-                    'unit' => 'UNIT',
-                    'est_price' => 100000,
-                    'subtotal' => 10000000,
-                ],
-            ],
-        ]);
+        $req = $this->linkedRequest([['sku' => 'A00001770', 'name' => $prod->name, 'qty' => 100, 'unit' => 'UNIT', 'est_price' => 100000]], 'PT Synnex Metrodata Indonesia');
 
         $purchaseData = [
             'purchase_code' => 'PB20261014114148',
@@ -136,9 +127,9 @@ class PurchaseApiTest extends TestCase
         $this->assertEquals(100000, (float) $prod->fresh()->last_buy_price);
         $this->assertEquals(100000, (float) $prod->fresh()->hpp);
 
-        $receipt = $this->postJson("/api/purchases/{$purchaseId}/receive", [
-            'notes' => 'Barang diterima dan diperiksa oleh Warehouse.',
-        ]);
+        Sanctum::actingAs(User::factory()->create(['role' => 'WAREHOUSE']));
+        $receiptPayload = ['version' => 1, 'idempotency_key' => 'ae4b75aa-1145-4e1e-9ea6-21c7d3d61da6', 'items' => [['line_index' => 0, 'accepted_qty' => 100, 'rejected_qty' => 0]], 'notes' => 'Barang diterima dan diperiksa oleh Warehouse.'];
+        $receipt = $this->postJson("/api/purchases/{$purchaseId}/receive", $receiptPayload);
 
         $receipt->assertOk()
             ->assertJsonPath('success', true)
@@ -156,9 +147,9 @@ class PurchaseApiTest extends TestCase
             ->assertJsonPath('data.0.stock', 100);
 
         // Replaying the receipt must not add the same shipment to stock twice.
-        $this->postJson("/api/purchases/{$purchaseId}/receive")
+        $this->postJson("/api/purchases/{$purchaseId}/receive", $receiptPayload)
             ->assertOk()
-            ->assertJsonPath('data.status', 'DITERIMA_GUDANG');
+            ->assertJsonPath('data.purchase.status', 'DITERIMA_GUDANG');
 
         $this->assertEquals(100, $prod->fresh()->stock);
     }

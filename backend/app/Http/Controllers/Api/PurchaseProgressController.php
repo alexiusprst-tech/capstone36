@@ -5,9 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\PurchaseTransaction;
 use App\Models\Supplier;
+use App\Models\WarehouseRequest;
+use App\Services\InventoryTransaction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class PurchaseProgressController extends Controller
@@ -18,7 +19,7 @@ class PurchaseProgressController extends Controller
         'tracking' => [['Dikirim ke Gudang CV', 'Barang Pengganti Dikirim'], null],
         'arrival' => [['Dikirim ke Gudang CV', 'Barang Pengganti Dikirim'], null],
         'discrepancy' => [['Dikirim ke Gudang CV', 'Barang Pengganti Dikirim'], 'Ketidaksesuaian Fisik (Menunggu Retur)'],
-        'replacement' => [['Ketidaksesuaian Fisik (Menunggu Retur)', 'Ketidaksesuaian'], 'Barang Pengganti Dikirim'],
+        'replacement' => [['Barang Pengganti Dipesan', 'Ketidaksesuaian Fisik (Menunggu Retur)', 'Ketidaksesuaian'], 'Barang Pengganti Dikirim'],
         'reject' => [['Menunggu Konfirmasi'], 'Ditolak Supplier'],
     ];
 
@@ -26,12 +27,14 @@ class PurchaseProgressController extends Controller
     {
         $action = $request->input('action');
         $role = strtoupper((string) $request->user()?->role);
-        abort_unless(in_array($action, ['arrival', 'discrepancy']) ? $role === 'WAREHOUSE' : $role === 'SUPPLIER', 403);
+        abort_unless(in_array($action, ['arrival', 'discrepancy']) ? $role === 'WAREHOUSE' : ($action === 'followup' ? $role === 'FINANCE' : in_array($role, ['FINANCE', 'SUPPLIER'], true)), 403);
         $data = $request->validate([
-            'action' => ['required', Rule::in([...array_keys(self::TRANSITIONS), 'recover'])],
+            'action' => ['required', Rule::in([...array_keys(self::TRANSITIONS), 'recover', 'followup'])],
             'version' => ['required', 'integer', 'min:0'],
             'progress' => ['required', 'array'],
-            'progress.supplier_status' => ['required', 'string', 'max:100'],
+            'progress.supplier_status' => ['nullable', 'string', 'max:100'],
+            'progress.followup_reference' => ['required_if:action,followup', 'string', 'max:255'],
+            'progress.followup_notes' => ['required_if:action,followup', 'string', 'max:5000'],
             'progress.supplier_confirmation_date' => ['nullable', 'date'],
             'progress.supplier_notes' => ['nullable', 'string', 'max:5000'],
             'progress.delivery_info' => ['nullable', 'array'],
@@ -48,18 +51,27 @@ class PurchaseProgressController extends Controller
             'progress.discrepancy_resolution' => ['nullable', 'array'],
             'progress.discrepancy_resolution.*' => ['nullable'],
         ]);
-        $purchase = DB::transaction(function () use ($request, $code, $data, $role, $action) {
+        $purchase = InventoryTransaction::run(function () use ($request, $code, $data, $role, $action) {
             $purchase = PurchaseTransaction::where('purchase_code', $code)->lockForUpdate()->firstOrFail();
             if ($role === 'SUPPLIER') {
                 $supplier = Supplier::whereRaw('LOWER(email) = ?', [strtolower($request->user()->email)])->first();
-                abort_unless($supplier && strcasecmp($supplier->name, (string) $purchase->default_supplier) === 0, 403, 'PO ini bukan milik Supplier Anda.');
+                abort_unless($supplier && ($purchase->supplier_id ? $purchase->supplier_id === $supplier->id : strcasecmp($supplier->name, (string) $purchase->default_supplier) === 0), 403, 'PO ini bukan milik Supplier Anda.');
             }
             abort_if($purchase->status === 'DITERIMA_GUDANG', 409, 'PO sudah diterima Gudang.');
             abort_unless($purchase->progress_version === (int) $data['version'], 409, 'Status PO sudah berubah. Muat ulang terlebih dahulu.');
             $current = $purchase->supplier_progress ?? ['supplier_status' => 'Menunggu Konfirmasi'];
+            abort_if($action === 'replacement' && $purchase->pending_followup, 409, 'Finance harus mencatat referensi dan hasil tindak lanjut sebelum pengiriman pengganti.');
             $progress = $data['progress'];
-            if ($action === 'recover') {
-                abort_unless($purchase->supplier_progress === null && in_array($progress['supplier_status'], ['Dikonfirmasi Supplier', 'Sedang Disiapkan', 'Dikirim ke Gudang CV', 'Barang Pengganti Dikirim', 'Ditolak Supplier']), 409, 'Data PO sudah tersimpan di server.');
+            if ($action === 'followup') {
+                abort_unless($purchase->pending_followup || in_array($current['supplier_status'], ['Ketidaksesuaian Fisik (Menunggu Retur)', 'Ketidaksesuaian', 'Ditolak Supplier'], true), 409, 'PO tidak sedang memerlukan tindak lanjut.');
+                $remaining = collect($purchase->receiptSummary())->sum('remaining_qty');
+                $progress = [...$current, 'followup_reference' => $progress['followup_reference'], 'followup_notes' => $progress['followup_notes'],
+                    'supplier_status' => $remaining > 0 ? 'Barang Pengganti Dipesan' : 'Diterima Gudang (Lengkap & Sesuai)', 'warehouse_arrived' => false];
+                $purchase->pending_followup = false;
+                $purchase->status = $remaining > 0 ? 'DIPESAN' : 'DITERIMA_GUDANG';
+                WarehouseRequest::whereKey($purchase->warehouse_request_id)->update(['status' => $remaining > 0 ? 'DIPROSES_PEMBELIAN' : 'SELESAI']);
+            } elseif ($action === 'recover') {
+                abort_unless($purchase->supplier_progress === null && in_array($progress['supplier_status'] ?? '', ['Dikonfirmasi Supplier', 'Sedang Disiapkan', 'Dikirim ke Gudang CV', 'Barang Pengganti Dikirim', 'Ditolak Supplier']), 409, 'Data PO sudah tersimpan di server.');
                 $progress = array_intersect_key($progress, array_flip(['supplier_status', 'supplier_notes', 'supplier_confirmation_date', 'delivery_info', 'rejection_reason']));
                 $progress['warehouse_arrived'] = false;
             } else {
@@ -81,6 +93,16 @@ class PurchaseProgressController extends Controller
                 if (in_array($action, ['dispatch', 'replacement'])) {
                     $progress['warehouse_arrived'] = false;
                 }
+                if (in_array($action, ['discrepancy', 'reject'], true)) {
+                    abort_if(empty($action === 'reject' ? ($progress['rejection_reason'] ?? '') : ($progress['discrepancy_reason'] ?? '')), 422, 'Catat alasan ketidaksesuaian atau penolakan.');
+                    $purchase->pending_followup = true;
+                    $purchase->status = 'PERLU_TINDAK_LANJUT';
+                    WarehouseRequest::whereKey($purchase->warehouse_request_id)->update(['status' => 'PERLU_TINDAK_LANJUT']);
+                }
+                if ($action === 'replacement') {
+                    $purchase->pending_followup = false;
+                    $purchase->status = 'DIPESAN';
+                }
             }
             if (in_array($action, ['dispatch', 'replacement']) || ($action === 'recover' && isset($progress['delivery_info']))) {
                 foreach (['surat_jalan', 'courier', 'tracking_number', 'dispatch_date'] as $field) {
@@ -93,11 +115,12 @@ class PurchaseProgressController extends Controller
                 'action' => $action, 'version' => $purchase->progress_version,
                 'user_id' => $request->user()->id, 'user' => $request->user()->name,
                 'role' => $role, 'timestamp' => now()->toIso8601String(),
+                'before' => $current, 'after' => $progress,
             ]];
             $purchase->save();
 
             return $purchase;
-        }, 3);
+        });
 
         return response()->json(['data' => $purchase]);
     }

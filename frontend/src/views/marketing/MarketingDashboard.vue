@@ -47,6 +47,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <KpiCard
         title="Pengajuan Client"
+        :unavailable="Boolean(orderSync.error)"
         :value="pendingClientOrders"
         :icon-component="Inbox"
         icon-variant="blue"
@@ -54,6 +55,7 @@
       />
       <KpiCard
         title="Menunggu Verifikasi"
+        :unavailable="Boolean(orderSync.error)"
         :value="waitingVerification"
         :icon-component="Clock"
         icon-variant="blue"
@@ -61,6 +63,7 @@
       />
       <KpiCard
         title="Siap Invoice"
+        :unavailable="Boolean(orderSync.error)"
         :value="approvedOrders"
         :icon-component="CheckCircle2"
         icon-variant="blue"
@@ -292,7 +295,7 @@ import StatusBadge from '../../components/common/StatusBadge.vue';
 import Drawer from '../../components/common/Drawer.vue';
 import Timeline from '../../components/common/Timeline.vue';
 import DocumentChecklist from '../../components/common/DocumentChecklist.vue';
-import { store } from '../../stores/mockData';
+import { store, orderSync } from '../../stores/mockData';
 
 import {
   Users,

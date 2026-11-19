@@ -21,11 +21,7 @@ class SessionController extends Controller
         $credentials['email'] = strtolower(trim($credentials['email']));
 
         if (! Auth::guard('web')->attempt($credentials)) {
-            // Support interchangeable password / password123 for all staff and supplier accounts
-            $altPassword = $credentials['password'] === 'password123' ? 'password' : ($credentials['password'] === 'password' ? 'password123' : null);
-            if (! $altPassword || ! Auth::guard('web')->attempt(['email' => $credentials['email'], 'password' => $altPassword])) {
-                throw ValidationException::withMessages(['email' => [__('auth.failed')]]);
-            }
+            throw ValidationException::withMessages(['email' => [__('auth.failed')]]);
         }
 
         $request->session()->regenerate();

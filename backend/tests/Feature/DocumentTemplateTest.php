@@ -6,6 +6,7 @@ use App\Models\DocumentTemplate;
 use App\Models\User;
 use Database\Seeders\DocumentTemplateSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class DocumentTemplateTest extends TestCase
@@ -16,6 +17,7 @@ class DocumentTemplateTest extends TestCase
     {
         parent::setUp();
         $this->seed(DocumentTemplateSeeder::class);
+        Sanctum::actingAs(User::factory()->create(['role' => 'ADMINISTRASI']));
     }
 
     public function test_can_list_document_templates(): void

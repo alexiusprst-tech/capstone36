@@ -163,3 +163,11 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(100, 116, 139, 0.7);
 }
+
+/* Keep primary actions reachable on touch screens and prevent footer buttons from overflowing. */
+@media (max-width: 639px) {
+  .ui-scope :where(button, a[role='button']) { min-height: 44px; }
+  .ui-scope :where(input:not([type='checkbox']):not([type='radio']):not([type='hidden']), select, textarea) { min-height: 44px; }
+  .ui-dialog-footer { gap: 8px; }
+  .ui-dialog-footer > :where(button, a) { white-space: normal; overflow-wrap: anywhere; }
+}

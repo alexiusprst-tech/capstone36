@@ -18,6 +18,14 @@
       </div>
     </template>
 
+    <div v-if="clientSync.error" role="alert" class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      <p>{{ clientSync.error }}</p>
+      <button type="button" class="mt-2 font-semibold underline" @click="storeActions.loadClients()">Muat ulang customer</button>
+    </div>
+    <div v-if="legacyBackupAvailable" role="note" class="mb-4 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
+      <p>Data customer lama dari perangkat ini tersedia sebagai salinan. Tinjau sebelum mendaftarkannya ke server.</p>
+      <button type="button" class="mt-2 font-semibold underline" @click="downloadLegacyCustomers">Unduh salinan customer lama</button>
+    </div>
     <!-- SEARCH & FILTER BAR -->
     <div class="ui-panel bg-white p-4 rounded-xl border border-slate-200/90 mb-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
       <div class="relative w-full sm:w-88">
@@ -286,7 +294,7 @@
 
         <div class="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 flex items-start gap-2">
           <AlertCircle class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-          <span>Data yang dihapus tidak dapat dipulihkan kembali.</span>
+          <span>Customer yang masih dipakai pesanan tidak dapat dihapus.</span>
         </div>
 
         <div class="pt-3 border-t border-slate-200 flex justify-end gap-2">
@@ -300,6 +308,7 @@
           <button
             type="button"
             class="px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-xs"
+            :disabled="deleting"
             @click="executeDelete"
           >
             Ya, Hapus Customer
@@ -311,17 +320,28 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from '../../navigation';
 import AppLayout from '../../components/layout/AppLayout.vue';
 import Modal from '../../components/common/Modal.vue';
-import { store, storeActions } from '../../stores/mockData';
+import { store, storeActions, clientSync, legacyCustomersBackup } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
+import { orderError } from '../../services/orderWorkflow';
 import { Search, Plus, Edit3, Trash2, AlertCircle } from 'lucide-vue-next';
 
 const router = useRouter();
 const toast = useToast();
 
+const legacyBackupAvailable = ref(Boolean(legacyCustomersBackup()));
+const downloadLegacyCustomers = () => {
+  const data = legacyCustomersBackup();
+  if (!data) return;
+  const url = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+  const link = document.createElement('a');
+  link.href = url; link.download = 'customer-perangkat-lama.json'; link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+onMounted(() => storeActions.loadClients());
 const searchQuery = ref('');
 const cityFilter = ref('');
 
@@ -399,7 +419,7 @@ const filteredClients = computed(() => {
 const totalItems = computed(() => filteredClients.value.length);
 const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value) || 1);
 
-const startItemIndex = computed(() => (currentPage.value - 1) * itemsPerPage.value + 1);
+const startItemIndex = computed(() => totalItems.value ? (currentPage.value - 1) * itemsPerPage.value + 1 : 0);
 const endItemIndex = computed(() => Math.min(currentPage.value * itemsPerPage.value, totalItems.value));
 
 const paginatedClients = computed(() => {
@@ -416,9 +436,13 @@ const confirmDelete = (client) => {
   deleteModalOpen.value = true;
 };
 
-const executeDelete = () => {
+const deleting = ref(false);
+const executeDelete = async () => {
+  if (deleting.value) return;
+  deleting.value = true;
+  try {
   if (clientToDelete.value) {
-    storeActions.deleteClient(clientToDelete.value.id);
+    await storeActions.deleteClient(clientToDelete.value.id);
     toast.success(`Customer ${clientToDelete.value.code} (${clientToDelete.value.name}) berhasil dihapus.`);
     deleteModalOpen.value = false;
     clientToDelete.value = null;
@@ -426,5 +450,6 @@ const executeDelete = () => {
       currentPage.value = totalPages.value;
     }
   }
+  } catch (error) { toast.error(orderError(error)); } finally { deleting.value = false; }
 };
 </script>

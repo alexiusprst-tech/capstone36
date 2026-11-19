@@ -149,8 +149,6 @@ const selectedOrder = ref(null);
 const approvedOrders = computed(() => {
   return store.orders
     .filter((o) => {
-      if (o.orderNumber === 'ORD-2026-007' || o.orderNumber === 'ORD-2026-008') return false;
-      if (o.date && String(o.date).startsWith('2026-10')) return false;
       return o.status === 'Disetujui' || o.status === 'Diproses' || o.status === 'Selesai';
     })
     .slice()

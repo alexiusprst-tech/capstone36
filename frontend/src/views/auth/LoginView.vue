@@ -108,24 +108,7 @@
           </button>
         </form>
 
-        <section class="login-demo" aria-labelledby="login-demo-title">
-          <h3 id="login-demo-title">Akses cepat untuk uji coba</h3>
-          <p>Pilih peran untuk langsung masuk dan mencoba modul sesuai hak akses.</p>
-          <div class="login-roles">
-            <button
-              v-for="r in demoRoles"
-              :key="r.role"
-              type="button"
-              class="login-role"
-              :disabled="loading"
-              @click="loginAs(r)"
-            >
-              <strong>{{ r.title }}</strong>
-              <span>{{ r.desc }}</span>
-            </button>
-          </div>
-          <p class="login-hint">Staf: <code>password123</code> <span aria-hidden="true">&middot;</span> Supplier: <code>password</code></p>
-        </section>
+        <p class="mt-5 text-sm text-slate-500">Gunakan akun yang diberikan administrator. Hak akses mengikuti peran akun Anda.</p>
       </div>
     </main>
   </div>
@@ -143,8 +126,8 @@ const route = useRoute();
 const toast = useToast();
 
 const form = ref({
-  email: 'marketing@alpharo.co.id',
-  password: 'password123',
+  email: '',
+  password: '',
 });
 const showPassword = ref(false);
 const loading = ref(false);
@@ -158,79 +141,6 @@ const roleHome = {
   FINANCE: '/finance/dashboard',
   CLIENT: '/portal',
   SUPPLIER: '/supplier/portal',
-};
-
-const demoRoles = [
-  {
-    role: 'MARKETING',
-    title: 'Marketing',
-    email: 'marketing@alpharo.co.id',
-    badgeColor: 'bg-blue-500',
-    desc: 'Kelola Client, Order Draft, & Pengajuan Verifikasi',
-    target: '/marketing/dashboard',
-  },
-  {
-    role: 'DIREKTUR',
-    title: 'Direktur',
-    email: 'direktur@alpharo.co.id',
-    badgeColor: 'bg-alpharo-500',
-    desc: 'Verifier, Approver & Managerial Monitoring',
-    target: '/director/dashboard',
-  },
-  {
-    role: 'ADMINISTRASI',
-    title: 'Administrasi',
-    email: 'admin@alpharo.co.id',
-    badgeColor: 'bg-emerald-500',
-    desc: 'Penerbitan PO, Surat Jalan, BAST, Faktur & Dokumen SPJ',
-    target: '/administration/dashboard',
-  },
-  {
-    role: 'WAREHOUSE',
-    title: 'Warehouse',
-    email: 'warehouse@alpharo.co.id',
-    badgeColor: 'bg-amber-500',
-    desc: 'Data Barang, Mutasi Stok, Pemenuhan & Pengiriman',
-    target: '/warehouse/dashboard',
-  },
-  {
-    role: 'FINANCE',
-    title: 'Finance',
-    email: 'finance@alpharo.co.id',
-    badgeColor: 'bg-rose-500',
-    desc: 'Invoice Tagihan, Pembayaran Masuk, & Laporan',
-    target: '/finance/dashboard',
-  },
-  {
-    role: 'CLIENT',
-    title: 'Portal Publik Rekanan',
-    email: 'client@alpharo.co.id',
-    badgeColor: 'bg-teal-500',
-    desc: 'Pengadaan Mandiri, Lacak Resi BAST & Pembayaran',
-    target: '/portal',
-  },
-  {
-    role: 'SUPPLIER',
-    title: 'Supplier / Vendor',
-    email: 'sales@synnexmetrodata.com',
-    password: 'password',
-    badgeColor: 'bg-amber-600',
-    desc: 'Terima Pesanan Masuk (PO), Konfirmasi & Kirim ke Gudang CV',
-    target: '/supplier/portal',
-  },
-];
-
-// 1-Click Login directly from Demo Role cards
-const loginAs = async (demo) => {
-  form.value.email = demo.email;
-  form.value.password = demo.password || 'password123';
-  await handleSubmit();
-};
-
-const quickFill = (demo) => {
-  form.value.email = demo.email;
-  form.value.password = demo.password || 'password123';
-  toast.info(`Kredensial ${demo.title} diisi. Silakan klik Masuk.`);
 };
 
 const handleSubmit = async () => {
@@ -490,13 +400,6 @@ const handleSubmit = async () => {
   background: var(--login-tint);
 }
 
-.login-toggle:focus-visible,
-.login-submit:focus-visible,
-.login-role:focus-visible {
-  outline: 3px solid var(--login-blue);
-  outline-offset: 3px;
-}
-
 .login-submit {
   display: flex;
   align-items: center;
@@ -523,12 +426,6 @@ const handleSubmit = async () => {
   height: 17px;
 }
 
-.login-submit:disabled,
-.login-role:disabled {
-  cursor: wait;
-  opacity: .65;
-}
-
 .login-error {
   margin: 0 0 16px;
   color: #b3261e;
@@ -543,83 +440,6 @@ const handleSubmit = async () => {
   border-top-color: #fff;
   border-radius: 50%;
   animation: login-spin .8s linear infinite;
-}
-
-.login-demo {
-  margin-top: 28px;
-  padding-top: 24px;
-  border-top: 1px solid var(--login-line);
-}
-
-.login-demo h3 {
-  margin: 0 0 5px;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.login-demo > p {
-  margin: 0 0 14px;
-  color: var(--login-muted);
-  font-size: 12px;
-  line-height: 1.7;
-}
-
-.login-roles {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.login-role {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
-  min-width: 0;
-  padding: 11px 14px;
-  border: 1px solid var(--login-line);
-  border-radius: 8px;
-  background: #fff;
-  color: var(--login-ink);
-  text-align: left;
-  cursor: pointer;
-  transition: border-color .15s, background .15s;
-}
-
-.login-role:hover {
-  border-color: var(--login-blue);
-  background: var(--login-tint);
-}
-
-.login-role strong {
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.login-role span {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  color: var(--login-muted);
-  font-size: 11px;
-  line-height: 1.5;
-}
-
-.login-demo .login-hint {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 5px;
-  margin: 16px 0 0;
-  font-size: 11px;
-}
-
-.login-hint code {
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: var(--login-tint);
-  font-family: ui-monospace, Menlo, monospace;
 }
 
 @keyframes login-spin {
@@ -639,11 +459,9 @@ const handleSubmit = async () => {
 @media (max-width: 380px) {
   .login-brand strong { font-size: 15px; }
   .login-card h2 { font-size: 25px; }
-  .login-role { padding: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .login-input input, .login-submit, .login-role { transition: none; }
   .login-spinner { animation: none; }
 }
 </style>

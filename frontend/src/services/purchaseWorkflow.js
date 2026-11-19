@@ -13,8 +13,17 @@ export const purchaseWorkflow = {
       action, version: purchase.progress_version || 0, progress,
     })).data.data;
   },
-  async receive(purchase, notes) {
-    return (await api.post(`/purchases/${encodeURIComponent(purchase.purchase_code)}/receive`, { notes })).data.data;
+  async requests() { return (await api.get('/warehouse/requests')).data.data; },
+  async request(payload) { return (await api.post('/warehouse/requests', payload)).data.data; },
+  async cancelRequest(code) { return (await api.post(`/warehouse/requests/${encodeURIComponent(code)}/cancel`)).data.data; },
+  async followup(purchase, { reference, notes }) {
+    return (await api.post(`/purchases/${encodeURIComponent(purchase.purchase_code)}/supplier-progress`, {
+      action: 'followup', version: purchase.progress_version || 0,
+      progress: { followup_reference: reference, followup_notes: notes },
+    })).data.data;
+  },
+  async receive(purchase, payload) {
+    return (await api.post(`/purchases/${encodeURIComponent(purchase.purchase_code)}/receive`, payload)).data.data;
   },
 };
 

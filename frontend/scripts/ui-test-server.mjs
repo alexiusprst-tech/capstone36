@@ -16,10 +16,7 @@ for (const args of [['artisan', 'migrate', '--force', '--no-interaction'], [path
   const result = spawnSync('php', args, { cwd: backend, env, stdio: 'inherit', windowsHide: true });
   if (result.status !== 0) process.exit(result.status || 1);
 }
-const children = [
-  ...(process.env.UI_TEST_BUILD === '1' ? [] : [spawn(process.execPath, ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', '5175', '--strictPort'], { cwd: frontend, env, stdio: 'inherit', windowsHide: true })]),
-  spawn('php', ['-S', '127.0.0.1:5174', path.join(backend, 'vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php')], { cwd: path.join(backend, 'public'), env, stdio: ['ignore', openSync(path.join(scratch, 'laravel.log'), 'a'), openSync(path.join(scratch, 'laravel.log'), 'a')], windowsHide: true }),
-];
+const children = [];
 let stopping = false;
 const stop = () => {
   if (stopping) return;
@@ -30,4 +27,22 @@ const stop = () => {
 };
 process.on('SIGINT', stop);
 process.on('SIGTERM', stop);
-children.forEach(child => child.on('exit', code => { stop(); process.exitCode = code || 0; }));
+function start(command, args, options) {
+  const child = spawn(command, args, options);
+  children.push(child);
+  child.on('exit', code => { stop(); process.exitCode = code || 0; });
+  return child;
+}
+if (process.env.UI_TEST_BUILD !== '1') {
+  const vite = start(process.execPath, ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', '5175', '--strictPort'], { cwd: frontend, env, stdio: 'inherit', windowsHide: true });
+  const deadline = Date.now() + 60000;
+  let ready = false;
+  while (Date.now() < deadline && vite.exitCode === null && !stopping) {
+    try { ready = (await fetch('http://127.0.0.1:5175/src/main.js', { signal: AbortSignal.timeout(2000) })).ok; } catch { /* Wait until the module server is actually ready. */ }
+    if (ready) break;
+    await new Promise(resolve => setTimeout(resolve, 250));
+  }
+  if (!ready) { stop(); throw new Error('Vite did not become ready for isolated browser tests.'); }
+}
+// Playwright probes Laravel. Do not expose its ready URL before Vite has written the hot file.
+start('php', ['-S', '127.0.0.1:5174', path.join(backend, 'vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php')], { cwd: path.join(backend, 'public'), env, stdio: ['ignore', openSync(path.join(scratch, 'laravel.log'), 'a'), openSync(path.join(scratch, 'laravel.log'), 'a')], windowsHide: true });

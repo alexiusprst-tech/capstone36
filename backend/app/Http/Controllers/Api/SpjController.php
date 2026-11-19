@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\SalesOrder;
 use App\Models\SpjDocument;
 use App\Models\SpjProject;
 use App\Services\SpjLetterhead;
@@ -51,6 +52,11 @@ class SpjController extends Controller
     public function updateProject(Request $request, string $id): JsonResponse
     {
         $project = SpjProject::where('project_id', $id)->firstOrFail();
+        if (! empty($project->metadata['source_order_number']) && SalesOrder::where('order_number', $project->metadata['source_order_number'])->exists()) {
+            foreach (['project_value', 'invoice_value', 'invoice_paid', 'finance_status', 'finance_data', 'director_approval', 'warehouse_status', 'warehouse_data', 'items'] as $field) {
+                abort_if($request->exists($field) && $request->input($field) != $project->getAttribute($field), 403, 'Data transaksi berasal dari pesanan. Status pembayaran, approval, stok, dan nilainya tidak dapat diubah lewat formulir SPJ.');
+            }
+        }
 
         $validated = $request->validate([
             'metadata' => ['sometimes', 'array:customer_profile,customer_address,company_address'],

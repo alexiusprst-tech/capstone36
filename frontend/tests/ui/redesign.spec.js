@@ -1,4 +1,5 @@
 import { signIn } from './helpers/session';
+import { customerFixture } from './helpers/customer-fixtures';
 import fs from 'node:fs';
 import { test, expect } from '@playwright/test';
 import * as XLSX from 'xlsx';
@@ -39,9 +40,9 @@ for (const { route, role } of screens) {
 test('public portal keeps all three existing service tabs', async ({ page }) => {
   await isolate(page);
   await page.goto('/portal');
-  await page.getByRole('navigation', { name: 'Navigasi portal publik' }).getByRole('button', { name: 'Lacak Pesanan', exact: true }).click();
+  await page.getByRole('navigation', { name: 'Navigasi portal publik' }).getByRole('button', { name: 'Lacak Pesanan & Pembayaran', exact: true }).click();
   await expect(page.getByText('1. Data Instansi & Pemohon', { exact: true })).toHaveCount(0);
-  await page.getByRole('navigation', { name: 'Navigasi portal publik' }).getByRole('button', { name: 'Pembayaran', exact: true }).click();
+  await page.getByRole('navigation', { name: 'Navigasi portal publik' }).getByRole('button', { name: 'Lacak Pesanan & Pembayaran', exact: true }).click();
   await expect(page.getByRole('heading', { name: /Pembayaran|Tagihan|Rekening/i }).first()).toBeVisible();
   await page.getByRole('navigation', { name: 'Navigasi portal publik' }).getByRole('button', { name: 'Ajukan Kebutuhan', exact: true }).click();
   await expect(page.getByText('1. Data Instansi & Pemohon', { exact: true })).toBeVisible();
@@ -82,6 +83,10 @@ test('protected pages continue to require authentication', async ({ page }) => {
 
 test('warehouse Excel export stays reachable at responsive widths', async ({ page }, testInfo) => {
   await isolate(page, 'WAREHOUSE');
+  // This case verifies layout/export, independently of the offline seed download.
+  await page.route('**/api/products?*', route => route.fulfill({ json: { success: true, data: [
+    { id: 1, sku: 'EXPORT-QA', name: 'Barang Ekspor', category: 'QA', unit: 'PCS', stock: 12, min_stock: 10, sell_price: 100, hpp: 80, last_buy_price: 80, status: 'Tersedia' },
+  ] } }));
   await page.goto('/warehouse/products');
   const firstSku = page.locator('#page-content tbody tr td').first();
   await expect(firstSku).toBeVisible();
@@ -163,6 +168,7 @@ test('supplier service tabs stay accessible', async ({ page }) => {
 
 test('client search shows a readable empty state and restores rows', async ({ page }, testInfo) => {
   await isolate(page, 'MARKETING');
+  await page.route('**/api/customers', route => route.fulfill({ json: { data: Array.from({ length: 10 }, (_, index) => ({ ...customerFixture, id: index + 1, code: 'CS' + String(index + 1).padStart(5, '0'), name: index ? 'Customer QA ' + index : 'SMA 9' })) } }));
   await page.goto('/marketing/clients');
   const search = page.getByPlaceholder('Cari ID, nama customer, alamat, kontak, email...');
   await search.fill('NO-MATCH-UI-REVIEW');
@@ -179,7 +185,7 @@ test('payment modal traps focus and closes without changing transactions', async
   await page.goto('/finance/payments');
   await expect(page.locator('tbody tr').first()).toBeVisible();
   const rowsBefore = await page.locator('tbody tr').count();
-  const trigger = page.getByRole('button', { name: 'Input Pembayaran Baru', exact: true });
+  const trigger = page.getByRole('button', { name: 'Informasi Pembayaran', exact: true });
   await trigger.click();
   const dialog = page.getByRole('dialog', { name: 'Input Pembayaran Masuk', exact: true });
   await expect(dialog).toBeVisible();
@@ -197,6 +203,10 @@ test('payment modal traps focus and closes without changing transactions', async
 test('order detail drawer and quick customer form retain their fields', async ({ page }, testInfo) => {
   await isolate(page, 'MARKETING');
   await page.goto('/marketing/dashboard');
+  await page.evaluate(async () => {
+    const { store } = await import(document.querySelector('script[type=module][src*="/src/main.js"]').src.replace('/main.js', '/stores/mockData.js'));
+    store.orders = [{ id: 'qa-drawer', orderNumber: 'ORD-QA-DRAWER', clientName: 'Customer QA', projectName: 'Proyek QA', date: '2026-11-19', grandTotal: 100000, status: 'Draft', items: [], timeline: [], documents: {} }];
+  });
   await page.getByRole('button', { name: 'Detail', exact: true }).first().click();
   const drawer = page.getByRole('dialog');
   await expect(drawer).toContainText('Timeline Proses');

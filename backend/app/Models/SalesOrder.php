@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SalesOrder extends Model
 {
-    protected $fillable = ['order_number', 'created_by', 'details', 'items', 'subtotal', 'tax', 'grand_total', 'history'];
+    protected $fillable = ['order_number', 'created_by', 'customer_id', 'details', 'items', 'subtotal', 'tax', 'grand_total', 'history'];
 
     protected function casts(): array
     {

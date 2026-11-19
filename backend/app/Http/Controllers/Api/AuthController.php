@@ -24,11 +24,7 @@ class AuthController extends Controller
         $email = strtolower(trim($validated['email']));
         $user = User::where('email', $email)->first();
 
-        $valid = $user && (
-            Hash::check($validated['password'], $user->password) ||
-            ($validated['password'] === 'password123' && Hash::check('password', $user->password)) ||
-            ($validated['password'] === 'password' && Hash::check('password123', $user->password))
-        );
+        $valid = $user && Hash::check($validated['password'], $user->password);
 
         if (! $valid) {
             throw ValidationException::withMessages([

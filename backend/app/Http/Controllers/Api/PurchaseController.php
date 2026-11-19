@@ -5,400 +5,196 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\PurchaseTransaction;
+use App\Models\SalesOrder;
 use App\Models\Supplier;
 use App\Models\WarehouseRequest;
+use App\Services\InventoryTransaction;
+use App\Services\OrderProcurement;
+use App\Services\PurchaseReceiving;
+use App\Services\SalesOrderInventory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class PurchaseController extends Controller
 {
-    /**
-     * List all suppliers
-     */
-    public function getSuppliers(Request $request): JsonResponse
-    {
-        $search = $request->query('search');
-
-        $query = Supplier::query()->where('is_active', true);
-
-        if (! empty($search)) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('code', 'like', "%{$search}%");
-            });
-        }
-
-        $suppliers = $query->orderBy('name', 'asc')->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $suppliers,
-        ]);
-    }
-
-    /**
-     * Create a new supplier
-     */
-    public function storeSupplier(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:100',
-            'address' => 'nullable|string|max:500',
-        ]);
-
-        $code = 'SUP'.str_pad((string) (Supplier::count() + 1), 5, '0', STR_PAD_LEFT);
-
-        $supplier = Supplier::create([
-            'code' => $code,
-            'name' => $validated['name'],
-            'phone' => $validated['phone'] ?? null,
-            'email' => $validated['email'] ?? null,
-            'address' => $validated['address'] ?? null,
-            'is_active' => true,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Supplier berhasil ditambahkan.',
-            'data' => $supplier,
-        ], 201);
-    }
-
-    /**
-     * List all warehouse requests
-     */
     public function getWarehouseRequests(Request $request): JsonResponse
     {
-        $search = $request->query('search');
-        $status = $request->query('status');
-
-        $query = WarehouseRequest::query();
-
-        if (! empty($status)) {
-            $query->where('status', $status);
+        $data = $request->validate(['search' => 'nullable|string|max:255', 'status' => 'nullable|string|max:50']);
+        $query = WarehouseRequest::with('order');
+        if (! empty($data['status'])) {
+            $query->where('status', $data['status']);
         }
-
-        if (! empty($search)) {
-            $query->where(function ($q) use ($search) {
-                $q->where('request_code', 'like', "%{$search}%")
-                    ->orWhere('project_name', 'like', "%{$search}%")
-                    ->orWhere('purpose', 'like', "%{$search}%");
+        if (! empty($data['search'])) {
+            $query->where(function ($q) use ($data) {
+                $q->where('request_code', 'like', '%'.$data['search'].'%')->orWhere('project_name', 'like', '%'.$data['search'].'%');
             });
         }
 
-        $requests = $query->orderBy('id', 'desc')->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $requests,
-        ]);
+        return response()->json(['success' => true, 'data' => $query->latest('id')->get()]);
     }
 
-    /**
-     * Create a new warehouse request
-     */
     public function storeWarehouseRequest(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'project_id' => 'nullable|string|max:100',
-            'project_name' => 'nullable|string|max:255',
-            'purpose' => 'required|string|max:500',
-            'requested_by' => 'required|string|max:100',
-            'items' => 'required|array|min:1',
-            'items.*.sku' => 'nullable|string',
-            'items.*.name' => 'required|string',
-            'items.*.qty' => 'required|numeric|min:1',
-            'items.*.unit' => 'nullable|string',
-            'items.*.est_price' => 'nullable|numeric|min:0',
-            'notes' => 'nullable|string',
+        $data = $request->validate([
+            'sales_order_id' => 'required_without:order_number|nullable|integer',
+            'order_number' => 'required_without:sales_order_id|nullable|string|max:80',
+            'purpose' => 'required|string|max:500', 'notes' => 'nullable|string|max:5000',
+            'items' => 'required|array|min:1|max:200', 'items.*.sku' => 'required|string|max:50|distinct:ignore_case',
+            'items.*.qty' => 'required|integer|min:1|max:1000000',
+            'items.*.est_price' => 'nullable|numeric|decimal:0,2|min:0|max:1000000000',
         ]);
+        $record = InventoryTransaction::run(function () use ($request, $data) {
+            $order = SalesOrder::query()->when(! empty($data['sales_order_id']), fn ($q) => $q->whereKey($data['sales_order_id']), fn ($q) => $q->where('order_number', $data['order_number']))->lockForUpdate()->first();
+            abort_unless($order && $order->status === 'Draft', 422, 'Pilih pesanan Draft yang tersimpan di server.');
+            abort_if(! empty($data['order_number']) && $order->order_number !== $data['order_number'], 422, 'Referensi pesanan tidak sama.');
+            $inventory = app(SalesOrderInventory::class);
+            $inventory->allocate($order);
+            $needs = collect($inventory->summaries(collect([$order]))[$order->id]['items'])->keyBy('sku');
+            $pending = $this->pendingQuantities($order->id);
+            $items = [];
+            $total = 0;
+            foreach ($data['items'] as $line) {
+                $need = $needs->get($line['sku']);
+                abort_unless($need && $need['catalogFound'], 422, 'SKU harus terdaftar pada pesanan dan katalog.');
+                $availableNeed = max(0, $need['shortage'] - ($pending[$line['sku']] ?? 0));
+                abort_if((int) $line['qty'] > $availableNeed, 422, 'Jumlah pengadaan melebihi kekurangan yang belum diajukan. Muat ulang pesanan.');
+                $price = (int) round(($line['est_price'] ?? 0) * 100);
+                $subtotal = (int) $line['qty'] * $price;
+                $total += $subtotal;
+                abort_if($total > 100_000_000_000_000, 422, 'Estimasi biaya melebihi batas sistem.');
+                $items[] = ['sku' => $line['sku'], 'name' => $need['name'], 'unit' => $need['unit'], 'qty' => (int) $line['qty'], 'est_price' => $price / 100, 'subtotal' => $subtotal / 100];
+            }
 
-        $nextId = WarehouseRequest::count() + 1;
-        $requestCode = 'REQ-2026-'.str_pad((string) $nextId, 3, '0', STR_PAD_LEFT);
+            return WarehouseRequest::create([
+                'request_code' => 'REQ-'.now(config('app.business_timezone'))->year.'-'.strtoupper((string) Str::ulid()), 'request_date' => now(config('app.business_timezone'))->toDateString(),
+                'sales_order_id' => $order->id, 'order_items_hash' => WarehouseRequest::itemsHash($order->items),
+                'requested_by_id' => $request->user()->id, 'requested_by' => $request->user()->name,
+                'project_id' => $order->details['projectId'] ?? null, 'project_name' => $order->details['projectName'],
+                'purpose' => $data['purpose'], 'status' => 'MENUNGGU_FINANCE', 'total_est_cost' => $total / 100,
+                'items' => $items, 'notes' => $data['notes'] ?? null,
+            ])->load('order');
+        });
 
-        $totalEstCost = 0;
-        $items = [];
-        foreach ($validated['items'] as $item) {
-            $qty = (float) $item['qty'];
-            $price = (float) ($item['est_price'] ?? 0);
-            $subtotal = $qty * $price;
-            $totalEstCost += $subtotal;
-
-            $items[] = [
-                'sku' => $item['sku'] ?? '-',
-                'name' => $item['name'],
-                'qty' => $qty,
-                'unit' => $item['unit'] ?? 'UNIT',
-                'est_price' => $price,
-                'subtotal' => $subtotal,
-            ];
-        }
-
-        $reqRecord = WarehouseRequest::create([
-            'request_code' => $requestCode,
-            'request_date' => now()->toDateString(),
-            'project_id' => $validated['project_id'] ?? null,
-            'project_name' => $validated['project_name'] ?? 'Pengadaan Material Bebas',
-            'purpose' => $validated['purpose'],
-            'requested_by' => $validated['requested_by'],
-            'status' => 'MENUNGGU_FINANCE',
-            'total_est_cost' => $totalEstCost,
-            'items' => $items,
-            'notes' => $validated['notes'] ?? null,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Pengajuan kebutuhan barang berhasil diajukan ke Finance.',
-            'data' => $reqRecord,
-        ], 201);
+        return response()->json(['success' => true, 'data' => $record], 201);
     }
 
-    /**
-     * List all purchase transactions
-     */
+    public function cancelWarehouseRequest(string $code): JsonResponse
+    {
+        $record = InventoryTransaction::run(function () use ($code) {
+            $record = WarehouseRequest::where('request_code', $code)->lockForUpdate()->firstOrFail();
+            abort_if($record->purchase_code || PurchaseTransaction::where('warehouse_request_id', $record->id)->exists(), 409, 'Pengajuan sudah memiliki PO dan tidak dapat dibatalkan.');
+            abort_if($record->status === 'DIBATALKAN', 409, 'Pengajuan sudah dibatalkan.');
+            $record->update(['status' => 'DIBATALKAN']);
+
+            return $record->load('order');
+        });
+
+        return response()->json(['success' => true, 'data' => $record]);
+    }
+
+    public function pendingQuantities(int $orderId): array
+    {
+        return app(OrderProcurement::class)->summaries([$orderId])[$orderId]['pending'];
+    }
+
     public function getPurchases(Request $request): JsonResponse
     {
-        $search = $request->query('search');
-
-        $query = PurchaseTransaction::query();
-
-        if (! empty($search)) {
-            $query->where(function ($q) use ($search) {
-                $q->where('purchase_code', 'like', "%{$search}%")
-                    ->orWhere('invoice_number', 'like', "%{$search}%")
-                    ->orWhere('project_name', 'like', "%{$search}%")
-                    ->orWhere('default_supplier', 'like', "%{$search}%");
+        $data = $request->validate(['search' => 'nullable|string|max:255']);
+        $query = PurchaseTransaction::with('receipts.lines');
+        if (strtoupper((string) $request->user()->role) === 'SUPPLIER') {
+            $supplier = Supplier::whereRaw('LOWER(email) = ?', [strtolower($request->user()->email)])->first();
+            $supplier ? $query->where(fn ($q) => $q->where('supplier_id', $supplier->id)->orWhere(fn ($legacy) => $legacy->whereNull('supplier_id')->where('default_supplier', $supplier->name))) : $query->whereRaw('1 = 0');
+        }
+        if (! empty($data['search'])) {
+            $query->where(function ($q) use ($data) {
+                foreach (['purchase_code', 'invoice_number', 'project_name', 'default_supplier'] as $field) {
+                    $q->orWhere($field, 'like', '%'.$data['search'].'%');
+                }
             });
         }
+        $purchases = $query->latest('id')->get();
+        $orders = WarehouseRequest::with('order')->whereIn('id', $purchases->pluck('warehouse_request_id'))->get()->keyBy('id');
+        foreach ($purchases as $purchase) {
+            $purchase->setAttribute('order_number', $orders->get($purchase->warehouse_request_id)?->order?->order_number);
+        }
 
-        $purchases = $query->orderBy('id', 'desc')->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $purchases,
-        ]);
+        return response()->json(['success' => true, 'data' => $purchases]);
     }
 
-    /**
-     * Create a purchase transaction matching the user's form
-     */
     public function storePurchase(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'purchase_code' => 'required|string|unique:purchase_transactions,purchase_code',
-            'transaction_date' => 'required|string',
-            'invoice_number' => 'nullable|string|max:100',
-            'project_id' => 'nullable|string|max:100',
-            'project_name' => 'required|string|max:255',
-            'default_supplier' => 'nullable|string|max:255',
-            'warehouse_request_id' => 'nullable|integer',
-            'warehouse_request_code' => 'nullable|string|max:100',
-            'subtotal' => 'required|numeric|min:0',
-            'discount' => 'nullable|numeric|min:0',
-            'total_price' => 'required|numeric|min:0',
-            'payment_method' => 'required|string|max:50',
-            'created_by' => 'nullable|string|max:100',
-            'notes' => 'nullable|string',
-            'items' => 'required|array|min:1',
-            'items.*.barang' => 'required|string',
-            'items.*.sku' => 'nullable|string',
-            'items.*.supplier' => 'nullable|string',
-            'items.*.unit' => 'nullable|string|max:50',
-            'items.*.qty' => 'required|numeric|min:0',
-            'items.*.harga_beli' => 'required|numeric|min:0',
-            'items.*.diskon_percent' => 'nullable|numeric|min:0',
-            'items.*.diskon_nominal' => 'nullable|numeric|min:0',
-            'items.*.subtotal' => 'required|numeric|min:0',
+        $data = $request->validate([
+            'purchase_code' => 'nullable|string|max:80|regex:/^[A-Za-z][A-Za-z0-9-]{0,79}$/|unique:purchase_transactions,purchase_code', 'transaction_date' => 'required|date',
+            'invoice_number' => 'nullable|string|max:100', 'supplier_id' => 'nullable|integer', 'default_supplier' => 'nullable|string|max:255',
+            'warehouse_request_id' => 'required_without:warehouse_request_code|nullable|integer', 'warehouse_request_code' => 'required_without:warehouse_request_id|nullable|string|max:100',
+            'discount' => 'nullable|numeric|decimal:0,2|min:0|max:1000000000000', 'payment_method' => 'required|string|max:50', 'notes' => 'nullable|string|max:5000',
+            'items' => 'required|array|min:1|max:200', 'items.*.sku' => 'required|string|max:50|distinct:ignore_case',
+            'items.*.barang' => 'nullable|string|max:300', 'items.*.unit' => 'nullable|string|max:50', 'items.*.supplier' => 'nullable|string|max:255',
+            'items.*.qty' => 'required|integer|min:1|max:1000000', 'items.*.harga_beli' => 'required|numeric|decimal:0,2|min:0|max:1000000000',
+            'items.*.diskon_percent' => 'nullable|numeric|min:0|max:100', 'items.*.diskon_nominal' => 'nullable|numeric|decimal:0,2|min:0|max:1000000000',
         ]);
-
-        return DB::transaction(function () use ($validated) {
-            $linkedRequest = ! empty($validated['warehouse_request_code'])
-                ? WarehouseRequest::where('request_code', $validated['warehouse_request_code'])->lockForUpdate()->first()
-                : (! empty($validated['warehouse_request_id']) ? WarehouseRequest::whereKey($validated['warehouse_request_id'])->lockForUpdate()->first() : null);
-            if (! empty($validated['warehouse_request_code']) || ! empty($validated['warehouse_request_id'])) {
-                abort_unless($linkedRequest, 422, 'Pengajuan Gudang belum tersimpan di server. Muat ulang daftar pengajuan.');
-                abort_if($linkedRequest->purchase_code || $linkedRequest->status === 'SELESAI', 409, 'Pengajuan Gudang ini sudah diterbitkan PO.');
-                $validated['warehouse_request_id'] = $linkedRequest->id;
-                $validated['warehouse_request_code'] = $linkedRequest->request_code;
+        $purchase = InventoryTransaction::run(function () use ($data, $request) {
+            abort_if(! empty($data['purchase_code']) && PurchaseTransaction::where('purchase_code', $data['purchase_code'])->exists(), 409, 'Kode PO sudah digunakan. Muat ulang sebelum menerbitkan PO.');
+            $mr = WarehouseRequest::query()->when(! empty($data['warehouse_request_id']), fn ($q) => $q->whereKey($data['warehouse_request_id']), fn ($q) => $q->where('request_code', $data['warehouse_request_code']))->lockForUpdate()->first();
+            abort_unless($mr, 422, 'Pengajuan Gudang tidak ditemukan.');
+            abort_if($mr->purchase_code || PurchaseTransaction::where('warehouse_request_id', $mr->id)->exists(), 409, 'Pengajuan Gudang sudah diterbitkan PO.');
+            abort_if(! empty($data['warehouse_request_code']) && $data['warehouse_request_code'] !== $mr->request_code, 422, 'Referensi pengajuan tidak sama.');
+            $order = SalesOrder::whereKey($mr->sales_order_id)->lockForUpdate()->first();
+            abort_unless($order && $order->status === 'Draft' && $mr->status === 'MENUNGGU_FINANCE' && $mr->order_items_hash === WarehouseRequest::itemsHash($order->items), 422, 'Kebutuhan pesanan berubah atau pengajuan lama belum terhubung. Batalkan lalu ajukan kembali dari pesanan.');
+            $supplierQuery = Supplier::where('is_active', true);
+            ! empty($data['supplier_id']) ? $supplierQuery->whereKey($data['supplier_id']) : $supplierQuery->where('name', $data['default_supplier'] ?? '');
+            $suppliers = $supplierQuery->lockForUpdate()->get();
+            abort_unless($suppliers->count() === 1, 422, 'Pilih satu Supplier aktif yang terdaftar.');
+            $supplier = $suppliers->first();
+            abort_if(! empty($data['default_supplier']) && $data['default_supplier'] !== $supplier->name, 422, 'Supplier tidak sama dengan pilihan master.');
+            $expected = collect($mr->items)->keyBy('sku');
+            app(SalesOrderInventory::class)->allocate($order);
+            $shortages = collect(app(SalesOrderInventory::class)->summaries(collect([$order]))[$order->id]['items'])->keyBy('sku');
+            foreach ($expected as $line) {
+                abort_if((int) $line['qty'] > ($shortages->get($line['sku'])['shortage'] ?? 0), 422, 'Kekurangan stok sudah berubah. Warehouse perlu membatalkan dan menyesuaikan pengajuan.');
             }
+            abort_unless(count($data['items']) === $expected->count(), 422, 'PO harus memuat seluruh barang dari pengajuan Gudang.');
+            $items = [];
+            $subtotal = 0;
+            foreach ($data['items'] as $line) {
+                $required = $expected->get($line['sku']);
+                abort_unless($required && (int) $required['qty'] === (int) $line['qty'], 422, 'SKU dan jumlah PO harus sama dengan pengajuan Gudang.');
+                abort_if(isset($line['unit']) && $line['unit'] !== $required['unit'], 422, 'Satuan PO tidak sama dengan pengajuan.');
+                abort_if(! empty($line['supplier']) && $line['supplier'] !== $supplier->name, 422, 'Satu PO hanya untuk Supplier yang dipilih.');
+                $product = Product::where('sku', $line['sku'])->lockForUpdate()->first();
+                abort_unless($product, 422, 'Barang pengajuan tidak tersedia pada katalog aktif.');
+                $price = (int) round($line['harga_beli'] * 100);
+                $discount = isset($line['diskon_nominal']) ? (int) round($line['diskon_nominal'] * 100) : (int) round($price * ($line['diskon_percent'] ?? 0) / 100);
+                abort_if($discount > $price, 422, 'Diskon per unit tidak boleh melebihi harga beli.');
+                $value = (int) $line['qty'] * ($price - $discount);
+                $subtotal += $value;
+                abort_if($subtotal > 100_000_000_000_000, 422, 'Nilai pembelian melebihi batas sistem.');
+                $items[] = ['sku' => $product->sku, 'barang' => $required['name'], 'unit' => $required['unit'], 'supplier' => $supplier->name,
+                    'qty' => (int) $line['qty'], 'harga_beli' => $price / 100, 'diskon_nominal' => $discount / 100,
+                    'diskon_percent' => $price ? $discount * 100 / $price : 0, 'subtotal' => $value / 100];
+                $product->update(['last_buy_price' => $price / 100, 'hpp' => $product->hpp > 0 ? $product->hpp : $price / 100]);
+            }
+            $discount = (int) round(($data['discount'] ?? 0) * 100);
+            abort_if($discount > $subtotal, 422, 'Diskon transaksi melebihi subtotal.');
             $purchase = PurchaseTransaction::create([
-                'purchase_code' => $validated['purchase_code'],
-                'transaction_date' => $validated['transaction_date'],
-                'invoice_number' => $validated['invoice_number'] ?? null,
-                'project_id' => $validated['project_id'] ?? null,
-                'project_name' => $validated['project_name'],
-                'default_supplier' => $validated['default_supplier'] ?? null,
-                'warehouse_request_id' => $validated['warehouse_request_id'] ?? null,
-                'warehouse_request_code' => $validated['warehouse_request_code'] ?? null,
-                'subtotal' => $validated['subtotal'],
-                'discount' => $validated['discount'] ?? 0,
-                'total_price' => $validated['total_price'],
-                'payment_method' => $validated['payment_method'],
-                'status' => 'DIPESAN',
-                'supplier_progress' => ['supplier_status' => 'Menunggu Konfirmasi'],
-                'progress_version' => 1,
-                'items' => $validated['items'],
-                'created_by' => $validated['created_by'] ?? 'Dewi Lestari (Finance)',
-                'notes' => $validated['notes'] ?? null,
+                'purchase_code' => $data['purchase_code'] ?? 'PO-'.strtoupper((string) Str::ulid()), 'transaction_date' => $data['transaction_date'],
+                'invoice_number' => $data['invoice_number'] ?? null, 'project_id' => $mr->project_id, 'project_name' => $mr->project_name,
+                'supplier_id' => $supplier->id, 'default_supplier' => $supplier->name, 'warehouse_request_id' => $mr->id, 'warehouse_request_code' => $mr->request_code,
+                'subtotal' => $subtotal / 100, 'discount' => $discount / 100, 'total_price' => ($subtotal - $discount) / 100,
+                'payment_method' => $data['payment_method'], 'status' => 'DIPESAN', 'supplier_progress' => ['supplier_status' => 'Menunggu Konfirmasi'],
+                'progress_version' => 1, 'items' => $items, 'created_by' => $request->user()->name, 'notes' => $data['notes'] ?? null,
             ]);
+            $mr->update(['status' => 'DIPROSES_PEMBELIAN', 'purchase_code' => $purchase->purchase_code]);
 
-            // If linked to a warehouse request, update the request status
-            if (! empty($validated['warehouse_request_id'])) {
-                WarehouseRequest::where('id', $validated['warehouse_request_id'])
-                    ->update([
-                        'status' => 'DIPROSES_PEMBELIAN',
-                        'purchase_code' => $validated['purchase_code'],
-                    ]);
-            } elseif (! empty($validated['warehouse_request_code'])) {
-                WarehouseRequest::where('request_code', $validated['warehouse_request_code'])
-                    ->update([
-                        'status' => 'DIPROSES_PEMBELIAN',
-                        'purchase_code' => $validated['purchase_code'],
-                    ]);
-            }
-
-            // PROBIS TO-BE Tahap 4: Update harga beli/acuan HPP, stok fisik BELUM bertambah sampai diterima Gudang (Tahap 5)
-            foreach ($validated['items'] as $item) {
-                $sku = $item['sku'] ?? null;
-                $hargaBeli = (float) $item['harga_beli'];
-
-                if (! empty($sku) && $hargaBeli > 0) {
-                    $prod = Product::where('sku', $sku)->first();
-                    if ($prod) {
-                        $updateData = ['last_buy_price' => $hargaBeli];
-                        if ($prod->hpp <= 0) {
-                            $updateData['hpp'] = $hargaBeli;
-                        }
-                        $prod->update($updateData);
-                    }
-                }
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Transaksi pembelian '.$purchase->purchase_code.' berhasil disimpan.',
-                'data' => $purchase,
-            ], 201);
+            return $purchase->load('receipts.lines');
         });
+
+        return response()->json(['success' => true, 'data' => $purchase], 201);
     }
 
-    /**
-     * Confirm physical receipt of purchase goods in Warehouse (PROBIS TO-BE Tahap 5).
-     * Increases actual physical stock upon verified delivery.
-     */
-    public function receivePurchaseShipment(Request $request, $id): JsonResponse
+    public function receivePurchaseShipment(Request $request, string $id): JsonResponse
     {
-        $purchase = PurchaseTransaction::where('id', $id)
-            ->orWhere('purchase_code', $id)
-            ->first();
-
-        if (! $purchase) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Transaksi pembelian tidak ditemukan.',
-            ], 404);
-        }
-
-        if ($purchase->status === 'DITERIMA_GUDANG') {
-            return response()->json([
-                'success' => true,
-                'message' => 'Barang untuk transaksi '.$purchase->purchase_code.' sudah pernah diterima sebelumnya.',
-                'data' => $purchase,
-            ]);
-        }
-
-        return DB::transaction(function () use ($purchase, $request) {
-            $purchase = PurchaseTransaction::whereKey($purchase->id)->lockForUpdate()->firstOrFail();
-            if ($purchase->status === 'DITERIMA_GUDANG') {
-                return response()->json(['success' => true, 'data' => $purchase]);
-            }
-            $purchase->progress_version++;
-            $purchase->supplier_progress = [...($purchase->supplier_progress ?? []), 'supplier_status' => 'Diterima Gudang (Lengkap & Sesuai)',
-                'warehouse_arrived' => true, 'received_at' => now()->toDateString()];
-            $notes = $request->input('notes', 'Barang diterima lengkap dan sesuai spesifikasi fisik.');
-
-            $purchase->update([
-                'status' => 'DITERIMA_GUDANG',
-                'notes' => $purchase->notes ? $purchase->notes."\n".$notes : $notes,
-            ]);
-
-            // Update linked warehouse request if any
-            if (! empty($purchase->warehouse_request_id)) {
-                WarehouseRequest::where('id', $purchase->warehouse_request_id)
-                    ->update(['status' => 'SELESAI']);
-            } elseif (! empty($purchase->warehouse_request_code)) {
-                WarehouseRequest::where('request_code', $purchase->warehouse_request_code)
-                    ->update(['status' => 'SELESAI']);
-            }
-
-            // Increment actual physical stock now that goods are physically received
-            $receivedItems = [];
-            foreach ($purchase->items ?? [] as $item) {
-                $sku = $item['sku'] ?? null;
-                $rawName = $item['barang'] ?? $item['name'] ?? null;
-                $cleanName = $rawName ? preg_replace('/^[A-Z0-9_\-]+\s*-\s*/', '', $rawName) : null;
-                $qty = (float) ($item['qty'] ?? 0);
-
-                if ($qty > 0) {
-                    $prod = null;
-                    if (! empty($sku) && $sku !== '-') {
-                        $prod = Product::where('sku', $sku)->first();
-                    }
-                    if (! $prod && ! empty($cleanName)) {
-                        $prod = Product::where('name', $cleanName)
-                            ->orWhere('name', $rawName)
-                            ->orWhere('name', 'like', "%{$cleanName}%")
-                            ->first();
-                    }
-
-                    if ($prod) {
-                        $newStock = $prod->stock + $qty;
-                        $prod->update([
-                            'stock' => $newStock,
-                            'status' => $newStock > 10 ? 'Tersedia' : ($newStock > 0 ? 'Menipis' : 'Habis'),
-                        ]);
-                        $receivedItems[] = [
-                            'sku' => $prod->sku,
-                            'name' => $prod->name,
-                            'qty_received' => $qty,
-                            'current_stock' => $newStock,
-                        ];
-                    } else {
-                        $generatedSku = (! empty($sku) && $sku !== '-') ? $sku : 'PRD-'.str_pad((string) (Product::count() + 1), 4, '0', STR_PAD_LEFT);
-                        $newProd = Product::create([
-                            'sku' => $generatedSku,
-                            'name' => $cleanName ?: ($rawName ?? 'Barang Supplier'),
-                            'category' => 'Material Pengadaan',
-                            'unit' => $item['unit'] ?? 'Unit',
-                            'stock' => (int) $qty,
-                            'min_stock' => 10,
-                            'last_buy_price' => (float) ($item['harga_beli'] ?? 0),
-                            'hpp' => (float) ($item['harga_beli'] ?? 0),
-                            'sell_price' => round((float) ($item['harga_beli'] ?? 0) * 1.25),
-                            'status' => $qty > 10 ? 'Tersedia' : 'Menipis',
-                        ]);
-                        $receivedItems[] = [
-                            'sku' => $newProd->sku,
-                            'name' => $newProd->name,
-                            'qty_received' => $qty,
-                            'current_stock' => (int) $qty,
-                        ];
-                    }
-                }
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Barang pembelian '.$purchase->purchase_code.' berhasil diverifikasi fisik dan masuk ke stok gudang.',
-                'data' => [
-                    'purchase' => $purchase,
-                    'items_received' => $receivedItems,
-                ],
-            ]);
-        });
+        return app(PurchaseReceiving::class)->receive($request, $id);
     }
 }

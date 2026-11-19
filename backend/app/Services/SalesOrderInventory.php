@@ -10,6 +10,20 @@ use Illuminate\Validation\ValidationException;
 
 class SalesOrderInventory
 {
+    /** Caller holds the inventory mutex. Rebuild drafts without taking submitted stock. */
+    public function reallocateDrafts(?int $preferredOrderId = null): void
+    {
+        $orders = SalesOrder::where('status', 'Draft')->orderBy('id')->lockForUpdate()->get();
+        // Release draft allocations first so the preferred order genuinely receives priority.
+        foreach ($orders as $order) {
+            $this->release($order);
+        }
+        $orders = $orders->sortBy(fn ($order) => [$order->id === $preferredOrderId ? 0 : 1, $order->id]);
+        foreach ($orders as $order) {
+            $this->allocate($order);
+        }
+    }
+
     /** Caller holds the order lock in a transaction. Product locks serialize competing orders. */
     public function allocate(SalesOrder $order): void
     {
@@ -76,12 +90,12 @@ class SalesOrderInventory
                 $free = $product ? max(0, $product->stock - ($totals[$product->id] ?? 0)) : 0;
                 $usable = $product ? min($allocated, max(0, $product->stock - (($totals[$product->id] ?? 0) - $allocated))) : 0;
                 $line = $lines->first();
-                $items[] = ['sku' => $sku, 'name' => $line['name'] ?: ($product?->name ?? 'Barang dalam pesanan'),
-                    'unit' => $line['unit'] ?: ($product?->unit ?? ''), 'catalogFound' => $product !== null,
+                $items[] = ['sku' => $sku, 'name' => ($line['name'] ?? '') ?: ($product?->name ?? 'Barang dalam pesanan'),
+                    'unit' => ($line['unit'] ?? '') ?: ($product?->unit ?? ''), 'catalogFound' => $product !== null,
                     'required' => $required, 'allocated' => $usable,
                     'available' => $free, 'shortage' => max(0, $required - $usable)];
             }
-            $result[$order->id] = ['status' => collect($items)->sum('shortage') === 0 ? 'Siap Diajukan' : 'Menunggu Stok', 'items' => $items];
+            $result[$order->id] = ['status' => $items !== [] && collect($items)->sum('shortage') === 0 ? 'Siap Diajukan' : 'Menunggu Stok', 'items' => $items];
         }
 
         return $result;

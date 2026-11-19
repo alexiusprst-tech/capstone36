@@ -4,153 +4,88 @@
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Stok & Mutasi Persediaan</h1>
-          <p class="text-sm text-slate-500 mt-1">
-            Pencatatan arus masuk barang, pengeluaran order proyek, opname, dan penyesuaian stok fisik.
-          </p>
+          <p class="text-sm text-slate-500 mt-1">Riwayat stok fisik yang tersimpan di server, termasuk saldo awal, penyesuaian, dan penerimaan pembelian.</p>
         </div>
-        <button
-          type="button"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-alpharo-500 hover:bg-alpharo-600 text-white font-semibold rounded-lg text-xs shadow-xs transition-colors"
-          @click="openAdjustmentModal"
-        >
-          <Plus class="w-4 h-4" />
-          <span>Input Mutasi Stok</span>
-        </button>
+        <button type="button" class="px-4 py-2 bg-alpharo-500 hover:bg-alpharo-600 text-white font-semibold rounded-lg text-xs" @click="router.push('/warehouse/products')">Kelola Stok di Data Barang</button>
       </div>
     </template>
-
-    <!-- KPIS FOR INVENTORY MOVEMENTS -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-      <KpiCard title="Total SKU Aktif" :value="store.products.length" icon-variant="blue" />
-      <KpiCard title="Mutasi Masuk" :value="incomingCount" icon-variant="blue" />
-      <KpiCard title="Mutasi Keluar" :value="outgoingCount" icon-variant="blue" />
-      <KpiCard title="Penyesuaian Opname" :value="adjustCount" icon-variant="blue" />
-    </div>
-
-    <!-- STOCK MOVEMENTS TABLE -->
-    <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
-      <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs">
-        <span class="font-semibold text-slate-900 uppercase">Riwayat Mutasi & Pergerakan Barang</span>
-        <span class="text-slate-500">{{ store.stockMovements.length }} Transaksi Mutasi</span>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="ui-table-wide ui-table w-full text-left text-xs border-collapse">
-          <thead>
-            <tr class="bg-slate-50/50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px]">
-              <th class="py-3 px-4">Waktu</th>
-              <th class="py-3 px-4">SKU & Barang</th>
-              <th class="py-3 px-4 text-center">Jenis Mutasi</th>
-              <th class="py-3 px-4 text-right">Volume</th>
-              <th class="py-3 px-4">No. Referensi</th>
-              <th class="py-3 px-4">Petugas Lapangan</th>
-            </tr>
-          </thead>
+    <p class="mb-5 text-sm text-slate-600">Alokasi pesanan mengurangi stok tersedia, tanpa mengubah stok fisik atau membuat mutasi. Saldo awal migrasi mencatat stok saat ledger mulai digunakan.</p>
+    <div class="ui-panel bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <form class="p-4 flex flex-col sm:flex-row gap-3 border-b border-slate-200" @submit.prevent="load(1)">
+        <div class="flex-1">
+          <label for="movement-search" class="block text-xs font-semibold text-slate-700 mb-1">Cari SKU, barang, atau referensi</label>
+          <input id="movement-search" v-model="search" maxlength="255" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Masukkan kata pencarian" />
+        </div>
+        <div>
+          <label for="movement-type" class="block text-xs font-semibold text-slate-700 mb-1">Jenis mutasi</label>
+          <select id="movement-type" v-model="type" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
+            <option value="">Semua jenis</option><option value="OPENING">Saldo awal</option><option value="ADJUSTMENT">Penyesuaian</option><option value="RECEIPT">Penerimaan pembelian</option>
+          </select>
+        </div>
+        <button type="submit" :disabled="loading" class="self-end px-4 py-2 rounded-lg bg-slate-800 text-white text-sm disabled:opacity-50">Terapkan</button>
+      </form>
+      <div v-if="error" role="alert" class="p-5 text-sm text-red-700 bg-red-50">{{ error }} <button type="button" class="underline font-semibold ml-2" @click="load(meta.current_page)">Coba lagi</button></div>
+      <p v-else-if="loading" role="status" class="p-6 text-sm text-slate-500">Memuat riwayat mutasi dari server…</p>
+      <p v-else-if="!movements.length" class="p-6 text-sm text-slate-500">Tidak ada riwayat mutasi untuk filter ini.</p>
+      <div v-else class="overflow-x-auto">
+        <table class="ui-table-wide w-full text-left text-xs border-collapse">
+          <thead class="bg-slate-50 text-slate-600 border-b border-slate-200"><tr>
+            <th class="p-4">Waktu</th><th class="p-4">SKU & Barang</th><th class="p-4">Jenis</th><th class="p-4 text-right">Perubahan</th><th class="p-4 text-right">Sebelum → Sesudah</th><th class="p-4">Referensi & Alasan</th><th class="p-4">Petugas</th>
+          </tr></thead>
           <tbody class="divide-y divide-slate-100">
-            <tr v-for="m in store.stockMovements" :key="m.id" class="hover:bg-slate-50/70 transition-colors">
-              <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ m.date }}</td>
-              <td class="py-3.5 px-4">
-                <span class="font-semibold text-slate-900 block">{{ m.productName || m.name }}</span>
-                <span class="font-mono text-[11px] text-slate-400">{{ m.sku }}</span>
-              </td>
-              <td class="py-3.5 px-4 text-center">
-                <span
-                  :class="[
-                    m.type === 'Masuk' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : m.type === 'Keluar' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-alpharo-50 text-alpharo-700 border-alpharo-200',
-                    'px-2 py-0.5 rounded-full border font-semibold text-[11px]'
-                  ]"
-                >
-                  {{ m.type }}
-                </span>
-              </td>
-              <td class="py-3.5 px-4 text-right font-mono font-semibold text-slate-900 whitespace-nowrap">
-                {{ m.type === 'Masuk' ? '+' : m.type === 'Keluar' ? '-' : '' }}{{ Math.abs(m.qty) }} {{ m.unit }}
-              </td>
-              <td class="py-3.5 px-4 font-mono text-slate-600">{{ m.reference }}</td>
-              <td class="py-3.5 px-4 text-slate-700">{{ m.pic }}</td>
+            <tr v-for="movement in movements" :key="movement.id" class="hover:bg-slate-50">
+              <td class="p-4 whitespace-nowrap text-slate-500">{{ formatDate(movement.created_at) }}</td>
+              <td class="p-4"><span class="block font-semibold">{{ movement.name_snapshot }}</span><span class="font-mono text-slate-500">{{ movement.sku_snapshot }}</span></td>
+              <td class="p-4 whitespace-nowrap">{{ labels[movement.type] || movement.type }}</td>
+              <td class="p-4 text-right font-mono font-semibold" :class="movement.delta > 0 ? 'text-emerald-700' : movement.delta < 0 ? 'text-rose-700' : 'text-slate-600'">{{ movement.delta > 0 ? '+' : '' }}{{ number(movement.delta) }}</td>
+              <td class="p-4 text-right whitespace-nowrap font-mono">{{ number(movement.before_stock) }} → {{ number(movement.after_stock) }}</td>
+              <td class="p-4 min-w-48"><span v-if="movement.reference_id" class="block font-mono">{{ movement.reference_type }} #{{ movement.reference_id }}</span><span class="text-slate-600">{{ movement.reason || '—' }}</span></td>
+              <td class="p-4">{{ movement.actor?.name || (movement.reference_type === 'migration' ? 'Migrasi sistem' : 'Sistem / petugas tidak tersedia') }}</td>
             </tr>
           </tbody>
         </table>
       </div>
+      <div class="p-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
+        <span>{{ number(meta.total) }} mutasi · Halaman {{ meta.current_page }} dari {{ meta.last_page }}</span>
+        <div class="flex gap-2">
+          <button type="button" :disabled="loading || meta.current_page <= 1" class="border rounded-lg px-3 py-2 disabled:opacity-40" @click="load(meta.current_page - 1)">Sebelumnya</button>
+          <button type="button" :disabled="loading || meta.current_page >= meta.last_page" class="border rounded-lg px-3 py-2 disabled:opacity-40" @click="load(meta.current_page + 1)">Berikutnya</button>
+        </div>
+      </div>
     </div>
-
-    <!-- INPUT MUTASI MODAL -->
-    <Modal v-model="modalOpen" title="Input Mutasi / Penyesuaian Stok" subtitle="Catat barang masuk suplier, pemakaian site, atau hasil stock opname" size="md">
-      <form class="space-y-4 text-xs" @submit.prevent="saveMovement">
-        <div>
-          <label class="block font-semibold text-slate-700 uppercase mb-1">Pilih Material</label>
-          <select v-model="form.sku" required class="w-full px-3 py-2 border rounded-lg bg-white">
-            <option v-for="p in store.products" :key="p.sku" :value="p.sku">
-              [{{ p.sku }}] {{ p.name }} (Stok Saat Ini: {{ p.stock }} {{ p.unit }})
-            </option>
-          </select>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-semibold text-slate-700 uppercase mb-1">Jenis Mutasi</label>
-            <select v-model="form.type" required class="w-full px-3 py-2 border rounded-lg bg-white">
-              <option value="Masuk">Barang Masuk (Penerimaan)</option>
-              <option value="Keluar">Barang Keluar (Pengiriman)</option>
-              <option value="Penyesuaian">Penyesuaian (Stock Opname)</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-700 uppercase mb-1">Jumlah Volume</label>
-            <input v-model.number="form.qty" type="number" min="1" required class="w-full px-3 py-2 border rounded-lg text-center" />
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-semibold text-slate-700 uppercase mb-1">Nomor Referensi Dokumen</label>
-          <input v-model="form.reference" required placeholder="Contoh: PO-SUPPLIER-102 / OPNAME-OKT" class="w-full px-3 py-2 border rounded-lg font-mono" />
-        </div>
-
-        <div class="flex justify-end gap-2 pt-2 border-t border-slate-200">
-          <button type="button" class="px-3.5 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg" @click="modalOpen = false">Batal</button>
-          <button type="submit" class="px-4 py-1.5 bg-alpharo-500 text-white font-semibold rounded-lg">Simpan Mutasi</button>
-        </div>
-      </form>
-    </Modal>
   </AppLayout>
 </template>
-
 <script setup>
-import { ref, computed } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useRouter } from '../../navigation';
 import AppLayout from '../../components/layout/AppLayout.vue';
-import KpiCard from '../../components/common/KpiCard.vue';
-import Modal from '../../components/common/Modal.vue';
-import { store, storeActions } from '../../stores/mockData';
-import { useToast } from '../../services/toast';
-import { Plus } from 'lucide-vue-next';
-
-const toast = useToast();
-
-const modalOpen = ref(false);
-const form = ref({
-  sku: store.products[0]?.sku || '',
-  type: 'Masuk',
-  qty: 10,
-  reference: 'SURAT-JALAN-SUPPLIER',
-});
-
-const incomingCount = computed(() => store.stockMovements.filter((m) => m.type === 'Masuk').length);
-const outgoingCount = computed(() => store.stockMovements.filter((m) => m.type === 'Keluar').length);
-const adjustCount = computed(() => store.stockMovements.filter((m) => m.type === 'Penyesuaian').length);
-
-const openAdjustmentModal = () => {
-  form.value = {
-    sku: store.products[0]?.sku || '',
-    type: 'Masuk',
-    qty: 50,
-    reference: `OPNAME-${new Date().toISOString().slice(5, 10)}`,
-  };
-  modalOpen.value = true;
-};
-
-const saveMovement = () => {
-  storeActions.addStockMovement(form.value);
-  toast.success(`Mutasi stok ${form.value.sku} berhasil dicatat.`);
-  modalOpen.value = false;
-};
+import api from '../../services/api';
+const router = useRouter();
+const movements = ref([]);
+const search = ref('');
+const type = ref('');
+const loading = ref(false);
+const error = ref('');
+const meta = ref({ current_page: 1, last_page: 1, total: 0 });
+const labels = { OPENING: 'Saldo awal', ADJUSTMENT: 'Penyesuaian', RECEIPT: 'Penerimaan pembelian' };
+const number = (value) => Number(value || 0).toLocaleString('id-ID');
+const formatDate = (value) => value ? new Date(value).toLocaleString('id-ID') : '—';
+let requestId = 0;
+async function load(page = 1) {
+  const id = ++requestId;
+  loading.value = true;
+  error.value = '';
+  try {
+    const response = await api.get('/inventory/movements', { params: { page, per_page: 25, search: search.value || undefined, type: type.value || undefined } });
+    if (id !== requestId) return;
+    movements.value = response.data.data;
+    meta.value = response.data.meta;
+  } catch (err) {
+    if (id !== requestId) return;
+    error.value = err.response?.data?.message || 'Riwayat mutasi gagal dimuat. Periksa koneksi lalu coba lagi.';
+  } finally {
+    if (id === requestId) loading.value = false;
+  }
+}
+onMounted(() => load());
 </script>

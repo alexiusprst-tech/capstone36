@@ -1,7 +1,7 @@
 <template>
   <div class="app-shell ui-scope min-h-screen flex flex-col font-sans text-slate-800"
-    @keydown.esc="mobileSidebarOpen = false; notificationOpen = false; roleDropdownOpen = false"
-    @click="if (!$event.target.closest('[data-popover]')) { notificationOpen = false; roleDropdownOpen = false }">
+    @keydown.esc="mobileSidebarOpen = false; notificationOpen = false"
+    @click="closeOutsidePopover">
     <a href="#page-content" class="skip-link">Lewati ke konten</a>
     <ToastContainer />
     <div v-if="mobileSidebarOpen" class="fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-xs lg:hidden" @click="mobileSidebarOpen = false"></div>
@@ -57,17 +57,11 @@
         </div>
         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
           <Link href="/portal" class="hidden xl:inline-flex items-center gap-1.5 px-3 py-2 text-alpharo-700 bg-alpharo-50 rounded-lg text-xs font-medium border border-alpharo-100 hover:bg-alpharo-100 transition-colors" title="Buka Portal Publik Rekanan"><Globe class="w-3.5 h-3.5" /><span>Portal Publik ↗</span></Link>
+          <span class="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-xs text-slate-600" aria-label="Peran akun aktif">
+            <ShieldCheck class="w-3.5 h-3.5 text-alpharo-600" />Peran: {{ roleLabel }}
+          </span>
           <div class="relative" data-popover>
-            <button type="button" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs text-slate-600 transition-colors" :aria-expanded="roleDropdownOpen" aria-controls="role-menu" @click="roleDropdownOpen = !roleDropdownOpen; notificationOpen = false">
-              <ShieldCheck class="w-3.5 h-3.5 text-alpharo-600" /><span>Peran: {{ roleLabel }}</span><ChevronDown class="w-3.5 h-3.5 text-slate-400" />
-            </button>
-            <div v-if="roleDropdownOpen" id="role-menu" class="ui-popover absolute right-0 mt-2 w-64 bg-white rounded-xl border border-slate-200 py-2 z-50">
-              <div class="px-4 py-2 border-b border-slate-100 text-xs"><p class="font-semibold text-slate-900">Pilih Role Pengguna</p><p class="text-slate-500 text-[11px] mt-1">Beralih konteks kerja secara instan</p></div>
-              <div class="py-1"><button v-for="r in store.roles" :key="r.key" type="button" :class="[store.currentUser.role === r.key ? 'bg-alpharo-50 text-alpharo-700' : 'text-slate-700 hover:bg-slate-50', 'w-full text-left px-4 py-2.5 text-xs flex items-center justify-between']" @click="onSelectRole(r.key)"><div><p class="font-medium">{{ r.label }}</p><p class="text-[11px] text-slate-500 mt-0.5">{{ r.division }}</p></div><span v-if="store.currentUser.role === r.key" class="text-alpharo-600">●</span></button></div>
-            </div>
-          </div>
-          <div class="relative" data-popover>
-            <button type="button" class="relative p-2 text-slate-500 rounded-lg hover:bg-slate-100 transition-colors flex items-center justify-center" title="Pusat Notifikasi Real-time" aria-label="Buka pusat notifikasi" :aria-expanded="notificationOpen" aria-controls="notification-panel" @click="notificationOpen = !notificationOpen; roleDropdownOpen = false">
+            <button type="button" class="relative p-2 text-slate-500 rounded-lg hover:bg-slate-100 transition-colors flex items-center justify-center" title="Pusat Notifikasi Real-time" aria-label="Buka pusat notifikasi" :aria-expanded="notificationOpen" aria-controls="notification-panel" @click="notificationOpen = !notificationOpen">
               <Bell :class="['w-[18px] h-[18px]', isBellPulsing ? 'text-alpharo-600 animate-bounce' : '']" />
               <span v-if="unreadCount > 0" :class="['absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-rose-500 text-white text-[9px] font-semibold rounded-full flex items-center justify-center ring-2 ring-white', isBellPulsing ? 'animate-pulse' : '']">{{ unreadCount }}</span>
             </button>
@@ -95,7 +89,7 @@
         </p>
         <slot></slot>
       </main>
-      <footer class="app-footer mt-auto px-4 sm:px-6 lg:px-8 py-4 text-[11px] text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2"><span>&copy; 2026 CV Alpharo Artha Jaya — Sistem Informasi Terintegrasi Enterprise</span><div class="flex items-center gap-3"><span>Versi 1.0.0 (Capstone Release)</span><span>·</span><span class="flex items-center gap-1.5 text-emerald-600"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Sistem Online</span></div></footer>
+      <footer class="app-footer mt-auto px-4 sm:px-6 lg:px-8 py-4 text-[11px] text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2"><span>&copy; 2026 CV Alpharo Artha Jaya — Sistem Informasi Terintegrasi Enterprise</span><div class="flex items-center gap-3"><span>Versi pengembangan</span><span>·</span><span class="flex items-center gap-1.5" :class="orderSync.error ? 'text-amber-700' : 'text-slate-500'"><span class="w-1.5 h-1.5 rounded-full" :class="orderSync.error ? 'bg-amber-500' : 'bg-slate-400'"></span>{{ orderSync.error ? 'Sinkronisasi terganggu' : 'Sesi aktif' }}</span></div></footer>
     </div>
   </div>
 </template>
@@ -106,7 +100,7 @@ import { onRealtimeNotification } from '../../services/realtime';
 import { useRouter, useRoute } from '../../navigation';
 import { store, storeActions, orderSync } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
-import { login, logout } from '../../services/session';
+import { logout } from '../../services/session';
 import ToastContainer from '../common/ToastContainer.vue';
 import AlpharoLogo from '../common/AlpharoLogo.vue';
 
@@ -129,7 +123,6 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
   Menu,
   X,
   Activity,
@@ -144,11 +137,11 @@ const router = useRouter();
 const route = useRoute();
 const isActivePath = path => route.path === path || route.path.startsWith(path + '/');
 const toast = useToast();
+const closeOutsidePopover = event => { if (!event.target.closest('[data-popover]')) notificationOpen.value = false; };
 
 const sidebarCollapsed = ref(false);
 const mobileSidebarOpen = ref(false);
 const notificationOpen = ref(false);
-const roleDropdownOpen = ref(false);
 const isBellPulsing = ref(false);
 let unsubscribeRealtime = null;
 let orderRefreshTimer = null;
@@ -158,6 +151,7 @@ const refreshOrders = () => {
 };
 
 onMounted(() => {
+  storeActions.loadClients();
   refreshOrders();
   window.addEventListener('focus', refreshOrders);
   orderRefreshTimer = window.setInterval(refreshOrders, 30000);
@@ -398,35 +392,6 @@ const navGroups = computed(() => {
 
   return [];
 });
-
-const roleDemoCredentials = {
-  MARKETING: { email: 'marketing@alpharo.co.id', password: 'password123' },
-  DIREKTUR: { email: 'direktur@alpharo.co.id', password: 'password123' },
-  ADMINISTRASI: { email: 'admin@alpharo.co.id', password: 'password123' },
-  WAREHOUSE: { email: 'warehouse@alpharo.co.id', password: 'password123' },
-  FINANCE: { email: 'finance@alpharo.co.id', password: 'password123' },
-  CLIENT: { email: 'client@alpharo.co.id', password: 'password123' },
-  SUPPLIER: { email: 'sales@synnexmetrodata.com', password: 'password' },
-};
-
-const onSelectRole = async (newRoleKey) => {
-  roleDropdownOpen.value = false;
-  const credentials = roleDemoCredentials[newRoleKey];
-  if (!credentials) return;
-  try {
-    const user = await login(credentials);
-    toast.success(`Beralih ke peran: ${roleLabel.value}`);
-    const targetMap = {
-      MARKETING: '/marketing/dashboard', DIREKTUR: '/director/dashboard',
-      ADMINISTRASI: '/administration/dashboard', WAREHOUSE: '/warehouse/dashboard',
-      FINANCE: '/finance/dashboard', CLIENT: '/portal', SUPPLIER: '/supplier/portal',
-    };
-    router.push(targetMap[user.role] || '/');
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Tidak dapat beralih peran. Silakan coba lagi.');
-  }
-};
-
 
 const getNotificationRoute = () => {
   const r = store.currentUser.role.toLowerCase();

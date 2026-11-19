@@ -84,9 +84,8 @@ export function expandSchoolName(name) {
 
 export function customerProfile(client = {}) {
   const profile = Object.fromEntries(fields.map(field => [field, typeof client[field] === 'string' ? client[field].trim() : '']));
-  if (profile.orgFullName) {
-    profile.orgFullName = expandSchoolName(profile.orgFullName);
-  } else if (profile.name) {
+  // Preserve an explicitly supplied official identity; only infer when it is absent.
+  if (!profile.orgFullName && profile.name) {
     profile.orgFullName = expandSchoolName(profile.name);
   }
   return profile;

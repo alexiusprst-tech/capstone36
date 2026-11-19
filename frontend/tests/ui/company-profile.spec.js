@@ -19,7 +19,7 @@ test('company profile remains readable and aligned across viewport widths', asyn
       const rect = item.getBoundingClientRect();
       return { left: rect.left, right: rect.right, height: rect.height, clipped: item.scrollWidth > item.clientWidth + 1 };
     }));
-    expect(buttons).toHaveLength(4);
+    expect(buttons).toHaveLength(3);
     buttons.forEach((button, index) => {
       expect(button.left).toBeGreaterThanOrEqual(0);
       expect(button.right).toBeLessThanOrEqual(width);
@@ -55,10 +55,10 @@ test('company profile actions preserve the public service flow and unfinished re
   await navigation.getByRole('button', { name: 'Profil Perusahaan', exact: true }).click();
   await page.getByRole('button', { name: 'Lacak Pesanan', exact: true }).last().click();
   await expect(page).toHaveURL(/tab=tracking/);
-  await expect(page.getByRole('heading', { name: 'Lacak Resi & BAST', exact: true })).toBeVisible();
-  await navigation.getByRole('button', { name: 'Pembayaran', exact: true }).click();
-  await expect(page).toHaveURL(/tab=payment/);
-  await expect(page.getByRole('heading', { name: 'Pembayaran & Termin', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Lacak Pesanan, Pengiriman & Pembayaran Tagihan', exact: true })).toBeVisible();
+  await navigation.getByRole('button', { name: 'Lacak Pesanan & Pembayaran', exact: true }).click();
+  await expect(page).toHaveURL(/tab=tracking/);
+  await expect(page.getByRole('heading', { name: 'Lacak Pesanan, Pengiriman & Pembayaran Tagihan', exact: true })).toBeVisible();
   await navigation.getByRole('button', { name: 'Profil Perusahaan', exact: true }).click();
   await page.getByRole('button', { name: 'Buat Pesanan Sekarang', exact: true }).click();
   await expect(input).toHaveValue('PIC Sekolah Uji Desain');

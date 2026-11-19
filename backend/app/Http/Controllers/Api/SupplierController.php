@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\PurchaseTransaction;
 use App\Models\Supplier;
+use App\Services\InventoryTransaction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -22,6 +24,9 @@ class SupplierController extends Controller
         $status = $request->query('status');
 
         $query = Supplier::query();
+        if (strtoupper((string) $request->user()?->role) === 'SUPPLIER') {
+            $query->whereRaw('LOWER(email) = ?', [strtolower($request->user()->email)]);
+        }
 
         if ($status !== null && $status !== '') {
             if ($status === 'active' || $status === '1' || $status === 'Aktif') {
@@ -52,6 +57,7 @@ class SupplierController extends Controller
 
         if ($perPage === 'all' || (int) $perPage <= 0) {
             $suppliers = $query->get();
+
             return response()->json([
                 'success' => true,
                 'data' => $suppliers,
@@ -122,7 +128,7 @@ class SupplierController extends Controller
     /**
      * Display the specified supplier.
      */
-    public function show($id): JsonResponse
+    public function show(Request $request, $id): JsonResponse
     {
         $supplier = Supplier::where('id', $id)
             ->orWhere('code', $id)
@@ -134,6 +140,8 @@ class SupplierController extends Controller
                 'message' => 'Supplier tidak ditemukan.',
             ], 404);
         }
+
+        abort_if(strtoupper((string) $request->user()?->role) === 'SUPPLIER' && strcasecmp((string) $supplier->email, $request->user()->email) !== 0, 403, 'Data Supplier bukan milik Anda.');
 
         return response()->json([
             'success' => true,
@@ -197,7 +205,13 @@ class SupplierController extends Controller
             ], 404);
         }
 
-        $supplier->delete();
+        InventoryTransaction::run(function () use ($supplier) {
+            $locked = Supplier::whereKey($supplier->id)->lockForUpdate()->firstOrFail();
+            abort_if(PurchaseTransaction::where('supplier_id', $locked->id)
+                ->orWhere(fn ($q) => $q->whereNull('supplier_id')->where('default_supplier', $locked->name))->exists(), 409,
+                'Supplier memiliki riwayat pembelian. Nonaktifkan Supplier untuk menjaga referensi.');
+            $locked->delete();
+        });
 
         return response()->json([
             'success' => true,
@@ -205,4 +219,3 @@ class SupplierController extends Controller
         ]);
     }
 }
-

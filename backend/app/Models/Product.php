@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'sku',
@@ -34,5 +36,10 @@ class Product extends Model
             'hpp' => 'float',
             'sell_price' => 'float',
         ];
+    }
+
+    public static function stockStatus(int $stock, int $minStock = 10): string
+    {
+        return $stock <= 0 ? 'Habis' : ($stock <= $minStock ? 'Menipis' : 'Tersedia');
     }
 }

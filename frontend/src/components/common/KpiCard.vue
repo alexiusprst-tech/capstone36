@@ -12,12 +12,12 @@
 
         <!-- Value Container: Guaranteed No Wrap on Currency Prefix, Responsive Sizing -->
         <div class="mt-2 min-w-0">
-          <div v-if="isCurrency" class="flex items-baseline gap-1 min-w-0 overflow-hidden" :title="`Rp ${formattedNumber}`">
-            <span class="text-xs font-bold text-slate-400 font-mono shrink-0 select-none">Rp</span>
+          <div v-if="isCurrency" class="flex items-baseline gap-1 min-w-0 overflow-hidden" :title="unavailable ? 'Data belum tersedia' : `Rp ${formattedNumber}`">
+            <span v-if="!unavailable" class="text-xs font-bold text-slate-400 font-mono shrink-0 select-none">Rp</span>
             <span
               :class="[
                 valueFontSizeClass,
-                'font-semibold text-slate-900 tracking-tight tabular-nums truncate max-w-full'
+                'font-semibold text-slate-900 tracking-tight tabular-nums max-w-full whitespace-normal break-all'
               ]"
             >
               {{ formattedNumber }}
@@ -28,7 +28,7 @@
             <span
               :class="[
                 valueFontSizeClass,
-                'font-semibold text-slate-900 tracking-tight tabular-nums truncate max-w-full'
+                'font-semibold text-slate-900 tracking-tight tabular-nums max-w-full whitespace-normal break-all'
               ]"
             >
               {{ formattedNumber }}
@@ -70,6 +70,7 @@ import { computed } from 'vue';
 
 const props = defineProps({
   title: { type: String, required: true },
+  unavailable: { type: Boolean, default: false },
   value: { type: [Number, String], required: true },
   unit: { type: String, default: '' },
   isCurrency: { type: Boolean, default: false },
@@ -81,6 +82,7 @@ const props = defineProps({
 });
 
 const formattedNumber = computed(() => {
+  if (props.unavailable || (typeof props.value === 'number' && !Number.isFinite(props.value))) return '—';
   if (typeof props.value === 'number') {
     return props.value.toLocaleString('id-ID');
   }

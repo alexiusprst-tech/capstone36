@@ -45,6 +45,7 @@ class SpjProjectFromOrder
         if (! empty($details['customerProfile']['code'])) {
             $values['customer_code'] = $details['customerProfile']['code'];
         }
+        $values['project_value'] = $order->grand_total;
         if (! $project->exists) {
             $values += ['project_value' => $order->grand_total, 'status' => 'DRAFT', 'warehouse_status' => 'PENDING', 'finance_status' => 'MENUNGGU_PEMBAYARAN', 'city_signature' => $details['customerProfile']['letterheadCity'] ?? ''];
         }

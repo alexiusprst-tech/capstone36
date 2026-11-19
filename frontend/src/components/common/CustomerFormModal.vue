@@ -42,10 +42,10 @@
             
             <div class="p-4 space-y-3.5">
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-name">
                   Nama Customer <span class="text-rose-500">*</span>
                 </label>
-                <input
+                <input id="quick-customer-name"
                   ref="namaInput"
                   v-model="form.name"
                   type="text"
@@ -57,9 +57,9 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Organisasi Lengkap</label>
-                <input
-                  v-model="form.orgFullName"
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-orgFullName">Nama Organisasi Lengkap</label>
+                <input id="quick-customer-orgFullName"
+                  v-model="form.orgFullName" @input="identitySync.edit('orgFullName')"
                   type="text"
                   placeholder="Contoh: SMA Negeri 9 Jakarta"
                   class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800"
@@ -67,9 +67,9 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Organisasi Singkat</label>
-                <input
-                  v-model="form.orgShortName"
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-orgShortName">Nama Organisasi Singkat</label>
+                <input id="quick-customer-orgShortName"
+                  v-model="form.orgShortName" @input="identitySync.edit('orgShortName')"
                   type="text"
                   placeholder="Contoh: SMAN 9"
                   class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800"
@@ -77,10 +77,10 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-address">
                   Alamat <span class="text-rose-500">*</span>
                 </label>
-                <textarea
+                <textarea id="quick-customer-address"
                   v-model="form.address"
                   rows="3"
                   required
@@ -91,9 +91,9 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat Kop Surat</label>
-                <textarea
-                  v-model="form.letterheadAddress"
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-letterheadAddress">Alamat Kop Surat</label>
+                <textarea id="quick-customer-letterheadAddress"
+                  v-model="form.letterheadAddress" @input="identitySync.edit('letterheadAddress')"
                   rows="3"
                   placeholder="Alamat resmi untuk kop surat..."
                   class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600 text-slate-800 resize-y"
@@ -101,8 +101,8 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">NPWP</label>
-                <input
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-npwp">NPWP</label>
+                <input id="quick-customer-npwp"
                   v-model="form.npwp"
                   type="text"
                   placeholder="01.234.567.8-001.000"
@@ -133,10 +133,10 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-city">
                   Kota <span class="text-rose-500">*</span>
                 </label>
-                <select
+                <select id="quick-customer-city"
                   v-model="form.city"
                   required
                   class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600"
@@ -148,10 +148,10 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-district">
                   Kecamatan <span class="text-rose-500">*</span>
                 </label>
-                <select
+                <select id="quick-customer-district"
                   v-model="form.district"
                   required
                   class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600"
@@ -163,10 +163,10 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-subdistrict">
                   Kelurahan <span class="text-rose-500">*</span>
                 </label>
-                <select
+                <select id="quick-customer-subdistrict"
                   v-model="form.subdistrict"
                   required
                   class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-alpharo-500/30 focus:border-alpharo-600"
@@ -178,10 +178,10 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-postalCode">
                   Kode Pos <span class="text-rose-500">*</span>
                 </label>
-                <input
+                <input id="quick-customer-postalCode"
                   v-model="form.postalCode"
                   type="text"
                   required
@@ -191,8 +191,8 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Kota Kop Surat</label>
-                <input
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-letterheadCity">Kota Kop Surat</label>
+                <input id="quick-customer-letterheadCity"
                   v-model="form.letterheadCity"
                   type="text"
                   placeholder="Contoh: Jakarta Timur"
@@ -211,10 +211,10 @@
 
             <div class="p-4 space-y-3.5">
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-contactPerson">
                   Contact Person <span class="text-rose-500">*</span>
                 </label>
-                <input
+                <input id="quick-customer-contactPerson"
                   v-model="form.contactPerson"
                   type="text"
                   required
@@ -224,10 +224,10 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-phone">
                   No HP <span class="text-rose-500">*</span>
                 </label>
-                <input
+                <input id="quick-customer-phone"
                   v-model="form.phone"
                   type="text"
                   required
@@ -237,8 +237,8 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Telepon Organisasi</label>
-                <input
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-orgPhone">Telepon Organisasi</label>
+                <input id="quick-customer-orgPhone"
                   v-model="form.orgPhone"
                   type="text"
                   placeholder="Contoh: 021-8091234"
@@ -247,8 +247,8 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Faksimile</label>
-                <input
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-fax">Faksimile</label>
+                <input id="quick-customer-fax"
                   v-model="form.fax"
                   type="text"
                   placeholder="Contoh: 021-8091235"
@@ -257,8 +257,8 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Website</label>
-                <input
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-website">Website</label>
+                <input id="quick-customer-website"
                   v-model="form.website"
                   type="text"
                   placeholder="https://sman9jkt.sch.id"
@@ -267,8 +267,8 @@
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Email</label>
-                <input
+                <label class="block text-xs font-semibold text-slate-700 mb-1" for="quick-customer-email">Email</label>
+                <input id="quick-customer-email"
                   v-model="form.email"
                   type="email"
                   placeholder="info@sman9jkt.sch.id"
@@ -290,7 +290,7 @@
           </button>
           
           <button
-            type="submit"
+            type="submit" :disabled="saving"
             class="px-5 py-2 text-xs font-semibold text-white bg-alpharo-600 hover:bg-alpharo-700 rounded-lg shadow-xs transition-all flex items-center gap-1.5"
           >
             <CheckSquare class="w-4 h-4" />
@@ -309,6 +309,8 @@ import { useDialog } from '../../composables/useDialog';
 import { UserPlus, User, MapPin, Phone, X, CheckSquare } from 'lucide-vue-next';
 import { storeActions } from '../../stores/mockData';
 import { useToast } from '../../services/toast';
+import { customerIdentitySync } from '../../services/customerIdentity';
+import { orderError } from '../../services/orderWorkflow';
 import { expandSchoolName } from '../../services/customerProfile';
 import { KOTA_OPTIONS, getKecamatanList, getKelurahanList, getPostalCode } from '../../data/wilayahDki';
 
@@ -357,6 +359,7 @@ watch(
     if (val) {
       if (props.initialData && Object.keys(props.initialData).length > 0) {
         form.value = { ...form.value, ...props.initialData };
+        identitySync.reset(props.initialData);
       } else {
         resetForm();
       }
@@ -368,6 +371,7 @@ watch(
 );
 
 const resetForm = () => {
+  identitySync.reset();
   form.value = {
     name: '',
     orgFullName: '',
@@ -391,20 +395,9 @@ const resetForm = () => {
   };
 };
 
-const onNameInput = () => {
-  if (!form.value.orgFullName) {
-    form.value.orgFullName = expandSchoolName(form.value.name);
-  }
-  if (!form.value.orgShortName && form.value.name.length <= 15) {
-    form.value.orgShortName = form.value.name;
-  }
-};
-
-const syncLetterheadAddress = () => {
-  if (!form.value.letterheadAddress) {
-    form.value.letterheadAddress = form.value.address;
-  }
-};
+const identitySync = customerIdentitySync(form, expandSchoolName);
+const onNameInput = identitySync.nameChanged;
+const syncLetterheadAddress = identitySync.addressChanged;
 
 // Location options (DKI Jakarta Seeder: 5 Kota, 44 Kecamatan, 267 Kelurahan)
 const cityOptions = computed(() => KOTA_OPTIONS);
@@ -432,7 +425,9 @@ const onSubdistrictChange = () => {
   form.value.postalCode = getPostalCode(form.value.subdistrict);
 };
 
-const handleSubmit = () => {
+const saving = ref(false);
+const handleSubmit = async () => {
+  if (saving.value) return;
   if (!form.value.name.trim()) {
     toast.error('Nama Customer wajib diisi.');
     return;
@@ -446,14 +441,17 @@ const handleSubmit = () => {
     return;
   }
 
-  form.value.orgFullName = expandSchoolName(form.value.orgFullName || form.value.name);
+  form.value.orgFullName ||= expandSchoolName(form.value.name);
 
-  const newClient = storeActions.addClient({
+  saving.value = true;
+  try {
+  const newClient = await storeActions.addClient({
     ...form.value,
   });
 
   toast.success(`Customer ${newClient.name} (${newClient.code}) berhasil disimpan!`);
   emit('saved', newClient);
   emit('close');
+  } catch (error) { toast.error(orderError(error)); } finally { saving.value = false; }
 };
 </script>

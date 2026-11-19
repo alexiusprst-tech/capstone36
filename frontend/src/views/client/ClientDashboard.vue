@@ -265,7 +265,7 @@ const outstandingCount = computed(
 );
 
 const totalOutstanding = computed(() =>
-  clientInvoices.value.reduce((sum, inv) => sum + (inv.remainingAmount || 0), 0)
+  clientInvoices.value.reduce((sum, inv) => sum + Number(inv.remainingAmount || 0), 0)
 );
 
 const latestOrder = computed(() => clientOrders.value[0] || null);

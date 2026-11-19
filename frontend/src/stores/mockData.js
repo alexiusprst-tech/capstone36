@@ -1,16 +1,27 @@
 import { reactive, watch } from 'vue';
+import api from '../services/api';
 import { WILAYAH_DKI } from '../data/wilayahDki';
 import { orderWorkflow } from '../services/orderWorkflow';
 import { purchaseWorkflow, mergePurchaseRecords } from '../services/purchaseWorkflow';
 import { SHIPPING_STATUS } from '../services/shippingStatus';
-import { customerProfile, findProjectCustomer, expandSchoolName } from '../services/customerProfile';
+import { customerProfile } from '../services/customerProfile';
 
 function withOrderCustomerProfile(order) {
-  const client = findProjectCustomer({ customer_name: order.clientName, customer_code: order.customerProfile?.code }, store.clients);
-  return client && client.id === Number(order.clientId) ? { ...order, customerProfile: customerProfile(client) } : order;
+  const client = store.clients.find(client => client.serverManaged && client.id === Number(order.clientId));
+  return client ? { ...order, customerProfile: { ...customerProfile(client), ...(order.customerProfile || {}), code: client.code, name: client.name } } : order;
 }
 
 export const STORAGE_KEY = 'alpharo_integrated_system_v3';
+export const LEGACY_CUSTOMERS_KEY = 'alpharo_customers_legacy_v1';
+export function legacyCustomersBackup() {
+  try {
+    const saved = localStorage.getItem(LEGACY_CUSTOMERS_KEY);
+    if (saved) return saved;
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    const clients = (Array.isArray(parsed.clients) ? parsed.clients : []).filter(client => !client.serverManaged);
+    return clients.length ? JSON.stringify({ clients }) : null;
+  } catch { return null; }
+}
 
 // Initial realistic enterprise seed data for CV Alpharo Artha Jaya (Supplier & Contractor)
 const defaultData = {
@@ -44,440 +55,8 @@ const defaultData = {
     { id: 3, name: 'Rina Wijaya, S.E.', email: 'rina.wijaya@alpharo.co.id', phone: '0815-9922-3344', title: 'Marketing Representative' },
     { id: 4, name: 'Siti Rahma', email: 'siti.rahma@alpharo.co.id', phone: '0817-6655-4433', title: 'Education Sector Specialist' },
   ],
-  clients: [
-    {
-      id: 1,
-      code: 'CS00001',
-      name: 'SMA 9',
-      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 9 JAKARTA',
-      orgShortName: 'SMAN 9',
-      address: 'Jl. SMU 9, Halim Perdanakusuma, Kelurahan Kebon Pala, Kecamatan Makasar, Kota Jakarta Timur, DKI Jakarta',
-      province: 'DKI JAKARTA',
-      city: 'JAKARTA TIMUR',
-      district: 'Makasar',
-      subdistrict: 'Kebon Pala',
-      postalCode: '13650',
-      contactPerson: 'Bpk. supri',
-      phone: '081316673264',
-      email: 'adm@sma9jkt.sch.id',
-      npwp: '01.234.567.8-001.000',
-      letterheadAddress: 'Jl. SMU 9, Halim Perdanakusuma, Kebon Pala, Makasar, Jakarta Timur',
-      letterheadCity: 'Jakarta Timur',
-      orgPhone: '021-8091234',
-      fax: '021-8091235',
-      website: 'https://sma9jkt.sch.id',
-      status: 'Aktif',
-      type: 'Instansi Pendidikan',
-      totalOrders: 3,
-      totalTransaction: 54000000,
-      createdAt: '2025-01-15',
-    },
-    {
-      id: 2,
-      code: 'CS00002',
-      name: 'SMA 14 JAKARTA',
-      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 14 JAKARTA',
-      orgShortName: 'SMAN 14',
-      address: 'Jalan SMA XIV (atau Jl. SMA Barat / Jl. SMAN 14 Barat I No. 6), Kelurahan Cililitan / Cawang, Kecamatan Kramat Jati, Jakarta Timur',
-      province: 'DKI JAKARTA',
-      city: 'JAKARTA TIMUR',
-      district: 'Kramat Jati',
-      subdistrict: 'Cililitan',
-      postalCode: '13640',
-      contactPerson: 'Bu Nis Kepsek',
-      phone: '087887744383',
-      email: 'sman14dkijakarta@gmail.com',
-      npwp: '01.234.567.8-002.000',
-      letterheadAddress: 'Jalan SMA XIV, Kelurahan Cililitan, Kecamatan Kramat Jati, Jakarta Timur',
-      letterheadCity: 'Jakarta Timur',
-      orgPhone: '021-8092345',
-      fax: '021-8092346',
-      website: 'https://sman14jkt.sch.id',
-      status: 'Aktif',
-      type: 'Instansi Pendidikan',
-      totalOrders: 2,
-      totalTransaction: 32000000,
-      createdAt: '2025-02-10',
-    },
-    {
-      id: 3,
-      code: 'CS00003',
-      name: 'SMA PKP',
-      orgFullName: 'SEKOLAH MENENGAH ATAS PKP JAKARTA ISLAMIC SCHOOL',
-      orgShortName: 'SMA PKP',
-      address: 'I. Lkr. Pkp No.1, RT.1/RW.8, Klp. Dua Wetan, Kec. Ciracas, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13730',
-      province: 'DKI JAKARTA',
-      city: 'JAKARTA TIMUR',
-      district: 'Ciracas',
-      subdistrict: 'Kelapa Dua Wetan',
-      postalCode: '13730',
-      contactPerson: 'IBU SHIFA',
-      phone: '083870292444',
-      email: 'smapkp@yahoo.com',
-      npwp: '01.234.567.8-003.000',
-      letterheadAddress: 'Jl. Lkr. Pkp No.1, RT.1/RW.8, Klp. Dua Wetan, Ciracas, Jakarta Timur',
-      letterheadCity: 'Jakarta Timur',
-      orgPhone: '021-8710234',
-      fax: '021-8710235',
-      website: 'https://smapkp.sch.id',
-      status: 'Aktif',
-      type: 'Instansi Pendidikan',
-      totalOrders: 1,
-      totalTransaction: 15500000,
-      createdAt: '2025-03-01',
-    },
-    {
-      id: 4,
-      code: 'CS00004',
-      name: 'SMAN 30 JAKARTA',
-      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 30 JAKARTA',
-      orgShortName: 'SMAN 30',
-      address: 'Jl. Jend. A. Yani No.43A, Kelurahan Cempaka Putih Timur, Kecamatan Cempaka Putih, Jakarta Pusat, DKI Jakarta 10510',
-      province: 'DKI JAKARTA',
-      city: 'JAKARTA PUSAT',
-      district: 'Cempaka Putih',
-      subdistrict: 'Cempaka Putih Timur',
-      postalCode: '10510',
-      contactPerson: 'BU MURTI',
-      phone: '081399224967',
-      email: 'info@sman30-jkt.sch.id',
-      npwp: '01.234.567.8-004.000',
-      letterheadAddress: 'Jl. Jend. A. Yani No.43A, Cempaka Putih Timur, Jakarta Pusat',
-      letterheadCity: 'Jakarta Pusat',
-      orgPhone: '021-4241234',
-      fax: '021-4241235',
-      website: 'https://sman30-jkt.sch.id',
-      status: 'Aktif',
-      type: 'Instansi Pendidikan',
-      totalOrders: 2,
-      totalTransaction: 28000000,
-      createdAt: '2025-03-15',
-    },
-    {
-      id: 5,
-      code: 'CS00005',
-      name: 'SMAN 39 JAKARTA',
-      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 39 JAKARTA',
-      orgShortName: 'SMAN 39',
-      address: 'Jl. R.A. Fadillah, Cijantung, Kelurahan Baru, Kecamatan Pasar Rebo, Jakarta Timur, DKI Jakarta, kode pos 13780',
-      province: 'DKI JAKARTA',
-      city: 'JAKARTA TIMUR',
-      district: 'Pasar Rebo',
-      subdistrict: 'Baru',
-      postalCode: '13780',
-      contactPerson: 'BU EKA KEPSEK',
-      phone: '081574326913',
-      email: 'sman39jakarta@gmail.com',
-      npwp: '01.234.567.8-005.000',
-      letterheadAddress: 'Jl. R.A. Fadillah, Cijantung, Pasar Rebo, Jakarta Timur',
-      letterheadCity: 'Jakarta Timur',
-      orgPhone: '021-8770123',
-      fax: '021-8770124',
-      website: 'https://sman39jakarta.sch.id',
-      status: 'Aktif',
-      type: 'Instansi Pendidikan',
-      totalOrders: 1,
-      totalTransaction: 19000000,
-      createdAt: '2025-04-02',
-    },
-    {
-      id: 6,
-      code: 'CS00006',
-      name: 'SMAN 42 JAKARTA',
-      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 42 JAKARTA',
-      orgShortName: 'SMAN 42',
-      address: 'Jl. Rajawali Raya / Jl. Rajawali – Halim Perdanakusuma, Kelurahan Halim Perdanakusuma, Kecamatan Makasar, Jakarta Timur, 13610.',
-      province: 'DKI JAKARTA',
-      city: 'JAKARTA TIMUR',
-      district: 'Makasar',
-      subdistrict: 'Halim Perdanakusuma',
-      postalCode: '13610',
-      contactPerson: 'BU NURAY BENDAHARA',
-      phone: '08561072635',
-      email: 'sman42jaktim@gmail.com',
-      npwp: '01.234.567.8-006.000',
-      letterheadAddress: 'Jl. Rajawali Raya, Halim Perdanakusuma, Makasar, Jakarta Timur',
-      letterheadCity: 'Jakarta Timur',
-      orgPhone: '021-8001234',
-      fax: '021-8001235',
-      website: 'https://sman42jakarta.sch.id',
-      status: 'Aktif',
-      type: 'Instansi Pendidikan',
-      totalOrders: 0,
-      totalTransaction: 0,
-      createdAt: '2025-04-18',
-    },
-    {
-      id: 7,
-      code: 'CS00007',
-      name: 'SMAN 58 JAKARTA',
-      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 58 JAKARTA',
-      orgShortName: 'SMAN 58',
-      address: 'Jl. Raya Ciracas No. 2, RT.007/RW.003, Kelurahan Ciracas, Kecamatan Ciracas, Kota Jakarta Timur, DKI Jakarta 13740',
-      province: 'DKI JAKARTA',
-      city: 'JAKARTA TIMUR',
-      district: 'Ciracas',
-      subdistrict: 'Ciracas',
-      postalCode: '13740',
-      contactPerson: 'BU DIAH KEPSEK',
-      phone: '081218012250',
-      email: 'admin@sman58-jkt.sch.id',
-      npwp: '01.234.567.8-007.000',
-      letterheadAddress: 'Jl. Raya Ciracas No. 2, Ciracas, Jakarta Timur',
-      letterheadCity: 'Jakarta Timur',
-      orgPhone: '021-8711234',
-      fax: '021-8711235',
-      website: 'https://sman58-jkt.sch.id',
-      status: 'Aktif',
-      type: 'Instansi Pendidikan',
-      totalOrders: 0,
-      totalTransaction: 0,
-      createdAt: '2025-05-01',
-    },
-    {
-      id: 8,
-      code: 'CS00008',
-      name: 'SMAN 62 JAKARTA',
-      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 62 JAKARTA',
-      orgShortName: 'SMAN 62',
-      address: 'Jl. Raya Jakarta-Bogor, RT.13/RW.11, Kramat Jati, Kec. Kramat jati, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13540',
-      province: 'DKI JAKARTA',
-      city: 'JAKARTA TIMUR',
-      district: 'Kramat Jati',
-      subdistrict: 'Kramat Jati',
-      postalCode: '13540',
-      contactPerson: 'PAK WAHYU SMA 62',
-      phone: '085213138444',
-      email: 'sman62enamdua@gmail.com',
-      npwp: '01.234.567.8-008.000',
-      letterheadAddress: 'Jl. Raya Jakarta-Bogor, Kramat Jati, Jakarta Timur',
-      letterheadCity: 'Jakarta Timur',
-      orgPhone: '021-8093456',
-      fax: '021-8093457',
-      website: 'https://sman62jkt.sch.id',
-      status: 'Aktif',
-      type: 'Instansi Pendidikan',
-      totalOrders: 0,
-      totalTransaction: 0,
-      createdAt: '2025-05-14',
-    },
-    {
-      id: 9,
-      code: 'CS00009',
-      name: 'SMAN 64 JAKARTA',
-      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 64 JAKARTA',
-      orgShortName: 'SMAN 64',
-      address: 'Jl. Raya Cipayung, Cipayung, Kecamatan Cipayung, Kota Jakarta Timur, DKI Jakarta 13840',
-      province: 'DKI JAKARTA',
-      city: 'JAKARTA TIMUR',
-      district: 'Cipayung',
-      subdistrict: 'Cipayung',
-      postalCode: '13840',
-      contactPerson: 'BU INDAH SMA 64',
-      phone: '081290565304',
-      email: 'sman64jkt@gmail.com',
-      npwp: '01.234.567.8-009.000',
-      letterheadAddress: 'Jl. Raya Cipayung, Cipayung, Jakarta Timur',
-      letterheadCity: 'Jakarta Timur',
-      orgPhone: '021-8441234',
-      fax: '021-8441235',
-      website: 'https://sman64jkt.sch.id',
-      status: 'Aktif',
-      type: 'Instansi Pendidikan',
-      totalOrders: 0,
-      totalTransaction: 0,
-      createdAt: '2025-05-20',
-    },
-    {
-      id: 10,
-      code: 'CS00010',
-      name: 'SMAN 67 JAKARTA',
-      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 67 JAKARTA',
-      orgShortName: 'SMAN 67',
-      address: 'alan Squadron, Kelurahan Halim Perdanakusuma, Kecamatan Makasar, Jakarta Timur, DKI Jakarta 13610',
-      province: 'DKI JAKARTA',
-      city: 'JAKARTA TIMUR',
-      district: 'Makasar',
-      subdistrict: 'Halim Perdanakusuma',
-      postalCode: '13610',
-      contactPerson: 'PAK GATOT SMA 67',
-      phone: '087757770321',
-      email: 'info@sman67-jkt.sch.id',
-      npwp: '01.234.567.8-010.000',
-      letterheadAddress: 'Jl. Squadron, Halim Perdanakusuma, Makasar, Jakarta Timur',
-      letterheadCity: 'Jakarta Timur',
-      orgPhone: '021-8002345',
-      fax: '021-8002346',
-      website: 'https://sman67-jkt.sch.id',
-      status: 'Aktif',
-      type: 'Instansi Pendidikan',
-      totalOrders: 0,
-      totalTransaction: 0,
-      createdAt: '2025-06-01',
-    },
-    {
-      id: 11,
-      code: 'CS00011',
-      name: 'SMAN 68 JAKARTA',
-      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 68 JAKARTA',
-      orgShortName: 'SMAN 68',
-      address: 'Jalan Salemba Raya No. 18, Kelurahan Kenari, Kecamatan Senen, Kota Jakarta Pusat, DKI Jakarta 10430',
-      province: 'DKI JAKARTA',
-      city: 'JAKARTA PUSAT',
-      district: 'Senen',
-      subdistrict: 'Kenari',
-      postalCode: '10430',
-      contactPerson: 'BU YANI SMA 68',
-      phone: '087896090000',
-      email: 'sman68@gmail.com',
-      npwp: '01.234.567.8-011.000',
-      letterheadAddress: 'Jalan Salemba Raya No. 18, Kenari, Senen, Jakarta Pusat',
-      letterheadCity: 'Jakarta Pusat',
-      orgPhone: '021-3141234',
-      fax: '021-3141235',
-      website: 'https://sman68jkt.sch.id',
-      status: 'Aktif',
-      type: 'Instansi Pendidikan',
-      totalOrders: 0,
-      totalTransaction: 0,
-      createdAt: '2025-06-15',
-    },
-    {
-      id: 12,
-      code: 'CS00012',
-      name: 'SMAN 71 JAKARTA',
-      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 71 JAKARTA',
-      orgShortName: 'SMAN 71',
-      address: 'Jalan H. Dogol, Kavling TNI AL, Duren Sawit, Jakarta Timur, DKI Jakarta 13440',
-      province: 'DKI JAKARTA',
-      city: 'JAKARTA TIMUR',
-      district: 'Duren Sawit',
-      subdistrict: 'Duren Sawit',
-      postalCode: '13440',
-      contactPerson: 'BU ISOH',
-      phone: '081311331171',
-      email: 'smatujuhsatu@gmail.com',
-      npwp: '01.234.567.8-012.000',
-      letterheadAddress: 'Jalan H. Dogol, Kavling TNI AL, Duren Sawit, Jakarta Timur',
-      letterheadCity: 'Jakarta Timur',
-      orgPhone: '021-8611234',
-      fax: '021-8611235',
-      website: 'https://sman71jkt.sch.id',
-      status: 'Aktif',
-      type: 'Instansi Pendidikan',
-      totalOrders: 0,
-      totalTransaction: 0,
-      createdAt: '2025-07-01',
-    },
-    {
-      id: 13,
-      code: 'CS00013',
-      name: 'SMAN 76 JAKARTA',
-      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 76 JAKARTA',
-      orgShortName: 'SMAN 76',
-      address: 'Jl. Tipar Cakung (Jl. Inspeksi PAM RT.10/RW.07), Kelurahan Cakung Barat, Kecamatan Cakung, Jakarta Timur',
-      province: 'DKI JAKARTA',
-      city: 'JAKARTA TIMUR',
-      district: 'Cakung',
-      subdistrict: 'Cakung Barat',
-      postalCode: '13910',
-      contactPerson: 'BU YAYUK SMA 76',
-      phone: '081314885995',
-      email: 'tu.sman76jakarta@gmail.com',
-      npwp: '01.234.567.8-013.000',
-      letterheadAddress: 'Jl. Tipar Cakung, Cakung Barat, Cakung, Jakarta Timur',
-      letterheadCity: 'Jakarta Timur',
-      orgPhone: '021-4601234',
-      fax: '021-4601235',
-      website: 'https://sman76jkt.sch.id',
-      status: 'Aktif',
-      type: 'Instansi Pendidikan',
-      totalOrders: 0,
-      totalTransaction: 0,
-      createdAt: '2025-07-10',
-    },
-    {
-      id: 14,
-      code: 'CS00014',
-      name: 'SMPN 106 JAKARTA',
-      orgFullName: 'SEKOLAH MENENGAH PERTAMA NEGERI 106 JAKARTA',
-      orgShortName: 'SMPN 106',
-      address: 'Jakarta',
-      province: 'DKI JAKARTA',
-      city: 'JAKARTA TIMUR',
-      district: 'Ciracas',
-      subdistrict: 'Kelapa Dua Wetan',
-      postalCode: '13730',
-      contactPerson: 'Pa Ujang',
-      phone: '0812584184814',
-      email: 'mail@smpn106jkt.sch.id',
-      npwp: '01.234.567.8-014.000',
-      letterheadAddress: 'Jl. SMPN 106, Ciracas, Jakarta Timur',
-      letterheadCity: 'Jakarta Timur',
-      orgPhone: '021-8701234',
-      fax: '021-8701235',
-      website: 'https://smpn106jkt.sch.id',
-      status: 'Aktif',
-      type: 'Instansi Pendidikan',
-      totalOrders: 0,
-      totalTransaction: 0,
-      createdAt: '2025-07-22',
-    },
-    {
-      id: 15,
-      code: 'CS00015',
-      name: 'SMPN 188 JAKARTA',
-      orgFullName: 'SEKOLAH MENENGAH PERTAMA NEGERI 188 JAKARTA',
-      orgShortName: 'SMPN 188',
-      address: 'Jalan SMP 188 Kelurahan Rambutan, Kecamatan Ciracas - Jakarta Timur',
-      province: 'DKI JAKARTA',
-      city: 'JAKARTA TIMUR',
-      district: 'Ciracas',
-      subdistrict: 'Rambutan',
-      postalCode: '13830',
-      contactPerson: 'Parsono, M.Pd',
-      phone: '021-8403136',
-      email: 'smpn188kprambutan@gmail.com',
-      npwp: '01.234.567.8-015.000',
-      letterheadAddress: 'Jalan SMP 188 Kelurahan Rambutan, Kecamatan Ciracas - Jakarta Timur',
-      letterheadCity: 'Jakarta Timur',
-      orgPhone: '021-8403136',
-      fax: '021-8403137',
-      website: 'https://smpn188jkt.sch.id',
-      status: 'Aktif',
-      type: 'Instansi Pendidikan',
-      totalOrders: 0,
-      totalTransaction: 0,
-      createdAt: '2025-08-01',
-    },
-    {
-      id: 16,
-      code: 'CS00016',
-      name: 'SMA NEGRI 2 BOGOR',
-      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 2 BOGOR',
-      orgShortName: 'SMAN 2 BOGOR',
-      address: 'Jl. Kranji Ujung No.1, RT.03/RW.04, Budi Agung, Tanah Sareal, Kota Bogor, Jawa Barat 16165',
-      province: 'JAWA BARAT',
-      city: 'BOGOR',
-      district: 'Tanah Sareal',
-      subdistrict: 'Kedungbadak',
-      postalCode: '16165',
-      contactPerson: 'Endang Suhendar',
-      phone: '(0251) 8318761',
-      email: 'smandabogor@yahoo.co.id',
-      npwp: '01.234.567.8-016.000',
-      letterheadAddress: 'Jl. Kranji Ujung No.1, RT.03/RW.04, Budi Agung, Tanah Sareal, Kota Bogor',
-      letterheadCity: 'Kota Bogor',
-      orgPhone: '(0251) 8318761',
-      fax: '(0251) 8318762',
-      website: 'https://sman2bogor.sch.id',
-      status: 'Aktif',
-      type: 'Instansi Pendidikan',
-      totalOrders: 0,
-      totalTransaction: 0,
-      createdAt: '2025-08-15',
-    },
-  ],
+  clients: [],
+
   suppliers: [
     {
       id: 1,
@@ -896,6 +475,7 @@ function applyAuthenticatedUser(data) {
   }
 }
 
+let preserveLegacyStorage = false;
 function loadInitialState() {
   try {
     localStorage.removeItem('alpharo_integrated_system_v1');
@@ -907,9 +487,13 @@ function loadInitialState() {
       const parsed = JSON.parse(saved);
       const merged = { ...defaultData, ...parsed };
       applyAuthenticatedUser(merged);
-      if (!merged.clients || !merged.clients.some((c) => c.code === 'CS00001')) {
-        merged.clients = JSON.parse(JSON.stringify(defaultData.clients));
+      const legacyClients = (Array.isArray(parsed.clients) ? parsed.clients : []).filter(client => !client.serverManaged);
+      if (legacyClients.length && !localStorage.getItem(LEGACY_CUSTOMERS_KEY)) {
+        try { localStorage.setItem(LEGACY_CUSTOMERS_KEY, JSON.stringify({ savedAt: new Date().toISOString(), clients: legacyClients })); }
+        catch { preserveLegacyStorage = true; }
       }
+      // Customer identity is loaded from the authenticated server, never inferred from browser IDs.
+      merged.clients = [];
       if (!Array.isArray(merged.notifications) || !merged.notifications.some((n) => n.role === 'CLIENT')) {
         const nonClientNotifs = (merged.notifications || []).filter((n) => n.role !== 'CLIENT');
         const clientNotifs = defaultData.notifications.filter((n) => n.role === 'CLIENT');
@@ -953,8 +537,6 @@ function loadInitialState() {
           .filter((o) => {
             if (!o || !o.orderNumber) return false;
             const key = o.orderNumber.toUpperCase().trim();
-            if (key === 'ORD-2026-007' || key === 'ORD-2026-008') return false;
-            if (o.date && String(o.date).startsWith('2026-10')) return false;
             if (seenOrderNumbers.has(key)) return false;
             seenOrderNumbers.add(key);
             return true;
@@ -989,8 +571,6 @@ function loadInitialState() {
         const seenNotifs = new Set();
         merged.notifications = merged.notifications.filter((n) => {
           if (!n || n.id === 99) return false;
-          if (n.message?.includes('ORD-2026-007') || n.title?.includes('ORD-2026-007')) return false;
-          if (n.message?.includes('ORD-2026-008') || n.title?.includes('ORD-2026-008')) return false;
           const key = `${n.role}_${n.title}_${n.message}`;
           if (seenNotifs.has(key)) return false;
           seenNotifs.add(key);
@@ -1013,6 +593,9 @@ function loadInitialState() {
 }
 
 export const store = reactive(loadInitialState());
+export const clientSync = reactive({ loading: false, error: '' });
+let clientLoadPromise = null;
+const clientBusy = new Set();
 export const orderSync = reactive({ loading: false, error: '', busy: false });
 let orderLoadPromise = null;
 
@@ -1041,8 +624,10 @@ function mergeServerOrder(data, target) {
     }
     Object.assign(existing, value);
   } else store.orders.unshift(value);
-  if (data.invoice && !store.invoices.some(invoice => invoice.invoiceNumber === data.invoice.invoiceNumber)) {
-    store.invoices.unshift(data.invoice);
+  if (data.invoice) {
+    const invoice = store.invoices.find(item => item.invoiceNumber === data.invoice.invoiceNumber);
+    if (invoice) Object.assign(invoice, data.invoice);
+    else store.invoices.unshift(data.invoice);
   }
   for (const event of data.timeline || []) {
     const id = `order-${data.orderNumber}-${event.id}`;
@@ -1089,9 +674,7 @@ async function persistPurchaseProgress(purchase, action) {
     window.__alpharoRealtimePurchaseSync?.(saved);
   } catch (err) {
     if (err?.response?.status === 404) {
-      console.warn(`[PO Sync] PO ${purchase.purchase_code} belum tersimpan di database backend, status berhasil disimpan di state lokal.`);
-      mergePurchaseRecords(store.purchases, [purchase]);
-      return;
+      throw new Error('PO belum tersimpan di server. Muat ulang dan pastikan PO valid sebelum melanjutkan.');
     }
     throw err;
   }
@@ -1101,8 +684,9 @@ async function persistPurchaseProgress(purchase, action) {
 watch(
   () => store,
   (newVal) => {
+    if (preserveLegacyStorage) return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newVal));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...newVal, clients: [] }));
     } catch (e) {
       console.error('Storage save error:', e);
     }
@@ -1112,6 +696,26 @@ watch(
 
 // Store Actions & Business Logic
 export const storeActions = {
+  async createWarehouseRequest(payload) {
+    const response = await api.post('/warehouse/requests', payload);
+    const saved = response.data?.data;
+    if (!saved?.id || !saved.request_code) throw new Error('Server tidak mengembalikan nomor pengajuan yang tersimpan.');
+    const record = {
+      ...saved, requestCode: saved.request_code, date: saved.request_date,
+      requestedBy: saved.requested_by, projectName: saved.project_name,
+      totalEstCost: Number(saved.total_est_cost),
+      items: (saved.items || []).map(item => ({ ...item, estPrice: Number(item.est_price || 0) })),
+    };
+    if (!store.warehouseRequests) store.warehouseRequests = [];
+    store.warehouseRequests = [record, ...store.warehouseRequests.filter(item => item.id !== saved.id)];
+    this.addNotification('FINANCE', 'Pengajuan Kebutuhan Barang (Pengadaan)',
+      'Pengajuan ' + saved.request_code + ' untuk proyek "' + saved.project_name + '" telah tersimpan.',
+      'procurement', '/finance/purchases/create?request_id=' + saved.id);
+    this.addNotification('MARKETING', 'Pengadaan Barang Dalam Proses',
+      'Pengajuan ' + saved.request_code + ' telah dikirim Gudang ke Finance.', 'warehouse', '/marketing/orders');
+    this.addActivityLog('Pengajuan Kebutuhan Barang', saved.request_code, 'Diajukan ke Finance untuk proyek ' + saved.project_name);
+    return record;
+  },
   mergePurchases(purchases) { mergePurchaseRecords(store.purchases, purchases); },
 
   loadPurchases() {
@@ -1146,13 +750,9 @@ export const storeActions = {
         const orders = await orderWorkflow.list();
         const numbers = new Set(orders.map(order => order.orderNumber));
         store.orders = store.orders.filter(order => {
-          if (order.orderNumber === 'ORD-2026-007' || order.orderNumber === 'ORD-2026-008') return false;
-          if (order.date && String(order.date).startsWith('2026-10')) return false;
           return !order.serverManaged || numbers.has(order.orderNumber);
         });
         for (const order of orders) {
-          if (order.orderNumber === 'ORD-2026-007' || order.orderNumber === 'ORD-2026-008') continue;
-          if (order.date && String(order.date).startsWith('2026-10')) continue;
           mergeServerOrder(order);
         }
         store.orders.sort((a, b) => {
@@ -1165,7 +765,7 @@ export const storeActions = {
         });
         orderSync.error = '';
       } catch {
-        orderSync.error = 'Data persetujuan belum tersinkron. Periksa koneksi lalu muat ulang sebelum melanjutkan.';
+        orderSync.error = 'Data pesanan belum tersinkron. Periksa koneksi lalu muat ulang sebelum melanjutkan.';
       } finally { orderSync.loading = false; orderLoadPromise = null; }
     })();
     return orderLoadPromise;
@@ -1270,81 +870,63 @@ export const storeActions = {
     }
   },
 
-  // Marketing Client Actions
-  addClient(clientData) {
-    let nextNum = 1;
-    if (store.clients && store.clients.length > 0) {
-      const numbers = store.clients.map((c) => {
-        const match = c.code ? c.code.match(/(\d+)/) : null;
-        return match ? parseInt(match[1], 10) : c.id;
-      });
-      nextNum = Math.max(...numbers, 0) + 1;
-    }
-    const code = clientData.code || `CS${String(nextNum).padStart(5, '0')}`;
-    const nextId = store.clients.length ? Math.max(...store.clients.map((c) => c.id)) + 1 : 1;
-
-    const newClient = {
-      id: nextId,
-      code,
-      name: clientData.name || '',
-      orgFullName: expandSchoolName(clientData.orgFullName || clientData.name || ''),
-      orgShortName: clientData.orgShortName || clientData.name || '',
-      address: clientData.address || '',
-      npwp: clientData.npwp || '',
-      province: clientData.province || 'DKI JAKARTA',
-      city: clientData.city || 'JAKARTA TIMUR',
-      district: clientData.district || '',
-      subdistrict: clientData.subdistrict || '',
-      postalCode: clientData.postalCode || '',
-      contactPerson: clientData.contactPerson || '',
-      phone: clientData.phone || '',
-      letterheadAddress: clientData.letterheadAddress || clientData.address || '',
-      letterheadCity: clientData.letterheadCity || clientData.city || '',
-      orgPhone: clientData.orgPhone || '',
-      fax: clientData.fax || '',
-      website: clientData.website || '',
-      email: clientData.email || '',
-      status: clientData.status || 'Aktif',
-      type: clientData.type || 'Instansi Pendidikan',
-      totalOrders: 0,
-      totalTransaction: 0,
-      createdAt: new Date().toISOString().split('T')[0],
-    };
-
-    store.clients.unshift(newClient);
-    this.addActivityLog('Menambah Client Baru', code, `Client ${newClient.name} berhasil didaftarkan.`);
-    return newClient;
+  // CAPS-11: customer mutations must succeed on the server before updating the UI.
+  loadClients() {
+    if (clientLoadPromise) return clientLoadPromise;
+    if (!['MARKETING', 'WAREHOUSE', 'FINANCE', 'ADMINISTRASI', 'DIREKTUR'].includes(store.currentUser?.role)) return Promise.resolve([]);
+    clientSync.loading = true;
+    clientLoadPromise = (async () => {
+      try {
+        const response = await api.get('/customers');
+        if (!Array.isArray(response.data?.data) || response.data.data.some(client => !client.id || !client.name || !client.code || !client.serverManaged)) throw new Error('Respons customer tidak valid.');
+        store.clients = response.data.data;
+        clientSync.error = '';
+        return store.clients;
+      } catch (error) {
+        store.clients = [];
+        clientSync.error = 'Data customer belum dapat dimuat dari server. Periksa koneksi lalu muat ulang.';
+        return [];
+      } finally { clientSync.loading = false; clientLoadPromise = null; }
+    })();
+    return clientLoadPromise;
   },
 
-  updateClient(clientId, clientData) {
-    const idx = store.clients.findIndex((c) => c.id === Number(clientId) || c.code === String(clientId));
-    if (idx !== -1) {
-      const existing = store.clients[idx];
-      const normalizedOrgFullName = clientData.orgFullName || clientData.name
-        ? expandSchoolName(clientData.orgFullName || clientData.name)
-        : existing.orgFullName;
-      const updated = {
-        ...existing,
-        ...clientData,
-        orgFullName: normalizedOrgFullName,
-        id: existing.id,
-        code: existing.code,
-      };
-      store.clients[idx] = updated;
-      this.addActivityLog('Memperbarui Data Client', existing.code, `Data client ${updated.name} diperbarui.`);
-      return updated;
-    }
-    return null;
+  async addClient(data) {
+    requireOrderRole('MARKETING');
+    if (clientLoadPromise) await clientLoadPromise;
+    if (clientBusy.has('create')) throw new Error('Penyimpanan customer sedang diproses.');
+    clientBusy.add('create');
+    try {
+      const saved = (await api.post('/customers', data)).data.data;
+      if (!saved?.id || !saved.serverManaged) throw new Error('Customer belum dikonfirmasi tersimpan di server.');
+      store.clients.unshift(saved);
+      this.addActivityLog('Menambah Client Baru', saved.code, 'Customer tersimpan di server.');
+      return saved;
+    } finally { clientBusy.delete('create'); }
   },
 
-  deleteClient(clientId) {
-    const idx = store.clients.findIndex((c) => c.id === Number(clientId) || c.code === String(clientId));
-    if (idx !== -1) {
-      const removed = store.clients.splice(idx, 1)[0];
-      this.addActivityLog('Menghapus Data Client', removed.code, `Client ${removed.name} dihapus dari sistem.`);
-      return removed;
-    }
-    return null;
+  async updateClient(identifier, data) {
+    requireOrderRole('MARKETING');
+    if (clientLoadPromise) await clientLoadPromise;
+    const key = String(identifier);
+    if (clientBusy.has(key)) throw new Error('Perubahan customer sedang diproses.');
+    clientBusy.add(key);
+    try {
+      const saved = (await api.put('/customers/' + encodeURIComponent(identifier), data)).data.data;
+      if (!saved?.id || !saved.serverManaged) throw new Error('Perubahan customer belum dikonfirmasi server.');
+      const index = store.clients.findIndex(client => client.id === saved.id);
+      if (index >= 0) store.clients[index] = saved;
+      else store.clients.unshift(saved);
+      this.addActivityLog('Memperbarui Data Client', saved.code, 'Data customer diperbarui di server.');
+      return saved;
+    } finally { clientBusy.delete(key); }
+  },
+
+  async deleteClient(identifier) {
+    requireOrderRole('MARKETING');
+    await api.delete('/customers/' + encodeURIComponent(identifier));
+    store.clients = store.clients.filter(client => client.id !== Number(identifier) && client.code !== String(identifier));
+    this.addActivityLog('Menghapus Data Client', String(identifier), 'Customer yang tidak dipakai pesanan dihapus dari server.');
   },
 
   async createOrder(orderData) {
@@ -1573,97 +1155,12 @@ export const storeActions = {
     }
   },
 
-  createShipment(shipmentData) {
-    const nextId = store.shipments.length ? Math.max(...store.shipments.map((s) => s.id)) + 1 : 1;
-    const shipmentNumber = `SHP-2026-${String(nextId).padStart(3, '0')}`;
-    const newShipment = {
-      id: nextId,
-      shipmentNumber,
-      orderNumber: shipmentData.orderNumber,
-      clientName: shipmentData.clientName,
-      suratJalanNumber: shipmentData.suratJalanNumber || `SJ-${shipmentData.orderNumber}`,
-      destination: shipmentData.destination || 'Gudang Client',
-      expedition: shipmentData.expedition || 'Armada Internal CV Alpharo',
-      driverName: shipmentData.driverName || 'Sopir Ekspedisi',
-      driverPhone: shipmentData.driverPhone || '0812-0000-1111',
-      departureDate: new Date().toLocaleString('id-ID'),
-      estimatedArrival: 'Hari berikutnya',
-      status: 'Sedang Dikirim',
-      notes: shipmentData.notes || '',
-    };
-    store.shipments.unshift(newShipment);
-
-    const order = store.orders.find((o) => o.orderNumber === shipmentData.orderNumber);
-    if (order) {
-      order.fulfillmentStatus = 'Sedang Dikirim';
-      order.status = 'Diproses';
-    }
-
-    this.addActivityLog('Memulai Pengiriman Barang', shipmentNumber, `Order ${shipmentData.orderNumber} via ${newShipment.expedition}`);
-    return newShipment;
+  createShipment() {
+    throw new Error('Pengiriman belum aktif. Pembayaran lunas dan SPJ siap harus diverifikasi di server terlebih dahulu.');
   },
 
-  updateShipmentStatus(shipmentId, newStatus) {
-    const s = store.shipments.find((item) => item.id === shipmentId);
-    if (s) {
-      s.status = newStatus;
-      if (newStatus === 'Selesai') {
-        const order = store.orders.find((o) => o.orderNumber === s.orderNumber);
-        if (order) {
-          order.fulfillmentStatus = 'Selesai';
-          order.timeline.push({
-            stage: 'Pengiriman Selesai',
-            user: store.currentUser.name,
-            timestamp: new Date().toLocaleString('id-ID'),
-            status: 'completed',
-            notes: 'Armada tiba di site proyek. BAST fisik ditandatangani oleh penerima lapangan.',
-          });
-
-          // Check if invoice is also paid
-          const inv = store.invoices.find((i) => i.orderNumber === s.orderNumber);
-          if (inv && inv.status === 'Lunas') {
-            order.status = 'Selesai';
-            order.timeline.push({
-              stage: 'Pesanan Selesai',
-              user: 'System',
-              timestamp: new Date().toLocaleString('id-ID'),
-              status: 'completed',
-              notes: 'Pesanan resmi tuntas: Pengiriman barang tuntas dan seluruh tagihan telah lunas 100%.',
-            });
-            this.addNotification('DIREKTUR', 'Proyek Selesai Tuntas', `Order ${order.orderNumber} (${order.clientName}) telah selesai penuh (Pengiriman & Pelunasan 100%).`, 'order', '/director/monitoring');
-          }
-        }
-      }
-      this.addActivityLog('Update Status Pengiriman', s.shipmentNumber, `Status diubah menjadi ${newStatus}.`);
-    }
-  },
-
-  addStockMovement(data) {
-    const product = store.products.find((p) => p.sku === data.sku);
-    if (product) {
-      if (data.type === 'Masuk') {
-        product.stock += Number(data.qty);
-      } else if (data.type === 'Keluar') {
-        product.stock = Math.max(0, product.stock - Number(data.qty));
-      } else if (data.type === 'Penyesuaian') {
-        product.stock = Number(data.qty);
-      }
-      product.status = product.stock <= 0 ? 'Tidak Tersedia' : product.stock <= product.minStock ? 'Menipis' : 'Tersedia';
-
-      store.stockMovements.unshift({
-        id: Date.now(),
-        date: new Date().toLocaleString('id-ID'),
-        sku: product.sku,
-        name: product.name,
-        type: data.type,
-        qty: Number(data.qty),
-        unit: product.unit,
-        reference: data.reference || 'PENYESUAIAN-MANUAL',
-        pic: store.currentUser.name,
-      });
-
-      this.addActivityLog('Mutasi Stok Barang', product.sku, `${data.type} sebanyak ${data.qty} ${product.unit}.`);
-    }
+  updateShipmentStatus() {
+    throw new Error('Status pengiriman belum terhubung ke server dan tidak dapat dikonfirmasi dari browser.');
   },
 
   // Finance Actions (Unified Single Module: Invoice & Payments)
@@ -1679,78 +1176,8 @@ export const storeActions = {
     });
   },
 
-  recordPayment(paymentData) {
-    const invoice = store.invoices.find(
-      (i) => (paymentData.invoiceNumber && i.invoiceNumber === paymentData.invoiceNumber) ||
-             (paymentData.invoiceId && i.id === paymentData.invoiceId)
-    );
-    if (!invoice) return null;
-
-    const nextId = store.payments.length ? Math.max(...store.payments.map((p) => p.id)) + 1 : 1;
-    const paymentNumber = `PAY-2026-${String(nextId).padStart(3, '0')}`;
-    const payAmount = Number(paymentData.amount);
-
-    invoice.paidAmount += payAmount;
-    invoice.remainingAmount = Math.max(0, invoice.totalAmount - invoice.paidAmount);
-
-    if (invoice.remainingAmount <= 0) {
-      invoice.status = 'Lunas';
-    } else {
-      invoice.status = 'Sebagian';
-    }
-
-    const newPayment = {
-      id: nextId,
-      paymentNumber,
-      invoiceNumber: invoice.invoiceNumber,
-      clientName: invoice.clientName,
-      totalInvoice: invoice.totalAmount,
-      paymentType: paymentData.paymentType || 'Pembayaran Tagihan',
-      terminSequence: invoice.remainingAmount <= 0 ? 'Pelunasan Penuh' : 'Pembayaran Sebagian',
-      amount: payAmount,
-      remainingBalance: invoice.remainingAmount,
-      paymentDate: paymentData.paymentDate || new Date().toISOString().split('T')[0],
-      paymentMethod: paymentData.paymentMethod || 'Transfer BCA',
-      referenceNumber: paymentData.referenceNumber || `TRF-${Math.floor(100000 + Math.random() * 900000)}`,
-      proofFile: paymentData.proofFile || 'BUKTI_PEMBAYARAN.pdf',
-      proofUrl: paymentData.proofUrl || null,
-      status: 'Lunas',
-      recordedBy: store.currentUser.name,
-      notes: paymentData.notes || '',
-    };
-
-    store.payments.unshift(newPayment);
-
-    // Update order timeline and status
-    const order = store.orders.find((o) => o.orderNumber === invoice.orderNumber);
-    if (order) {
-      order.timeline.push({
-        stage: invoice.remainingAmount <= 0 ? 'Pembayaran Lunas' : 'Pembayaran Diterima',
-        user: store.currentUser.name,
-        timestamp: new Date().toLocaleString('id-ID'),
-        status: 'completed',
-        notes: `Penerimaan kas Rp ${Number(payAmount || 0).toLocaleString('id-ID')}. Sisa tagihan invoice: Rp ${Number(invoice.remainingAmount || 0).toLocaleString('id-ID')}`,
-      });
-
-      if (invoice.remainingAmount <= 0) {
-        if (order.fulfillmentStatus === 'Selesai') {
-          order.status = 'Selesai';
-          order.timeline.push({
-            stage: 'Pesanan Selesai',
-            user: 'System',
-            timestamp: new Date().toLocaleString('id-ID'),
-            status: 'completed',
-            notes: 'Pesanan resmi tuntas: Pengiriman barang selesai dan seluruh tagihan telah lunas 100%.',
-          });
-          this.addNotification('DIREKTUR', 'Order Selesai Tuntas', `Order ${order.orderNumber} (${order.clientName}) telah lunas dan pengiriman selesai.`, 'order', '/director/monitoring');
-        } else {
-          this.addNotification('WAREHOUSE', 'Pembayaran Client Lunas', `Order ${order.orderNumber} telah lunas. Persiapkan dan selesaikan pengiriman.`, 'finance', '/warehouse/shipments');
-        }
-      }
-    }
-
-    this.addActivityLog('Mencatat Pembayaran', paymentNumber, `Penerimaan Rp ${payAmount.toLocaleString('id-ID')} (${newPayment.terminSequence})`);
-    return newPayment;
+  recordPayment() {
+    throw new Error('Pembayaran belum terhubung ke penyedia pembayaran. Bukti transfer tidak dapat menandai invoice lunas.');
   },
 
   // Client Order Request (Public Portal & Client Role)
@@ -2168,121 +1595,12 @@ export const storeActions = {
   },
 
   async confirmSupplierReceipt(purchaseCode, receiptData = {}) {
-    const p = (store.purchases || []).find((x) => x.purchase_code === purchaseCode || x.id === purchaseCode);
-    if (!p) throw new Error('PO tidak ditemukan.');
-    const receipt = await purchaseWorkflow.receive(p, receiptData.notes);
-    if (!receipt.purchase) {
-      mergePurchaseRecords(store.purchases, [receipt]);
-      return false;
-    }
-    mergePurchaseRecords(store.purchases, [receipt.purchase]);
-
-
-    p.supplier_status = 'Diterima Gudang (Lengkap & Sesuai)';
-    p.status = 'DITERIMA_GUDANG';
-    p.received_at = new Date().toISOString().split('T')[0];
-    p.received_notes = receiptData.notes || 'Barang diterima lengkap dan sesuai spesifikasi fisik di gudang.';
-
-    // PROBIS TO-BE Tahap 5: Update stok fisik produk aktif di gudang secara REAL-TIME
-    if (Array.isArray(p.items)) {
-      if (!Array.isArray(store.products)) {
-        store.products = [];
-      }
-      p.items.forEach((item) => {
-        const rawName = item.name || item.barang || '';
-        const cleanName = rawName.replace(/^[A-Z0-9_\-]+\s*-\s*/, '').trim();
-        const sku = (item.sku && item.sku !== '-') ? item.sku : (rawName.includes(' - ') ? rawName.split(' - ')[0].trim() : '');
-        const qty = Number(item.qty) || 0;
-
-        if (qty > 0) {
-          let prod = store.products.find((pr) => {
-            if (sku && pr.sku && pr.sku.toLowerCase() === sku.toLowerCase()) return true;
-            if (cleanName && pr.name && pr.name.toLowerCase() === cleanName.toLowerCase()) return true;
-            if (rawName && pr.name && pr.name.toLowerCase() === rawName.toLowerCase()) return true;
-            if (pr.name && cleanName && pr.name.toLowerCase().includes(cleanName.toLowerCase())) return true;
-            return false;
-          });
-
-          if (prod) {
-            prod.stock = receipt.items_received.find(item => item.sku === prod.sku)?.current_stock ?? prod.stock;
-            prod.status = prod.stock > 10 ? 'Tersedia' : (prod.stock > 0 ? 'Menipis' : 'Habis');
-          } else {
-            // New item received from supplier - add to master inventory in real time!
-            const newId = store.products.length ? Math.max(...store.products.map((x) => x.id || 0)) + 1 : 1;
-            prod = {
-              id: newId,
-              sku: sku || `PRD-${String(newId).padStart(4, '0')}`,
-              name: cleanName || rawName || 'Barang Baru Supplier',
-              category: 'Material Pengadaan',
-              unit: item.unit || 'Unit',
-              stock: qty,
-              minStock: 10,
-              price: Math.round((Number(item.harga_beli || item.est_price || 0) * 1.25)) || 100000,
-              costPrice: Number(item.harga_beli || item.est_price || 0),
-              status: qty > 10 ? 'Tersedia' : 'Menipis',
-              location: 'Gudang Utama A-01',
-            };
-            store.products.unshift(prod);
-          }
-
-          // Catat di Riwayat Mutasi Kartu Stok Gudang
-          if (!Array.isArray(store.stockMovements)) {
-            store.stockMovements = [];
-          }
-          store.stockMovements.unshift({
-            id: Date.now() + Math.random(),
-            date: new Date().toISOString().split('T')[0],
-            sku: prod.sku,
-            productName: prod.name,
-            name: prod.name,
-            type: 'Masuk',
-            qty: qty,
-            unit: prod.unit || item.unit || 'Unit',
-            reference: `PO-${p.purchase_code}`,
-            notes: `Penerimaan fisik barang supplier ${p.default_supplier}`,
-            pic: store.currentUser?.name || 'Agus Santoso (Warehouse)',
-          });
-        }
-      });
-    }
-
-    // Update status Pengajuan Gudang jika ada
-    if (p.warehouse_request_id || p.warehouse_request_code) {
-      const matchReq = (store.warehouseRequests || []).find(
-        (r) =>
-          r.id === p.warehouse_request_id ||
-          r.requestCode === p.warehouse_request_code ||
-          r.request_code === p.warehouse_request_code
-      );
-      if (matchReq) {
-        matchReq.status = 'SELESAI';
-      }
-    }
-
-    // Update antrean pemenuhan gudang jika ada order proyek terkait
-    if (store.warehouseFulfillments && p.project_name) {
-      store.warehouseFulfillments.forEach((ful) => {
-        if (ful.projectName === p.project_name || ful.clientName?.includes(p.project_name)) {
-          ful.items.forEach((fi) => {
-            const matchItem = p.items?.find((pi) => (pi.sku && pi.sku === fi.sku) || (pi.barang && pi.barang.includes(fi.name)));
-            if (matchItem) {
-              fi.availQty = Math.max(fi.availQty, fi.reqQty);
-            }
-          });
-        }
-      });
-    }
-
-    // Notifikasi ke Finance & Marketing
-    this.addNotification(
-      ['FINANCE', 'MARKETING'],
-      'Barang Supplier Tiba & Diterima di Gudang',
-      `Barang dari Supplier ${p.default_supplier} (PO: ${p.purchase_code}) telah diverifikasi fisik dan masuk ke stok gudang. Pesanan siap dialokasikan untuk pemenuhan proyek "${p.project_name}".`,
-      'warehouse',
-      '/warehouse/fulfillment'
-    );
-    this.addActivityLog('Penerimaan Fisik Barang Supplier', p.purchase_code, `Diterima lengkap dan masuk ke stok gudang.`);
-    return true;
+    const purchase = (store.purchases || []).find(record => record.purchase_code === purchaseCode || record.id === purchaseCode);
+    if (!purchase) throw new Error('PO tidak ditemukan.');
+    const result = await purchaseWorkflow.receive(purchase, receiptData);
+    mergePurchaseRecords(store.purchases, [result.purchase || result]);
+    await this.loadOrders();
+    return result;
   },
 
   async reportSupplierShipmentDiscrepancy(purchaseCode, reason = '', media = [], damagedItems = [], undamagedItems = []) {

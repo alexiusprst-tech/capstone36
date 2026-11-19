@@ -2,16 +2,19 @@
 
 namespace Tests\Feature;
 
+use App\Models\Product;
 use App\Models\PurchaseTransaction;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\WarehouseRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use Tests\Support\ProcurementFixture;
 use Tests\TestCase;
 
 class PurchaseProgressTest extends TestCase
 {
+    use ProcurementFixture;
     use RefreshDatabase;
 
     private function purchase(string $code = 'PO-ONE'): PurchaseTransaction
@@ -47,10 +50,12 @@ class PurchaseProgressTest extends TestCase
             ->assertOk()->assertJsonPath('data.delivery_info.tracking_number', 'RESI-001');
         $this->progress('dispatch', 2, ['supplier_status' => 'Dikirim ke Gudang CV', 'delivery_info' => $delivery])->assertConflict();
         $this->progress('confirm', 3, ['supplier_status' => 'Dikonfirmasi Supplier'])->assertConflict();
+        Sanctum::actingAs(User::factory()->create(['role' => 'FINANCE']));
+        $mr = $this->linkedRequest([['sku' => 'SKU-TWO', 'name' => 'Barang kedua', 'qty' => 1]]);
         $this->postJson('/api/purchases', [
-            'purchase_code' => 'PO-TWO', 'transaction_date' => '2026-11-06', 'project_name' => 'Proyek kedua',
+            'warehouse_request_id' => $mr->id, 'purchase_code' => 'PO-TWO', 'transaction_date' => '2026-11-06', 'project_name' => 'Proyek kedua',
             'default_supplier' => 'Supplier Uji', 'subtotal' => 100, 'total_price' => 100, 'payment_method' => 'Tunai',
-            'items' => [['barang' => 'Barang kedua', 'qty' => 1, 'harga_beli' => 100, 'subtotal' => 100]],
+            'items' => [['sku' => 'SKU-TWO', 'barang' => 'Barang kedua', 'qty' => 1, 'harga_beli' => 100, 'subtotal' => 100]],
         ])->assertCreated();
         $list = $this->getJson('/api/purchases')->assertOk();
         $data = collect($list->json('data'))->firstWhere('purchase_code', 'PO-ONE');
@@ -68,12 +73,12 @@ class PurchaseProgressTest extends TestCase
         $this->progress('arrival', 1, ['supplier_status' => 'Dikirim ke Gudang CV'])->assertForbidden();
     }
 
-    public function test_finance_and_anonymous_cannot_change_supplier_progress(): void
+    public function test_finance_can_record_supplier_progress_but_anonymous_cannot(): void
     {
         $this->purchase();
         $this->progress('confirm', 1, ['supplier_status' => 'Dikonfirmasi Supplier'])->assertUnauthorized();
         Sanctum::actingAs(User::factory()->create(['role' => 'FINANCE']));
-        $this->progress('confirm', 1, ['supplier_status' => 'Dikonfirmasi Supplier'])->assertForbidden();
+        $this->progress('confirm', 1, ['supplier_status' => 'Dikonfirmasi Supplier'])->assertOk();
     }
 
     public function test_legacy_confirmation_can_be_recovered_once_without_creating_another_purchase(): void
@@ -99,12 +104,13 @@ class PurchaseProgressTest extends TestCase
 
     public function test_warehouse_request_cannot_be_used_to_issue_a_duplicate_po(): void
     {
+        Sanctum::actingAs(User::factory()->create(['role' => 'FINANCE']));
         $request = WarehouseRequest::create(['request_code' => 'REQ-ONE', 'request_date' => '2026-11-06',
             'requested_by' => 'Gudang', 'purchase_code' => 'PO-ONE', 'status' => 'DIPROSES_PEMBELIAN']);
         $this->postJson('/api/purchases', ['purchase_code' => 'PO-DUP', 'transaction_date' => '2026-11-06',
             'project_name' => 'Proyek', 'warehouse_request_id' => $request->id, 'warehouse_request_code' => 'REQ-ONE',
             'subtotal' => 100, 'total_price' => 100, 'payment_method' => 'Tunai',
-            'items' => [['barang' => 'Barang', 'qty' => 1, 'harga_beli' => 100, 'subtotal' => 100]],
+            'items' => [['sku' => 'SKU-TEST', 'barang' => 'Barang', 'qty' => 1, 'harga_beli' => 100, 'subtotal' => 100]],
         ])->assertConflict();
         $this->assertDatabaseCount('purchase_transactions', 0);
         $this->assertSame('PO-ONE', $request->fresh()->purchase_code);
@@ -124,11 +130,14 @@ class PurchaseProgressTest extends TestCase
         $this->progress('arrival', 4, ['supplier_status' => 'Dikirim ke Gudang CV'])->assertOk()->assertJsonPath('data.warehouse_arrived', true);
         $this->progress('arrival', 5, ['supplier_status' => 'Dikirim ke Gudang CV'])->assertConflict();
         $this->progress('discrepancy', 5, ['supplier_status' => 'Ketidaksesuaian Fisik (Menunggu Retur)', 'discrepancy_reason' => 'Barang rusak'])->assertOk();
+        Sanctum::actingAs(User::factory()->create(['role' => 'FINANCE']));
+        $this->progress('followup', 6, ['followup_reference' => 'RETUR-ONE', 'followup_notes' => 'Supplier mengganti barang rusak'])->assertOk();
         Sanctum::actingAs($supplier);
-        $this->progress('replacement', 6, ['supplier_status' => 'Barang Pengganti Dikirim', 'delivery_info' => [...$delivery, 'tracking_number' => 'RESI-REPLACEMENT']])
+        $this->progress('replacement', 7, ['supplier_status' => 'Barang Pengganti Dikirim', 'delivery_info' => [...$delivery, 'tracking_number' => 'RESI-REPLACEMENT']])
             ->assertOk()->assertJsonPath('data.warehouse_arrived', false)->assertJsonPath('data.discrepancy_reason', 'Barang rusak');
         Sanctum::actingAs($warehouse);
-        $this->postJson('/api/purchases/PO-ONE/receive')->assertOk();
+        Product::create(['sku' => 'SKU-TEST', 'name' => 'Barang', 'category' => 'QA', 'unit' => 'UNIT', 'stock' => 0]);
+        $this->postJson('/api/purchases/PO-ONE/receive', ['version' => 8, 'idempotency_key' => 'a09e1e50-ce33-460d-a78b-39a94a6efaa0', 'items' => [['line_index' => 0, 'accepted_qty' => 1, 'rejected_qty' => 0]]])->assertOk();
         $this->getJson('/api/purchases')->assertOk()->assertJsonPath('data.0.supplier_status', 'Diterima Gudang (Lengkap & Sesuai)')
             ->assertJsonPath('data.0.delivery_info.tracking_number', 'RESI-REPLACEMENT');
     }

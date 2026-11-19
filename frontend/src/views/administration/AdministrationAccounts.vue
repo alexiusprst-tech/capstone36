@@ -146,7 +146,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import AppLayout from '../../components/layout/AppLayout.vue';
-import { storeActions } from '../../stores/mockData';
 import api from '../../services/api';
 
 const divisions = [
@@ -185,26 +184,7 @@ const loadAccounts = async () => {
     const response = await api.get('/admin/accounts');
     accounts.value = response.data.users || [];
   } catch (error) {
-    if (error.response?.status === 403) {
-      // Auto-retry by syncing credentials with admin account
-      try {
-        const authRes = await api.post('/auth/login', {
-          email: 'admin@alpharo.co.id',
-          password: 'password123',
-        });
-        localStorage.setItem('token', authRes.data.token);
-        localStorage.setItem('user', JSON.stringify(authRes.data.user));
-        storeActions.setAuthenticatedUser(authRes.data.user);
-
-        const retryRes = await api.get('/admin/accounts');
-        accounts.value = retryRes.data.users || [];
-        return;
-      } catch {
-        errorMessage.value = 'Akses ditolak (403): Akun Anda tidak memiliki hak akses Administrator. Silakan login sebagai Administrasi atau Direktur.';
-      }
-    } else {
-      errorMessage.value = responseError(error, 'Gagal memuat daftar akun.');
-    }
+    errorMessage.value = responseError(error, 'Gagal memuat daftar akun.');
   } finally {
     isLoading.value = false;
   }

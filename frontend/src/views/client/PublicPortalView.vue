@@ -45,7 +45,7 @@
             <div>
               <h2 class="text-xs sm:text-sm font-semibold text-slate-900">Alur Pengadaan Mandiri Rekanan & Sekolah</h2>
               <p class="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
-                1. Ajukan Kebutuhan &rarr; 2. Verifikasi Stok & Penawaran (Marketing) &rarr; 3. Approval Direktur & SPJ &rarr; 4. Pengiriman Gudang &rarr; 5. Konfirmasi BAST & Pembayaran Tagihan.
+                1. Ajukan Kebutuhan &rarr; 2. Pemenuhan Stok &rarr; 3. Persetujuan Direktur untuk nilai di atas Rp5 juta &rarr; 4. Invoice & Pembayaran Terverifikasi &rarr; 5. SPJ Lengkap & Pengiriman.
               </p>
             </div>
           </div>
@@ -1870,15 +1870,15 @@ const filteredInvoices = computed(() => {
 });
 
 const totalInvoiceValue = computed(() =>
-  filteredInvoices.value.reduce((sum, inv) => sum + (inv.totalAmount || 0), 0)
+  filteredInvoices.value.reduce((sum, inv) => sum + Number(inv.totalAmount || 0), 0)
 );
 
 const totalPaid = computed(() =>
-  filteredInvoices.value.reduce((sum, inv) => sum + (inv.paidAmount || 0), 0)
+  filteredInvoices.value.reduce((sum, inv) => sum + Number(inv.paidAmount || 0), 0)
 );
 
 const totalOutstanding = computed(() =>
-  filteredInvoices.value.reduce((sum, inv) => sum + (inv.remainingAmount || 0), 0)
+  filteredInvoices.value.reduce((sum, inv) => sum + Number(inv.remainingAmount || 0), 0)
 );
 
 const paidCount = computed(() =>
@@ -1988,40 +1988,7 @@ const onModalInvoiceChange = () => {
 };
 
 const submitPaymentConfirmation = () => {
-  const inv = store.invoices.find((i) => i.invoiceNumber === paymentForm.value.invoiceNumber);
-  if (!inv) {
-    toast.error('Invoice tidak ditemukan.');
-    return;
-  }
-
-  if (!proofMediaList.value.length) {
-    toast.error('Harap unggah bukti transfer / SP2D terlebih dahulu sebelum mengirim.');
-    return;
-  }
-
-  storeActions.recordPayment({
-    invoiceId: inv.id,
-    invoiceNumber: inv.invoiceNumber,
-    amount: paymentForm.value.amount,
-    paymentDate: paymentForm.value.paymentDate,
-    paymentMethod: paymentForm.value.paymentMethod,
-    referenceNumber: paymentForm.value.referenceNumber,
-    paymentType: 'Pembayaran Tagihan',
-    notes: paymentForm.value.notes,
-    proofFile: proofMediaList.value[0]?.name || 'BUKTI_TRANSFER_REKANAN.pdf',
-    proofUrl: proofMediaList.value[0]?.url || null,
-  });
-
-  storeActions.addNotification(
-    'FINANCE',
-    'Konfirmasi Pembayaran Rekanan',
-    `Rekanan ${inv.clientName} telah mengirimkan konfirmasi pembayaran Rp ${Number(paymentForm.value.amount || 0).toLocaleString('id-ID')} untuk ${inv.invoiceNumber}.`,
-    'payment',
-    '/finance/payments'
-  );
-
-  toast.success('Konfirmasi pembayaran dan berkas bukti berhasil dikirim ke bagian Keuangan Alpharo!');
-  showPaymentModal.value = false;
+  toast.info('Pembayaran belum aktif. Bukti transfer belum dapat dikirim atau dipakai untuk melunasi invoice.');
 };
 
 // ==========================================

@@ -22,8 +22,8 @@ test('query-only Inertia tab changes retain an unfinished portal form', async ({
   await page.goto('/portal?tab=request');
   const input = page.getByPlaceholder('Nama lengkap PIC pemesan...', { exact: true });
   await input.fill('Sekolah untuk uji Inertia');
-  await page.getByRole('navigation', { name: 'Navigasi portal publik' }).getByRole('button', { name: 'Pembayaran', exact: true }).click();
-  await expect(page).toHaveURL(/tab=payment/);
+  await page.getByRole('navigation', { name: 'Navigasi portal publik' }).getByRole('button', { name: 'Lacak Pesanan & Pembayaran', exact: true }).click();
+  await expect(page).toHaveURL(/tab=tracking/);
   await page.getByRole('navigation', { name: 'Navigasi portal publik' }).getByRole('button', { name: 'Ajukan Kebutuhan', exact: true }).click();
   await expect(input).toHaveValue('Sekolah untuk uji Inertia');
 });
@@ -40,7 +40,7 @@ test('web login, refresh and logout use the server session', async ({ page }, te
   await page.getByRole('button', { name: 'Masuk ke sistem', exact: true }).click();
   await expect(page).toHaveURL(/\/finance\/purchases$/);
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Transaksi Pembelian (Purchasing)', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Transaksi Pembelian', exact: true })).toBeVisible();
   // Check the actual backend guard, independent of browser-local role data.
   await page.goto('/director/dashboard');
   await expect(page).toHaveURL(/\/finance\/dashboard$/);

@@ -14,11 +14,14 @@
           @click="openInputPaymentModal"
         >
           <Plus class="w-4 h-4" />
-          <span>Input Pembayaran Baru</span>
+          <span>Informasi Pembayaran</span>
         </button>
       </div>
     </template>
 
+    <p role="note" class="mb-5 text-sm text-amber-800 bg-amber-50 border-l-4 border-amber-400 px-4 py-3">
+      Pembayaran belum aktif. Invoice hanya dapat dilunasi setelah transaksi diverifikasi oleh penyedia pembayaran; unggahan bukti saja tidak melunasi tagihan.
+    </p>
     <!-- PAYMENTS TABLE -->
     <div class="ui-panel bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden">
       <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs">
@@ -42,6 +45,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
+            <tr v-if="!store.payments.length"><td colspan="9" class="py-10 px-4 text-center text-slate-500">Belum ada pembayaran terverifikasi. Penerbitan invoice tidak berarti tagihan sudah lunas.</td></tr>
             <tr v-for="pay in store.payments" :key="pay.id" class="hover:bg-slate-50/70 transition-colors">
               <td class="py-3.5 px-4 font-mono font-semibold text-slate-900">{{ pay.paymentNumber }}</td>
               <td class="py-3.5 px-4 font-mono text-slate-600">{{ pay.invoiceNumber }}</td>
@@ -74,8 +78,8 @@
     <Modal v-model="inputModalOpen" title="Input Pembayaran Masuk" subtitle="Catat pelunasan pembayaran tagihan invoice rekanan" size="md">
       <form class="space-y-4 text-xs" @submit.prevent="savePayment">
         <div>
-          <label class="block font-semibold text-slate-700 uppercase mb-1">Pilih Invoice Tagihan</label>
-          <select v-model="form.invoiceNumber" required class="w-full px-3 py-2 border rounded-lg bg-white" @change="onInvoiceSelect">
+          <label for="finance-payment-field-1" class="block font-semibold text-slate-700 uppercase mb-1">Pilih Invoice Tagihan</label>
+          <select id="finance-payment-field-1" v-model="form.invoiceNumber" required class="w-full px-3 py-2 border rounded-lg bg-white" @change="onInvoiceSelect">
             <option v-for="inv in unpaidInvoices" :key="inv.invoiceNumber" :value="inv.invoiceNumber">
               {{ inv.invoiceNumber }} - {{ inv.clientName }} (Sisa: Rp {{ Number(inv.remainingAmount || 0).toLocaleString('id-ID') }})
             </option>
@@ -84,18 +88,18 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-semibold text-slate-700 uppercase mb-1">Nominal Pembayaran (Rp)</label>
-            <input v-model.number="form.amount" type="number" min="1" required class="w-full px-3 py-2 border rounded-lg text-right font-mono" />
+            <label for="finance-payment-field-2" class="block font-semibold text-slate-700 uppercase mb-1">Nominal Pembayaran (Rp)</label>
+            <input id="finance-payment-field-2" v-model.number="form.amount" type="number" min="1" required class="w-full px-3 py-2 border rounded-lg text-right font-mono" />
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 uppercase mb-1">Tanggal Pembayaran</label>
-            <input v-model="form.paymentDate" type="date" required class="w-full px-3 py-2 border rounded-lg bg-white" />
+            <label for="finance-payment-field-3" class="block font-semibold text-slate-700 uppercase mb-1">Tanggal Pembayaran</label>
+            <input id="finance-payment-field-3" v-model="form.paymentDate" type="date" required class="w-full px-3 py-2 border rounded-lg bg-white" />
           </div>
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-700 uppercase mb-1">Metode Pembayaran</label>
-          <select v-model="form.paymentMethod" class="w-full px-3 py-2 border rounded-lg bg-white">
+          <label for="finance-payment-field-4" class="block font-semibold text-slate-700 uppercase mb-1">Metode Pembayaran</label>
+          <select id="finance-payment-field-4" v-model="form.paymentMethod" class="w-full px-3 py-2 border rounded-lg bg-white">
             <option value="Transfer Bank BCA (52323628813)">Transfer Bank BCA (No. Rek 52323628813)</option>
             <option value="SP2D BOS / Kas Daerah (Bank DKI)">SP2D BOS / Kas Daerah (Bank DKI)</option>
             <option value="Bilyet Giro (BG)">Bilyet Giro (BG)</option>
@@ -104,13 +108,13 @@
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-700 uppercase mb-1">Upload Bukti Transfer / Rekening Koran</label>
-          <input type="file" class="w-full px-3 py-2 border rounded-lg bg-slate-50" />
+          <label for="finance-payment-field-5" class="block font-semibold text-slate-700 uppercase mb-1">Upload Bukti Transfer / Rekening Koran</label>
+          <input id="finance-payment-field-5" type="file" class="w-full px-3 py-2 border rounded-lg bg-slate-50" />
         </div>
 
         <div class="flex justify-end gap-2 pt-2 border-t border-slate-200">
           <button type="button" class="px-3.5 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg" @click="inputModalOpen = false">Batal</button>
-          <button type="submit" class="px-4 py-1.5 bg-alpharo-500 text-white font-semibold rounded-lg">Konfirmasi Pembayaran</button>
+          <button type="submit" class="px-4 py-1.5 bg-alpharo-500 text-white font-semibold rounded-lg">Periksa Ketersediaan Pembayaran</button>
         </div>
       </form>
     </Modal>
@@ -250,6 +254,7 @@ const toast = useToast();
 const showProofModal = ref(false);
 const previewProof = (pay) => {
   if (!pay) return;
+  selectedPayment.value = pay;
   showProofModal.value = true;
 };
 
@@ -290,11 +295,8 @@ const onInvoiceSelect = () => {
 };
 
 const savePayment = () => {
-  const p = storeActions.recordPayment(form.value);
-  if (p) {
-    toast.success(`Pembayaran ${p.paymentNumber} senilai Rp ${Number(p.amount || 0).toLocaleString('id-ID')} berhasil dicatat.`);
-    inputModalOpen.value = false;
-  }
+  try { storeActions.recordPayment(form.value); }
+  catch (error) { toast.error(error.message); }
 };
 
 const openPaymentDetail = (pay) => {

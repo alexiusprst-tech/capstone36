@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
@@ -43,6 +44,9 @@ class WarehouseRequest extends Model
         'items',
         'purchase_code',
         'notes',
+        'sales_order_id',
+        'requested_by_id',
+        'order_items_hash',
     ];
 
     /**
@@ -52,4 +56,22 @@ class WarehouseRequest extends Model
         'items' => 'array',
         'total_est_cost' => 'decimal:2',
     ];
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(SalesOrder::class, 'sales_order_id');
+    }
+
+    public static function itemsHash(array $items): string
+    {
+        $quantities = collect($items)->groupBy('sku')->map(fn ($rows) => (int) $rows->sum('qty'))->sortKeys()->all();
+
+        return hash('sha256', json_encode($quantities));
+    }
+
+    public function toArray(): array
+    {
+        return [...parent::toArray(), 'order_number' => $this->order?->order_number,
+            'requirements_changed' => ! $this->order || $this->order_items_hash !== self::itemsHash($this->order->items)];
+    }
 }

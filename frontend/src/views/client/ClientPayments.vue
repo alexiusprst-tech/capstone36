@@ -440,15 +440,15 @@ const filteredInvoices = computed(() => {
 });
 
 const totalInvoiceValue = computed(() =>
-  clientInvoices.value.reduce((sum, inv) => sum + (inv.totalAmount || 0), 0)
+  clientInvoices.value.reduce((sum, inv) => sum + Number(inv.totalAmount || 0), 0)
 );
 
 const totalPaid = computed(() =>
-  clientInvoices.value.reduce((sum, inv) => sum + (inv.paidAmount || 0), 0)
+  clientInvoices.value.reduce((sum, inv) => sum + Number(inv.paidAmount || 0), 0)
 );
 
 const totalOutstanding = computed(() =>
-  clientInvoices.value.reduce((sum, inv) => sum + (inv.remainingAmount || 0), 0)
+  clientInvoices.value.reduce((sum, inv) => sum + Number(inv.remainingAmount || 0), 0)
 );
 
 const paidCount = computed(() => clientInvoices.value.filter((inv) => inv.status === 'Lunas').length);
@@ -557,41 +557,6 @@ const onModalInvoiceChange = () => {
 };
 
 const submitPaymentConfirmation = () => {
-  const inv = clientInvoices.value.find((i) => i.invoiceNumber === paymentForm.value.invoiceNumber);
-  if (!inv) {
-    toast.error('Invoice tidak ditemukan.');
-    return;
-  }
-
-  if (!proofMediaList.value.length) {
-    toast.error('Harap unggah bukti transfer terlebih dahulu sebelum mengirim.');
-    return;
-  }
-
-  // Call store action to record payment
-  storeActions.recordPayment({
-    invoiceId: inv.id,
-    invoiceNumber: inv.invoiceNumber,
-    amount: paymentForm.value.amount,
-    paymentDate: paymentForm.value.paymentDate,
-    paymentMethod: paymentForm.value.paymentMethod,
-    referenceNumber: paymentForm.value.referenceNumber,
-    paymentType: 'Pembayaran Tagihan',
-    notes: paymentForm.value.notes,
-    proofFile: proofMediaList.value[0]?.name || 'BUKTI_TRANSFER_SMA.pdf',
-    proofUrl: proofMediaList.value[0]?.url || null,
-  });
-
-  // Also add client confirmation notification to Finance
-  storeActions.addNotification(
-    'FINANCE',
-    'Konfirmasi Pembayaran Rekanan',
-    `${store.currentUser.name} telah mengirimkan konfirmasi pembayaran Rp ${Number(paymentForm.value.amount || 0).toLocaleString('id-ID')} untuk ${inv.invoiceNumber}.`,
-    'payment',
-    '/finance/payments'
-  );
-
-  toast.success('Konfirmasi pembayaran dan bukti transfer berhasil dikirim ke bagian Keuangan Alpharo!');
-  showPaymentModal.value = false;
+  toast.info('Pembayaran belum aktif. Bukti transfer belum dapat dikirim atau dipakai untuk melunasi invoice.');
 };
 </script>
