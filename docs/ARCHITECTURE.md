@@ -1,53 +1,64 @@
-> Pembaruan 19 November 2026: kontrak Sprint 1 yang telah diintegrasikan dan diuji ada pada [SPRINT1_PROGRESS.md](SPRINT1_PROGRESS.md). Bagian berikut mencakup spesifikasi awal dan rencana modul lain; gunakan kontrak Sprint 1 tersebut jika terdapat perbedaan implementasi, status, atau rumus.
+# Arsitektur aplikasi dan batas integrasi
 
-# System Architecture & Technical Specifications
-## CV. Alphate Artha Jaya — Integrated Procurement & SPJ System
+Baseline 20 November 2026. Sistem aktif adalah **Laravel + Inertia + Vue dengan API transaksi**, bukan dua aplikasi SPA Vue Router/Pinia yang terpisah. Sumber: [composer.json](../backend/composer.json), [package.json](../frontend/package.json), [route halaman](../backend/routes/web.php), [pages.php](../backend/config/pages.php), [route API](../backend/routes/api.php).
 
-| Komponen | Spesifikasi Arsitektur |
-| :--- | :--- |
-| **Pola Arsitektur** | Decoupled Single-Page Application (SPA) + Headless RESTful API |
-| **Backend Framework** | Laravel 12.x on PHP 8.4 (OPcache enabled) |
-| **Frontend Framework** | Vue 3.5 (Composition API `<script setup>`), Vite 6, Tailwind CSS v4 |
-| **Autentikasi** | Laravel Sanctum Token-Based Authentication |
-| **Database** | SQLite 3 (Dev/Test) & MySQL 8.0+ InnoDB (Production) |
+## Lapisan aktif
 
----
+| Lapisan | Tanggung jawab dan batas |
+| --- | --- |
+| Laravel web/Inertia 2 | Route halaman, login/sesi, CSRF, pengiriman komponen Vue; URL Laravel adalah pintu masuk |
+| Vue 3 + Vite 6 + Tailwind 4 | UI, form, tampilan status dan navigasi Inertia Link; build ke backend/public/build |
+| State browser legacy | Vue reactive/localStorage pada `frontend/src/stores/mockData.js`; sebagian data lokal dan adapter server bercampur, bukan ledger bisnis |
+| API/Sanctum | Autentikasi, EnsureApiAccess, validasi request, pembatasan per aksi/objek di controller |
+| Service domain | SalesOrderInventory, InventoryTransaction, PurchaseReceiving, StockLedger, SpjProjectFromOrder dan service generator SPJ |
+| Database/file | MariaDB operasional; relasi/versi/transaksi/ledger; template, upload asli dan hasil generate terpisah |
+| Reverb/Echo | Infrastruktur pembaruan tersedia; keberadaan paket tidak menjamin setiap modul real time atau memakai provider eksternal |
 
-## 1. Struktur Layer Sistem
+API customer/order/pengadaan/alokasi/receipt adalah sumber server pada modul yang telah diintegrasikan. Jangan membiarkan adapter lokal membuat status lunas/terkirim bila backend belum mendukung. Pada kode saat audit `recordPayment`, `createShipment` dan perubahan status shipment menghentikan aksi belum terhubung; pertahankan kegagalan yang jelas sampai integrasi sah selesai.
 
-```text
-[ Browser Client - Vue 3 / Vite 6 ]
-   ├── Marketing Views (Clients, Orders)
-   ├── Warehouse Views (2.196 Products, Requests, Fulfillment)
-   ├── Finance Views (Purchases, Invoices, Payments)
-   ├── Administration Views (SPJ Generator, Document Verification)
-   └── Pinia Store & Vue Router 4 (Role-Based Route Guards)
-            │
-            ▼ HTTPS / JSON REST API
-[ API Gateway & Security - Laravel 12 ]
-   ├── routes/api.php
-   ├── Sanctum Bearer Token Auth Guard
-   ├── Role-Based Authorization Middleware
-   └── Form Request Validation Engine
-            │
-            ▼ Domain Services
-   ├── ProductController (Catalog, Excel Import/Export)
-   ├── PurchaseController (Warehouse Requests & Purchase Transactions)
-   ├── SpjController (SPJ Compilation & Bulk Generation)
-   └── OrderDocumentController (Docx Template Engine & PDF Exporter)
-            │
-            ▼ Persistence & Storage
-   ├── Database: SQLite (Testing) / MySQL 8.0+ (Production)
-   └── File Storage: storage/app/public/ (Generated SPJ & Scanned BAST)
+## Orkestrasi proses
+
+```mermaid
+flowchart LR
+    Customer[Pesanan customer] --> Order[Order Marketing di server]
+    Order --> Stock[Alokasi dan cek stok]
+    Stock -->|Kurang| MR[MR Warehouse]
+    MR --> PO[PO Finance ke Supplier]
+    PO --> QC[Receipt dan QC Warehouse]
+    QC -->|Ditolak| Follow[Followup Finance dan pengganti]
+    Follow --> QC
+    QC -->|Layak| Stock
+    Stock -->|Seluruhnya siap| Submit[Marketing submit]
+    Submit --> Gate{Di atas Rp5 juta?}
+    Gate -->|Ya| Director[Approval Direktur]
+    Gate -->|Tidak| Invoice[Invoice Finance]
+    Director --> Invoice
+    Invoice -. Target .-> Pay[Provider VA/QRIS terverifikasi]
+    Pay -. Lunas .-> SPJ[SPJ pra-kirim Administrasi]
+    SPJ -. Siap .-> Ship[Dispatch Warehouse bersama SPJ]
+    Ship -. Target .-> Receipt[Customer terima dan lampiran susulan]
 ```
 
----
+Garis putus-putus menandai integrasi target yang belum lengkap, bukan proses paralel. Generator SPJ dan invoice sudah mempunyai kode sendiri, tetapi hubungan keseluruhan belum selesai. Nomor resi Supplier→Gudang berada pada modul pengadaan; Warehouse→Customer berada pada target pengiriman customer.
 
-## 2. Pipeline Data Antar-Modul (BPMN Alignment)
+## Konsistensi dan transaksi
 
-1. **Order Intake**: Marketing menginput pesanan klien $ightarrow$ Instruksi cek stok dikirim ke Gudang.
-2. **Stock Verification**: Gudang mengecek ketersediaan pada katalog 2.196 SKU. Jika kurang $ightarrow$ Terbitkan *Material Request* (`REQ-YYYY-XXX`).
-3. **Purchase Processing**: Finance menarik pengajuan gudang $ightarrow$ Form "Tambah Transaksi Pembelian" ter-populate otomatis $ightarrow$ Input no faktur, supplier, harga beli, diskon $ightarrow$ Simpan transaksi (`TRX-YYYYMMDD-XXXX`).
-4. **Goods Receipt & Stock-In**: Supplier kirim barang ke Gudang $ightarrow$ Gudang verifikasi QC $ightarrow$ Stok master bertambah.
-5. **Parallel Delivery & Invoicing**: Logistik kirim barang (Surat Jalan/BAST) & Finance kirim invoice penagihan ke Klien.
-6. **SPJ Compilation**: Administrasi memverifikasi 5 dokumen pokok $ightarrow$ Generate otomatis bundel dokumen SPJ.
+Penulis stok/alokasi memakai InventoryTransaction: mutex inventory sebelum row lock entitas, transaksi dan retry deadlock terbatas. Alokasi tidak mengubah fisik; penerimaan accepted dan ledger dicatat atomik. Receipt mempunyai kunci retry dan hash payload. Draft/order/customer menggunakan versi sesuai kontrak endpoint; submit menolak versi usang, sementara approve/invoice memeriksa state terbaru dalam lock.
+
+Perluasan target harus mempertahankan urutan kunci yang sama. Verifikasi provider menyimpan event dedup dan perubahan pembayaran atomik. Finalisasi bundel mengevaluasi sumber sah. Dispatch memeriksa ulang lunas+SPJ Siap dan menyimpan perubahan pengiriman, mutasi stok serta pelepasan alokasi sekali. Pekerjaan email/notifikasi dimulai setelah commit dengan dedup/retry yang tidak membuat transaksi ulang. Nama event/job/tabel belum ditetapkan; jangan mengklaim pola outbox atau worker tertentu sudah berjalan.
+
+## Integrasi target dan keamanan
+
+Satu provider VA/QRIS sandbox mengikuti Sprint 2, belum bank/provider pilihan. Verifikasi signature/identitas harus memakai kontrak provider resmi saat dipilih, bukan rancangan header rekaan. Instruksi pembayaran tidak sama dengan hasil pembayaran; query provider untuk rekonsiliasi hanya server berwenang. Rahasia provider tidak dikirim ke Vue atau log publik.
+
+CAPS-26 menggunakan InvoiceDeliveryService untuk mencatat percobaan saat pesanan terkunci. Dalam mode demo dengan penerima default aktif, penerbitan dan pencatatan percobaan berlangsung dalam satu transaksi. Setelah commit, InvoiceEmailSender menghubungi Mailtrap. Pengiriman ulang memakai layanan dan tujuan yang sama. Server membentuk tautan dari `APP_URL` dan menyimpan hash token. Halaman customer memeriksa invoice, pemilik, masa berlaku, pencabutan dan alamat sesuai kebijakan yang tercatat saat kirim. Pelacakan pengiriman barang melalui tautan customer merupakan cakupan CAPS-32. Supplier tetap dibatasi PO miliknya melalui akun yang terhubung.
+
+Template/upload/file output harus dilayani melalui pemeriksaan akses. Unduh SPJ aktif masih dapat menulis/generate; target pisahkan generate berotorisasi dari pembacaan file versi tersimpan. Master template tidak sama dengan transaksi final. Format asli dipertahankan terpisah, pengambilan gambar jarak jauh dinonaktifkan pada renderer.
+
+## Batas sinkronisasi SPJ
+
+SpjProjectFromOrder menyiapkan proyek/draft dan snapshot order/profil. Ia belum menjadi penghubung otoritatif menyeluruh antara approval order, pembayaran provider dan dispatch. Referensi utama berupa JSON source_order_number; order lain dalam proyek sama belum diakumulasi. Salinan `finance_status`, `warehouse_status` atau `director_approval` tidak boleh dipakai untuk melewati gerbang transaksi. Rancangan final harus membaca sumber sah atau snapshot berversi yang dapat dibuktikan.
+
+## Pengujian dan implementasi bertahap
+
+Gunakan kontrak [API](API.md)/[schema](SCHEMA.md), uji domain/HTTP di SQLite terpisah dan konkurensi di engine tujuan, lalu browser desktop/mobile terhadap Laravel nyata. Fixture dibolehkan selama pengembangan paralel; DoD integrasi pembayaran memerlukan hasil provider sandbox nyata, bukan mock sebagai satu-satunya bukti. Render Word/PDF diperiksa isi dan tampilan. Jangan mengubah desain/navigation sekaligus mengerjakan gerbang bisnis di luar issue. Prioritas dan keterbatasan di [audit](BPMN_JIRA_AUDIT.md).

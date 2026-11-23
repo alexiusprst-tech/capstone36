@@ -1,18 +1,18 @@
-import { reactive, watch } from 'vue';
-import api from '../services/api';
-import { WILAYAH_DKI } from '../data/wilayahDki';
-import { orderWorkflow } from '../services/orderWorkflow';
-import { purchaseWorkflow, mergePurchaseRecords } from '../services/purchaseWorkflow';
-import { SHIPPING_STATUS } from '../services/shippingStatus';
-import { customerProfile } from '../services/customerProfile';
+import { computed, reactive, watch } from 'vue';
+import api from '../services/api.js';
+import { WILAYAH_DKI } from '../data/wilayahDki.js';
+import { orderWorkflow } from '../services/orderWorkflow.js';
+import { purchaseWorkflow, mergePurchaseRecords } from '../services/purchaseWorkflow.js';
+import { SHIPPING_STATUS } from '../services/shippingStatus.js';
+import { customerProfile } from '../services/customerProfile.js';
 
 function withOrderCustomerProfile(order) {
   const client = store.clients.find(client => client.serverManaged && client.id === Number(order.clientId));
   return client ? { ...order, customerProfile: { ...customerProfile(client), ...(order.customerProfile || {}), code: client.code, name: client.name } } : order;
 }
 
-export const STORAGE_KEY = 'alpharo_integrated_system_v3';
-export const LEGACY_CUSTOMERS_KEY = 'alpharo_customers_legacy_v1';
+export { STORAGE_KEY, LEGACY_CUSTOMERS_KEY, prepareStorageSnapshot, saveStateToStorage } from '../services/storageManager.js';
+import { STORAGE_KEY, LEGACY_CUSTOMERS_KEY, prepareStorageSnapshot, saveStateToStorage } from '../services/storageManager.js';
 export function legacyCustomersBackup() {
   try {
     const saved = localStorage.getItem(LEGACY_CUSTOMERS_KEY);
@@ -55,7 +55,472 @@ const defaultData = {
     { id: 3, name: 'Rina Wijaya, S.E.', email: 'rina.wijaya@alpharo.co.id', phone: '0815-9922-3344', title: 'Marketing Representative' },
     { id: 4, name: 'Siti Rahma', email: 'siti.rahma@alpharo.co.id', phone: '0817-6655-4433', title: 'Education Sector Specialist' },
   ],
-  clients: [],
+  clients: [
+    {
+      id: 1,
+      code: 'CS00001',
+      name: 'SMA 9',
+      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 9 JAKARTA',
+      orgShortName: 'SMAN 9',
+      address: 'Jl. SMU 9, Halim Perdanakusuma, Kelurahan Kebon Pala, Kecamatan Makasar, Kota Jakarta Timur, DKI Jakarta',
+      province: 'DKI JAKARTA',
+      city: 'JAKARTA TIMUR',
+      district: 'Makasar',
+      subdistrict: 'Kebon Pala',
+      postalCode: '13650',
+      contactPerson: 'Bpk. supri',
+      phone: '081316673264',
+      email: 'adm@sma9jkt.sch.id',
+      npwp: '01.234.567.8-001.000',
+      letterheadAddress: 'Jl. SMU 9, Halim Perdanakusuma, Kebon Pala, Makasar, Jakarta Timur',
+      letterheadCity: 'Jakarta Timur',
+      orgPhone: '021-8091234',
+      fax: '021-8091235',
+      website: 'https://sma9jkt.sch.id',
+      status: 'Aktif',
+      type: 'Instansi Pendidikan',
+      totalOrders: 3,
+      totalTransaction: 54000000,
+      createdAt: '2025-01-15',
+      version: 1,
+      serverManaged: true,
+    },
+    {
+      id: 2,
+      code: 'CS00002',
+      name: 'SMA 14 JAKARTA',
+      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 14 JAKARTA',
+      orgShortName: 'SMAN 14',
+      address: 'Jalan SMA XIV (atau Jl. SMA Barat / Jl. SMAN 14 Barat I No. 6), Kelurahan Cililitan / Cawang, Kecamatan Kramat Jati, Jakarta Timur',
+      province: 'DKI JAKARTA',
+      city: 'JAKARTA TIMUR',
+      district: 'Kramat Jati',
+      subdistrict: 'Cililitan',
+      postalCode: '13640',
+      contactPerson: 'Bu Nis Kepsek',
+      phone: '087887744383',
+      email: 'sman14dkijakarta@gmail.com',
+      npwp: '01.234.567.8-002.000',
+      letterheadAddress: 'Jalan SMA XIV, Kelurahan Cililitan, Kecamatan Kramat Jati, Jakarta Timur',
+      letterheadCity: 'Jakarta Timur',
+      orgPhone: '021-8092345',
+      fax: '021-8092346',
+      website: 'https://sman14jkt.sch.id',
+      status: 'Aktif',
+      type: 'Instansi Pendidikan',
+      totalOrders: 2,
+      totalTransaction: 32000000,
+      createdAt: '2025-02-10',
+      version: 1,
+      serverManaged: true,
+    },
+    {
+      id: 3,
+      code: 'CS00003',
+      name: 'SMA PKP',
+      orgFullName: 'SEKOLAH MENENGAH ATAS PKP JAKARTA ISLAMIC SCHOOL',
+      orgShortName: 'SMA PKP',
+      address: 'I. Lkr. Pkp No.1, RT.1/RW.8, Klp. Dua Wetan, Kec. Ciracas, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13730',
+      province: 'DKI JAKARTA',
+      city: 'JAKARTA TIMUR',
+      district: 'Ciracas',
+      subdistrict: 'Kelapa Dua Wetan',
+      postalCode: '13730',
+      contactPerson: 'IBU SHIFA',
+      phone: '083870292444',
+      email: 'smapkp@yahoo.com',
+      npwp: '01.234.567.8-003.000',
+      letterheadAddress: 'Jl. Lkr. Pkp No.1, RT.1/RW.8, Klp. Dua Wetan, Ciracas, Jakarta Timur',
+      letterheadCity: 'Jakarta Timur',
+      orgPhone: '021-8710234',
+      fax: '021-8710235',
+      website: 'https://smapkp.sch.id',
+      status: 'Aktif',
+      type: 'Instansi Pendidikan',
+      totalOrders: 1,
+      totalTransaction: 15500000,
+      createdAt: '2025-03-01',
+      version: 1,
+      serverManaged: true,
+    },
+    {
+      id: 4,
+      code: 'CS00004',
+      name: 'SMAN 30 JAKARTA',
+      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 30 JAKARTA',
+      orgShortName: 'SMAN 30',
+      address: 'Jl. Jend. A. Yani No.43A, Kelurahan Cempaka Putih Timur, Kecamatan Cempaka Putih, Jakarta Pusat, DKI Jakarta 10510',
+      province: 'DKI JAKARTA',
+      city: 'JAKARTA PUSAT',
+      district: 'Cempaka Putih',
+      subdistrict: 'Cempaka Putih Timur',
+      postalCode: '10510',
+      contactPerson: 'BU MURTI',
+      phone: '081399224967',
+      email: 'info@sman30-jkt.sch.id',
+      npwp: '01.234.567.8-004.000',
+      letterheadAddress: 'Jl. Jend. A. Yani No.43A, Cempaka Putih Timur, Jakarta Pusat',
+      letterheadCity: 'Jakarta Pusat',
+      orgPhone: '021-4241234',
+      fax: '021-4241235',
+      website: 'https://sman30-jkt.sch.id',
+      status: 'Aktif',
+      type: 'Instansi Pendidikan',
+      totalOrders: 2,
+      totalTransaction: 28000000,
+      createdAt: '2025-03-15',
+      version: 1,
+      serverManaged: true,
+    },
+    {
+      id: 5,
+      code: 'CS00005',
+      name: 'SMAN 39 JAKARTA',
+      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 39 JAKARTA',
+      orgShortName: 'SMAN 39',
+      address: 'Jl. R.A. Fadillah, Cijantung, Kelurahan Baru, Kecamatan Pasar Rebo, Jakarta Timur, DKI Jakarta, kode pos 13780',
+      province: 'DKI JAKARTA',
+      city: 'JAKARTA TIMUR',
+      district: 'Pasar Rebo',
+      subdistrict: 'Baru',
+      postalCode: '13780',
+      contactPerson: 'BU EKA KEPSEK',
+      phone: '081574326913',
+      email: 'sman39jakarta@gmail.com',
+      npwp: '01.234.567.8-005.000',
+      letterheadAddress: 'Jl. R.A. Fadillah, Cijantung, Pasar Rebo, Jakarta Timur',
+      letterheadCity: 'Jakarta Timur',
+      orgPhone: '021-8770123',
+      fax: '021-8770124',
+      website: 'https://sman39jakarta.sch.id',
+      status: 'Aktif',
+      type: 'Instansi Pendidikan',
+      totalOrders: 1,
+      totalTransaction: 19000000,
+      createdAt: '2025-04-02',
+      version: 1,
+      serverManaged: true,
+    },
+    {
+      id: 6,
+      code: 'CS00006',
+      name: 'SMAN 42 JAKARTA',
+      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 42 JAKARTA',
+      orgShortName: 'SMAN 42',
+      address: 'Jl. Rajawali Raya / Jl. Rajawali – Halim Perdanakusuma, Kelurahan Halim Perdanakusuma, Kecamatan Makasar, Jakarta Timur, 13610.',
+      province: 'DKI JAKARTA',
+      city: 'JAKARTA TIMUR',
+      district: 'Makasar',
+      subdistrict: 'Halim Perdanakusuma',
+      postalCode: '13610',
+      contactPerson: 'BU NURAY BENDAHARA',
+      phone: '08561072635',
+      email: 'sman42jaktim@gmail.com',
+      npwp: '01.234.567.8-006.000',
+      letterheadAddress: 'Jl. Rajawali Raya, Halim Perdanakusuma, Makasar, Jakarta Timur',
+      letterheadCity: 'Jakarta Timur',
+      orgPhone: '021-8001234',
+      fax: '021-8001235',
+      website: 'https://sman42jakarta.sch.id',
+      status: 'Aktif',
+      type: 'Instansi Pendidikan',
+      totalOrders: 0,
+      totalTransaction: 0,
+      createdAt: '2025-04-18',
+      version: 1,
+      serverManaged: true,
+    },
+    {
+      id: 7,
+      code: 'CS00007',
+      name: 'SMAN 58 JAKARTA',
+      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 58 JAKARTA',
+      orgShortName: 'SMAN 58',
+      address: 'Jl. Raya Ciracas No. 2, RT.007/RW.003, Kelurahan Ciracas, Kecamatan Ciracas, Kota Jakarta Timur, DKI Jakarta 13740',
+      province: 'DKI JAKARTA',
+      city: 'JAKARTA TIMUR',
+      district: 'Ciracas',
+      subdistrict: 'Ciracas',
+      postalCode: '13740',
+      contactPerson: 'BU DIAH KEPSEK',
+      phone: '081218012250',
+      email: 'admin@sman58-jkt.sch.id',
+      npwp: '01.234.567.8-007.000',
+      letterheadAddress: 'Jl. Raya Ciracas No. 2, Ciracas, Jakarta Timur',
+      letterheadCity: 'Jakarta Timur',
+      orgPhone: '021-8711234',
+      fax: '021-8711235',
+      website: 'https://sman58-jkt.sch.id',
+      status: 'Aktif',
+      type: 'Instansi Pendidikan',
+      totalOrders: 0,
+      totalTransaction: 0,
+      createdAt: '2025-05-01',
+      version: 1,
+      serverManaged: true,
+    },
+    {
+      id: 8,
+      code: 'CS00008',
+      name: 'SMAN 62 JAKARTA',
+      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 62 JAKARTA',
+      orgShortName: 'SMAN 62',
+      address: 'Jl. Raya Jakarta-Bogor, RT.13/RW.11, Kramat Jati, Kec. Kramat jati, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13540',
+      province: 'DKI JAKARTA',
+      city: 'JAKARTA TIMUR',
+      district: 'Kramat Jati',
+      subdistrict: 'Kramat Jati',
+      postalCode: '13540',
+      contactPerson: 'PAK WAHYU SMA 62',
+      phone: '085213138444',
+      email: 'sman62enamdua@gmail.com',
+      npwp: '01.234.567.8-008.000',
+      letterheadAddress: 'Jl. Raya Jakarta-Bogor, Kramat Jati, Jakarta Timur',
+      letterheadCity: 'Jakarta Timur',
+      orgPhone: '021-8093456',
+      fax: '021-8093457',
+      website: 'https://sman62jkt.sch.id',
+      status: 'Aktif',
+      type: 'Instansi Pendidikan',
+      totalOrders: 0,
+      totalTransaction: 0,
+      createdAt: '2025-05-14',
+      version: 1,
+      serverManaged: true,
+    },
+    {
+      id: 9,
+      code: 'CS00009',
+      name: 'SMAN 64 JAKARTA',
+      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 64 JAKARTA',
+      orgShortName: 'SMAN 64',
+      address: 'Jl. Raya Cipayung, Cipayung, Kecamatan Cipayung, Kota Jakarta Timur, DKI Jakarta 13840',
+      province: 'DKI JAKARTA',
+      city: 'JAKARTA TIMUR',
+      district: 'Cipayung',
+      subdistrict: 'Cipayung',
+      postalCode: '13840',
+      contactPerson: 'BU INDAH SMA 64',
+      phone: '081290565304',
+      email: 'sman64jkt@gmail.com',
+      npwp: '01.234.567.8-009.000',
+      letterheadAddress: 'Jl. Raya Cipayung, Cipayung, Jakarta Timur',
+      letterheadCity: 'Jakarta Timur',
+      orgPhone: '021-8441234',
+      fax: '021-8441235',
+      website: 'https://sman64jkt.sch.id',
+      status: 'Aktif',
+      type: 'Instansi Pendidikan',
+      totalOrders: 0,
+      totalTransaction: 0,
+      createdAt: '2025-05-20',
+      version: 1,
+      serverManaged: true,
+    },
+    {
+      id: 10,
+      code: 'CS00010',
+      name: 'SMAN 67 JAKARTA',
+      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 67 JAKARTA',
+      orgShortName: 'SMAN 67',
+      address: 'alan Squadron, Kelurahan Halim Perdanakusuma, Kecamatan Makasar, Jakarta Timur, DKI Jakarta 13610',
+      province: 'DKI JAKARTA',
+      city: 'JAKARTA TIMUR',
+      district: 'Makasar',
+      subdistrict: 'Halim Perdanakusuma',
+      postalCode: '13610',
+      contactPerson: 'PAK GATOT SMA 67',
+      phone: '087757770321',
+      email: 'info@sman67-jkt.sch.id',
+      npwp: '01.234.567.8-010.000',
+      letterheadAddress: 'Jl. Squadron, Halim Perdanakusuma, Makasar, Jakarta Timur',
+      letterheadCity: 'Jakarta Timur',
+      orgPhone: '021-8002345',
+      fax: '021-8002346',
+      website: 'https://sman67-jkt.sch.id',
+      status: 'Aktif',
+      type: 'Instansi Pendidikan',
+      totalOrders: 0,
+      totalTransaction: 0,
+      createdAt: '2025-06-01',
+      version: 1,
+      serverManaged: true,
+    },
+    {
+      id: 11,
+      code: 'CS00011',
+      name: 'SMAN 68 JAKARTA',
+      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 68 JAKARTA',
+      orgShortName: 'SMAN 68',
+      address: 'Jalan Salemba Raya No. 18, Kelurahan Kenari, Kecamatan Senen, Kota Jakarta Pusat, DKI Jakarta 10430',
+      province: 'DKI JAKARTA',
+      city: 'JAKARTA PUSAT',
+      district: 'Senen',
+      subdistrict: 'Kenari',
+      postalCode: '10430',
+      contactPerson: 'BU YANI SMA 68',
+      phone: '087896090000',
+      email: 'sman68@gmail.com',
+      npwp: '01.234.567.8-011.000',
+      letterheadAddress: 'Jalan Salemba Raya No. 18, Kenari, Senen, Jakarta Pusat',
+      letterheadCity: 'Jakarta Pusat',
+      orgPhone: '021-3141234',
+      fax: '021-3141235',
+      website: 'https://sman68jkt.sch.id',
+      status: 'Aktif',
+      type: 'Instansi Pendidikan',
+      totalOrders: 0,
+      totalTransaction: 0,
+      createdAt: '2025-06-15',
+      version: 1,
+      serverManaged: true,
+    },
+    {
+      id: 12,
+      code: 'CS00012',
+      name: 'SMAN 71 JAKARTA',
+      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 71 JAKARTA',
+      orgShortName: 'SMAN 71',
+      address: 'Jalan H. Dogol, Kavling TNI AL, Duren Sawit, Jakarta Timur, DKI Jakarta 13440',
+      province: 'DKI JAKARTA',
+      city: 'JAKARTA TIMUR',
+      district: 'Duren Sawit',
+      subdistrict: 'Duren Sawit',
+      postalCode: '13440',
+      contactPerson: 'BU ISOH',
+      phone: '081311331171',
+      email: 'smatujuhsatu@gmail.com',
+      npwp: '01.234.567.8-012.000',
+      letterheadAddress: 'Jalan H. Dogol, Kavling TNI AL, Duren Sawit, Jakarta Timur',
+      letterheadCity: 'Jakarta Timur',
+      orgPhone: '021-8611234',
+      fax: '021-8611235',
+      website: 'https://sman71jkt.sch.id',
+      status: 'Aktif',
+      type: 'Instansi Pendidikan',
+      totalOrders: 0,
+      totalTransaction: 0,
+      createdAt: '2025-07-01',
+      version: 1,
+      serverManaged: true,
+    },
+    {
+      id: 13,
+      code: 'CS00013',
+      name: 'SMAN 76 JAKARTA',
+      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 76 JAKARTA',
+      orgShortName: 'SMAN 76',
+      address: 'Jl. Tipar Cakung (Jl. Inspeksi PAM RT.10/RW.07), Kelurahan Cakung Barat, Kecamatan Cakung, Jakarta Timur',
+      province: 'DKI JAKARTA',
+      city: 'JAKARTA TIMUR',
+      district: 'Cakung',
+      subdistrict: 'Cakung Barat',
+      postalCode: '13910',
+      contactPerson: 'BU YAYUK SMA 76',
+      phone: '081314885995',
+      email: 'tu.sman76jakarta@gmail.com',
+      npwp: '01.234.567.8-013.000',
+      letterheadAddress: 'Jl. Tipar Cakung, Cakung Barat, Cakung, Jakarta Timur',
+      letterheadCity: 'Jakarta Timur',
+      orgPhone: '021-4601234',
+      fax: '021-4601235',
+      website: 'https://sman76jkt.sch.id',
+      status: 'Aktif',
+      type: 'Instansi Pendidikan',
+      totalOrders: 0,
+      totalTransaction: 0,
+      createdAt: '2025-07-10',
+      version: 1,
+      serverManaged: true,
+    },
+    {
+      id: 14,
+      code: 'CS00014',
+      name: 'SMPN 106 JAKARTA',
+      orgFullName: 'SEKOLAH MENENGAH PERTAMA NEGERI 106 JAKARTA',
+      orgShortName: 'SMPN 106',
+      address: 'Jakarta',
+      province: 'DKI JAKARTA',
+      city: 'JAKARTA TIMUR',
+      district: 'Ciracas',
+      subdistrict: 'Kelapa Dua Wetan',
+      postalCode: '13730',
+      contactPerson: 'Pa Ujang',
+      phone: '0812584184814',
+      email: 'mail@smpn106jkt.sch.id',
+      npwp: '01.234.567.8-014.000',
+      letterheadAddress: 'Jl. SMPN 106, Ciracas, Jakarta Timur',
+      letterheadCity: 'Jakarta Timur',
+      orgPhone: '021-8701234',
+      fax: '021-8701235',
+      website: 'https://smpn106jkt.sch.id',
+      status: 'Aktif',
+      type: 'Instansi Pendidikan',
+      totalOrders: 0,
+      totalTransaction: 0,
+      createdAt: '2025-07-22',
+      version: 1,
+      serverManaged: true,
+    },
+    {
+      id: 15,
+      code: 'CS00015',
+      name: 'SMPN 188 JAKARTA',
+      orgFullName: 'SEKOLAH MENENGAH PERTAMA NEGERI 188 JAKARTA',
+      orgShortName: 'SMPN 188',
+      address: 'Jalan SMP 188 Kelurahan Rambutan, Kecamatan Ciracas - Jakarta Timur',
+      province: 'DKI JAKARTA',
+      city: 'JAKARTA TIMUR',
+      district: 'Ciracas',
+      subdistrict: 'Rambutan',
+      postalCode: '13830',
+      contactPerson: 'Parsono, M.Pd',
+      phone: '021-8403136',
+      email: 'smpn188kprambutan@gmail.com',
+      npwp: '01.234.567.8-015.000',
+      letterheadAddress: 'Jalan SMP 188 Kelurahan Rambutan, Kecamatan Ciracas - Jakarta Timur',
+      letterheadCity: 'Jakarta Timur',
+      orgPhone: '021-8403136',
+      fax: '021-8403137',
+      website: 'https://smpn188jkt.sch.id',
+      status: 'Aktif',
+      type: 'Instansi Pendidikan',
+      totalOrders: 0,
+      totalTransaction: 0,
+      createdAt: '2025-08-01',
+      version: 1,
+      serverManaged: true,
+    },
+    {
+      id: 16,
+      code: 'CS00016',
+      name: 'SMA NEGRI 2 BOGOR',
+      orgFullName: 'SEKOLAH MENENGAH ATAS NEGERI 2 BOGOR',
+      orgShortName: 'SMAN 2 BOGOR',
+      address: 'Jl. Kranji Ujung No.1, RT.03/RW.04, Budi Agung, Tanah Sareal, Kota Bogor, Jawa Barat 16165',
+      province: 'JAWA BARAT',
+      city: 'BOGOR',
+      district: 'Tanah Sareal',
+      subdistrict: 'Kedungbadak',
+      postalCode: '16165',
+      contactPerson: 'Endang Suhendar',
+      phone: '(0251) 8318761',
+      email: 'smandabogor@yahoo.co.id',
+      npwp: '01.234.567.8-016.000',
+      letterheadAddress: 'Jl. Kranji Ujung No.1, RT.03/RW.04, Budi Agung, Tanah Sareal, Kota Bogor',
+      letterheadCity: 'Kota Bogor',
+      orgPhone: '(0251) 8318761',
+      fax: '(0251) 8318762',
+      website: 'https://sman2bogor.sch.id',
+      status: 'Aktif',
+      type: 'Instansi Pendidikan',
+      totalOrders: 0,
+      totalTransaction: 0,
+      createdAt: '2025-08-15',
+      version: 1,
+      serverManaged: true,
+    },
+  ],
 
   suppliers: [
     {
@@ -476,6 +941,8 @@ function applyAuthenticatedUser(data) {
 }
 
 let preserveLegacyStorage = false;
+let storageSaveTimer = null;
+
 function loadInitialState() {
   try {
     localStorage.removeItem('alpharo_integrated_system_v1');
@@ -485,6 +952,17 @@ function loadInitialState() {
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
+      // Clean up legacy bloated storage (e.g. products or huge payloads) immediately to free quota
+      if (
+        (Array.isArray(parsed.products) && parsed.products.length > 50) ||
+        parsed.wilayahDki ||
+        (saved.length > 500 * 1024)
+      ) {
+        try {
+          const sanitized = prepareStorageSnapshot(parsed);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
+        } catch {}
+      }
       const merged = { ...defaultData, ...parsed };
       applyAuthenticatedUser(merged);
       const legacyClients = (Array.isArray(parsed.clients) ? parsed.clients : []).filter(client => !client.serverManaged);
@@ -492,8 +970,10 @@ function loadInitialState() {
         try { localStorage.setItem(LEGACY_CUSTOMERS_KEY, JSON.stringify({ savedAt: new Date().toISOString(), clients: legacyClients })); }
         catch { preserveLegacyStorage = true; }
       }
-      // Customer identity is loaded from the authenticated server, never inferred from browser IDs.
-      merged.clients = [];
+      // Customer identity is loaded from the authenticated server, fallback to default clients
+      merged.clients = (Array.isArray(parsed.clients) && parsed.clients.length > 0)
+        ? parsed.clients
+        : JSON.parse(JSON.stringify(defaultData.clients || []));
       if (!Array.isArray(merged.notifications) || !merged.notifications.some((n) => n.role === 'CLIENT')) {
         const nonClientNotifs = (merged.notifications || []).filter((n) => n.role !== 'CLIENT');
         const clientNotifs = defaultData.notifications.filter((n) => n.role === 'CLIENT');
@@ -598,6 +1078,17 @@ let clientLoadPromise = null;
 const clientBusy = new Set();
 export const orderSync = reactive({ loading: false, error: '', busy: false });
 let orderLoadPromise = null;
+const syncedOrders = reactive(new Map());
+
+function canIssueInvoice(order) {
+  return order?.serverManaged && order.status === 'Siap Invoice' && !order.invoice &&
+    order.stockReadiness?.ready && order.submittedAt &&
+    (order.grandTotal <= 5000000 || Boolean(order.approvalDate));
+}
+
+export const readyInvoiceOrders = computed(() => Array.from(syncedOrders.values()).filter(canIssueInvoice));
+export const issuedInvoices = computed(() => Array.from(syncedOrders.values(), order => order.invoice)
+  .filter(Boolean).sort((a, b) => String(b.invoiceDate ?? '').localeCompare(String(a.invoiceDate ?? '')) || String(b.invoiceNumber).localeCompare(String(a.invoiceNumber))));
 
 function requireOrderRole(role) {
   if (store.currentUser?.role !== role) throw new Error('Peran Anda tidak berhak melakukan tindakan ini.');
@@ -605,22 +1096,29 @@ function requireOrderRole(role) {
 
 function mergeServerOrder(data, target) {
   const existing = target || store.orders.find(order => order.orderNumber === data.orderNumber);
-  if (existing?.serverManaged && existing.version > data.version) return existing;
+  // A delayed list response may predate a write in this session. A browser cache
+  // from a previous session is never evidence of a newer server version.
+  if (existing && syncedOrders.get(data.orderNumber)?.version > data.version) return existing;
+  syncedOrders.set(data.orderNumber, data);
   // Keep the existing UI identity and document references when upgrading a local draft.
   const documents = Object.fromEntries(['po', 'suratJalan', 'bast', 'faktur'].map(key => [key, {
     exists: false, number: '-', status: 'Belum Dibuat', date: '-', file: null,
   }]));
-  const value = { documents, date: new Date().toISOString().slice(0, 10), ...data, id: existing?.id ?? data.id };
+  const value = { documents, date: new Date().toISOString().slice(0, 10), ...data, id: existing?.id ?? data.id,
+    isHold: false, holdReason: null, holdBy: null, holdDate: null };
   if (existing) {
     value.documents = { ...documents, ...existing.documents };
+    // Old browser-only Hold flags cannot override a successfully read server order.
+    // Keep their original metadata and local history instead of silently losing notes.
+    if (existing.isHold || existing.holdReason || existing.holdBy || existing.holdDate) {
+      value.legacyHold = existing.legacyHold || { isHold: Boolean(existing.isHold), holdReason: existing.holdReason ?? null,
+        holdBy: existing.holdBy ?? null, holdDate: existing.holdDate ?? null };
+    }
     // Existing downstream modules still keep follow-ups and shipping/payment events locally.
     // Refresh only the server-owned history; do not discard those existing records.
-    if (existing.serverManaged) {
+    if (existing.serverManaged || value.legacyHold) {
       const localEvents = (existing.timeline || []).filter(event => event.id == null);
       value.timeline = [...(data.timeline || []), ...localEvents];
-      const invoice = store.invoices.find(item => item.orderNumber === data.orderNumber);
-      if (data.status === 'Menunggu Pembayaran' && existing.status === 'Selesai'
-        && invoice?.status === 'Lunas' && existing.fulfillmentStatus === 'Selesai') value.status = 'Selesai';
     }
     Object.assign(existing, value);
   } else store.orders.unshift(value);
@@ -680,19 +1178,27 @@ async function persistPurchaseProgress(purchase, action) {
   }
 }
 
-// Auto-save on change
+// Auto-save on change (debounced 200ms with storage sanitization)
 watch(
   () => store,
   (newVal) => {
     if (preserveLegacyStorage) return;
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...newVal, clients: [] }));
-    } catch (e) {
-      console.error('Storage save error:', e);
-    }
+    if (storageSaveTimer) clearTimeout(storageSaveTimer);
+    storageSaveTimer = setTimeout(() => {
+      saveStateToStorage(newVal);
+    }, 200);
   },
   { deep: true }
 );
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', () => {
+    if (storageSaveTimer) {
+      clearTimeout(storageSaveTimer);
+      saveStateToStorage(store);
+    }
+  });
+}
 
 // Store Actions & Business Logic
 export const storeActions = {
@@ -745,12 +1251,16 @@ export const storeActions = {
     if (orderLoadPromise) return orderLoadPromise;
     if (!['MARKETING', 'DIREKTUR', 'FINANCE', 'WAREHOUSE', 'ADMINISTRASI'].includes(store.currentUser?.role)) return Promise.resolve();
     orderSync.loading = true;
+    const knownAtRequest = new Map(syncedOrders);
     orderLoadPromise = (async () => {
       try {
         const orders = await orderWorkflow.list();
         const numbers = new Set(orders.map(order => order.orderNumber));
+        for (const [number, previous] of knownAtRequest) {
+          if (!numbers.has(number) && syncedOrders.get(number) === previous) syncedOrders.delete(number);
+        }
         store.orders = store.orders.filter(order => {
-          return !order.serverManaged || numbers.has(order.orderNumber);
+          return !order.serverManaged || numbers.has(order.orderNumber) || syncedOrders.has(order.orderNumber);
         });
         for (const order of orders) {
           mergeServerOrder(order);
@@ -781,6 +1291,7 @@ export const storeActions = {
     return runOrderAction(async () => mergeServerOrder(await orderWorkflow.stockCheck(order), order));
   },
   resetToDefaults() {
+    syncedOrders.clear();
     localStorage.removeItem(STORAGE_KEY);
     const defaults = JSON.parse(JSON.stringify(defaultData));
     Object.assign(store, defaults);
@@ -873,19 +1384,30 @@ export const storeActions = {
   // CAPS-11: customer mutations must succeed on the server before updating the UI.
   loadClients() {
     if (clientLoadPromise) return clientLoadPromise;
-    if (!['MARKETING', 'WAREHOUSE', 'FINANCE', 'ADMINISTRASI', 'DIREKTUR'].includes(store.currentUser?.role)) return Promise.resolve([]);
+    if (!['MARKETING', 'WAREHOUSE', 'FINANCE', 'ADMINISTRASI', 'DIREKTUR'].includes(store.currentUser?.role)) {
+      if (!store.clients.length) {
+        store.clients = JSON.parse(JSON.stringify(defaultData.clients || []));
+      }
+      return Promise.resolve(store.clients);
+    }
     clientSync.loading = true;
     clientLoadPromise = (async () => {
       try {
         const response = await api.get('/customers');
         if (!Array.isArray(response.data?.data) || response.data.data.some(client => !client.id || !client.name || !client.code || !client.serverManaged)) throw new Error('Respons customer tidak valid.');
-        store.clients = response.data.data;
+        if (response.data.data.length > 0) {
+          store.clients = response.data.data;
+        } else if (!store.clients.length) {
+          store.clients = JSON.parse(JSON.stringify(defaultData.clients || []));
+        }
         clientSync.error = '';
         return store.clients;
       } catch (error) {
-        store.clients = [];
-        clientSync.error = 'Data customer belum dapat dimuat dari server. Periksa koneksi lalu muat ulang.';
-        return [];
+        if (!store.clients.length) {
+          store.clients = JSON.parse(JSON.stringify(defaultData.clients || []));
+        }
+        clientSync.error = 'Data customer belum dapat dimuat dari server. Menampilkan data cadangan.';
+        return store.clients;
       } finally { clientSync.loading = false; clientLoadPromise = null; }
     })();
     return clientLoadPromise;
@@ -949,7 +1471,10 @@ export const storeActions = {
     const order = store.orders.find(item => item.id === orderId);
     if (!order || order.status !== 'Draft') throw new Error('Hanya draft yang dapat dihapus.');
     await runOrderAction(async () => {
-      if (order.serverManaged) await orderWorkflow.remove(order);
+      if (order.serverManaged) {
+        await orderWorkflow.remove(order);
+        syncedOrders.delete(order.orderNumber);
+      }
       store.orders.splice(store.orders.indexOf(order), 1);
     });
   },
@@ -986,7 +1511,9 @@ export const storeActions = {
 
   // Direktur Executive Control: Hold & Release Order
   holdOrder(orderId, reason) {
+    requireOrderRole('DIREKTUR');
     const order = store.orders.find((o) => o.id === orderId);
+    if (order?.serverManaged) throw new Error('Tahan atau revisi pesanan server belum ditetapkan dalam alur TO-BE. Pesanan tetap mengikuti status server.');
     if (order) {
       order.isHold = true;
       order.holdReason = reason || 'Ditahan oleh Direktur (Menunggu Kepastian Pembayaran)';
@@ -1022,7 +1549,9 @@ export const storeActions = {
   },
 
   releaseOrderHold(orderId, notes = '') {
+    requireOrderRole('DIREKTUR');
     const order = store.orders.find((o) => o.id === orderId);
+    if (order?.serverManaged) throw new Error('Lepas tahanan pesanan server belum ditetapkan dalam alur TO-BE. Pesanan tetap mengikuti status server.');
     if (order) {
       order.isHold = false;
       const prevReason = order.holdReason;
@@ -1166,13 +1695,15 @@ export const storeActions = {
   // Finance Actions (Unified Single Module: Invoice & Payments)
   async createInvoice(invoiceData) {
     requireOrderRole('FINANCE');
-    const order = store.orders.find(item => item.orderNumber === invoiceData.orderNumber);
-    if (!order?.serverManaged || order.status !== 'Siap Invoice') throw new Error('Pesanan belum memiliki persetujuan valid untuk invoice.');
+    const order = syncedOrders.get(invoiceData.orderNumber);
+    if (orderSync.error) throw new Error(orderSync.error);
+    if (!canIssueInvoice(order)) throw new Error('Periksa kembali pengajuan, stok, dan persetujuan pesanan sebelum menerbitkan invoice.');
     return runOrderAction(async () => {
-      const result = mergeServerOrder(await orderWorkflow.invoice(order, invoiceData), order);
+      const { data, delivery } = await orderWorkflow.invoice(order, invoiceData);
+      const result = mergeServerOrder(data);
       this.addNotification('MARKETING', 'Invoice Diterbitkan',
         `Invoice ${result.invoice.invoiceNumber} diterbitkan untuk ${order.orderNumber}.`, 'finance', '/marketing/orders');
-      return result.invoice;
+      return { ...result.invoice, delivery };
     });
   },
 
@@ -1682,3 +2213,4 @@ for (const method of ['confirmPurchaseOrderBySupplier', 'dispatchSupplierDeliver
     finally { purchaseBusy.delete(code); }
   };
 }
+

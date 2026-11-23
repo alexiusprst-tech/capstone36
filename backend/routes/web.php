@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CustomerInvoiceController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\SessionController;
 use App\Http\Middleware\EnsurePageRole;
@@ -13,19 +14,21 @@ Route::get('/', fn (Request $request) => redirect(
 Route::post('/login', [SessionController::class, 'store'])->middleware('throttle:10,1');
 Route::post('/logout', [SessionController::class, 'destroy'])->middleware('auth');
 
+// Keep bearer links out of session history and the internal Inertia application.
+Route::get('/invoice-access/{token}', CustomerInvoiceController::class)
+    ->withoutMiddleware('web')->name('invoice.customer.access');
+
 Route::get('/templates/{filename}', function (string $filename) {
-    $cleanFilename = basename($filename);
+    $cleanFilename = basename(urldecode($filename));
     $paths = [
         public_path('templates/'.$cleanFilename),
-        public_path('templates/data_barang_template.xlsx'),
         public_path('templates/data_barang_template (2).xlsx'),
         base_path('../data_barang_template (2).xlsx'),
-        base_path('../data_barang_template.xlsx'),
     ];
 
     foreach ($paths as $path) {
         if (file_exists($path)) {
-            return response()->download($path, 'data_barang_template.xlsx', [
+            return response()->download($path, 'data_barang_template (2).xlsx', [
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ]);
         }

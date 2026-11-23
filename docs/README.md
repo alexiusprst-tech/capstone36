@@ -1,65 +1,45 @@
-# Sistem Terintegrasi Pengadaan Barang & SPJ Dokumen
-## CV. Alpharo Artha Jaya — Dokumentasi Teknis Sistem
+# Dokumentasi sistem CV Alpharo Artha Jaya
 
-Dokumentasi resmi arsitektur sistem, proses bisnis, model data, dan antarmuka operasional CV. Alpharo Artha Jaya. Disusun berdasarkan analisis mendalam terhadap **Diagram BPMN To-Be (Proses Pesanan Hingga Dokumen SPJ)** serta implementasi kode aktif (Laravel 13 / PHP 8.4 dan Vue 3 / Vite 6 / Tailwind CSS).
+Baseline revisi: **20 November 2026**. Referensi proses adalah [gambar BPMN revisi](references/PROBIS-TO-BE-Revisi.png), pembacaan terurut di [PROBIS_TO_BE.md](PROBIS_TO_BE.md), Jira CAPS yang dibaca pada tanggal tersebut, dan kode dalam checkout ini. Dokumen ini tidak menyatakan seluruh TO-BE sudah berjalan.
 
----
+Urutan wajib: **stok/QC terpenuhi → Marketing mengajukan → Direktur bila nilai >Rp5 juta → Finance menerbitkan invoice → pembayaran terverifikasi lunas → Administrasi menyiapkan SPJ pra-kirim → Warehouse mengirim barang bersama SPJ**. BAST bertanda tangan dan foto penerimaan menjadi lampiran susulan, sesuai keputusan pengguna 20 November 2026.
 
-## 📌 Indeks Berkas Dokumentasi (Folder: docs/)
+## Indeks dan cara membaca
 
-Seluruh berkas dokumentasi teknis sistem tersentralisasi pada direktori [docs/](file:///c:/Users/Acer/capstone/docs/):
+| Dokumen | Isi |
+| --- | --- |
+| [PROBIS_TO_BE.md](PROBIS_TO_BE.md) | Semua jalur, pesan, gerbang, dan keterbatasan gambar |
+| [BPMN_JIRA_AUDIT.md](BPMN_JIRA_AUDIT.md) | Kesesuaian Jira, temuan kode/dokumen, keputusan terbuka, urutan implementasi dan kasus uji |
+| [PRD.md](PRD.md) | 46 kebutuhan dengan ID lama dipertahankan; tanggung jawab dan batas target |
+| [RULES.md](RULES.md) | Aturan lintas modul dan gerbang yang wajib diperiksa server |
+| [USER_FLOW.md](USER_FLOW.md) | Interaksi tiap peran dari pesanan sampai lampiran susulan |
+| [API.md](API.md) | Endpoint aktif, payload pokok dan kontrak target yang belum tersedia |
+| [DATABASE.md](DATABASE.md) | Struktur penyimpanan aktif, relasi dan kebutuhan migrasi mendatang |
+| [SCHEMA.md](SCHEMA.md) | Bentuk data, status dan kepemilikan sumber data |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Laravel/Inertia, batas modul dan integrasi target |
+| [DESIGN.md](DESIGN.md) | Pola UI yang dipertahankan dan representasi status yang benar |
+| [SPJ_GENERATION.md](SPJ_GENERATION.md) | Generator aktif, sumber data, pra-kirim versus susulan dan kekurangan validasinya |
+| [CAPS23_APPROVAL.md](CAPS23_APPROVAL.md) | Kontrak rinci pengajuan/approval yang sudah diimplementasikan |
+| [INERTIA.md](INERTIA.md) | Menjalankan halaman dan pengujian melalui Laravel |
+| [AGENT.md](AGENT.md) | Batas gagasan AI opsional; bukan kewenangan transaksi atau fitur wajib |
+| [SPRINT1_PROGRESS.md](SPRINT1_PROGRESS.md), [SPRINT1_COMPLETION.md](SPRINT1_COMPLETION.md) | Bukti historis pekerjaan Sprint 1; bukan status Jira langsung |
 
-| No | Berkas | Deskripsi & Cakupan Teknis |
-|:---|:---|:---|
-| 1 | [PRD.md](PRD.md) | **Product Requirements Document**: Latar belakang, peran pengguna, katalog lengkap **46 Functional Requirements (FR)**, dan alur cross-functional BPMN. |
-| 2 | [ARCHITECTURE.md](ARCHITECTURE.md) | **System Architecture**: Arsitektur Decoupled SPA + Headless REST API, pembagian layer, diagram modular, dan keamanan Sanctum. |
-| 3 | [DATABASE.md](DATABASE.md) | **Database Design**: Diagram ERD, kamus data tabel (products, warehouse_requests, purchase_transactions, spj_projects), indexing, dan seeder. |
-| 4 | [SCHEMA.md](SCHEMA.md) | **Data Schema & Models**: Definisi Eloquent models, casts, fillables, relationships, dan skema payload JSON. |
-| 5 | [API.md](API.md) | **API Contracts**: Rute endpoint RESTful aktif di `backend/routes/api.php`, header, parameter, body request, response payload, dan HTTP status. |
-| 6 | [RULES.md](RULES.md) | **Business Rules & Governance**: Aturan Segregation of Duties (SoD), formula kalkulasi diskon & PPN, penguncian satuan, dan kronologi SPJ. |
-| 7 | [USER_FLOW.md](USER_FLOW.md) | **User Flow**: Alur langkah demi langkah interaksi setiap peran selaras dengan swimlane BPMN To-Be (Marketing, Gudang, Finance, Admin). |
-| 8 | [DESIGN.md](DESIGN.md) | **UI/UX Design System**: Token warna aktif, sidebar gradient `#0B4DA2`, topbar, tabel data, modal catalog, dan tombol aksi bergradasi dengan icon putih. |
-| 9 | [AGENT.md](AGENT.md) | **AI Agent Framework**: Spesifikasi agen otonom (Procurement Advisor, SPJ Compliance Auditor, Inventory Optimizer) dan skema tool call. |
+Istilah **aktif** berarti ada implementasi pada kode yang diperiksa; **target** berarti kontrak implementasi berikutnya; **terbuka** berarti belum ada keputusan yang cukup. Jika dokumen historis berbeda, gunakan baseline revisi ini untuk target proses, kode untuk mengetahui kemampuan saat ini, dan catat selisihnya. Jangan memperlakukan spesifikasi sebagai bukti fitur sudah selesai.
 
----
+## Teknologi dan menjalankan lokal
 
-## ⚙️ Stack Teknologi Aktual
+Backend memakai Laravel `^13.17`, PHP `^8.3`, Sanctum, Inertia 2, Dompdf dan Reverb. Frontend memakai Vue 3.5, Inertia 2, Vite 6, Tailwind CSS 4 dan Lucide. Route halaman dimiliki Laravel, bukan Vue Router. State browser lama masih memakai Vue reactive/localStorage; bukan bukti semua transaksi tersimpan di server. Database operasional pada lingkungan yang diperiksa menggunakan MariaDB 10.4/InnoDB; pengujian terisolasi memakai SQLite.
 
-* **Backend**: Laravel 13.x (composer: ^13.17), PHP >=8.3, Eloquent ORM.
-* **Frontend**: Vue 3.5 (Composition API `<script setup>`), Inertia 2 dengan Vue 3, Vite 6, Tailwind CSS v4, dan Lucide Icons.
-* **Database**: SQLite 3 untuk pengujian; koneksi mysql pada lingkungan ini memakai MariaDB 10.4/InnoDB.
-* **Dokumen & Spreadsheet**: PhpSpreadsheet & SheetJS (Import/Export 2.196 SKU).
-* **Pengujian**: PHPUnit 12.5, unit test Node.js, dan Playwright. Hasil terbaru dicatat dalam laporan pengujian Sprint 1.
+Untuk instalasi baru saja: pasang dependensi melalui `composer install` di `backend` dan `npm ci` di `frontend`; siapkan `.env` dan APP_KEY tanpa menimpa konfigurasi yang sudah dipakai. Tinjau/backup database sebelum menjalankan migrasi pada lingkungan tujuan. `npm run build` menghasilkan aset di `backend/public/build`. Jalankan `php artisan serve` dari backend dan buka URL Laravel, biasanya `http://localhost:8000`. Mode pengembangan aset dijelaskan di [INERTIA.md](INERTIA.md).
 
----
+Pengujian: `php artisan test`, `npm run test:unit`, dan `npm run test:ui` pada lingkungan uji yang disediakan. Playwright menggunakan server/database SQLite terpisah. Jangan menjalankan `migrate:fresh`, seeder contoh, atau fixture terhadap database operasional. Akun uji tidak menjadi kredensial pasti akun operasional.
 
-## Progres dan kontrak Sprint 1
+## Batas kondisi saat audit
 
-Lihat [SPRINT1_PROGRESS.md](SPRINT1_PROGRESS.md) untuk kontrak customer server, relasi pesanan, pengujian, penanganan data customer lama, pengadaan, penerimaan parsial, ledger, audit perubahan, serta batas penyerahan Sprint 2. Kontrak ini mengoreksi spesifikasi awal yang belum mencerminkan kode terkini.
+Customer/order, stok/alokasi, pengadaan, penerimaan/QC, tindak lanjut dan pengajuan/approval tersedia di server. Finance dapat menerbitkan invoice dan mengirim tautan customer melalui SMTP. Integrasi pembayaran, antrean SPJ khusus lunas, kesiapan bundel pra-kirim, pengiriman barang dan tautan pelacakan masih menjadi pekerjaan Sprint 2.
 
-## 🚀 Panduan Memulai Cepat (Quickstart)
+Untuk pengujian invoice CAPS-26 dengan Mailtrap Sandbox, isi `INVOICE_MAILER=mailtrap_sandbox`, `MAILTRAP_SANDBOX_TOKEN`, dan `MAILTRAP_SANDBOX_INBOX_ID` pada `backend/.env`. Gunakan `MAIL_FROM_ADDRESS` dan `MAIL_FROM_NAME` untuk identitas pengirim serta `APP_URL` untuk alamat aplikasi yang dapat dibuka penguji. Finance membuka detail invoice lalu memilih **Kirim invoice**. Pesan dapat diperiksa di inbox sandbox terpilih. Masa berlaku tautan default tujuh hari. Untuk tes browser terisolasi, `npm run test:ui -- --grep CAPS26` menggunakan SMTP loopback dan SQLite.
 
-```bash
-# 1. Setup Backend
-cd backend
-composer install
-# Buat .env dari .env.example hanya pada instalasi baru; pertahankan .env yang sudah ada.
-# Jalankan php artisan key:generate hanya bila APP_KEY belum tersedia.
-php artisan migrate
-php artisan serve
+Untuk mengirim semua invoice baru secara otomatis ke satu inbox uji, gunakan `INVOICE_MAILER=mailtrap_demo`, `INVOICE_USE_DEFAULT_RECIPIENT=true`, `MAILTRAP_DEMO_TOKEN` dan `MAILTRAP_DEMO_RECIPIENT` pada backend. Mailtrap harus mengizinkan alamat penguji tersebut untuk domain demo. Penerbitan oleh Finance memicu email dan detail invoice menampilkan tujuan, status dan tombol kirim ulang. Invoice lama dapat dikirim satu per satu. Dengan opsi default nonaktif, pengiriman manual menggunakan alamat customer dan beralih ke Sandbox bila alamat itu berbeda dari penerima demo. Tautan memakai `APP_URL`. Alamat localhost hanya dapat dibuka di komputer yang menjalankan aplikasi.
 
-# 2. Setup & Build Frontend
-cd ../frontend
-npm ci
-npm run build   # Kompilasi otomatis ke backend/public
-```
-
-Pengujian aman: backend menggunakan php artisan test (SQLite :memory: sesuai phpunit.xml); frontend menggunakan npm run test:unit dan npm run test:ui. Server UI membuat SQLite terpisah pada .ui-review/inertia-ui dan akun sintetis. Jangan menjalankan migrate:fresh pada database operasional.
-
-Daftar berikut hanya berlaku bila seeder development terkait memang dijalankan pada database uji baru; bukan kredensial pasti dari database yang sudah dipakai. Jangan reset database operasional untuk membuat akun contoh.
-
-Akun contoh dari dokumentasi awal:
-* Admin: `admin@example.com` / `password`
-* Warehouse: `warehouse@example.com` / `password`
-* Finance: `finance@example.com` / `password`
-* Marketing: `marketing@example.com` / `password`
+Jira saat dibaca: CAPS-23 Done; CAPS-24–38 To Do; Sprint 1 Closed, Sprint 2 Epic 4–6 Active. Audit ini tidak mengubah Jira, kode aplikasi, database atau status sprint. Lihat [audit](BPMN_JIRA_AUDIT.md) untuk batas kesiapan sebelum implementasi berikutnya.

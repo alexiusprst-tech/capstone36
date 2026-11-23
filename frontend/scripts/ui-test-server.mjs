@@ -2,6 +2,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, openSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { startTestMailbox } from './ui-test-mailbox.mjs';
 
 const frontend = fileURLToPath(new URL('../', import.meta.url));
 const backend = path.resolve(frontend, '../backend');
@@ -9,7 +10,11 @@ const scratch = path.join(frontend, '.ui-review/inertia-ui');
 mkdirSync(scratch, { recursive: true });
 const database = path.join(scratch, 'testing.sqlite');
 writeFileSync(database, '');
+const mailbox = await startTestMailbox(scratch);
+writeFileSync(path.join(scratch, 'mailbox-directory'), path.basename(mailbox.directory));
 const env = { ...process.env, APP_ENV: 'testing', APP_URL: 'http://localhost:5174',
+  INVOICE_MAILER: 'smtp', MAIL_MAILER: 'smtp', MAIL_URL: '(null)', MAIL_SCHEME: 'smtp', MAIL_HOST: '127.0.0.1',
+  MAIL_PORT: String(mailbox.port), MAIL_USERNAME: '', MAIL_PASSWORD: '', MAIL_FROM_ADDRESS: 'finance@example.test',
   DB_CONNECTION: 'sqlite', DB_DATABASE: database, DB_URL: '', SESSION_DRIVER: 'database',
   CACHE_STORE: 'array', BROADCAST_CONNECTION: 'null', SANCTUM_STATEFUL_DOMAINS: 'localhost:5174,127.0.0.1:5174' };
 for (const args of [['artisan', 'migrate', '--force', '--no-interaction'], [path.join(frontend, 'scripts/seed-ui-users.php')]]) {
@@ -21,6 +26,7 @@ let stopping = false;
 const stop = () => {
   if (stopping) return;
   stopping = true;
+  mailbox.smtp.close();
   children.forEach(child => child.kill());
   const hotFile = path.join(backend, 'public/hot');
   if (existsSync(hotFile) && readFileSync(hotFile, 'utf8').includes(':5175')) unlinkSync(hotFile);

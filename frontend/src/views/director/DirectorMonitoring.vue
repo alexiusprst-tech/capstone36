@@ -138,6 +138,7 @@
                 <td class="py-3.5 px-4 text-right whitespace-nowrap">
                   <div class="flex items-center justify-end gap-1.5">
                     <button
+                      v-if="!order.serverManaged"
                       type="button"
                       :class="[
                         order.isHold
@@ -486,6 +487,10 @@ const filteredOrders = computed(() => {
 });
 
 const toggleHoldOrder = (order) => {
+  if (order.serverManaged) {
+    toast.warning('Tahan atau revisi pesanan server belum ditetapkan dalam alur TO-BE.');
+    return;
+  }
   order.isHold = !order.isHold;
   if (order.isHold) {
     toast.error(`Pesanan ${order.orderNumber} berhasil DITAHAN (Hold) oleh Direktur.`);

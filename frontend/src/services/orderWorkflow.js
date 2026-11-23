@@ -13,30 +13,64 @@ export const orderWorkflow = {
   async submit(order) { return (await api.post(`/orders/${encodeURIComponent(order.orderNumber)}/submit`, { version: order.version })).data.data; },
   async stockCheck(order) { return (await api.post(`/orders/${encodeURIComponent(order.orderNumber)}/stock-check`)).data.data; },
   async approve(order, notes) { return (await api.post(`/orders/${encodeURIComponent(order.orderNumber)}/approve`, { notes })).data.data; },
-  async invoice(order, data) { return (await api.post(`/orders/${encodeURIComponent(order.orderNumber)}/invoice`, data)).data.data; },
-  async downloadInvoice(orderNumber, preview = false) {
-    const response = await api.get(`/orders/${encodeURIComponent(orderNumber)}/invoice/download`, {
-      params: preview ? { preview: 1 } : {},
-      responseType: 'blob',
-    });
-    const disposition = response.headers['content-disposition'] || '';
-    const match = disposition.match(/filename="?([^";]+)"?/i);
-    const filename = match ? match[1] : `Invoice_${orderNumber}.pdf`;
-    const url = URL.createObjectURL(response.data);
+  async invoice(order, { invoiceDate, dueDate, paymentType, terminCount }) {
+    return (await api.post(`/orders/${encodeURIComponent(order.orderNumber)}/invoice`, { invoiceDate, dueDate, paymentType, terminCount })).data;
+  },
+  async fetchInvoiceBlob(orderNumber, format = 'pdf', preview = false) {
+    try {
+      const response = await api.get(`/orders/${encodeURIComponent(orderNumber)}/invoice/download`, {
+        params: preview ? { preview: 1 } : (format === 'docx' ? { format } : {}),
+        responseType: 'blob',
+      });
+      const disposition = response.headers['content-disposition'] || '';
+      const match = disposition.match(/filename="?([^";]+)"?/i);
+      const filename = match ? match[1] : `Invoice_${orderNumber}.${format}`;
+      const mime = format === 'docx'
+        ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        : 'application/pdf';
+      const blob = response.data instanceof Blob
+        ? new Blob([response.data], { type: response.data.type || mime })
+        : new Blob([response.data], { type: mime });
+      const url = URL.createObjectURL(blob);
+      return { blob, url, filename };
+    } catch (error) {
+      if (error.response?.data instanceof Blob) {
+        try {
+          const text = await error.response.data.text();
+          const parsed = JSON.parse(text);
+          if (parsed?.message) error.response.data = parsed;
+        } catch {
+          // keep original error if blob is not JSON
+        }
+      }
+      throw error;
+    }
+  },
+  async downloadInvoice(orderNumber, preview = false, format = 'pdf') {
+    const previewTab = preview ? window.open('about:blank', '_blank') : null;
+    if (preview && !previewTab) throw new Error('Izinkan tab pratinjau atau pilih Unduh PDF.');
+    if (previewTab) previewTab.opener = null;
+    let file;
+    try {
+      file = await this.fetchInvoiceBlob(orderNumber, format, preview);
+    } catch (error) {
+      previewTab?.close();
+      throw error;
+    }
 
-    if (preview) {
-      window.open(url, '_blank');
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    if (previewTab) {
+      if (!previewTab.closed) previewTab.location.replace(file.url);
+      setTimeout(() => URL.revokeObjectURL(file.url), 60000);
       return;
     }
 
     const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
+    link.href = file.url;
+    link.download = file.filename;
     document.body.appendChild(link);
     link.click();
     link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    setTimeout(() => URL.revokeObjectURL(file.url), 10000);
   },
 };
 

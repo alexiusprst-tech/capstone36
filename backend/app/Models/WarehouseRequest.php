@@ -47,6 +47,7 @@ class WarehouseRequest extends Model
         'sales_order_id',
         'requested_by_id',
         'order_items_hash',
+        'procurement_draft',
     ];
 
     /**
@@ -55,6 +56,7 @@ class WarehouseRequest extends Model
     protected $casts = [
         'items' => 'array',
         'total_est_cost' => 'decimal:2',
+        'procurement_draft' => 'array',
     ];
 
     public function order(): BelongsTo

@@ -131,6 +131,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             RegionSeeder::class,
+            CustomerSeeder::class,
             PurchaseAndRequestSeeder::class,
         ]);
     }

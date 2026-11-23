@@ -1,5 +1,7 @@
 # Kontrak aktual dan progres Sprint 1
 
+Pembaruan 20 November 2026 sesuai permintaan pengguna: form Pengajuan Gudang memuat Header Pembelian, Detail Pembelian, dan Total dan Pembayaran. Supplier, tanggal, nomor faktur, estimasi harga, diskon/satuan, diskon transaksi dan metode pembayaran tersimpan sebagai rencana pembelian pada pengajuan. Kode rencana `PB...` dibuat server ketika pengajuan disimpan dan diteruskan ke Finance sebagai isian awal PO. Supplier default berlaku untuk seluruh baris. Penyimpanan pengajuan tidak menerbitkan PO, menambah stok atau mencatat pelunasan; Finance tetap menyelesaikan transaksi pembelian. Kontrak field rinci ada pada `API.md`.
+
 19 November 2026. Acuan utama: Jira CAPS, sprint 4 **Sprint 1 - Epic 1-3**.
 
 Target Sprint 1 adalah pesanan tercatat dan stok terpenuhi sampai **Siap Diajukan**. Dokumen ini menjadi kontrak implementasi Sprint 1 yang diuji untuk customer, pesanan, stok, pengadaan dan penerimaan. Approval/invoice/pembayaran/SPJ final/pengiriman merupakan Sprint 2.

@@ -38,3 +38,14 @@ export function normalizeShippingStatus(status) {
   }
   return status;
 }
+
+/** Use the same icon and wording as the Supplier dropdown without changing stored values. */
+export function presentShippingStatus(status, fallback = 'Belum tersedia') {
+  const text = String(status ?? '').trim();
+  if (!text) return { icon: 'ℹ️', label: fallback };
+  const normalized = normalizeShippingStatus(text);
+  const option = SHIPPING_STATUS_OPTIONS.find(item => item.value === normalized || item.label === text);
+  if (!option) return { icon: 'ℹ️', label: text };
+  const separator = option.label.indexOf(' ');
+  return { icon: option.label.slice(0, separator), label: option.label.slice(separator + 1) };
+}

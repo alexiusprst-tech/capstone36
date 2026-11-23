@@ -32,33 +32,42 @@ test('Warehouse creates and cancels a real order shortage, Finance buys only its
     expect(order.data.stockReadiness.items[0]).toMatchObject({ shortage: 3, unrequestedShortage: 3 });
     const revised = await api(marketing, 'put', `/orders/${orderNumber}`, { version: order.data.version, details: { clientId: customer.data.id, clientName: customer.data.name, projectName: `Proyek Pengadaan UI ${suffix} Revisi`, notes: 'Catatan revisi untuk jejak audit' }, items: [{ sku, name: product.data.name, unit: 'PCS', qty: 5, price: 150.25 }] });
     expect(revised.data.version).toBe(order.data.version + 1);
+    const finance = await rolePage('FINANCE', '/finance/purchases');
+    const supplier = await api(finance, 'post', '/suppliers', { name: `Supplier Pengadaan UI ${suffix}`, phone: '02112345678' });
     await warehouse.reload();
 
     async function createRequest() {
       await warehouse.getByRole('button', { name: 'Buat Pengajuan Kebutuhan', exact: true }).click();
       await warehouse.getByLabel(/^Pesanan Sumber/).selectOption(orderNumber);
+      await warehouse.getByLabel(/^Supplier Default/).selectOption(String(supplier.data.id));
       await expect(warehouse.getByLabel(`Jumlah Pengadaan ${sku}`, { exact: true })).toHaveValue('3');
       await warehouse.getByLabel(/^Keperluan Pengadaan/).fill('Memenuhi tiga unit kekurangan stok pesanan.');
       await warehouse.getByLabel(`Estimasi Harga ${sku}`, { exact: true }).fill('100.10');
       const response = warehouse.waitForResponse(response => response.url().endsWith('/api/warehouse/requests') && response.request().method() === 'POST');
-      await warehouse.getByRole('button', { name: 'Kirim Pengajuan', exact: true }).click();
+      await warehouse.getByRole('button', { name: 'Simpan Pengajuan', exact: true }).click();
       const saved = await response; expect(saved.status()).toBe(201);
       const record = (await saved.json()).data;
-      await expect(warehouse.getByRole('heading', { name: record.request_code, exact: true })).toBeVisible();
+      const row = warehouse.getByRole('row').filter({ hasText: record.request_code });
+      await expect(row).toBeVisible();
+      await expect(row).toContainText(`Pesanan ${orderNumber}`);
+      await expect(row).toContainText(`Proyek Pengadaan UI ${suffix} Revisi`);
+      await expect(row).toContainText('300,30');
+      await expect(row.getByRole('button', { name: `Detail Pengajuan ${record.request_code}`, exact: true })).toBeVisible();
       return record;
     }
     const first = await createRequest();
-    await expect(warehouse.getByText(`Pesanan ${orderNumber}`, { exact: false }).first()).toBeVisible();
+    const firstRequestRow = warehouse.getByRole('row').filter({ hasText: first.request_code });
+    await expect(firstRequestRow).toContainText(`Pesanan ${orderNumber}`);
     const cancellation = warehouse.waitForResponse(response => response.url().endsWith(`/api/warehouse/requests/${first.request_code}/cancel`) && response.request().method() === 'POST');
-    await warehouse.getByRole('button', { name: `Batalkan Pengajuan ${first.request_code}`, exact: true }).click();
+    await firstRequestRow.getByRole('button', { name: `Batalkan Pengajuan ${first.request_code}`, exact: true }).click();
     expect((await cancellation).status()).toBe(200);
     await expect(warehouse.getByRole('button', { name: `Batalkan Pengajuan ${first.request_code}`, exact: true })).toHaveCount(0);
+    await expect(firstRequestRow).toContainText('Dibatalkan');
     const request = await createRequest(); expect(request.request_code).not.toBe(first.request_code);
     await warehouse.getByRole('button', { name: 'Buat Pengajuan Kebutuhan', exact: true }).click();
     await expect(warehouse.getByLabel(/^Pesanan Sumber/).locator(`option[value="${orderNumber}"]`)).toHaveCount(0);
 
-    const finance = await rolePage('FINANCE', '/finance/purchases');
-    const supplier = await api(finance, 'post', '/suppliers', { name: `Supplier Pengadaan UI ${suffix}`, phone: '02112345678' });
+
     await finance.reload();
     await finance.getByRole('button', { name: `Pilih Supplier & Beli ${request.request_code}`, exact: true }).click();
     await expect(finance.getByRole('combobox', { name: 'Pengajuan Gudang', exact: true })).toHaveValue(request.request_code);

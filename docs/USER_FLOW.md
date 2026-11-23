@@ -1,50 +1,65 @@
-> Pembaruan 19 November 2026: kontrak Sprint 1 yang telah diintegrasikan dan diuji ada pada [SPRINT1_PROGRESS.md](SPRINT1_PROGRESS.md). Bagian berikut mencakup spesifikasi awal dan rencana modul lain; gunakan kontrak Sprint 1 tersebut jika terdapat perbedaan implementasi, status, atau rumus.
+# Alur pengguna menurut BPMN revisi
 
-# End-to-End User Flow & BPMN Alignment
-## CV. Alphate Artha Jaya — Alur Interaksi Pengguna Berdasarkan BPMN To-Be
+Baseline 20 November 2026; lihat [pembacaan lengkap](PROBIS_TO_BE.md). Bagian pembayaran sampai customer menerima adalah **target Sprint 2**, bukan klaim fitur saat ini sudah berfungsi penuh. Tidak ada pengiriman paralel dengan invoice.
 
-Diagram BPMN To-Be menghubungkan 6 entitas kerja secara runtut:
+## 1. Customer dan Marketing membuat pesanan
 
-```text
-[Klien] --> [Marketing] --> [Warehouse] --> [Finance] --> [Supplier] --> [Administrasi SPJ]
-```
+Customer menyampaikan kebutuhan ke perusahaan. Marketing memilih/melengkapi customer server, membuat Draft dan memilih barang dari master SKU beserta kuantitas, harga jual serta rincian kebutuhan. Simpan memakai versi terbaru. Sistem menyimpan snapshot identitas, menghitung nilai dan menampilkan alokasi/kekurangan per barang.
 
----
+Jika stok seluruh baris terpenuhi, menuju pengajuan (langkah 4). Jika kurang, Draft tetap tersimpan dan Warehouse melihat kebutuhan untuk pengadaan. Marketing tidak menerbitkan MR Gudang, PO supplier atau Surat Jalan pengiriman customer sebagai pengganti role terkait.
 
-## 1. Tahapan Alur Kerja End-to-End
+## 2. Warehouse mengajukan kebutuhan, Finance membeli
 
-### Fase 1: Input Pesanan Klien (Marketing)
-1. Klien memberikan pesanan proyek pengadaan/konstruksi.
-2. Marketing mendaftarkan pesanan di `/marketing/orders/create` (memilih klien dari master wilayah DKI Jakarta).
-3. Marketing meneruskan data kebutuhan barang ke Gudang.
+Warehouse membuka Pengajuan Kebutuhan pada pesanan yang kurang. Form mengikuti pola pembelian yang telah diminta pengguna: header kode rencana otomatis, tanggal, faktur opsional, proyek dari pesanan dan supplier default; tabel barang/supplier/jumlah/harga estimasi/diskon/subtotal; ringkasan total/diskon/metode usulan. Barang dan satuan dari master, kuantitas dibatasi kekurangan. Simpan membentuk MR, **belum PO**.
 
-### Fase 2: Pengecekan Stok & Pengajuan Pembelian (Warehouse)
-1. Gudang mengecek ketersediaan fisik barang pada katalog 2.196 SKU.
-2. **Percabangan Stok**:
-   * *Stok Cukup*: Gudang mengonfirmasi barang siap dikirim ke Marketing.
-   * *Stok Kurang*: Gudang membuka `/warehouse/requests` dan menyusun *Material Request*.
-3. Pada tabel pengajuan: Staf gudang memilih item via modal katalog 2.196 SKU, satuan terkunci otomatis, memasukkan kuantitas, dan mengirim pengajuan ke Finance.
+Finance memilih MR yang masih valid, memeriksa supplier aktif, harga beli/diskon serta seluruh rincian. Perubahan kebutuhan memerlukan pembatalan MR yang belum diproses dan pengajuan ulang. Finance menerbitkan satu PO supplier; status `DIPESAN`. PO ini tidak menambah stok atau menyatakan pembayaran customer lunas.
 
-### Fase 3: Transaksi Pembelian Supplier (Finance)
-1. Finance membuka `/finance/purchases/create`.
-2. Sistem otomatis menampilkan banner auto-sync dari pengajuan gudang yang berstatus `MENUNGGU_FINANCE`.
-3. Seluruh baris barang terisi otomatis. Finance melengkapi:
-   * No Faktur resmi dari supplier fisik.
-   * Supplier Default rekanan.
-   * Harga beli aktual dan diskon/satuan.
-   * Metode pembayaran (Transfer Bank / Tunai).
-4. Finance menyimpan transaksi `TRX-YYYYMMDD-XXXX`. Status pengajuan gudang berubah menjadi `DIPROSES_PEMBELIAN`.
+Supplier/Finance memperbarui konfirmasi dan resi perjalanan barang menuju Gudang. Gudang melihat status beserta ikon dan riwayat pembaruannya. Ini terpisah dari resi pengiriman ke customer pada langkah 8.
 
-### Fase 4: Penerimaan Fisik & Quality Control (Warehouse)
-1. Supplier mengirimkan fisik material ke gudang perusahaan.
-2. Staf gudang melakukan inspeksi mutu & kuantitas (QC) di `/warehouse/fulfillment`.
-3. Mengonfirmasi penerimaan barang $ightarrow$ Kuantitas stok master bertambah otomatis.
+## 3. Warehouse menerima dan memeriksa barang
 
-### Fase 5: Pengiriman Fisik & Penagihan Paralel
-* **Cabang Logistik**: Logistik/Marketing mencetak Surat Jalan $ightarrow$ Klien menerima barang & menandatangani BAST/Surat Jalan.
-* **Cabang Keuangan**: Finance menerbitkan Faktur Penjualan / Invoice $ightarrow$ Klien membayar $ightarrow$ Finance menerbitkan Kuitansi Pelunasan.
+Catat kedatangan, lalu penerimaan/QC per baris dengan jumlah layak dan ditolak. Isi alasan barang ditolak. Ringkasan harus menampilkan dipesan, diterima layak kumulatif, ditolak dan sisa yang masih harus dipenuhi; kedatangan tidak otomatis berarti seluruh barang sesuai.
 
-### Fase 6: Konsolidasi & Penerbitan Dokumen SPJ (Administrasi)
-1. Administrasi membuka `/administration/spj`.
-2. Sistem menampilkan checklist otomatis kelengkapan 5 dokumen pokok (Surat Pesanan, Faktur Pembelian, Surat Jalan, Invoice, Kuitansi).
-3. Administrasi menekan tombol "Generate Dokumen SPJ Lengkap" untuk menghasilkan bundel berkas siap audit.
+Jika parsial layak, hanya bagian layak masuk stok/ledger. Jika ada penolakan, Finance melihat antrean tindak lanjut, mencatat referensi dan hasil komunikasi supplier, lalu pengganti dikirim dan QC diulang pada kebutuhan tersisa. Barang ditolak tidak lebih dulu dimasukkan stok lalu diretur dari stok sah. Retry penerimaan yang sama tidak menambah stok lagi.
+
+Setelah seluruh kebutuhan pesanan teralokasi, tampilkan “Siap Diajukan”. Ini indikator kesiapan; status penjualan masih Draft hingga Marketing submit.
+
+## 4. Marketing mengajukan; Direktur bila perlu
+
+Marketing memeriksa rincian final dan mengajukan versi terbaru. Server memeriksa ulang seluruh alokasi. Detail kemudian terkunci. Nilai final server >Rp5 juta menjadi `Menunggu Verifikasi`; Direktur membaca rincian, pengaju, waktu aktual, stok, harga dan estimasi HPP bila tersedia, lalu menyetujui menjadi `Siap Invoice`.
+
+Nilai ≤Rp5 juta langsung `Siap Invoice` setelah submit; Direktur dapat memantau tanpa menyetujui. Tidak ada tombol tahan/tolak/revisi untuk order server sampai proses tersebut disepakati. Pesanan yang belum disetujui tetap menunggu; Finance tidak dapat melompatinya.
+
+## 5. Finance menerbitkan dan mengirim invoice
+
+Finance membuka antrean Siap Invoice, memeriksa customer, barang, nilai final, persetujuan bila wajib dan tanggal jatuh tempo. Server menerbitkan satu invoice bernomor unik dari order. Status menjadi `Menunggu Pembayaran`. Finance dapat mempratinjau atau mengunduh kuitansi dan membuka bagian **Pengiriman invoice ke customer** pada detail invoice.
+
+Di lingkungan uji dengan penerima default aktif, **Terbitkan Tagihan** sekaligus mengirim pemberitahuan ke inbox uji yang ditentukan. Finance melihat alamat dan hasil pengiriman pada detail invoice. Saat pengiriman gagal, Finance memilih **Kirim ulang invoice** dari detail tersebut. Di luar mode ini, Finance memeriksa email customer lalu memilih **Kirim invoice**. Penerima membuka tautan untuk membaca nomor, rincian dan saldo tagihan. Jika instruksi VA/QRIS dari provider belum tersedia, halaman menampilkan status tersebut. Kirim ulang mengganti tautan setelah penyedia menerima pesan. **Cabut tautan** mengakhiri akses ke invoice terkait.
+
+## 6. Customer membayar; sistem memverifikasi
+
+Target CAPS-28/31/33: pilih kanal tersedia, server mengambil nominal dari invoice dan membuat instruksi provider dengan masa berlaku. Sistem memverifikasi hasil dari provider. Sambil menunggu, tampilkan status tertunda/gagal/kedaluwarsa sesuai hasil yang valid. Instruksi yang kedaluwarsa dapat diganti percobaannya tanpa invoice kedua.
+
+Belum lunas kembali ke informasi invoice/pembayaran; tidak maju ke SPJ operasional atau pengiriman. Sudah lunas mencatat fakta server dan memicu konfirmasi email uji. Duplikat callback/refresh tidak mengubah jumlah uang atau menggandakan efek.
+
+## 7. Administrasi menyelesaikan SPJ pra-kirim
+
+Target CAPS-24: antrean kerja berisi pesanan lunas. Metadata/draft yang disiapkan sebelum lunas tetap bertanda persiapan. Detail proyek menunjukkan sumber customer/order/invoice/pembayaran dan kekurangan administratif, bukan nilai contoh.
+
+Checklist terbagi **pra-kirim** dan **lampiran susulan**. Daftar wajib pra-kirim harus ditetapkan sebelum menyelesaikan implementasi gerbang Siap. Admin melengkapi data, preview, generate atau mengunggah dokumen yang relevan; server memvalidasi kesiapan bundel, tidak sekadar menghitung file terunduh. Dokumen yang belum mungkin ditandatangani penerima tidak memblokir fase ini.
+
+## 8. Warehouse mengirim bersama SPJ
+
+Target CAPS-30: antrean pengiriman hanya dapat ditindaklanjuti bila lunas dan SPJ pra-kirim Siap. Gudang memeriksa alamat/barang/bundel, mengisi kurir, nomor resi dan informasi kirim, lalu mengonfirmasi dispatch. Server memeriksa ulang semua prasyarat, menyimpan bukti versi SPJ dan mutasi stok sekali. Barang dan SPJ dikirim bersama; customer memperoleh resi/tautan akses terbatas.
+
+Jika pembayaran/SPJ belum sah, server menolak tanpa perubahan stok atau status. Pesan menyebut penghambat yang konkret dan bagian yang bertanggung jawab; jangan menyiasati dengan tombol lokal.
+
+## 9. Pelacakan dan lampiran setelah penyerahan
+
+Target CAPS-32: customer melihat pesanan yang berhak diakses melalui tautan terbatas; resi manual dapat mengarah ke layanan kurir. Konfirmasi terima tersedia setelah dispatch dan tidak menghasilkan efek berulang. Nomor resi saja tidak membuka data invoice pribadi.
+
+Sesuai klarifikasi pengguna, BAST bertanda tangan dan foto penerimaan dilengkapi setelah penyerahan. Admin mencatat kelengkapan susulan terpisah; pengiriman yang sah tidak berubah kembali menjadi belum dikirim. Keterkaitan tanggal, penerima dan file harus dapat diaudit. Langkah ini memperluas titik akhir BPMN yang hanya menunjukkan barang+SPJ sudah dikirim.
+
+## Pemulihan kesalahan
+
+Versi usang: muat ulang dan tinjau perubahan, jangan menimpa otomatis. Koneksi gagal: tampilkan bahwa hasil belum diketahui dan gunakan mekanisme retry sesuai endpoint. Hak akses gagal: hentikan aksi dan arahkan ke peran yang tepat. Email gagal: retry pengiriman pesan, bukan transaksi bisnis. Data sumber kurang: tampilkan field/sumber yang harus dilengkapi, jangan mengganti dengan nol, tanggal hari ini, nama contoh atau status selesai.

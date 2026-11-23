@@ -93,6 +93,7 @@ class SalesOrderInventory
                 $items[] = ['sku' => $sku, 'name' => ($line['name'] ?? '') ?: ($product?->name ?? 'Barang dalam pesanan'),
                     'unit' => ($line['unit'] ?? '') ?: ($product?->unit ?? ''), 'catalogFound' => $product !== null,
                     'required' => $required, 'allocated' => $usable,
+                    'estimatedUnitCost' => $product && $product->hpp > 0 ? (float) $product->hpp : null,
                     'available' => $free, 'shortage' => max(0, $required - $usable)];
             }
             $result[$order->id] = ['status' => $items !== [] && collect($items)->sum('shortage') === 0 ? 'Siap Diajukan' : 'Menunggu Stok', 'items' => $items];

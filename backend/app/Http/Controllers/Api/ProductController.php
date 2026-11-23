@@ -663,16 +663,14 @@ class ProductController extends Controller
     public function downloadTemplate(): BinaryFileResponse|JsonResponse
     {
         $paths = [
-            public_path('templates/data_barang_template.xlsx'),
             public_path('templates/data_barang_template (2).xlsx'),
             base_path('../data_barang_template (2).xlsx'),
-            base_path('../data_barang_template.xlsx'),
             base_path('../data_barang_20261014_103611.xlsx'),
         ];
 
         foreach ($paths as $path) {
             if (file_exists($path)) {
-                return response()->download($path, 'template_import_data_barang.xlsx', [
+                return response()->download($path, 'data_barang_template (2).xlsx', [
                     'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 ]);
             }

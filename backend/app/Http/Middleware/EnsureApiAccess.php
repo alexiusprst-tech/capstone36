@@ -29,8 +29,9 @@ class EnsureApiAccess
             'spj' => $read ? self::INTERNAL : ['ADMINISTRASI'],
             'document-templates' => $read ? self::INTERNAL : ['ADMINISTRASI'],
             'documents' => $read ? self::INTERNAL : ['ADMINISTRASI', 'MARKETING', 'FINANCE'],
+            'orders' => $request->is('api/orders/*/invoice/delivery') ? ['FINANCE'] : null,
             // These controllers enforce their more specific permissions themselves.
-            'orders', 'auth', 'admin' => null,
+            'auth', 'admin' => null,
             default => [],
         };
         abort_if($roles !== null && ! in_array($role, $roles, true), 403, 'Peran Anda tidak berhak melakukan tindakan ini.');

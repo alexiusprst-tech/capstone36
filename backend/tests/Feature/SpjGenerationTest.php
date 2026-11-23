@@ -227,6 +227,17 @@ class SpjGenerationTest extends TestCase
         $this->assertNull($this->doc('penawaran')->file_path);
     }
 
+    public function test_single_kuitansi_requires_full_payment_and_leaves_other_documents_in_draft(): void
+    {
+        $this->project->update(['finance_status' => 'BELUM LUNAS', 'invoice_paid' => 0]);
+        $this->postJson($this->url('kuitansi', 'generate'))->assertUnprocessable();
+        $this->assertNull($this->doc('kuitansi')->file_path);
+        $this->project->update(['finance_status' => 'LUNAS', 'invoice_paid' => $this->project->project_value]);
+        $this->postJson($this->url('kuitansi', 'generate'))->assertOk();
+        $this->assertSame(['kuitansi'], $this->project->documents()->whereNotNull('file_path')->pluck('doc_key')->all());
+        $this->assertSame(14, $this->project->documents()->where('status', 'DRAFT')->count());
+    }
+
     public function test_original_photo_survives_generation_and_is_embedded_in_both_formats(): void
     {
         $upload = UploadedFile::fake()->image('serah-terima.png', 240, 160);

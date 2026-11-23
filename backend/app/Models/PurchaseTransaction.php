@@ -77,7 +77,7 @@ class PurchaseTransaction extends Model
 
     public function receipts(): HasMany
     {
-        return $this->hasMany(PurchaseReceipt::class)->with('lines')->orderBy('id');
+        return $this->hasMany(PurchaseReceipt::class)->with(['lines', 'receiver'])->orderBy('id');
     }
 
     public function receiptSummary(): array
@@ -89,12 +89,40 @@ class PurchaseTransaction extends Model
             $accepted = (int) $received->sum('accepted_qty');
             $rejected = (int) $received->sum('rejected_qty');
             $remaining = max(0, (int) $item['qty'] - $accepted);
+            $qc = match (true) {
+                $remaining === 0 && $rejected > 0 => ['PENGGANTI_DITERIMA', 'Pengganti diterima'],
+                $remaining === 0 => ['SESUAI', 'Lengkap dan sesuai'],
+                $rejected > 0 && $this->pending_followup => ['DITOLAK_RETUR', 'Ditolak / perlu retur'],
+                $rejected > 0 => ['MENUNGGU_PENGGANTI', 'Menunggu pengganti'],
+                $accepted > 0 => ['DITERIMA_SEBAGIAN', 'Diterima sebagian'],
+                default => ['BELUM_DIPERIKSA', 'Belum diperiksa'],
+            };
 
             return ['line_index' => $index, 'sku' => $item['sku'] ?? null, 'name' => $item['barang'] ?? $item['name'] ?? '',
                 'unit' => $item['unit'] ?? 'UNIT', 'expected_qty' => (int) $item['qty'],
                 'accepted_qty' => $accepted, 'rejected_qty' => $rejected, 'remaining_qty' => $remaining,
+                'qc_status' => $qc[0], 'qc_label' => $qc[1],
                 'accepted' => $accepted, 'rejected' => $rejected, 'remaining' => $remaining];
         })->all();
+    }
+
+    public function rejectedItems(): array
+    {
+        $items = [];
+        foreach ($this->receipts as $receipt) {
+            $receipt->loadMissing('receiver');
+            foreach ($receipt->lines as $line) {
+                if ($line->rejected_qty <= 0) {
+                    continue;
+                }
+                $items[] = ['receipt_id' => $receipt->id, 'received_date' => $receipt->received_date,
+                    'received_by_id' => $receipt->received_by_id, 'received_by_name' => $receipt->receiver?->name,
+                    'line_index' => $line->line_index, 'sku' => $line->sku, 'name' => $line->name, 'unit' => $line->unit,
+                    'rejected_qty' => $line->rejected_qty, 'reason' => $line->reason];
+            }
+        }
+
+        return $items;
     }
 
     public function toArray(): array
@@ -102,9 +130,22 @@ class PurchaseTransaction extends Model
         $data = parent::toArray();
         $progress = $data['supplier_progress'] ?? [];
         unset($data['supplier_progress']);
+        $summary = $this->receiptSummary();
+        $rejected = (int) array_sum(array_column($summary, 'rejected_qty'));
+        $remaining = (int) array_sum(array_column($summary, 'remaining_qty'));
+        $returnStatus = match (true) {
+            $rejected === 0 => 'TIDAK_ADA',
+            (bool) $this->pending_followup => 'PERLU_TINDAK_LANJUT',
+            $remaining > 0 => 'MENUNGGU_PENGGANTI',
+            default => 'PENGGANTI_DITERIMA',
+        };
 
         return [...$data, ...$progress,
-            'receipts' => $this->receipts->toArray(), 'receipt_summary' => $this->receiptSummary(),
+            'receipts' => $this->receipts->toArray(), 'receipt_summary' => $summary,
+            'inspection' => ['ordered_qty' => (int) array_sum(array_column($summary, 'expected_qty')),
+                'accepted_qty' => (int) array_sum(array_column($summary, 'accepted_qty')), 'rejected_qty' => $rejected,
+                'remaining_qty' => $remaining, 'needs_followup' => (bool) $this->pending_followup, 'return_status' => $returnStatus],
+            'return_items' => $this->rejectedItems(),
             'supplier_status' => $this->status === 'DITERIMA_GUDANG' ? 'Diterima Gudang (Lengkap & Sesuai)' : ($progress['supplier_status'] ?? 'Menunggu Konfirmasi'),
             'progress_persisted' => $this->supplier_progress !== null || $this->status === 'DITERIMA_GUDANG',
         ];

@@ -15,7 +15,7 @@
       {{ legacyPendingCount }} pengajuan lama perlu divalidasi ulang Marketing agar rincian dan alokasi stok tersimpan di server.
     </p>
     <!-- TABS NAVIGATION -->
-    <div class="flex items-center gap-2 border-b border-slate-200 mb-6 pb-2">
+    <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 mb-6 pb-2">
       <button
         type="button"
         :class="[
@@ -131,12 +131,12 @@
                   <span class="font-semibold text-slate-900 block">{{ order.clientName }}</span>
                   <span class="text-[11px] text-slate-400 block truncate max-w-xs">{{ order.projectName || 'Pengadaan Barang & Jasa' }}</span>
                 </td>
-                <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ order.date }}</td>
+                <td class="py-3.5 px-4 text-slate-500 whitespace-nowrap">{{ order.submittedAt ? formatSubmissionTime(order.submittedAt) : order.date }}</td>
                 <td class="py-3.5 px-4 text-right font-mono font-semibold text-slate-900 whitespace-nowrap">
                   Rp {{ Number(order.grandTotal || 0).toLocaleString('id-ID') }}
                 </td>
                 <td class="py-3.5 px-4 text-slate-600">
-                  <span class="font-medium text-slate-700 block">{{ order.submittedBy }}</span>
+                  <span class="font-medium text-slate-700 block">{{ order.submittedBy || 'Belum tercatat' }}</span>
                   <span v-if="order.urgency" class="text-[11px] text-amber-600 font-semibold uppercase tracking-wider block">
                     Urgensi: {{ order.urgency }}
                   </span>
@@ -223,7 +223,7 @@
               <div class="grid grid-cols-2 gap-2">
                 <div>
                   <span class="text-slate-400 text-[11px] block">Tanggal Pengajuan</span>
-                  <span class="font-mono text-slate-700 font-medium">{{ selectedOrder.date }}</span>
+                  <span class="font-mono text-slate-700 font-medium">{{ selectedOrder.submittedAt ? formatSubmissionTime(selectedOrder.submittedAt) : selectedOrder.date }}</span>
                 </div>
                 <div>
                   <span class="text-slate-400 text-[11px] block">Target Pengiriman</span>
@@ -232,7 +232,7 @@
               </div>
               <div>
                 <span class="text-slate-400 text-[11px] block">Diajukan Oleh</span>
-                <span class="text-slate-700 font-medium">{{ selectedOrder.submittedBy }}</span>
+                <span class="text-slate-700 font-medium">{{ selectedOrder.submittedBy || 'Belum tercatat' }}</span>
               </div>
               <div>
                 <span class="text-slate-400 text-[11px] block">Alamat Pengiriman Proyek</span>
@@ -336,13 +336,13 @@
                 </div>
                 <div class="flex justify-between text-slate-500 text-[11px]">
                   <span>Estimasi HPP (Modal):</span>
-                  <span class="font-mono">Rp {{ Number(computedFinancials.hpp).toLocaleString('id-ID') }}</span>
+                  <span class="font-mono">{{ formatCost(computedFinancials.hpp) }}</span>
                 </div>
                 <div class="pt-2 border-t border-dashed border-slate-200 flex justify-between items-center">
                   <span class="font-semibold text-slate-700">Gross Margin:</span>
-                  <span class="font-mono font-semibold text-emerald-600">
-                    Rp {{ Number(computedFinancials.grossMarginRp).toLocaleString('id-ID') }}
-                    <span class="text-xs">({{ computedFinancials.grossMarginPct }}%)</span>
+                  <span :class="['font-mono font-semibold', computedFinancials.grossMarginRp === null ? 'text-slate-500' : computedFinancials.grossMarginRp < 0 ? 'text-rose-600' : 'text-emerald-600']">
+                    {{ formatCost(computedFinancials.grossMarginRp) }}
+                    <span v-if="computedFinancials.grossMarginPct !== null" class="text-xs">({{ computedFinancials.grossMarginPct }}%)</span>
                   </span>
                 </div>
 
@@ -351,7 +351,7 @@
                   <div
                     :class="[
                       'p-2 rounded text-center font-semibold text-xs border flex items-center justify-center gap-1.5',
-                      computedFinancials.grossMarginPct >= 20
+                      computedFinancials.grossMarginPct === null ? 'bg-slate-50 text-slate-600 border-slate-200' : computedFinancials.grossMarginPct >= 20
                         ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
                         : computedFinancials.grossMarginPct >= 10
                         ? 'bg-amber-50 text-amber-800 border-amber-300'
@@ -400,7 +400,7 @@
             <button
               type="button"
               class="px-4 py-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-semibold text-xs rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
-              @click="openHoldModal(selectedOrder)"
+              v-if="!selectedOrder.serverManaged" @click="openHoldModal(selectedOrder)"
             >
               <PauseCircle class="w-4 h-4" />
               <span>Tahan / Minta Revisi (Hold)</span>
@@ -530,7 +530,7 @@
     <Modal
       v-model="verificationModalOpen"
       :title="`Telaah & Keputusan Verifikasi Order: ${selectedOrder?.orderNumber || ''}`"
-      :subtitle="`${selectedOrder?.clientName || ''} • ${selectedOrder?.projectName || 'Pengadaan'} (Diajukan: ${selectedOrder?.date || ''})`"
+      :subtitle="`${selectedOrder?.clientName || ''} • ${selectedOrder?.projectName || 'Pengadaan'} (Diajukan: ${selectedOrder?.submittedAt ? formatSubmissionTime(selectedOrder.submittedAt) : selectedOrder?.date || ''})`"
       size="full"
     >
       <div v-if="selectedOrder" class="space-y-6 text-xs">
@@ -555,7 +555,7 @@
               <div class="grid grid-cols-2 gap-2">
                 <div>
                   <span class="text-slate-400 text-[11px] block">Tanggal Pengajuan</span>
-                  <span class="font-mono text-slate-700 font-medium">{{ selectedOrder.date }}</span>
+                  <span class="font-mono text-slate-700 font-medium">{{ selectedOrder.submittedAt ? formatSubmissionTime(selectedOrder.submittedAt) : selectedOrder.date }}</span>
                 </div>
                 <div>
                   <span class="text-slate-400 text-[11px] block">Urgensi Proyek</span>
@@ -566,7 +566,7 @@
               </div>
               <div>
                 <span class="text-slate-400 text-[11px] block">Diajukan Oleh</span>
-                <span class="text-slate-700 font-medium">{{ selectedOrder.submittedBy }}</span>
+                <span class="text-slate-700 font-medium">{{ selectedOrder.submittedBy || 'Belum tercatat' }}</span>
               </div>
               <div>
                 <span class="text-slate-400 text-[11px] block">Alamat Pengiriman Proyek</span>
@@ -663,13 +663,13 @@
                 </div>
                 <div class="flex justify-between text-slate-500 text-[11px]">
                   <span>Estimasi Beban Modal (HPP):</span>
-                  <span class="font-mono">Rp {{ Number(computedFinancials.hpp).toLocaleString('id-ID') }}</span>
+                  <span class="font-mono">{{ formatCost(computedFinancials.hpp) }}</span>
                 </div>
                 <div class="pt-2 border-t border-dashed border-slate-200 flex justify-between items-center">
                   <span class="font-semibold text-slate-700">Gross Margin:</span>
-                  <span class="font-mono font-semibold text-emerald-600">
-                    Rp {{ Number(computedFinancials.grossMarginRp).toLocaleString('id-ID') }}
-                    <span class="text-xs">({{ computedFinancials.grossMarginPct }}%)</span>
+                  <span :class="['font-mono font-semibold', computedFinancials.grossMarginRp === null ? 'text-slate-500' : computedFinancials.grossMarginRp < 0 ? 'text-rose-600' : 'text-emerald-600']">
+                    {{ formatCost(computedFinancials.grossMarginRp) }}
+                    <span v-if="computedFinancials.grossMarginPct !== null" class="text-xs">({{ computedFinancials.grossMarginPct }}%)</span>
                   </span>
                 </div>
 
@@ -678,7 +678,7 @@
                   <div
                     :class="[
                       'p-2 rounded text-center font-semibold text-xs border flex items-center justify-center gap-1.5',
-                      computedFinancials.grossMarginPct >= 20
+                      computedFinancials.grossMarginPct === null ? 'bg-slate-50 text-slate-600 border-slate-200' : computedFinancials.grossMarginPct >= 20
                         ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
                         : computedFinancials.grossMarginPct >= 10
                         ? 'bg-amber-50 text-amber-800 border-amber-300'
@@ -735,7 +735,7 @@
             <button
               type="button"
               class="px-4 py-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-semibold text-xs rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
-              @click="openHoldModal(selectedOrder)"
+              v-if="!selectedOrder.serverManaged" @click="openHoldModal(selectedOrder)"
             >
               <PauseCircle class="w-4 h-4" />
               <span>Tahan / Minta Revisi</span>
@@ -847,7 +847,7 @@ const pendingOrders = computed(() => {
 const legacyPendingCount = computed(() => store.orders.filter(order => !order.serverManaged && order.status === 'Menunggu Verifikasi').length);
 
 const heldOrders = computed(() => {
-  return (store.orders || []).filter((o) => o.status === 'Ditahan' || o.isHold);
+  return (store.orders || []).filter((o) => !o.serverManaged && (o.status === 'Ditahan' || o.isHold));
 });
 
 const pastDecisions = computed(() => {
@@ -895,62 +895,36 @@ const getStockInfo = (item) => {
   };
 };
 
-// Financial Margin Feasibility Calculation
+// HPP is an optional catalog estimate; missing costs must not invent a margin.
 const computedFinancials = computed(() => {
   const ord = selectedOrder.value;
-  if (!ord) {
-    return {
-      subtotal: 0,
-      hpp: 0,
-      grossMarginRp: 0,
-      grossMarginPct: 0,
-      marginFeasibility: 'Menunggu Data',
-      tax: 0,
-      grandTotal: 0,
-    };
-  }
-
-  const items = ord.items || [];
-  const subtotal = Number(ord.subtotal) || items.reduce((sum, it) => sum + (Number(it.qty || 0) * Number(it.price || 0)), 0);
-
-  let totalHpp = 0;
-  items.forEach((it) => {
-    const prod = (store.products || []).find(
-      (p) =>
-        (p.sku && it.sku && p.sku.toLowerCase() === it.sku.toLowerCase()) ||
-        (p.name && it.name && p.name.toLowerCase() === it.name.toLowerCase())
-    );
-    const cost = prod?.costPrice || Math.round((Number(it.price) || 0) * 0.78);
-    totalHpp += cost * (Number(it.qty) || 0);
+  const items = ord?.items || [];
+  const subtotal = Number(ord?.subtotal ?? items.reduce((sum, item) => sum + Number(item.qty || 0) * Number(item.price || 0), 0));
+  const costs = items.map(item => {
+    if (ord.serverManaged) return ord.stockReadiness?.items.find(line => line.sku === item.sku)?.estimatedUnitCost ?? null;
+    const product = (store.products || []).find(product => product.sku && item.sku && product.sku.toLowerCase() === item.sku.toLowerCase());
+    return product?.costPrice ?? product?.hpp ?? null;
   });
-
-  if (totalHpp === 0 && subtotal > 0) {
-    totalHpp = Math.round(subtotal * 0.78);
+  const hasCosts = items.length > 0 && costs.every(cost => cost !== null && Number.isFinite(Number(cost)) && Number(cost) > 0);
+  const hpp = hasCosts ? items.reduce((total, item, index) => total + Number(costs[index]) * Number(item.qty || 0), 0) : null;
+  const grossMarginRp = hpp === null ? null : subtotal - hpp;
+  const grossMarginPct = grossMarginRp !== null && subtotal > 0 ? Math.round(grossMarginRp / subtotal * 100) : null;
+  let marginFeasibility = hpp === null ? 'Data HPP belum tersedia' : 'Persentase margin tidak tersedia untuk subtotal nol';
+  if (grossMarginPct !== null) {
+    marginFeasibility = grossMarginPct >= 20 ? 'Margin Sehat & Sangat Layak (≥ 20%)'
+      : grossMarginPct >= 10 ? 'Margin Wajar (10% - 20%)' : 'Margin Rendah / Berisiko (< 10%)';
   }
-
-  const grossMarginRp = Math.max(0, subtotal - totalHpp);
-  const grossMarginPct = subtotal > 0 ? Math.round((grossMarginRp / subtotal) * 100) : 0;
-
-  let marginFeasibility = 'Margin Sehat & Sangat Layak (> 20%)';
-  if (grossMarginPct < 10) {
-    marginFeasibility = 'Margin Rendah / Berisiko (< 10%)';
-  } else if (grossMarginPct < 20) {
-    marginFeasibility = 'Margin Wajar (10% - 20%)';
-  }
-
-  const tax = Number(ord.tax) || Math.round(subtotal * 0.11);
-  const grandTotal = Number(ord.grandTotal) || (subtotal + tax);
-
-  return {
-    subtotal,
-    hpp: totalHpp,
-    grossMarginRp,
-    grossMarginPct,
-    marginFeasibility,
-    tax,
-    grandTotal,
-  };
+  const tax = Number(ord?.tax ?? 0);
+  return { subtotal, hpp, grossMarginRp, grossMarginPct, marginFeasibility, tax, grandTotal: Number(ord?.grandTotal ?? subtotal + tax) };
 });
+
+const formatCost = value => value === null ? 'Belum tersedia' : 'Rp ' + Number(value).toLocaleString('id-ID');
+const formatSubmissionTime = value => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? 'Waktu belum tersedia' : new Intl.DateTimeFormat('id-ID', {
+    dateStyle: 'short', timeStyle: 'short', timeZone: 'Asia/Jakarta',
+  }).format(date);
+};
 
 // Row Click -> Select and Smooth Scroll to Panel
 const selectForVerification = (order) => {

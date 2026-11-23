@@ -1,85 +1,77 @@
-> Pembaruan 19 November 2026: kontrak Sprint 1 yang telah diintegrasikan dan diuji ada pada [SPRINT1_PROGRESS.md](SPRINT1_PROGRESS.md). Bagian berikut mencakup spesifikasi awal dan rencana modul lain; gunakan kontrak Sprint 1 tersebut jika terdapat perbedaan implementasi, status, atau rumus.
+# Database — struktur aktif dan kebutuhan TO-BE
 
-# Database Architecture & Entity Relationship Design
-## CV. Alphate Artha Jaya — Dokumentasi Basis Data Sistem
+Baseline 20 November 2026. Sumber struktur adalah [migrasi](../backend/database/migrations) dan [model](../backend/app/Models), bukan contoh JSON browser. Dokumen ini tidak menjalankan migrasi. Lingkungan operasional yang diperiksa menggunakan koneksi mysql/MariaDB 10.4 InnoDB; QA memakai SQLite terisolasi. Uji konkurensi juga perlu dilakukan pada engine tujuan, karena SQLite tidak membuktikan seluruh perilaku row lock InnoDB.
 
-| Parameter | Spesifikasi |
-| :--- | :--- |
-| **Engine** | SQLite 3 (Dev / Test) & MySQL 8.0+ InnoDB (Production) |
-| **Collation** | `utf8mb4_unicode_ci` |
-| **Total Tabel** | 12 Tabel Relasional |
+## Tabel dan relasi domain aktif
 
----
+| Tabel | Isi utama dan relasi |
+| --- | --- |
+| `users` | Akun, role; dipakai pelaku order, approval, receipt dan ledger |
+| `customers` | Kode unik, nama/kontak/telepon/alamat, email/city nullable, profile JSON, version, created_by |
+| `products`, `product_categories`, `product_units` | SKU unik, satuan/kategori, stok fisik integer, nilai biaya/jual; produk mempunyai soft delete |
+| `suppliers` | Kode unik, identitas/kontak/alamat/detail supplier, is_active |
+| `sales_orders` | Nomor unik, customer_id nullable untuk legacy, created_by, status/version, details/items/history JSON, subtotal/tax/grand_total rupiah integer, submitted/approved actor+time, approval_notes, invoice JSON nullable |
+| `sales_order_allocations` | sales_order_id + product_id + qty; unik gabungan order/produk; tidak mengurangi stock fisik |
+| `invoice_deliveries` | Satu percobaan email per baris, terkait sales order, customer, nomor invoice dan pengguna Finance. Menyimpan penerima, status, waktu, hash SHA-256 token yang unik, kedaluwarsa dan pencabutan. |
+| `warehouse_requests` | request_code unik, tanggal, sales_order_id, requested_by_id, order_items_hash, items JSON, total_est_cost decimal(15,2), status, purchase_code nullable, procurement_draft JSON nullable |
+| `purchase_transactions` | purchase_code unik, MR ID/kode, supplier_id, snapshot default_supplier, tanggal/faktur, items JSON, subtotal/discount/total_price decimal(15,2), status, pending_followup, supplier_progress/history JSON, progress_version |
+| `purchase_receipts` | purchase_transaction_id, UUID retry dan hash payload, tanggal, received_by_id, notes, legacy |
+| `purchase_receipt_lines` | receipt ID, product ID, line_index, snapshot SKU/nama/satuan, accepted_qty/rejected_qty, reason |
+| `inventory_locks` | Baris mutex inventory ID 1 untuk urutan transaksi stok/alokasi |
+| `inventory_movements` | product_id/actor_id, type, reference_type/id, delta, before_stock/after_stock, snapshot SKU/nama, reason, timestamps |
+| `spj_projects` | project_id string unik, identitas/profil proyek, nilai invoice/payment salinan, status lama, items/metadata/director_approval/warehouse_data/finance_data JSON |
+| `spj_documents` | FK project_id string, doc_key/doc_order, status, requirements, nomor/tanggal, form_data, file_path, source_file_path, version |
+| `document_templates`, `order_documents` | Master dokumen dan hasil dokumen order; terpisah dari tabel SPJ |
+| `regions` | Referensi wilayah |
 
-## 1. Kamus Data Tabel Utama
+Tabel framework seperti token Sanctum, session/cache/job tetap ada sesuai migrasi. Daftar domain ini bukan klaim hanya ada sejumlah tertentu tabel pada seluruh database. Ledger dan alokasi tidak memiliki model Eloquent untuk setiap tabel; sumber otoritas tetap migrasi/service.
 
-### 1.1 Tabel `products` (2.196 Master SKU)
-* `id`: `BIGINT UNSIGNED`, Primary Key, Auto Increment.
-* `sku`: `VARCHAR(50)`, Unique, Indexed (Format `A00000001` - `A00002196`).
-* `name`: `VARCHAR(255)`, Indexed.
-* `category`: `VARCHAR(150)`, Indexed.
-* `unit`: `VARCHAR(50)`, Indexed (Locked: ZAK, BATANG, PCS, MTR, KALENG).
-* `stock`: `INTEGER`, Default: 0.
-* `min_stock`: `INTEGER`, Default: 0.
-* `last_buy_price`: `DECIMAL(15,2)`, Default: 0.
-* `hpp`: `DECIMAL(15,2)`, Default: 0.
-* `sell_price`: `DECIMAL(15,2)`, Default: 0.
-* `status`: `VARCHAR(30)`, Default: 'Tersedia'.
-
-### 1.2 Tabel `warehouse_requests`
-* `id`: `BIGINT UNSIGNED`, Primary Key, Auto Increment.
-* `request_code`: `VARCHAR(255)`, Unique (`REQ-YYYY-XXX`).
-* `request_date`: `DATE`.
-* `project_id`: `VARCHAR(255)`, Nullable.
-* `project_name`: `VARCHAR(255)`, Nullable.
-* `purpose`: `TEXT`, Nullable.
-* `requested_by`: `VARCHAR(255)`.
-* `status`: `VARCHAR(255)`, Default: `'MENUNGGU_FINANCE'` (`DIPROSES_PEMBELIAN`, `SELESAI`, `DITOLAK`).
-* `total_est_cost`: `DECIMAL(15,2)`, Default: 0.
-* `items`: `JSON` (Array of items: `sku`, `name`, `qty`, `unit`, `est_price`, `subtotal`).
-* `purchase_code`: `VARCHAR(255)`, Nullable.
-
-### 1.3 Tabel `purchase_transactions`
-* `id`: `BIGINT UNSIGNED`, Primary Key, Auto Increment.
-* `purchase_code`: `VARCHAR(255)`, Unique (`TRX-YYYYMMDD-XXXX` / `PB...`).
-* `transaction_date`: `DATE`.
-* `invoice_number`: `VARCHAR(255)`, Nullable (Nomor faktur fisik supplier).
-* `project_id`: `VARCHAR(255)`, Nullable.
-* `project_name`: `VARCHAR(255)`, Nullable.
-* `default_supplier`: `VARCHAR(255)`, Nullable.
-* `warehouse_request_id`: `BIGINT UNSIGNED`, Nullable.
-* `warehouse_request_code`: `VARCHAR(255)`, Nullable.
-* `subtotal`: `DECIMAL(15,2)`, Default: 0.
-* `discount`: `DECIMAL(15,2)`, Default: 0.
-* `total_price`: `DECIMAL(15,2)`, Default: 0.
-* `payment_method`: `VARCHAR(255)`, Default: 'Tunai'.
-* `status`: `VARCHAR(255)`, Default: 'LUNAS'.
-* `items`: `JSON` (Array of purchase rows: `barang`, `supplier`, `qty`, `harga_beli`, `diskon_percent`, `diskon_nominal`, `subtotal`).
-* `created_by`: `VARCHAR(255)`, Nullable.
-
-### 1.4 Tabel `suppliers`
-* `id`: `BIGINT UNSIGNED`, Primary Key, Auto Increment.
-* `code`: `VARCHAR(255)`, Unique (`SUP-001` - `SUP-005`).
-* `name`: `VARCHAR(255)`.
-* `phone`: `VARCHAR(255)`, Nullable.
-* `email`: `VARCHAR(255)`, Nullable.
-* `address`: `TEXT`, Nullable.
-* `is_active`: `BOOLEAN`, Default: true.
-
-### 1.5 Tabel `spj_projects` & `spj_documents`
-* `spj_projects`: Metadata proyek pengadaan, plafon anggaran, nilai proyek, realisasi pembayaran, dan PIC penandatangan.
-* `spj_documents`: 15 instrumen dokumen SPJ (`doc_key`, `doc_title`, `doc_order`, `status`, `file_path`, `is_uploaded`).
-
----
-
-## 2. Seeder & Baseline Database
-
-1. `ProductSeeder`: Memuat 2.196 master barang dari `products_seed.json`.
-2. `PurchaseAndRequestSeeder`: Memuat 5 rekanan supplier dan contoh pengajuan aktif `REQ-2026-001`.
-3. `SpjProjectSeeder`: Memuat proyek pengadaan dan 15 template dokumen SPJ.
-4. `RegionSeeder`: Memuat hierarki wilayah DKI Jakarta (Kota, Kecamatan, Kelurahan).
-
-Eksekusi seeder lengkap:
-```bash
-php artisan migrate:fresh --seed
+```mermaid
+erDiagram
+    customers ||--o{ sales_orders : customer_id
+    sales_orders ||--o{ invoice_deliveries : sales_order_id
+    customers ||--o{ invoice_deliveries : customer_id
+    sales_orders ||--o{ sales_order_allocations : sales_order_id
+    products ||--o{ sales_order_allocations : product_id
+    sales_orders ||--o{ warehouse_requests : sales_order_id
+    warehouse_requests ||--o{ purchase_transactions : warehouse_request_id
+    suppliers ||--o{ purchase_transactions : supplier_id
+    purchase_transactions ||--o{ purchase_receipts : purchase_transaction_id
+    purchase_receipts ||--o{ purchase_receipt_lines : purchase_receipt_id
+    products ||--o{ purchase_receipt_lines : product_id
+    products ||--o{ inventory_movements : product_id
+    spj_projects ||--o{ spj_documents : project_id
 ```
+
+Garis ERD menggambarkan relasi referensi/logis; jangan menyimpulkan semuanya memiliki foreign key atau kardinalitas unik yang ditegakkan database. Contohnya `purchase_transactions.warehouse_request_id` pada migrasi awal adalah unsigned bigint nullable, bukan FK/unique; service membatasi satu PO per MR dalam transaksi. `sales_orders.details.projectId`/`spj_projects.metadata.source_order_number` adalah referensi JSON, bukan FK formal. Order legacy boleh belum punya customer_id. Perbaikan constraint perlu migrasi terpisah setelah audit data.
+
+## Integritas yang sudah terlihat pada struktur
+
+- Nomor order/MR/PO/customer/supplier unik. Alokasi unik `(sales_order_id, product_id)`.
+- Receipt unik `(purchase_transaction_id, idempotency_key)` dan baris receipt unik `(purchase_receipt_id, line_index)`; payload_hash membedakan retry identik dari konflik.
+- Dokumen SPJ unik `(project_id, doc_key)`; project_id mengacu kunci string proyek. Source upload terpisah dari hasil generate sejak migrasi preservasi upload.
+- Ledger mempunyai index `(product_id,id)` dan `(type,id)` untuk histori. Referensi transaksi dicatat bersama delta dan stok sebelum/sesudah; ledger pembukaan migrasi tidak menambah stok fisik lagi.
+- Relasi customer/order dan produk/receipt membatasi penghapusan sesuai migrasi. Arsip barang menjaga referensi historis; data legacy tidak dipadankan berdasarkan kemiripan nama.
+
+## Risiko struktur aktif yang harus diatasi dalam backlog
+
+Migrasi awal PO mempunyai default `LUNAS`, meskipun controller baru secara eksplisit menyimpan `DIPESAN`. Migrasi awal proyek SPJ juga memberi default `DISETUJUI`, `TERKIRIM`, `LUNAS`; jalur `SpjProjectFromOrder` baru menimpa menjadi Draft/Pending/Menunggu Pembayaran. Default lama tetap tidak boleh menjadi bukti bisnis. Nilai `invoice_paid`/finance_status pada proyek bukan ledger pembayaran provider.
+
+Approval order dan `spj_projects.director_approval` terpisah; sinkronisasi otomatis approval/pembayaran/pengiriman menyeluruh belum tersedia. Proyek yang menerima order kedua dengan instansi sama belum mengagregasi nilai/barang kedua secara otomatis; jangan menyebut total proyek sebagai rekap multi-order yang terjamin. Keputusan agregasi harus jelas sebelum SPJ memakai banyak order.
+
+## Kebutuhan penyimpanan target Sprint 2 — belum migrasi aktif
+
+| Kapabilitas | Data/constraint yang diperlukan; penamaan tabel masih rancangan |
+| --- | --- |
+| Pembayaran invoice | Referensi order/invoice tunggal dan nilai/mata uang immutable, status pembayaran sah terpisah dari status order/dokumen |
+| Percobaan VA/QRIS | Satu invoice dapat mempunyai beberapa attempt; provider reference unik, kanal, amount, expiry dan state; tidak membuat invoice baru |
+| Notifikasi provider | Event/reference unik, hasil autentikasi, hash payload, waktu diterima/provider, keputusan pemrosesan; kebijakan penyimpanan payload sensitif ditentukan |
+| Email konfirmasi pelunasan | Referensi ke pembayaran terverifikasi dan deduplikasi pengiriman konfirmasi CAPS-29 |
+| Kesiapan SPJ | Checklist pra-kirim versi yang ditetapkan, validasi sumber, actor/waktu dan bundel/versi file; checklist susulan tersendiri |
+| Dispatch/penerimaan customer | Referensi order/SPJ/payment, kurir/resi/actor/time, kunci aksi unik dan peristiwa stok; konfirmasi terima idempoten setelah dispatch |
+
+Belum ada tabel pembayaran/provider webhook atau shipment customer pada migrasi yang diperiksa. Jangan menjalankan SQL dari rancangan ini sebagai skema final. Sebelum menambah migrasi, putuskan provider, satuan nilai uang, daftar SPJ pra-kirim dan cakupan satu/multi-order; petakan state legacy, backfill tanpa mengarang lunas/terkirim, tambah constraint setelah membersihkan data, lalu uji migration/rollback pada salinan. Jangan mengubah migrasi historis untuk diam-diam menafsir ulang transaksi lama.
+
+## Perlindungan operasi
+
+Backup database dan file terkait sebelum migrasi operasional; review rencana backfill/rollback terlebih dahulu. Tidak menjalankan seeder contoh atau `migrate:fresh` pada data pengguna. Uji menggunakan database/file output terisolasi. Arsip, histori dan referensi dokumen yang sudah ikut pengiriman harus dipertahankan meskipun ada revisi master. Detail bentuk data dan transisi di [SCHEMA.md](SCHEMA.md).

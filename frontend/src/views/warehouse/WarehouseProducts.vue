@@ -610,7 +610,7 @@
                 </div>
                 <h5 class="font-semibold text-slate-900 text-base">File Template Excel Data Barang</h5>
                 <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  Download file template excel resmi (<code>data_barang_template.xlsx</code>) yang berisi format susunan kolom data barang yang kompatibel dengan sistem.
+                  Download file template resmi yang berisi format susunan kolom data barang yang kompatibel dengan sistem.
                 </p>
               </div>
 
@@ -665,7 +665,7 @@
           <div class="p-4 border border-emerald-200 bg-emerald-50/70 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
             <div>
               <span class="font-semibold text-emerald-900 block">Ingin langsung menguji dengan data lengkap?</span>
-              <span class="text-emerald-700">Muat otomatis 2.196 data barang dari file template <code>data_barang_template.xlsx</code> tanpa perlu upload manual.</span>
+              <span class="text-emerald-700">Muat otomatis 2.196 data barang dari file template <code>data_barang_template (2).xlsx</code> tanpa perlu upload manual.</span>
             </div>
             <button
               type="button"
@@ -1892,8 +1892,8 @@ const downloadOfficialTemplate = () => {
   try {
     toast.info('Menyiapkan file template data barang...');
     const link = document.createElement('a');
-    link.href = '/templates/data_barang_template.xlsx';
-    link.setAttribute('download', 'data_barang_template.xlsx');
+    link.href = '/templates/data_barang_template (2).xlsx';
+    link.setAttribute('download', 'data_barang_template (2).xlsx');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -2082,7 +2082,7 @@ const loadSampleRkasData = async () => {
     if (res.ok) {
       const json = await res.json();
       parsedExcelData.value = json.products;
-      uploadedFileName.value = 'data_barang_template.xlsx';
+      uploadedFileName.value = 'data_barang_template (2).xlsx';
       uploadedFileSize.value = '186.9 KB';
       toast.success(`Berhasil memuat 2.196 data RKAS resmi.`);
       importStep.value = 3;

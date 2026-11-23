@@ -212,6 +212,109 @@ class SalesOrderApiTest extends TestCase
         $this->assertCount(3, $order->fresh()->history);
     }
 
+    public function test_finance_checks_full_payment_and_current_stock_before_writing_invoice(): void
+    {
+        $order = $this->draft(stock: 1);
+        $this->submitOrder('ORD-T22')->assertOk();
+        $this->postJson('/api/orders/ORD-T22/invoice', $this->invoicePayload())->assertForbidden();
+        $this->loginAsRole('FINANCE');
+        $this->postJson('/api/orders/ORD-T22/invoice', [...$this->invoicePayload(), 'paymentType' => 'Termin', 'terminCount' => 4])
+            ->assertUnprocessable()->assertJsonValidationErrors(['paymentType', 'terminCount']);
+        Product::where('sku', 'T22-ITEM')->update(['stock' => 0]);
+        $this->postJson('/api/orders/ORD-T22/invoice', $this->invoicePayload())->assertUnprocessable();
+        $this->assertNull($order->fresh()->invoice);
+        $this->assertSame('Siap Invoice', $order->fresh()->status);
+    }
+
+    public function test_issued_invoice_keeps_the_order_snapshot_and_legacy_pdf_remains_readable(): void
+    {
+        $order = $this->draft(4_504_504.50);
+        $contact = Customer::findOrFail($order->customer_id)->contact_person;
+        $this->submitOrder('ORD-T22')->assertOk();
+        $issuer = $this->loginAsRole('FINANCE');
+        $this->postJson('/api/orders/ORD-T22/invoice', [...$this->invoicePayload(), 'items' => [], 'paidAmount' => 123, 'issuedBy' => 'Nama formulir'])
+            ->assertOk()->assertJsonPath('data.invoice.items.0.price', 4_504_504.50)
+            ->assertJsonPath('data.invoice.totalAmount', 5_000_000)->assertJsonPath('data.invoice.paidAmount', 0)
+            ->assertJsonPath('data.invoice.issuedBy', $issuer->name)
+            ->assertJsonPath('data.invoice.customerProfile.contactPerson', $contact)
+            ->assertJsonPath('data.invoice.paymentMethods', ['Virtual Account', 'QRIS']);
+        $snapshot = $order->fresh()->invoice;
+        Customer::whereKey($order->customer_id)->update(['name' => 'Nama instansi baru', 'contact_person' => 'Kontak baru']);
+        $this->assertSame($snapshot, $order->fresh()->invoice);
+        $order->refresh();
+        $order->invoice = collect($snapshot)->except(['receipt', 'items', 'customerProfile', 'projectName', 'subtotal', 'tax', 'issuedBy', 'paymentMethods'])->all();
+        $order->save();
+        $before = $order->fresh()->invoice;
+        $pdf = $this->get('/api/orders/ORD-T22/invoice/download')->assertOk()->assertHeader('Content-Type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF-', $pdf->getContent());
+        $this->assertSame($before, $order->fresh()->invoice);
+    }
+
+    #[TestWith([true])]
+    #[TestWith([false])]
+    public function test_word_invoice_fills_the_kuitansi_master_without_generating_spj(bool $hasReceiptDetails): void
+    {
+        $order = $this->draft(4_504_504.50);
+        if ($hasReceiptDetails) {
+            $this->putJson('/api/orders/ORD-T22', [
+                'version' => $order->version, 'items' => $order->items,
+                'details' => [...$order->details, 'namaKegiatan' => 'Administrasi Kegiatan Sekolah (ADIWIYATA)',
+                    'sumberDana' => 'BOP', 'tahunAnggaran' => '2026', 'docNumbers' => [
+                        'faktur' => '462/AAJ/FK/VI/2026', 'kuitansi' => '462/AAJ/KUI/VI/2026',
+                    ]],
+            ])->assertOk();
+        }
+        $this->submitOrder('ORD-T22')->assertOk();
+        $this->loginAsRole('FINANCE');
+        $invoice = $this->postJson('/api/orders/ORD-T22/invoice', [
+            ...$this->invoicePayload(), 'invoiceDate' => '2026-06-22', 'dueDate' => '2026-06-29',
+        ])->assertOk()->json('data.invoice');
+        $url = '/api/orders/ORD-T22/invoice/download';
+        $this->getJson($url.'?format=txt')->assertUnprocessable();
+        $download = $this->get($url.'?format=docx')->assertOk()
+            ->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        $file = tempnam(sys_get_temp_dir(), 'inv-');
+        $master = new \ZipArchive;
+        $issued = new \ZipArchive;
+        file_put_contents($file, $download->getContent());
+        $this->assertTrue($master->open(public_path('docs/Kuitansi-TEMPLATE.docx')));
+        $this->assertTrue($issued->open($file));
+        try {
+            $this->assertSame($master->numFiles, $issued->numFiles);
+            for ($i = 0; $i < $master->numFiles; $i++) {
+                $part = $master->getNameIndex($i);
+                if ($part !== 'word/document.xml') {
+                    $this->assertSame(hash('sha256', $master->getFromName($part)), hash('sha256', $issued->getFromName($part)), $part);
+                }
+            }
+            $dom = new \DOMDocument;
+            $this->assertTrue($dom->loadXML($issued->getFromName('word/document.xml'), LIBXML_NONET));
+            $xpath = new \DOMXPath($dom);
+            $xpath->registerNamespace('w', 'http://schemas.openxmlformats.org/wordprocessingml/2006/main');
+            $this->assertSame('KUITANSI', $xpath->evaluate('string(/w:document/w:body/w:p[1]/w:r/w:t)'));
+            $this->assertCount(2, $xpath->query('/w:document/w:body/w:tbl'));
+            foreach (['Sudah Terima dari', $invoice['clientName'], 'Banyaknya Uang', '# Lima Juta Rupiah #', 'Pembayaran',
+                'Rp. 5,000,000,-', 'Jakarta, 22 Juni 2026', 'Hormat Kami,', 'Franklin Janwar', 'Direktur'] as $expected) {
+                $this->assertStringContainsString($expected, $dom->textContent);
+            }
+            $receiptNumber = $hasReceiptDetails ? '462/AAJ/KUI/VI/2026' : $invoice['invoiceNumber'];
+            $this->assertStringContainsString('Nomor : '.$receiptNumber, $dom->textContent);
+            $description = $hasReceiptDetails
+                ? 'Pembelian Barang/Jasa Administrasi Kegiatan Sekolah (ADIWIYATA), yang dibiayai dari Dana Bantuan Operasional Pendidikan (BOP) Tahun Anggaran 2026, sesuai Faktur Penjualan Nomor: 462/AAJ/FK/VI/2026'
+                : 'Pembelian Barang/Jasa Proyek T22, sesuai Faktur Penjualan Nomor: '.$invoice['invoiceNumber'];
+            $this->assertStringContainsString($description, $dom->textContent);
+            foreach (['Rincian pesanan', 'T22-ITEM', 'Harga satuan', 'Subtotal', 'PPN', 'Total tagihan'] as $omitted) {
+                $this->assertStringNotContainsString($omitted, $dom->textContent);
+            }
+        } finally {
+            $master->close();
+            $issued->close();
+            unlink($file);
+        }
+        $this->assertEquals($invoice, $order->fresh()->invoice);
+        $this->assertDatabaseMissing('spj_documents', ['status' => 'FINAL']);
+    }
+
     public function test_invalid_item_and_invoice_dates_return_422(): void
     {
         $order = $this->draft();
@@ -252,7 +355,7 @@ class SalesOrderApiTest extends TestCase
 
     private function invoicePayload(): array
     {
-        return ['invoiceDate' => '2026-11-06', 'dueDate' => '2026-11-20', 'paymentType' => 'Penuh', 'terminCount' => 4];
+        return ['invoiceDate' => '2026-11-06', 'dueDate' => '2026-11-20', 'paymentType' => 'Penuh', 'terminCount' => 1];
     }
 
     public function test_competing_orders_cannot_submit_against_the_same_stock(): void

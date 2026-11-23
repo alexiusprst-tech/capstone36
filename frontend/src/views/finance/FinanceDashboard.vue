@@ -146,7 +146,7 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100">
-                <tr v-for="inv in store.invoices.slice(0, 4)" :key="inv.id" class="hover:bg-slate-50/60 transition-colors">
+                <tr v-for="inv in issuedInvoices.slice(0, 4)" :key="inv.id" class="hover:bg-slate-50/60 transition-colors">
                   <td class="py-3 px-3 font-mono font-semibold text-slate-900">{{ inv.invoiceNumber }}</td>
                   <td class="py-3 px-3 font-medium text-slate-800">{{ inv.clientName }}</td>
                   <td class="py-3 px-3 text-right font-mono font-semibold text-slate-900 whitespace-nowrap">
@@ -218,7 +218,7 @@
 
           <div class="divide-y divide-slate-100 text-xs xl:max-h-80 xl:overflow-y-auto overscroll-auto">
             <div
-              v-for="inv in store.invoices.filter(i => (i.remainingAmount || 0) > 0)"
+              v-for="inv in issuedInvoices.filter(i => (i.remainingAmount || 0) > 0)"
               :key="inv.id"
               class="py-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4"
             >
@@ -283,7 +283,7 @@ import AppLayout from '../../components/layout/AppLayout.vue';
 import KpiCard from '../../components/common/KpiCard.vue';
 import ActivityLogCard from '../../components/common/ActivityLogCard.vue';
 import StatusBadge from '../../components/common/StatusBadge.vue';
-import { store, storeActions } from '../../stores/mockData';
+import { store, storeActions, readyInvoiceOrders as readyOrders, issuedInvoices } from '../../stores/mockData';
 import {
   ChevronRight,
   AlertCircle,
@@ -301,16 +301,14 @@ onMounted(() => {
   storeActions.loadOrders();
 });
 
-const readyOrders = computed(() => (store.orders || []).filter((o) => o.serverManaged && o.status === 'Siap Invoice'));
+const unpaidCount = computed(() => issuedInvoices.value.filter((i) => i.status === 'Belum Dibayar').length);
+const overdueCount = computed(() => issuedInvoices.value.filter((i) => i.status === 'Jatuh Tempo').length);
+const partialCount = computed(() => issuedInvoices.value.filter((i) => i.status === 'Sebagian' || i.status === 'Sebagian / Termin').length);
+const paidCount = computed(() => issuedInvoices.value.filter((i) => i.status === 'Lunas').length);
 
-const unpaidCount = computed(() => store.invoices.filter((i) => i.status === 'Belum Dibayar').length);
-const overdueCount = computed(() => store.invoices.filter((i) => i.status === 'Jatuh Tempo').length);
-const partialCount = computed(() => store.invoices.filter((i) => i.status === 'Sebagian' || i.status === 'Sebagian / Termin').length);
-const paidCount = computed(() => store.invoices.filter((i) => i.status === 'Lunas').length);
-
-const totalInvoiceValue = computed(() => store.invoices.reduce((sum, i) => sum + Number(i.totalAmount || 0), 0));
+const totalInvoiceValue = computed(() => issuedInvoices.value.reduce((sum, i) => sum + Number(i.totalAmount || 0), 0));
 const totalPaymentValue = computed(() => store.payments.reduce((sum, p) => sum + Number(p.amount || 0), 0));
-const totalReceivableValue = computed(() => store.invoices.reduce((sum, i) => sum + Number(i.remainingAmount || 0), 0));
+const totalReceivableValue = computed(() => issuedInvoices.value.reduce((sum, i) => sum + Number(i.remainingAmount || 0), 0));
 
 const pendingWarehouseRequests = computed(() => {
   return (store.warehouseRequests || []).filter(
@@ -318,5 +316,5 @@ const pendingWarehouseRequests = computed(() => {
   );
 });
 
-const dueInvoices = computed(() => store.invoices.filter((i) => i.status === 'Jatuh Tempo' || ((i.status === 'Sebagian' || i.status === 'Sebagian / Termin') && i.remainingAmount > 0)));
+const dueInvoices = computed(() => issuedInvoices.value.filter((i) => i.status === 'Jatuh Tempo' || ((i.status === 'Sebagian' || i.status === 'Sebagian / Termin') && i.remainingAmount > 0)));
 </script>

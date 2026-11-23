@@ -14,6 +14,7 @@ use App\Services\PurchaseReceiving;
 use App\Services\SalesOrderInventory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class PurchaseController extends Controller
@@ -43,6 +44,13 @@ class PurchaseController extends Controller
             'items' => 'required|array|min:1|max:200', 'items.*.sku' => 'required|string|max:50|distinct:ignore_case',
             'items.*.qty' => 'required|integer|min:1|max:1000000',
             'items.*.est_price' => 'nullable|numeric|decimal:0,2|min:0|max:1000000000',
+            'items.*.est_discount' => 'nullable|numeric|decimal:0,2|min:0|max:1000000000',
+            'procurement_draft' => 'sometimes|required|array:transaction_date,invoice_number,supplier_id,payment_method,discount',
+            'procurement_draft.transaction_date' => 'required_with:procurement_draft|date_format:Y-m-d',
+            'procurement_draft.invoice_number' => 'nullable|string|max:100',
+            'procurement_draft.supplier_id' => 'required_with:procurement_draft|integer',
+            'procurement_draft.payment_method' => 'required_with:procurement_draft|in:Tunai,Transfer,Termin',
+            'procurement_draft.discount' => 'nullable|numeric|decimal:0,2|min:0|max:1000000000000',
         ]);
         $record = InventoryTransaction::run(function () use ($request, $data) {
             $order = SalesOrder::query()->when(! empty($data['sales_order_id']), fn ($q) => $q->whereKey($data['sales_order_id']), fn ($q) => $q->where('order_number', $data['order_number']))->lockForUpdate()->first();
@@ -52,6 +60,18 @@ class PurchaseController extends Controller
             $inventory->allocate($order);
             $needs = collect($inventory->summaries(collect([$order]))[$order->id]['items'])->keyBy('sku');
             $pending = $this->pendingQuantities($order->id);
+            $draft = null;
+            if (array_key_exists('procurement_draft', $data)) {
+                $supplier = Supplier::whereKey($data['procurement_draft']['supplier_id'])->where('is_active', true)->lockForUpdate()->first();
+                abort_unless($supplier, 422, 'Pilih supplier aktif yang terdaftar.');
+                $draft = [
+                    'purchase_code' => 'PB'.now(config('app.business_timezone'))->format('Ymd').strtoupper((string) Str::ulid()),
+                    'transaction_date' => $data['procurement_draft']['transaction_date'],
+                    'invoice_number' => trim($data['procurement_draft']['invoice_number'] ?? ''),
+                    'supplier_id' => $supplier->id, 'default_supplier' => $supplier->name,
+                    'payment_method' => $data['procurement_draft']['payment_method'],
+                ];
+            }
             $items = [];
             $total = 0;
             foreach ($data['items'] as $line) {
@@ -60,10 +80,20 @@ class PurchaseController extends Controller
                 $availableNeed = max(0, $need['shortage'] - ($pending[$line['sku']] ?? 0));
                 abort_if((int) $line['qty'] > $availableNeed, 422, 'Jumlah pengadaan melebihi kekurangan yang belum diajukan. Muat ulang pesanan.');
                 $price = (int) round(($line['est_price'] ?? 0) * 100);
-                $subtotal = (int) $line['qty'] * $price;
+                $lineDiscount = (int) round(($line['est_discount'] ?? 0) * 100);
+                abort_if($lineDiscount > $price, 422, 'Diskon per satuan tidak boleh melebihi harga barang.');
+                $subtotal = (int) $line['qty'] * ($price - $lineDiscount);
                 $total += $subtotal;
                 abort_if($total > 100_000_000_000_000, 422, 'Estimasi biaya melebihi batas sistem.');
-                $items[] = ['sku' => $line['sku'], 'name' => $need['name'], 'unit' => $need['unit'], 'qty' => (int) $line['qty'], 'est_price' => $price / 100, 'subtotal' => $subtotal / 100];
+                $items[] = ['sku' => $line['sku'], 'name' => $need['name'], 'unit' => $need['unit'], 'qty' => (int) $line['qty'], 'est_price' => $price / 100, 'est_discount' => $lineDiscount / 100, 'subtotal' => $subtotal / 100];
+            }
+            if ($draft !== null) {
+                $transactionDiscount = (int) round(($data['procurement_draft']['discount'] ?? 0) * 100);
+                abort_if($transactionDiscount > $total, 422, 'Diskon transaksi tidak boleh melebihi jumlah harga barang.');
+                $draft['subtotal'] = $total / 100;
+                $draft['discount'] = $transactionDiscount / 100;
+                $total -= $transactionDiscount;
+                $draft['total_price'] = $total / 100;
             }
 
             return WarehouseRequest::create([
@@ -73,6 +103,8 @@ class PurchaseController extends Controller
                 'project_id' => $order->details['projectId'] ?? null, 'project_name' => $order->details['projectName'],
                 'purpose' => $data['purpose'], 'status' => 'MENUNGGU_FINANCE', 'total_est_cost' => $total / 100,
                 'items' => $items, 'notes' => $data['notes'] ?? null,
+                'procurement_draft' => $draft,
+                'purchase_code' => null,
             ])->load('order');
         });
 
@@ -100,26 +132,28 @@ class PurchaseController extends Controller
 
     public function getPurchases(Request $request): JsonResponse
     {
-        $data = $request->validate(['search' => 'nullable|string|max:255']);
-        $query = PurchaseTransaction::with('receipts.lines');
-        if (strtoupper((string) $request->user()->role) === 'SUPPLIER') {
-            $supplier = Supplier::whereRaw('LOWER(email) = ?', [strtolower($request->user()->email)])->first();
-            $supplier ? $query->where(fn ($q) => $q->where('supplier_id', $supplier->id)->orWhere(fn ($legacy) => $legacy->whereNull('supplier_id')->where('default_supplier', $supplier->name))) : $query->whereRaw('1 = 0');
-        }
-        if (! empty($data['search'])) {
-            $query->where(function ($q) use ($data) {
-                foreach (['purchase_code', 'invoice_number', 'project_name', 'default_supplier'] as $field) {
-                    $q->orWhere($field, 'like', '%'.$data['search'].'%');
-                }
-            });
-        }
-        $purchases = $query->latest('id')->get();
-        $orders = WarehouseRequest::with('order')->whereIn('id', $purchases->pluck('warehouse_request_id'))->get()->keyBy('id');
-        foreach ($purchases as $purchase) {
-            $purchase->setAttribute('order_number', $orders->get($purchase->warehouse_request_id)?->order?->order_number);
-        }
+        return DB::transaction(function () use ($request) {
+            $data = $request->validate(['search' => 'nullable|string|max:255']);
+            $query = PurchaseTransaction::with('receipts.lines')->sharedLock();
+            if (strtoupper((string) $request->user()->role) === 'SUPPLIER') {
+                $supplier = Supplier::whereRaw('LOWER(email) = ?', [strtolower($request->user()->email)])->first();
+                $supplier ? $query->where(fn ($q) => $q->where('supplier_id', $supplier->id)->orWhere(fn ($legacy) => $legacy->whereNull('supplier_id')->where('default_supplier', $supplier->name))) : $query->whereRaw('1 = 0');
+            }
+            if (! empty($data['search'])) {
+                $query->where(function ($q) use ($data) {
+                    foreach (['purchase_code', 'invoice_number', 'project_name', 'default_supplier'] as $field) {
+                        $q->orWhere($field, 'like', '%'.$data['search'].'%');
+                    }
+                });
+            }
+            $purchases = $query->latest('id')->get();
+            $orders = WarehouseRequest::with('order')->whereIn('id', $purchases->pluck('warehouse_request_id'))->get()->keyBy('id');
+            foreach ($purchases as $purchase) {
+                $purchase->setAttribute('order_number', $orders->get($purchase->warehouse_request_id)?->order?->order_number);
+            }
 
-        return response()->json(['success' => true, 'data' => $purchases]);
+            return response()->json(['success' => true, 'data' => $purchases]);
+        });
     }
 
     public function storePurchase(Request $request): JsonResponse

@@ -2,6 +2,19 @@
 
 return [
 
+    'invoice' => ['soffice' => env('INVOICE_SOFFICE')],
+
+    'mailtrap_sandbox' => [
+        'token' => env('MAILTRAP_SANDBOX_TOKEN'),
+        'inbox_id' => env('MAILTRAP_SANDBOX_INBOX_ID'),
+    ],
+
+    'mailtrap_demo' => [
+        'use_default' => env('INVOICE_USE_DEFAULT_RECIPIENT', false),
+        'recipient' => env('MAILTRAP_DEMO_RECIPIENT'),
+        'token' => env('MAILTRAP_DEMO_TOKEN'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

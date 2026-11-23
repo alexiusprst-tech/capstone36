@@ -15,10 +15,10 @@ class PurchaseProgressController extends Controller
 {
     private const TRANSITIONS = [
         'confirm' => [['Menunggu Konfirmasi'], 'Dikonfirmasi Supplier'],
-        'dispatch' => [['Dikonfirmasi Supplier', 'Sedang Disiapkan'], 'Dikirim ke Gudang CV'],
-        'tracking' => [['Dikirim ke Gudang CV', 'Barang Pengganti Dikirim'], null],
-        'arrival' => [['Dikirim ke Gudang CV', 'Barang Pengganti Dikirim'], null],
-        'discrepancy' => [['Dikirim ke Gudang CV', 'Barang Pengganti Dikirim'], 'Ketidaksesuaian Fisik (Menunggu Retur)'],
+        'dispatch' => [['Dikonfirmasi Supplier', 'Sedang Disiapkan', 'Diterima Sebagian'], 'Dikirim ke Gudang CV'],
+        'tracking' => [['Dikirim ke Gudang CV', 'Barang Pengganti Dikirim', 'Diterima Sebagian'], null],
+        'arrival' => [['Dikirim ke Gudang CV', 'Barang Pengganti Dikirim', 'Diterima Sebagian'], null],
+        'discrepancy' => [['Dikirim ke Gudang CV', 'Barang Pengganti Dikirim', 'Diterima Sebagian'], 'Ketidaksesuaian Fisik (Menunggu Retur)'],
         'replacement' => [['Barang Pengganti Dipesan', 'Ketidaksesuaian Fisik (Menunggu Retur)', 'Ketidaksesuaian'], 'Barang Pengganti Dikirim'],
         'reject' => [['Menunggu Konfirmasi'], 'Ditolak Supplier'],
     ];
@@ -38,7 +38,22 @@ class PurchaseProgressController extends Controller
             'progress.supplier_confirmation_date' => ['nullable', 'date'],
             'progress.supplier_notes' => ['nullable', 'string', 'max:5000'],
             'progress.delivery_info' => ['nullable', 'array'],
-            'progress.delivery_info.*' => ['nullable'],
+            'progress.delivery_info.surat_jalan' => ['nullable', 'string', 'max:100'],
+            'progress.delivery_info.courier' => ['nullable', 'string', 'max:150'],
+            'progress.delivery_info.tracking_number' => ['nullable', 'string', 'max:150'],
+            'progress.delivery_info.dispatch_date' => ['nullable', 'date'],
+            'progress.delivery_info.est_arrival' => ['nullable', 'string', 'max:100'],
+            'progress.delivery_info.shipping_status' => ['nullable', 'string', 'max:150'],
+            'progress.delivery_info.current_location' => ['nullable', 'string', 'max:255'],
+            'progress.delivery_info.last_updated' => ['nullable', 'string', 'max:100'],
+            'progress.delivery_info.notes' => ['nullable', 'string', 'max:5000'],
+            'progress.delivery_info.milestones' => ['nullable', 'array', 'max:100'],
+            'progress.delivery_info.milestones.*' => ['array'],
+            'progress.delivery_info.milestones.*.timestamp' => ['nullable', 'string', 'max:100'],
+            'progress.delivery_info.milestones.*.status' => ['nullable', 'string', 'max:150'],
+            'progress.delivery_info.milestones.*.location' => ['nullable', 'string', 'max:255'],
+            'progress.delivery_info.milestones.*.notes' => ['nullable', 'string', 'max:5000'],
+            'progress.delivery_info.milestones.*.updated_by' => ['nullable', 'string', 'max:255'],
             'progress.warehouse_arrived' => ['nullable', 'boolean'],
             'progress.discrepancy_reason' => ['nullable', 'string', 'max:5000'],
             'progress.discrepancy_reported_at' => ['nullable', 'date'],
@@ -86,6 +101,15 @@ class PurchaseProgressController extends Controller
                     'replacement' => ['delivery_info', 'discrepancy_resolution', 'warehouse_arrived'],
                     'reject' => ['rejection_reason'],
                 };
+                if (in_array($action, ['tracking', 'arrival'], true)) {
+                    if (isset($progress['delivery_info'])) {
+                        $patch = array_filter($progress['delivery_info'], fn ($value) => $value !== null);
+                        $progress['delivery_info'] = array_replace(is_array($current['delivery_info'] ?? null) ? $current['delivery_info'] : [], $patch);
+                    } else {
+                        // A nullable partial update must never erase the existing shipment identity.
+                        unset($progress['delivery_info']);
+                    }
+                }
                 $progress = [...$current, ...array_intersect_key($progress, array_flip($keys)), 'supplier_status' => $next ?? $current['supplier_status']];
                 if ($action === 'arrival') {
                     $progress['warehouse_arrived'] = true;

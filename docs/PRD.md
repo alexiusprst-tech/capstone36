@@ -1,165 +1,99 @@
-# Product Requirements Document (PRD)
-## Sistem Manajemen Pengadaan & SPJ Terintegrasi — CV. Alphate Artha Jaya
+# PRD — Pengadaan, pesanan dan SPJ terintegrasi
 
-| Parameter | Spesifikasi |
-| :--- | :--- |
-| **Nama Produk** | AlphaSPJ Platform (Integrated Procurement & SPJ System) |
-| **Organisasi** | CV. Alphate Artha Jaya (CV. Alpharo Artha Jaya) |
-| **Versi Dokumen** | 1.1.0 (Formal FR Baseline) |
-| **Stack Backend** | Laravel 12.x (PHP 8.4) & Sanctum Auth |
-| **Stack Frontend** | Vue 3.5 (Composition API `<script setup>`), Vite 6, Tailwind CSS v4, Lucide Icons |
-| **Dasar Analisis** | Diagram BPMN To-Be: Proses Pesanan Hingga Dokumen SPJ |
+CV Alpharo Artha Jaya. Baseline revisi 20 November 2026. [BPMN](PROBIS_TO_BE.md) adalah acuan urutan; [RULES.md](RULES.md) memerinci kontrak dan [audit](BPMN_JIRA_AUDIT.md) memisahkan kemampuan aktif dari backlog. ID 46 FR dipertahankan untuk keterlacakan; uraian di bawah adalah kebutuhan, bukan pernyataan semua sudah diimplementasikan.
 
----
+## Tujuan dan batas produk
 
-## 1. Latar Belakang & Masalah Bisnis
+Hubungkan pesanan customer, ketersediaan stok, pengadaan bila perlu, approval, invoice, pembayaran, SPJ dan pengiriman tanpa entri transaksi ganda atau pelompatan wewenang. Generator mengambil data yang dapat ditelusuri; nilai contoh tidak boleh menjadi bukti transaksi. Jumlah SKU master dapat berubah; angka 2.196 adalah kondisi dataset awal, bukan batas bisnis yang harus ditanam dalam kode.
 
-1. **Pemisahan Wewenang (Segregation of Duties - SoD)**:
-   Pencatatan pembelian barang sering tumpang-tindih antara staf Gudang dan Finance. Gudang tidak berwenang mengelola komitmen uang atau harga beli, dan Finance tidak boleh memanipulasi stok fisik tanpa verifikasi penerimaan barang yang sah.
-2. **Katalog Master 2.196 SKU Bahan Baku**:
-   Pengadaan barang sering mengalami kekeliruan penamaan, ketidakseragaman konversi satuan, atau salah estimasi harga jika diinput manual. Sistem mewajibkan pemilihan item langsung dari master 2.196 SKU dengan satuan terkunci otomatis.
-3. **Penyusunan Dokumen SPJ yang Memakan Waktu**:
-   Pengumpulan berkas cetak (Surat Pesanan, Faktur Pembelian Supplier, Surat Jalan, Invoice, Kuitansi, dan BAST) membutuhkan waktu berminggu-minggu. Sistem mengotomasi kompilasi berkas proyek menjadi bundel SPJ siap audit.
+Marketing mengelola customer dan pesanan; Warehouse memastikan stok, mengajukan kebutuhan kepada Finance, menerima/QC dan mengirim; Finance memesan supplier, menindaklanjuti ketidaksesuaian dan mengelola invoice/pembayaran; Direktur menyetujui penjualan >Rp5 juta; Administrasi mengurus SPJ. Customer/Supplier adalah peserta eksternal. Kanal akses tanpa akun untuk customer merupakan target Jira, bukan endpoint anonim yang saat ini tersedia.
 
----
+Pengajuan Gudang memuat field pembelian sesuai permintaan pengguna sebagai **usulan**. Ini tidak menyerahkan penerbitan PO atau verifikasi uang kepada Gudang. Pisahkan pembelian supplier dan penjualan customer, termasuk kode, nilai, faktur serta resinya.
 
-## 2. Matriks Peran Pengguna (Role Matrix)
+## Kebutuhan fungsional
 
-| Role | Tanggung Jawab Utama | Akses Menu di Sistem |
-| :--- | :--- | :--- |
-| **Marketing** | Manajemen data klien, pencatatan pesanan (sales order), pengecekan stok, pengajuan pengadaan, penerbitan surat jalan. | `/marketing/orders`, `/marketing/clients`, `/marketing/order-form` |
-| **Warehouse (Gudang)** | Katalog 2.196 SKU, import/export Excel, pengecekan stok, pengajuan material request, penerimaan barang & QC, pencatatan resi pengiriman. | `/warehouse/products`, `/warehouse/requests`, `/warehouse/fulfillment`, `/warehouse/shipments` |
-| **Finance (Keuangan)** | Verifikasi pengajuan, filter approval Direktur >Rp 5 Juta, pembuatan invoice (BCA VA, Transfer, QRIS), pencatatan pelunasan & konfirmasi email. | `/finance/purchases`, `/finance/purchases/create`, `/finance/invoices`, `/finance/payments` |
-| **Administrasi** | Verifikasi kelengkapan berkas, pembuatan dokumen SPJ, peringatan SPJ sebelum kirim barang, checklist meterai, pengarsipan. | `/administration/spj`, `/administration/templates`, `/administration/documents` |
-| **Direktur** | Wewenang persetujuan pesanan >Rp 5.000.000, monitoring pesanan $\le$Rp 5.000.000, evaluasi margin & laporan analitik eksekutif. | `/director/dashboard`, `/director/verification`, `/director/reports` |
-| **Client (Tanpa Akun)** | Menerima invoice & kuitansi email, tracking pengiriman via nomor resi publik (tanpa login), dan konfirmasi penerimaan barang. | `/tracking/:resi` (Portal Publik) |
+### Marketing — 8 FR
 
----
+| ID | Kebutuhan | Keterlacakan |
+| --- | --- | --- |
+| FR-MKT-01 | Kelola customer server dengan identitas/kontak dan kode unik; perubahan master tidak menulis ulang snapshot order lama. | CAPS-11 |
+| FR-MKT-02 | Buat Draft pesanan dari customer valid dan simpan di server dengan nomor unik. | CAPS-12 |
+| FR-MKT-03 | Pilih SKU/satuan master, kuantitas, harga jual dan rincian kebutuhan; server menghitung total final. | CAPS-12 |
+| FR-MKT-04 | Lihat alokasi dan kekurangan setiap baris, bukan sekadar stok fisik katalog. | CAPS-10/12 |
+| FR-MKT-05 | Teruskan kebutuhan yang kurang ke antrean Warehouse; MR resmi tetap dibuat Warehouse. | CAPS-13/16 |
+| FR-MKT-06 | Perbarui harga jual/rincian selama Draft, memakai versi terbaru; kunci setelah pengajuan. | CAPS-15/23 |
+| FR-MKT-07 | Ajukan approval hanya setelah seluruh kebutuhan terpenuhi; >Rp5 juta menunggu Direktur, sisanya Siap Invoice. | CAPS-23 |
+| FR-MKT-08 | Pantau status, pengajuan, approval dan kejadian dengan pelaku/waktu server. | CAPS-16/23 |
 
-## 3. Katalog Kebutuhan Fungsional Resmi (Functional Requirements)
+### Finance — 11 FR
 
-Berikut adalah daftar lengkap 46 kebutuhan fungsional resmi sistem yang diselaraskan dengan implementasi modul dan alur BPMN To-Be:
+| ID | Kebutuhan | Keterlacakan |
+| --- | --- | --- |
+| FR-FIN-01 | Tinjau rincian pengajuan pembelian dan penjualan pada antrean yang terpisah. | CAPS-14/25 |
+| FR-FIN-02 | Tampilkan kebutuhan approval berdasarkan nilai final penjualan server >Rp5 juta. | CAPS-23/25 |
+| FR-FIN-03 | Terima penjualan yang telah diajukan dan memenuhi approval; tidak menggantikan submit Marketing. | CAPS-23/25 |
+| FR-FIN-04 | Tampilkan status approval dan pelaku/waktunya; tidak membuat persetujuan lokal. | CAPS-23/27 |
+| FR-FIN-05 | Terbitkan satu invoice aktif dari penjualan valid; nomor/nilai unik dan rincian terkunci. | CAPS-25 |
+| FR-FIN-06 | Sediakan VA/QRIS melalui satu provider sandbox versi awal; bank/provider belum diputuskan. | CAPS-28 |
+| FR-FIN-07 | Kirim invoice/instruksi lewat email uji dan tautan akses customer terbatas; resend tidak membuat invoice baru. | CAPS-26 |
+| FR-FIN-08 | Sistem memverifikasi hasil provider beserta identitas transaksi, nominal dan status; bukti unggah tidak meluluskan pembayaran. | CAPS-31 |
+| FR-FIN-09 | Tandai lunas hanya dari hasil terverifikasi dan tangani callback duplikat/terlambat dengan aman. | CAPS-31/33 |
+| FR-FIN-10 | Kirim konfirmasi lunas; kegagalan email tidak membatalkan pembayaran sah. | CAPS-29 |
+| FR-FIN-11 | Lihat riwayat pembelian, tindak lanjut supplier, invoice, percobaan dan status pembayaran sesuai kewenangan. | CAPS-14/18/27/33 |
 
-### A. Functional Requirement — Marketing
-| ID FR | User | Functional Requirement | Modul / Halaman Sistem |
-| :--- | :--- | :--- | :--- |
-| **FR-MKT-01** | Marketing | Sistem menyediakan fitur untuk menginput dan mengelola data client. | `/marketing/clients` & `ClientFormView.vue` |
-| **FR-MKT-02** | Marketing | Sistem menyediakan fitur untuk membuat pesanan baru berdasarkan data client. | `/marketing/orders/create` & `OrderFormView.vue` |
-| **FR-MKT-03** | Marketing | Sistem menyediakan fitur untuk menginput detail pesanan, meliputi barang, jumlah, dan informasi kebutuhan client. | `OrderFormView.vue` (Item Table) |
-| **FR-MKT-04** | Marketing | Sistem menyediakan fitur untuk memeriksa ketersediaan stok barang di warehouse. | `OrderFormView.vue` & `WarehouseProducts.vue` |
-| **FR-MKT-05** | Marketing | Sistem menyediakan fitur untuk mengajukan permintaan pengadaan barang kepada warehouse apabila stok tidak tersedia atau tidak mencukupi. | Hand-off Marketing ke `/warehouse/requests` |
-| **FR-MKT-06** | Marketing | Sistem menyediakan fitur untuk menginput dan memperbarui harga final pesanan setelah dikonfirmasi. | `OrderFormView.vue` (Final Price Confirmation) |
-| **FR-MKT-07** | Marketing | Sistem menyediakan fitur untuk meneruskan detail pesanan dan harga final kepada finance. | Order Submission Pipeline $\rightarrow$ Finance Queue |
-| **FR-MKT-08** | Marketing | Sistem menampilkan status pesanan untuk membantu marketing memantau perkembangan pesanan. | `/marketing/orders` & `/marketing/orders/monitoring` |
+### Warehouse — 12 FR
 
-### B. Functional Requirement — Finance
-| ID FR | User | Functional Requirement | Modul / Halaman Sistem |
-| :--- | :--- | :--- | :--- |
-| **FR-FIN-01** | Finance | Sistem menampilkan detail pesanan dan harga final yang telah diteruskan oleh marketing. | `/finance/invoices` & `/finance/purchases/create` |
-| **FR-FIN-02** | Finance | Sistem mengidentifikasi pesanan dengan nilai di atas Rp5.000.000 yang memerlukan persetujuan direktur. | Aturan Ambang Batas Otomatis (> Rp 5.000.000) |
-| **FR-FIN-03** | Finance | Sistem menyediakan fitur untuk mengajukan persetujuan direktur terhadap pesanan yang memenuhi ketentuan. | Tombol "Ajukan Approval Direktur" pada Order |
-| **FR-FIN-04** | Finance | Sistem menampilkan status persetujuan direktur terhadap pesanan yang diajukan. | Badge Status Approval (`PENDING`, `APPROVED`, `REJECTED`) |
-| **FR-FIN-05** | Finance | Sistem menyediakan fitur untuk membuat invoice berdasarkan detail pesanan yang telah memenuhi persyaratan persetujuan. | Form Penerbitan Invoice Resmi (`/finance/invoices`) |
-| **FR-FIN-06** | Finance | Sistem menyediakan pilihan metode pembayaran berupa BCA Virtual Account (VA), transfer BCA, dan QRIS. | Opsi Pembayaran Invoice: `BCA_VA`, `TRANSFER_BCA`, `QRIS` |
-| **FR-FIN-07** | Finance | Sistem menyediakan fitur untuk mengirimkan invoice dan informasi pembayaran kepada client. | Notifikasi Pengiriman Invoice (Email / PDF Link) |
-| **FR-FIN-08** | Finance | Sistem menyediakan fitur untuk mencatat dan memverifikasi pembayaran client. | `/finance/payments` (Verifikasi Bukti Bayar) |
-| **FR-FIN-09** | Finance | Sistem memperbarui status pembayaran menjadi lunas setelah pelunasan terverifikasi. | Status Update Otomatis $\rightarrow$ `LUNAS` |
-| **FR-FIN-10** | Finance | Sistem mengirimkan konfirmasi pelunasan kepada client melalui email. | Automated Email Notification Engine |
-| **FR-FIN-11** | Finance | Sistem menyediakan fitur untuk melihat riwayat transaksi dan status pembayaran setiap pesanan. | `/finance/purchases` & `/finance/monitoring` |
+| ID | Kebutuhan | Keterlacakan |
+| --- | --- | --- |
+| FR-WH-01 | Kelola katalog SKU/satuan/kategori, impor/ekspor dan arsip barang dengan perlindungan referensi. | CAPS-10 |
+| FR-WH-02 | Perbarui stok fisik melalui operasi sah dengan ledger; PO/alokasi tidak menambah/mengurangi stok fisik. | CAPS-10/17 |
+| FR-WH-03 | Lihat kebutuhan order, alokasi, kekurangan dan sisa pengadaan per SKU. | CAPS-13/16 |
+| FR-WH-04 | Lihat Draft penjualan yang membutuhkan pengadaan tanpa menduplikasi order Marketing. | CAPS-13 |
+| FR-WH-05 | Buat MR kepada Finance untuk kekurangan; form supplier/harga/diskon adalah estimasi. Finance yang memesan supplier. | CAPS-13/14 |
+| FR-WH-06 | Lihat resi supplier dan catat kedatangan/QC parsial/penolakan; Finance menangani tindak lanjut penggantian. | CAPS-17/18 |
+| FR-WH-07 | Tampilkan kesiapan secara jujur: stok siap diajukan berbeda dari lunas/SPJ siap dikirim. | CAPS-16/30 |
+| FR-WH-08 | Tampilkan antrean penyiapan pengiriman customer setelah lunas dan SPJ pra-kirim Siap. | CAPS-30 |
+| FR-WH-09 | Simpan proses penyiapan tanpa menganggap kedatangan supplier atau stok teralokasi sebagai sudah dikirim customer. | CAPS-30 |
+| FR-WH-10 | Catat kurir/resi/waktu dispatch dan referensi versi SPJ yang ikut dikirim. | CAPS-30 |
+| FR-WH-11 | Perbarui pengiriman dengan audit dan mutasi stok sekali; resi manual versi awal. | CAPS-30/32 |
+| FR-WH-12 | Lihat konfirmasi penerimaan customer dan lampiran susulan setelah dispatch. | CAPS-32/36 |
 
-### C. Functional Requirement — Warehouse
-| ID FR | User | Functional Requirement | Modul / Halaman Sistem |
-| :--- | :--- | :--- | :--- |
-| **FR-WH-01** | Warehouse | Sistem menyediakan fitur untuk menginput dan mengelola data barang. | `/warehouse/products` (2.196 SKU) |
-| **FR-WH-02** | Warehouse | Sistem menyediakan fitur untuk memperbarui jumlah stok barang. | `/warehouse/inventory` & Form Koreksi/Mutasi |
-| **FR-WH-03** | Warehouse | Sistem menampilkan detail barang dan jumlah kebutuhan berdasarkan pesanan. | `/warehouse/requests` & Modal Rincian Order |
-| **FR-WH-04** | Warehouse | Sistem menampilkan permintaan pengadaan barang yang diajukan oleh marketing. | Antrean Pengadaan Masuk dari Marketing |
-| **FR-WH-05** | Warehouse | Sistem menyediakan fitur untuk mencatat permintaan pengadaan barang kepada supplier. | Form *Material Request* (`REQ-YYYY-XXX`) |
-| **FR-WH-06** | Warehouse | Sistem menyediakan fitur untuk memperbarui status pengadaan barang berdasarkan informasi dari supplier. | Status Transisi Pengadaan Gudang |
-| **FR-WH-07** | Warehouse | Sistem memberikan notifikasi kepada warehouse ketika pesanan telah memenuhi persyaratan untuk diproses. | Notifikasi Barang Siap Diproses / Disiapkan |
-| **FR-WH-08** | Warehouse | Sistem menampilkan daftar pesanan yang perlu disiapkan dan dikirim. | `/warehouse/fulfillment` & `/warehouse/shipments` |
-| **FR-WH-09** | Warehouse | Sistem menyediakan fitur untuk memperbarui status persiapan barang. | Status: `MENUNGGU_PERSIAPAN` $\rightarrow$ `SIAP_KIRIM` |
-| **FR-WH-10** | Warehouse | Sistem menyediakan fitur untuk mencatat nomor resi dan informasi pengiriman barang. | Input Nomor Resi & Ekspedisi Pengiriman |
-| **FR-WH-11** | Warehouse | Sistem menyediakan fitur untuk memperbarui status pengiriman berdasarkan informasi yang tersedia. | Status: `SEDANG_DIKIRIM` $\rightarrow$ `TERKIRIM` |
-| **FR-WH-12** | Warehouse | Sistem menampilkan status konfirmasi penerimaan barang oleh client. | Indikator BAST / Status Diterima Client |
+### Administrasi — 6 FR
 
-### D. Functional Requirement — Admin
-| ID FR | User | Functional Requirement | Modul / Halaman Sistem |
-| :--- | :--- | :--- | :--- |
-| **FR-ADM-01** | Admin | Sistem menampilkan detail pesanan yang memerlukan dokumen SPJ. | `/administration/spj` (Antrean Proyek SPJ) |
-| **FR-ADM-02** | Admin | Sistem menyediakan fitur untuk membuat dokumen SPJ berdasarkan data pesanan. | Generator Bundel Dokumen SPJ |
-| **FR-ADM-03** | Admin | Sistem menyediakan fitur untuk mengunggah atau menyimpan dokumen SPJ yang telah dibuat. | Upload Berkas Scan Eksternal & BAST Bertanda Tangan |
-| **FR-ADM-04** | Admin | Sistem menyediakan fitur untuk memperbarui status penyelesaian dokumen SPJ. | Status: `DRAFT`, `VERIFIED`, `SELESAI`, `ARCHIVED` |
-| **FR-ADM-05** | Admin | Sistem menampilkan informasi apabila dokumen SPJ belum selesai sebelum jadwal pengiriman barang. | **Early Warning Alert Banner** (Peringatan Sebelum Kirim) |
-| **FR-ADM-06** | Admin | Sistem menyediakan fitur untuk mencatat kelengkapan dokumen SPJ, termasuk informasi penggunaan meterai apabila diwajibkan. | Checklist 5 Berkas & Flag Kewajiban Meterai |
+| ID | Kebutuhan | Keterlacakan |
+| --- | --- | --- |
+| FR-ADM-01 | Antrean kerja SPJ aktual hanya order lunas; draft metadata awal diberi label persiapan. | CAPS-24 |
+| FR-ADM-02 | Generate dokumen dari customer/order/invoice dan isian administratif valid; satu template prioritas Sprint 2, 15 jenis yang ada bukan daftar wajib otomatis. | CAPS-24 |
+| FR-ADM-03 | Unggah/arsip dokumen eksternal asli terpisah dari hasil generate; BAST bertanda tangan/foto penerimaan adalah susulan. | CAPS-24 + klarifikasi pengguna |
+| FR-ADM-04 | Bedakan status file dengan kesiapan bundel pra-kirim dan kelengkapan susulan; simpan versi/validasi. | CAPS-24/30 |
+| FR-ADM-05 | Jelaskan kekurangan pra-kirim dan cegah dispatch lewat validasi server, bukan peringatan UI saja. | CAPS-24/30 |
+| FR-ADM-06 | Catat checklist wajib yang ditetapkan untuk proyek/template termasuk meterai bila memiliki dasar; daftar final masih terbuka. | CAPS-24/36 |
 
-### E. Functional Requirement — Direktur
-| ID FR | User | Functional Requirement | Modul / Halaman Sistem |
-| :--- | :--- | :--- | :--- |
-| **FR-DIR-01** | Direktur | Sistem menampilkan daftar pesanan dengan nilai di atas Rp5.000.000 yang memerlukan persetujuan direktur. | `/director/verification` (Filter > Rp 5.000.000) |
-| **FR-DIR-02** | Direktur | Sistem menyediakan fitur untuk menyetujui atau menolak pesanan yang memerlukan persetujuan. | Tombol Aksi: `Setujui Order` / `Tolak Order` |
-| **FR-DIR-03** | Direktur | Sistem mencatat status dan riwayat persetujuan direktur. | Audit Trail Persetujuan Direktur (`director_approval`) |
-| **FR-DIR-04** | Direktur | Sistem menyediakan fitur untuk memantau pesanan dengan nilai Rp5.000.000 atau kurang tanpa memerlukan persetujuan direktur. | `/director/orders` (Monitoring Pesanan $\le$ Rp 5 Juta) |
+### Direktur — 4 FR
 
-### F. Functional Requirement — Client (Tanpa Akun)
-| ID FR | Aktor | Functional Requirement | Modul / Halaman Sistem |
-| :--- | :--- | :--- | :--- |
-| **FR-CL-01** | Client | Sistem mengirimkan invoice dan informasi pembayaran kepada client melalui media komunikasi yang ditentukan. | Pengiriman Invoice Digital (BCA VA / Transfer / QRIS) |
-| **FR-CL-02** | Client | Sistem mengirimkan konfirmasi pelunasan melalui email setelah pembayaran terverifikasi. | Email Tanda Terima & Kuitansi Lunas |
-| **FR-CL-03** | Client | Sistem menyediakan mekanisme tracking pengiriman tanpa mengharuskan client login ke sistem. | **Portal Publik Pelacakan** (Tanpa Autentikasi Login) |
-| **FR-CL-04** | Client | Sistem memungkinkan client melihat status pengiriman menggunakan nomor resi yang telah diberikan. | Input Nomor Resi $\rightarrow$ Tampilan Timeline Pengiriman |
-| **FR-CL-05** | Client | Sistem menyediakan mekanisme bagi client untuk mengonfirmasi penerimaan barang. | Tombol Konfirmasi Penerimaan pada Laman Tracking Resi |
+| ID | Kebutuhan | Keterlacakan |
+| --- | --- | --- |
+| FR-DIR-01 | Lihat antrean pesanan >Rp5 juta setelah Marketing submit dan stok siap. | CAPS-23 |
+| FR-DIR-02 | Setujui pesanan valid melalui server; penolakan/tahan/revisi formal tidak ditambahkan tanpa keputusan proses. | CAPS-23 |
+| FR-DIR-03 | Simpan pelaku/waktu/catatan approval dan kunci perubahan rincian setelah pengajuan. | CAPS-23 |
+| FR-DIR-04 | Monitor pesanan ≤Rp5 juta serta invoice/pembayaran/pengiriman sesuai data tersedia; tidak memerlukan approval tambahan. | CAPS-23/27 |
 
----
+### Customer tanpa akun — 5 FR (target akses Jira)
 
-## 4. Alur Bisnis Lintas Fungsi & Integrasi BPMN
+| ID | Kebutuhan | Keterlacakan |
+| --- | --- | --- |
+| FR-CL-01 | Terima invoice dan instruksi VA/QRIS melalui kanal uji yang ditetapkan. | CAPS-26/28 |
+| FR-CL-02 | Terima konfirmasi setelah pembayaran benar-benar terverifikasi lunas. | CAPS-29 |
+| FR-CL-03 | Akses pelacakan melalui tautan terbatas tanpa akun, tanpa membuka data pesanan orang lain. | CAPS-32 |
+| FR-CL-04 | Lihat status/resi pesanan sendiri; awalnya resi manual/tautan kurir. | CAPS-32 |
+| FR-CL-05 | Konfirmasi penerimaan hanya setelah dispatch; aksi berulang tidak menggandakan efek. | CAPS-32 |
 
-Hubungan timbal-balik antar-kebutuhan fungsional dijabarkan dalam 5 tahapan terpadu:
+## Cakupan rilis dan penerimaan
 
-```mermaid
-flowchart TD
-    subgraph Fase_1_Order [1. Order & Ketersediaan Stok]
-        M1[FR-MKT-01..03: Order Baru] --> M2{FR-MKT-04: Cek Stok Gudang}
-        M2 -- Cukup --> M3[FR-MKT-06..07: Finalisasi Harga]
-        M2 -- Kurang --> W1[FR-MKT-05 / FR-WH-04..06: Pengadaan Supplier]
-        W1 --> M3
-    end
+Fondasi aktif: customer/order, stok/alokasi, pengadaan, penerimaan/QC dan followup, serta CAPS-23. Invoice/generator SPJ memiliki implementasi awal yang perlu diselaraskan. Target Sprint 2: penyempurnaan invoice, akses/email customer, satu provider VA/QRIS sandbox, verifikasi dan retry, antrean SPJ lunas, bundel pra-kirim, dispatch dan tracking manual. Checklist susulan terpisah dari syarat dispatch.
 
-    subgraph Fase_2_Approval [2. Wewenang Direktur]
-        M3 --> F1[FR-FIN-01..02: Cek Ambang Batas Rp 5 Juta]
-        F1 -- "> Rp 5.000.000" --> D1[FR-FIN-03 / FR-DIR-01..03: Wajib Approval Direktur]
-        F1 -- "<= Rp 5.000.000" --> D2[FR-DIR-04: Cukup Monitoring]
-        D1 --> F2[FR-FIN-05: Penerbitan Invoice]
-        D2 --> F2
-    end
+Tidak termasuk tanpa persetujuan baru: integrasi semua bank/kurir, pembayaran cicilan/refund, retur stok yang sudah diterima sah, approval pembelian Rp50 juta, AI otonom, reject/hold server, dan pengubahan desain seluruh aplikasi. Pengguna meminta tampilan/alur yang ada dipertahankan; perubahan UI mengikuti [DESIGN.md](DESIGN.md).
 
-    subgraph Fase_3_Payment [3. Pembayaran Multi-Kanal]
-        F2 --> F3[FR-FIN-06..07 / FR-CL-01: Invoice BCA VA, Transfer, QRIS]
-        F3 --> F4[FR-FIN-08..09: Verifikasi Lunas]
-        F4 --> F5[FR-FIN-10 / FR-CL-02: Konfirmasi Pelunasan Email]
-    end
+Penerimaan membutuhkan pembuktian di server, review independen dan integrasi sesuai DoD Jira; fixture saja tidak menyelesaikan integrasi provider. Uji nilai Rp4.999.999/Rp5.000.000/Rp5.000.001, stok parsial/bersaing, QC/pengganti/retry, akses lintas role, invoice ganda, callback palsu/duplikat/terlambat, unpaid/SPJ belum siap menolak dispatch, lalu dispatch/konfirmasi/susulan yang benar. Rincian skenario di [audit](BPMN_JIRA_AUDIT.md).
 
-    subgraph Fase_4_Fulfillment [4. Pengiriman & Tracking Publik]
-        F4 --> W2[FR-WH-07..09: Penyiapan Barang]
-        W2 --> W3[FR-WH-10..11: Input Nomor Resi]
-        W3 --> C1[FR-CL-03..04: Client Tracking via Resi Tanpa Login]
-        C1 --> C2[FR-CL-05 / FR-WH-12: Client Konfirmasi Terima]
-    end
-
-    subgraph Fase_5_SPJ [5. Pengendalian Dokumen SPJ]
-        M3 & W3 & F4 & C2 --> A1[FR-ADM-01..04: Kompilasi Dokumen SPJ]
-        W2 -.-> A2[FR-ADM-05: Warning Jika SPJ Belum Selesai Sebelum Kirim]
-        A1 --> A3[FR-ADM-06: Verifikasi Berkas & Checklist Meterai]
-    end
-```
-
----
-
-## 5. Ringkasan Fitur Inti (F-01 s/d F-06)
-
-* **F-01 (Katalog & Import Excel)**: Mendukung 2.196 SKU master barang (`A00000001` - `A00002196`), template Excel resmi, dan manajemen kategori/satuan (`FR-WH-01`, `FR-WH-02`).
-* **F-02 (Marketing Order & Client)**: Form registrasi pesanan, integrasi data wilayah bertingkat DKI Jakarta, dan kalkulasi nilai proyek (`FR-MKT-01`, `FR-MKT-02`, `FR-MKT-03`).
-* **F-03 (Pengecekan Stok & Material Request)**: Picker modal dari katalog 2.196 SKU, satuan terkunci otomatis, estimasi harga pokok, dan pengajuan ke finance (`FR-MKT-04`, `FR-MKT-05`, `FR-WH-03`, `FR-WH-05`).
-* **F-04 (Approval Direktur & Pembelian Finance)**: Validasi ambang batas Rp 5.000.000, panel persetujuan Direktur, form transaksi pembelian bergradasi dengan icon putih (`[Q]`, `[+]`, `[X]`, `[Trash2]`), dan diskon bertingkat (`FR-FIN-01` s/d `04`, `FR-DIR-01` s/d `04`).
-* **F-05 (Invoice, Resi & Tracking Publik)**: Penerbitan invoice dengan opsi BCA VA, Transfer BCA, QRIS, pencatatan nomor resi ekspedisi, halaman tracking publik tanpa login, dan email konfirmasi lunas (`FR-FIN-05` s/d `10`, `FR-WH-10`, `FR-CL-01` s/d `05`).
-* **F-06 (Kompilasi SPJ, Warning Kirim, & Meterai)**: Generator 15 instrumen dokumen SPJ, banner peringatan jika SPJ belum tuntas sebelum tanggal pengiriman, dan pencatatan bukti fisik meterai (`FR-ADM-01` s/d `06`).
+Kebutuhan nonfungsional: transaksi atomik, referensi unik, versi konflik, histori pelaku/waktu, akses objek per customer/supplier, file aman dan privat, perhitungan uang deterministik, pesan kesalahan jelas, serta layar kecil tanpa overflow halaman. Jangan mengklaim SLA/availability numerik yang belum disetujui. Stack aktual dijelaskan di [README.md](README.md).

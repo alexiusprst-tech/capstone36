@@ -1,0 +1,41 @@
+.procurement-form { min-width: 0; padding: 14px; border: 1px solid #d5ddea; border-radius: 8px; background: #fff; box-shadow: 0 1px 3px #17255408; color: #334155; }
+.procurement-form .procurement-section { position: relative; min-width: 0; margin-bottom: 12px; padding: 13px 12px 12px; overflow: hidden; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; }
+.procurement-form .procurement-section::before { content: ''; position: absolute; inset: 0 0 auto; height: 2px; background: linear-gradient(90deg, #16a34a, #2563eb); }
+.procurement-form .procurement-heading { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #dce4ef; font-size: 12px; font-weight: 700; color: #1e293b; }
+.procurement-form .procurement-heading svg { width: 13px; height: 13px; flex-shrink: 0; }
+.procurement-form label, .procurement-form .procurement-label { display: block; margin-bottom: 4px; font-size: 11px; font-weight: 500; color: #475569; }
+.procurement-form :is(input, select, textarea) { box-sizing: border-box; display: block; width: 100%; min-width: 0; min-height: 26px; border: 1px solid #cbd5e1; border-radius: 3px; padding: 4px 7px; background: #fff; font-size: 12px; line-height: 1.35; color: #334155; }
+.procurement-form :is(input, textarea)[readonly] { background: #e9edf2; }
+.procurement-form .procurement-control { display: flex; min-width: 0; align-items: stretch; }
+.procurement-form .procurement-control :is(input, select) { flex: 1; width: 0; border-radius: 3px 0 0 3px; }
+.procurement-form .procurement-icon-button { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 26px; min-height: 26px; border: 1px solid currentColor; margin-left: -1px; background: white; color: #2563eb; }
+.procurement-form .procurement-icon-button:last-child { border-radius: 0 3px 3px 0; }
+.procurement-form .procurement-icon-button svg { width: 15px; height: 15px; }
+.procurement-form .procurement-icon-button:disabled { cursor: not-allowed; opacity: .5; }
+.procurement-form .procurement-table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 12px; text-align: left; }
+.procurement-form .procurement-table th { padding: 7px; background: #f0f3f6; border-bottom: 1px solid #dce4ef; font-weight: 600; color: #475569; }
+.procurement-form .procurement-table td { padding: 7px; border-bottom: 1px solid #dce4ef; vertical-align: top; }
+.procurement-form .procurement-table input { text-align: right; }
+.procurement-form .procurement-table input[readonly] { text-align: left; }
+.procurement-form .procurement-summary { display: grid; gap: 7px; font-size: 12px; }
+.procurement-form .procurement-summary > div { display: grid; grid-template-columns: minmax(90px, 1fr) minmax(140px, 1.7fr); align-items: center; gap: 8px; }
+.procurement-form .procurement-summary dt { text-align: right; color: #64748b; }
+.procurement-form .procurement-summary dd { min-width: 0; margin: 0; }
+.procurement-form .procurement-summary output { display: block; min-height: 26px; padding: 4px 7px; background: #e9edf2; border: 1px solid #dce4ef; border-radius: 3px; text-align: right; overflow-wrap: anywhere; }
+.procurement-form .procurement-summary input { text-align: right; }
+@media (max-width: 1023px) {
+  .procurement-form .procurement-table, .procurement-form .procurement-table tbody { display: block; min-width: 0; }
+  .procurement-form .procurement-table colgroup, .procurement-form .procurement-table thead { display: none; }
+  .procurement-form .procurement-table tbody tr { display: grid; min-width: 0; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding: 6px; border: 1px solid #dce4ef; border-radius: 5px; margin-bottom: 8px; background: #fff; }
+  .procurement-form .procurement-table td { display: block; min-width: 0; border: 0; }
+  .procurement-form .procurement-table td[data-wide] { grid-column: 1 / -1; }
+  .procurement-form .procurement-table td[data-label]::before { content: attr(data-label); display: block; margin-bottom: 5px; font-size: 11px; font-weight: 500; color: #475569; }
+}
+@media (max-width: 639px) {
+  .procurement-form { padding: 10px; }
+  .procurement-form .procurement-section { padding: 12px 9px; }
+  .procurement-form :is(input, select, textarea) { min-height: 44px; font-size: 16px; }
+  .procurement-form .procurement-icon-button { width: 38px; min-height: 44px; }
+  .procurement-form .procurement-summary > div { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); }
+  .procurement-form .procurement-summary output { min-height: 44px; display: flex; align-items: center; justify-content: flex-end; }
+}

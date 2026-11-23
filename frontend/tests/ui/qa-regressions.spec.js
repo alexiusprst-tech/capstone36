@@ -53,12 +53,9 @@ test('sync failure is not presented as zero orders or an online system', async (
 
 test('large currency values remain fully available in KPI cards', async ({ page }) => {
   await signIn(page, 'FINANCE');
+  const invoice = { id: 'qa-kpi', orderNumber: 'ORD-KPI', invoiceNumber: 'INV-QA', totalAmount: 1234567890123, remainingAmount: 1234567890123, status: 'Belum Dibayar', clientName: 'QA', dueDate: '2026-12-01' };
+  await page.route('**/api/orders', route => route.fulfill({ json: { data: [{ id: 'server-1', orderNumber: invoice.orderNumber, status: 'Menunggu Pembayaran', serverManaged: true, version: 3, items: [], timeline: [], invoice }] } }));
   await page.goto('/finance/dashboard');
-  await page.evaluate(async expression => {
-    const { store } = await import(eval(expression));
-    store.invoices = [{ id: 'qa-kpi', invoiceNumber: 'INV-QA', totalAmount: '1234567890123', remainingAmount: '1234567890123', status: 'Belum Dibayar', clientName: 'QA', dueDate: '2026-12-01' }];
-    store.payments = [];
-  }, modulePath);
   const value = page.locator('.kpi-card').filter({ hasText: 'Total Piutang' });
   await expect(value).toContainText('1.234.567.890.123');
   const clipped = await value.locator('span').evaluateAll(nodes => nodes.some(node => getComputedStyle(node).textOverflow === 'ellipsis' && node.scrollWidth > node.clientWidth));

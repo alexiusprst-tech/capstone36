@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\DocumentTemplateController;
 use App\Http\Controllers\Api\InventoryMovementController;
+use App\Http\Controllers\Api\InvoiceDeliveryController;
 use App\Http\Controllers\Api\OrderDocumentController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\PurchaseController;
@@ -29,18 +30,19 @@ Route::middleware(['auth:sanctum', EnsureApiAccess::class])->group(function () {
     Route::get('/customers/{identifier}', [CustomerController::class, 'show']);
     Route::put('/customers/{identifier}', [CustomerController::class, 'update']);
     Route::delete('/customers/{identifier}', [CustomerController::class, 'destroy']);
-    Route::post('/purchases/{code}/supplier-progress', [PurchaseProgressController::class, 'store'])->middleware('auth:sanctum');
+    Route::post('/purchases/{code}/supplier-progress', [PurchaseProgressController::class, 'store']);
 
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/orders', [SalesOrderController::class, 'index']);
-        Route::put('/orders/{number}', [SalesOrderController::class, 'update']);
-        Route::delete('/orders/{order}', [SalesOrderController::class, 'destroy']);
-        Route::post('/orders/{order}/submit', [SalesOrderController::class, 'submit']);
-        Route::post('/orders/{order}/stock-check', [SalesOrderController::class, 'stockCheck']);
-        Route::post('/orders/{order}/approve', [SalesOrderController::class, 'approve']);
-        Route::post('/orders/{order}/invoice', [SalesOrderController::class, 'invoice']);
-        Route::get('/orders/{order}/invoice/download', [SalesOrderController::class, 'downloadInvoice'])->name('api.orders.invoice.download');
-    });
+    Route::get('/orders', [SalesOrderController::class, 'index']);
+    Route::put('/orders/{number}', [SalesOrderController::class, 'update']);
+    Route::delete('/orders/{order}', [SalesOrderController::class, 'destroy']);
+    Route::post('/orders/{order}/submit', [SalesOrderController::class, 'submit']);
+    Route::post('/orders/{order}/stock-check', [SalesOrderController::class, 'stockCheck']);
+    Route::post('/orders/{order}/approve', [SalesOrderController::class, 'approve']);
+    Route::post('/orders/{order}/invoice', [SalesOrderController::class, 'invoice']);
+    Route::get('/orders/{order}/invoice/download', [SalesOrderController::class, 'downloadInvoice'])->name('api.orders.invoice.download');
+    Route::get('/orders/{order}/invoice/delivery', [InvoiceDeliveryController::class, 'show']);
+    Route::post('/orders/{order}/invoice/delivery', [InvoiceDeliveryController::class, 'store']);
+    Route::delete('/orders/{order}/invoice/delivery', [InvoiceDeliveryController::class, 'destroy']);
 
     // Products & Inventory Catalog
     Route::get('/inventory/movements', [InventoryMovementController::class, 'index']);
@@ -89,23 +91,19 @@ Route::middleware(['auth:sanctum', EnsureApiAccess::class])->group(function () {
     Route::get('/documents', [OrderDocumentController::class, 'index'])->name('api.documents.index');
     Route::get('/documents/{id}/download', [OrderDocumentController::class, 'download'])->name('api.documents.download');
 
-    // Protected Routes
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/auth/user', [AuthController::class, 'user'])->name('api.auth.user');
-        Route::post('/auth/logout', [AuthController::class, 'logout'])->name('api.auth.logout');
-        Route::get('/admin/accounts', [AccountController::class, 'index'])->name('api.admin.accounts.index');
-        Route::post('/admin/accounts', [AccountController::class, 'store'])->name('api.admin.accounts.store');
+    // Auth, Accounts & Template Administration
+    Route::get('/auth/user', [AuthController::class, 'user'])->name('api.auth.user');
+    Route::post('/auth/logout', [AuthController::class, 'logout'])->name('api.auth.logout');
+    Route::get('/admin/accounts', [AccountController::class, 'index'])->name('api.admin.accounts.index');
+    Route::post('/admin/accounts', [AccountController::class, 'store'])->name('api.admin.accounts.store');
 
-        // Template Administration
-        Route::post('/document-templates/{id}/upload', [DocumentTemplateController::class, 'upload'])->name('api.templates.upload');
-        Route::post('/document-templates/{id}/toggle-status', [DocumentTemplateController::class, 'toggle-status'])->name('api.templates.toggle-status');
+    Route::post('/document-templates/{id}/upload', [DocumentTemplateController::class, 'upload'])->name('api.templates.upload');
+    Route::post('/document-templates/{id}/toggle-status', [DocumentTemplateController::class, 'toggleStatus'])->name('api.templates.toggle-status');
 
-        // Document Generation & Scans
-        Route::post('/documents/generate', [OrderDocumentController::class, 'generate'])->name('api.documents.generate');
-        Route::post('/documents/upload-scan', [OrderDocumentController::class, 'uploadScan'])->name('api.documents.upload-scan');
-        Route::delete('/documents/{id}', [OrderDocumentController::class, 'destroy'])->name('api.documents.destroy');
-
-    });
+    // Document Generation & Scans
+    Route::post('/documents/generate', [OrderDocumentController::class, 'generate'])->name('api.documents.generate');
+    Route::post('/documents/upload-scan', [OrderDocumentController::class, 'uploadScan'])->name('api.documents.upload-scan');
+    Route::delete('/documents/{id}', [OrderDocumentController::class, 'destroy'])->name('api.documents.destroy');
 
     // SPJ Integrated Routes (Operational, Read, Generate & Updates)
     Route::prefix('spj')->group(function () {

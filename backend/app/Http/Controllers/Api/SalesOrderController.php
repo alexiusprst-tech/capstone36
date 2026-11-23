@@ -8,18 +8,19 @@ use App\Models\Product;
 use App\Models\PurchaseTransaction;
 use App\Models\SalesOrder;
 use App\Models\WarehouseRequest;
+use App\Services\FinanceInvoiceDocument;
 use App\Services\InventoryTransaction;
+use App\Services\InvoiceDeliveryService;
+use App\Services\InvoiceEmailSender;
 use App\Services\OrderProcurement;
 use App\Services\SalesOrderInventory;
 use App\Services\SpjLetterhead;
 use App\Services\SpjProjectFromOrder;
-use Dompdf\Dompdf;
-use Dompdf\Options;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\File;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class SalesOrderController extends Controller
 {
@@ -212,82 +213,103 @@ class SalesOrderController extends Controller
         });
     }
 
-    public function invoice(Request $request, SalesOrder $order): JsonResponse
+    public function invoice(Request $request, SalesOrder $order, InvoiceDeliveryService $deliveries): JsonResponse
     {
         $this->allow($request, ['FINANCE']);
         $data = $request->validate([
-            'invoiceDate' => ['required', 'date'],
-            'dueDate' => ['required', 'date', 'after_or_equal:invoiceDate'],
-            'paymentType' => ['nullable', Rule::in(['Penuh', 'Termin'])],
-            'terminCount' => ['nullable', 'integer', 'min:1', 'max:4'],
+            'invoiceDate' => ['required', 'date_format:Y-m-d'],
+            'dueDate' => ['required', 'date_format:Y-m-d', 'after_or_equal:invoiceDate'],
+            'paymentType' => ['nullable', Rule::in(['Penuh'])],
+            'terminCount' => ['nullable', 'integer', 'in:1'],
         ]);
 
-        return $this->transition($order, function ($order) use ($request, $data) {
-            abort_unless($order->status === 'Siap Invoice' && $order->submitted_at
-                && ($order->grand_total <= self::APPROVAL_LIMIT || $order->approved_at), 409, 'Invoice hanya dapat diterbitkan setelah pengajuan dan persetujuan valid.');
+        $autoSend = InvoiceEmailSender::usesDefaultRecipient();
+        $token = $autoSend ? bin2hex(random_bytes(32)) : '';
+        $attempt = null;
+        $response = $this->transition($order, function ($order) use ($request, $data, $autoSend, $token, $deliveries, &$attempt) {
             abort_if($order->invoice !== null, 409, 'Invoice pesanan sudah diterbitkan.');
+            abort_unless($order->status === 'Siap Invoice' && $order->isApprovedForInvoice(), 409, 'Invoice hanya dapat diterbitkan setelah pengajuan dan persetujuan valid.');
             $this->inventory->assertReady($order);
+            $finalDetails = $this->invoiceDetails($order);
+            $finalDetails['customerProfile']['contactPerson'] ??= Customer::whereKey($order->customer_id)->value('contact_person');
             $order->invoice = [
-                'id' => 'server-'.$order->id, 'invoiceNumber' => 'INV-'.now()->year.'-S'.str_pad((string) $order->id, 6, '0', STR_PAD_LEFT),
-                'orderNumber' => $order->order_number, 'clientId' => $order->details['clientId'] ?? null,
-                'clientName' => $order->details['clientName'], 'invoiceDate' => $data['invoiceDate'], 'dueDate' => $data['dueDate'],
-                'totalAmount' => $order->grand_total, 'paidAmount' => 0, 'remainingAmount' => $order->grand_total,
+                ...$finalDetails,
+                'id' => 'server-'.$order->id, 'invoiceNumber' => 'INV-'.now(config('app.business_timezone'))->year.'-S'.str_pad((string) $order->id, 6, '0', STR_PAD_LEFT),
+                'invoiceDate' => $data['invoiceDate'], 'dueDate' => $data['dueDate'],
+                'issuedBy' => $request->user()->name, 'paymentMethods' => ['Virtual Account', 'QRIS'],
+                'paidAmount' => 0, 'remainingAmount' => $order->grand_total,
                 'status' => 'Belum Dibayar', 'paymentType' => 'Penuh', 'terminCount' => 1, 'termins' => [],
             ];
             $order->status = 'Menunggu Pembayaran';
             $this->record($order, $request, 'Invoice Diterbitkan', $order->invoice['invoiceNumber'].' diterbitkan oleh Finance.');
+            if ($autoSend) {
+                try {
+                    $attempt = $deliveries->reserve($order, $request->user()->id, $token);
+                } catch (HttpExceptionInterface $error) {
+                    if (! in_array($error->getStatusCode(), [409, 422], true)) {
+                        throw $error;
+                    }
+                    // Keep the issued invoice when the delivery prerequisites are incomplete.
+                }
+            }
         });
+
+        if ($autoSend) {
+            $result = $attempt ? $deliveries->deliver($attempt, $token) : null;
+            $response->setData([...$response->getData(true), 'delivery' => [
+                'sent' => ($result['status'] ?? null) === 200,
+                'recipient' => InvoiceEmailSender::recipientFor(null),
+            ]]);
+        }
+
+        return $response;
+    }
+
+    private function invoiceDetails(SalesOrder $order): array
+    {
+        $details = $order->details;
+
+        return [
+            'orderNumber' => $order->order_number, 'clientId' => $order->customer_id, 'clientName' => $details['clientName'] ?? null,
+            'projectId' => $details['projectId'] ?? null, 'projectName' => $details['projectName'] ?? null,
+            'receipt' => [
+                'number' => $details['docNumbers']['kuitansi'] ?? null, 'salesInvoiceNumber' => $details['docNumbers']['faktur'] ?? null,
+                'activity' => $details['namaKegiatan'] ?? null, 'activityDetail' => $details['rincianKegiatan'] ?? null,
+                'fundingSource' => $details['sumberDana'] ?? null, 'fiscalYear' => $details['tahunAnggaran'] ?? null,
+            ],
+            'customerProfile' => collect($details['customerProfile'] ?? [])->only(['address', 'phone', 'contactPerson'])->all(),
+            'penanggungJawabNama' => $details['penanggungJawabNama'] ?? null, 'penanggungJawabJabatan' => $details['penanggungJawabJabatan'] ?? null,
+            'items' => $order->items, 'subtotal' => $order->subtotal, 'tax' => $order->tax, 'totalAmount' => $order->grand_total,
+        ];
     }
 
     public function downloadInvoice(Request $request, string $order): Response
     {
         $this->allow($request, ['FINANCE', 'MARKETING', 'DIREKTUR', 'ADMINISTRASI', 'CLIENT']);
-        $salesOrder = SalesOrder::where('order_number', $order)
-            ->orWhere('id', $order)
-            ->firstOrFail();
-
-        abort_unless($salesOrder->invoice !== null, 404, 'Invoice belum diterbitkan untuk pesanan ini.');
+        $salesOrder = SalesOrder::where('order_number', $order)->first();
+        if (! $salesOrder && ctype_digit($order)) {
+            $salesOrder = SalesOrder::find($order);
+        }
+        abort_unless($salesOrder, 404, 'Pesanan tidak ditemukan.');
 
         if (strtoupper((string) $request->user()?->role) === 'CLIENT') {
-            $clientId = $salesOrder->details['clientId'] ?? null;
+            $clientId = $salesOrder->customer_id;
             abort_unless($clientId && $request->user()?->client_id
                 && (int) $clientId === (int) $request->user()->client_id, 403, 'Akses invoice tidak diizinkan.');
         }
 
-        $invoice = $salesOrder->invoice;
-        $details = $salesOrder->details ?? [];
-        $items = $salesOrder->items ?? [];
+        abort_unless($salesOrder->invoice !== null, 404, 'Invoice belum diterbitkan untuk pesanan ini.');
+        // Invoices issued before CAPS-25 rely on the original, locked order details.
+        $invoice = $salesOrder->invoice + $this->invoiceDetails($salesOrder);
 
-        $cache = storage_path('framework/cache/pdf');
-        File::ensureDirectoryExists($cache);
+        $format = $request->validate(['format' => ['sometimes', Rule::in(['pdf', 'docx'])]])['format'] ?? 'pdf';
+        $invoice['invoiceNumber'] ??= $salesOrder->order_number;
+        $filename = 'Invoice_'.$invoice['invoiceNumber'].'.'.$format;
+        $disposition = $format === 'pdf' && ($request->boolean('preview') || $request->boolean('stream')) ? 'inline' : 'attachment';
 
-        $options = new Options([
-            'isRemoteEnabled' => false,
-            'isHtml5ParserEnabled' => true,
-            'defaultFont' => 'Helvetica',
-            'tempDir' => $cache,
-            'fontCache' => $cache,
-            'fontDir' => $cache,
-            'chroot' => [base_path(), storage_path()],
-        ]);
-        $dompdf = new Dompdf($options);
-        $dompdf->setPaper('A4', 'portrait');
-
-        $html = view('pdf.invoice', [
-            'order' => $salesOrder,
-            'invoice' => $invoice,
-            'details' => $details,
-            'items' => $items,
-        ])->render();
-
-        $dompdf->loadHtml($html, 'UTF-8');
-        $dompdf->render();
-
-        $filename = 'Invoice_'.($invoice['invoiceNumber'] ?? $salesOrder->order_number).'.pdf';
-        $disposition = $request->query('preview') || $request->query('stream') ? 'inline' : 'attachment';
-
-        return response($dompdf->output(), 200, [
-            'Content-Type' => 'application/pdf',
+        return response(app(FinanceInvoiceDocument::class)->render($invoice, $format), 200, [
+            'Content-Type' => $format === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'Cache-Control' => 'private, no-store',
             'Content-Disposition' => "{$disposition}; filename=\"{$filename}\"",
         ]);
     }
@@ -338,6 +360,7 @@ class SalesOrderController extends Controller
             'orderNumber' => $order->order_number, 'status' => $order->status, 'items' => $order->items,
             'subtotal' => $order->subtotal, 'tax' => $order->tax, 'grandTotal' => $order->grand_total,
             'createdById' => $order->created_by, 'submittedById' => $order->submitted_by,
+            'submittedBy' => collect($order->history)->last(fn ($event) => $event['stage'] === 'Pengajuan Persetujuan')['user'] ?? null,
             'submittedAt' => $order->submitted_at?->toIso8601String(),
             'approvedById' => $order->approved_by, 'approvalDate' => $order->approved_at?->toIso8601String(),
             'approvedBy' => collect($order->history)->last(fn ($event) => $event['stage'] === 'Disetujui Direktur')['user'] ?? null,

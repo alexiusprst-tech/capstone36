@@ -1,30 +1,19 @@
-# AI Multi-Agent System Specification
-## CV. Alphate Artha Jaya — Intelligent Procurement & SPJ Auditor
+# Catatan AI opsional dan batas otomasi
 
-| Sistem | Spesifikasi |
-| :--- | :--- |
-| **Kerangka Kerja** | Alpha-Agents Multi-Agent Framework |
-| **Pola Orkestrasi** | Hierarchical Supervisor dengan Human-in-the-Loop (HITL) |
-| **Domain Keahlian** | Pengadaan Cerdas, Kepatuhan Audit SPJ, dan Optimasi Stok |
+Baseline 20 November 2026. File ini adalah **catatan produk**, bukan `AGENTS.md` instruksi pengerjaan repository. Framework AI multi-agent belum menjadi kebutuhan wajib BPMN atau goal Sprint 2 dan tidak dinyatakan telah tersedia pada aplikasi.
 
----
+Prioritas implementasi adalah [BPMN revisi](PROBIS_TO_BE.md), [PRD](PRD.md), [RULES](RULES.md) dan backlog Jira. Jangan membuat dependency AI untuk mengajukan pesanan, membayar, menyiapkan SPJ atau mengirim barang.
 
-## 1. Arsitektur Multi-Agent
+## Gagasan yang boleh dinilai kemudian
 
-1. **Procurement Advisor Agent**:
-   * Menganalisis *Material Request* baru dari gudang.
-   * Merekomendasikan supplier terbaik berdasarkan riwayat harga beli dan lead time pengiriman.
-   * Mendeteksi anomali lonjakan harga beli (> 15% dari HPP katalog).
-2. **SPJ Compliance & Audit Agent**:
-   * Melakukan *Three-Way Matching* otomatis antara nilai Surat Pesanan (Marketing), Surat Jalan/BAST (Gudang), dan Faktur Tagihan & Kuitansi (Finance).
-   * Memvalidasi urutan kronologis tanggal dokumen sebelum SPJ difinalisasi.
-3. **Inventory Optimization Agent**:
-   * Memonitor level stok pada 2.196 SKU.
-   * Mengirimkan notifikasi draf pengajuan barang saat stok berada di bawah batas minimum (*Safety Stock*).
+| Gagasan opsional | Batas |
+| --- | --- |
+| Saran supplier/estimasi biaya | Rekomendasi saja dari data terverifikasi; Finance tetap memilih dan menerbitkan PO |
+| Pemeriksaan konsistensi dokumen | Menandai perbedaan sumber/nominal/tanggal/fase; bukan mengesahkan pembayaran, tanda tangan atau kepatuhan hukum |
+| Peringatan stok minimum | Informasi kepada Warehouse; tidak otomatis membuat MR/PO atau mengubah stok |
 
----
+Tidak ada ambang anomali 15% atau approval pembelian ≥Rp50 juta yang disahkan oleh BPMN/Jira yang diperiksa. Hapus ketergantungan pada aturan hipotetis tersebut. Gerbang yang jelas adalah **pesanan penjualan >Rp5 juta → approval Direktur**, sesudah Marketing submit dan stok siap.
 
-## 2. Batasan Otoritas & Human-in-the-Loop (HITL)
+Jika AI kelak ditambahkan, semua transaksi tetap lewat validasi/otorisasi server yang sama. AI tidak boleh mengarang identitas, nilai/tanggal, tanda tangan, bukti foto, pelunasan atau dokumen yang tidak tersedia; tidak boleh menyetujui order, meluluskan pembayaran atau dispatch secara mandiri. Data sensitif tidak dikirim ke layanan eksternal tanpa keputusan dan konfigurasi yang disetujui.
 
-* AI Agent **TIDAK MEMILIKI OTORITAS** untuk mencairkan kas, mentransfer dana bank, atau menyetujui transaksi secara mandiri.
-* Setiap transaksi pembelian $\ge$ Rp 50.000.000,- wajib melalui persetujuan manual pimpinan (Direktur CV. Alphate Artha Jaya).
+Review pengembangan oleh subagent yang diminta pengguna adalah cara kerja pengerjaan/review kode, bukan fitur AI bisnis baru yang harus dipasang ke aplikasi. Tidak ada tool-call framework atau layanan AI baru yang ditambahkan oleh revisi dokumentasi ini.

@@ -16,6 +16,9 @@ return [
 
     'default' => env('MAIL_MAILER', 'log'),
 
+    'invoice_mailer' => env('INVOICE_MAILER', 'smtp'),
+    'invoice_link_ttl_days' => (int) env('INVOICE_LINK_TTL_DAYS', 7),
+
     /*
     |--------------------------------------------------------------------------
     | Mailer Configurations
